@@ -6,7 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CalculatorKeypad, useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
-import { SuccessScreen } from "@/components/ifn";
+import { SuccessScreen, ButtonPrimary, ButtonSecondary } from "@/components/ifn";
+import { QRReceipt } from "@/components/merchant/QRReceipt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,7 @@ export default function MerchantCashier() {
   const [isLoading, setIsLoading] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
   const [merchantName, setMerchantName] = useState("");
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const numericAmount = parseInt(amount.replace(/\D/g, "")) || 0;
   const cmuDeduction = Math.round(numericAmount * 0.01);
@@ -147,12 +149,13 @@ export default function MerchantCashier() {
     setMethod(null);
     setStep("input");
     setTransactionRef("");
+    setShowReceipt(false);
   };
 
   return (
     <>
       {/* SuccessScreen plein écran - SE REND AU-DESSUS DE TOUT */}
-      {step === "success" && method && (
+      {step === "success" && method && !showReceipt && (
         <SuccessScreen
           title={t("its_done")}
           amount={numericAmount}
@@ -160,8 +163,35 @@ export default function MerchantCashier() {
           onComplete={() => navigate("/marchand")}
           onNewAction={resetForm}
           newActionLabel={t("new_sale")}
+          onViewReceipt={() => setShowReceipt(true)}
+          viewReceiptLabel={t("view_receipt")}
           autoReturnSeconds={3}
         />
+      )}
+
+      {/* QR Receipt plein écran */}
+      {step === "success" && method && showReceipt && (
+        <div className="fixed inset-0 z-50 bg-background p-4 overflow-auto flex flex-col">
+          <div className="flex-1">
+            <QRReceipt transaction={{
+              reference: transactionRef,
+              amount: numericAmount,
+              paymentMethod: method,
+              cmuDeduction: cmuDeduction,
+              rstiDeduction: rstiDeduction,
+              date: new Date(),
+              merchantName: merchantName
+            }} />
+          </div>
+          <div className="mt-4 space-y-3 pb-4">
+            <ButtonPrimary onClick={resetForm} className="w-full">
+              {t("new_sale")}
+            </ButtonPrimary>
+            <ButtonSecondary onClick={() => navigate("/marchand")} className="w-full">
+              {t("home")}
+            </ButtonSecondary>
+          </div>
+        </div>
       )}
 
       <div className="min-h-screen bg-background pb-20">

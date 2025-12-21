@@ -10,6 +10,8 @@ interface SuccessScreenProps {
   onComplete?: () => void;
   onNewAction?: () => void;
   newActionLabel?: string;
+  onViewReceipt?: () => void;
+  viewReceiptLabel?: string;
   autoReturnSeconds?: number;
   className?: string;
 }
@@ -21,12 +23,17 @@ const SuccessScreen = ({
   onComplete,
   onNewAction,
   newActionLabel = "Nouvelle vente",
+  onViewReceipt,
+  viewReceiptLabel = "Voir le reçu",
   autoReturnSeconds = 3,
   className
 }: SuccessScreenProps) => {
   const [countdown, setCountdown] = useState(autoReturnSeconds);
+  const [countdownStopped, setCountdownStopped] = useState(false);
 
   useEffect(() => {
+    if (countdownStopped) return;
+    
     if (countdown <= 0) {
       onComplete?.();
       return;
@@ -37,7 +44,7 @@ const SuccessScreen = ({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, onComplete]);
+  }, [countdown, onComplete, countdownStopped]);
 
   return (
     <div className={cn(
@@ -75,15 +82,29 @@ const SuccessScreen = ({
         Retour dans {countdown}s...
       </p>
 
-      {/* New action button */}
-      {onNewAction && (
-        <ButtonSecondary
-          onClick={onNewAction}
-          className="mt-6 bg-white/20 hover:bg-white/30 text-white border-2 border-white/30"
-        >
-          {newActionLabel}
-        </ButtonSecondary>
-      )}
+      {/* Action buttons */}
+      <div className="mt-6 space-y-3 w-full max-w-xs">
+        {onNewAction && (
+          <ButtonSecondary
+            onClick={onNewAction}
+            className="w-full bg-white/20 hover:bg-white/30 text-white border-2 border-white/30"
+          >
+            {newActionLabel}
+          </ButtonSecondary>
+        )}
+        
+        {onViewReceipt && (
+          <ButtonSecondary
+            onClick={() => {
+              setCountdownStopped(true);
+              onViewReceipt();
+            }}
+            className="w-full bg-white/10 hover:bg-white/20 text-white border-2 border-white/20"
+          >
+            📄 {viewReceiptLabel}
+          </ButtonSecondary>
+        )}
+      </div>
     </div>
   );
 };
