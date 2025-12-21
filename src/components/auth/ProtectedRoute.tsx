@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import type { Database } from '@/integrations/supabase/types';
 import { Loader2 } from 'lucide-react';
 
@@ -16,9 +17,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/agent/login' 
 }) => {
   const { isAuthenticated, isLoading, checkRole, user } = useAuth();
+  const { isDemoMode, demoRole } = useDemoMode();
   const [hasRole, setHasRole] = useState<boolean | null>(null);
   const [isCheckingRole, setIsCheckingRole] = useState(false);
   const location = useLocation();
+
+  // Check if demo mode matches required role
+  const isDemoAllowed = isDemoMode && requiredRole && demoRole === requiredRole;
 
   useEffect(() => {
     const verifyRole = async () => {
@@ -36,6 +41,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       verifyRole();
     }
   }, [requiredRole, checkRole, isAuthenticated, user]);
+
+  // Allow access in demo mode if role matches
+  if (isDemoAllowed) {
+    return <Outlet />;
+  }
 
   // Show loading while checking auth
   if (isLoading || isCheckingRole) {
