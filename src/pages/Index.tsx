@@ -1,31 +1,30 @@
 import { Link } from "react-router-dom";
-import { Banknote, Users, Boxes, Settings, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RoleCard {
   emoji: string;
   title: string;
-  subtitle: string;
   description: string;
   href: string;
   variant: "primary" | "secondary" | "tertiary" | "muted";
   size: "large" | "normal" | "small";
+  badge?: string;
 }
 
 const roles: RoleCard[] = [
   {
     emoji: "💵",
     title: "Je suis Marchand",
-    subtitle: "",
-    description: "Encaisser, vendre et accéder à la protection sociale",
+    description: "Encaisser et vendre en toute sécurité",
     href: "/marchand",
     variant: "primary",
     size: "large",
+    badge: "⭐ Accès principal",
   },
   {
     emoji: "👥",
     title: "Je suis Agent terrain",
-    subtitle: "",
     description: "Enrôler et accompagner les marchands",
     href: "/agent",
     variant: "secondary",
@@ -33,8 +32,7 @@ const roles: RoleCard[] = [
   },
   {
     emoji: "📦",
-    title: "Coopérative",
-    subtitle: "",
+    title: "Je suis Coopérative",
     description: "Gérer les stocks et commandes",
     href: "/cooperative",
     variant: "tertiary",
@@ -42,8 +40,7 @@ const roles: RoleCard[] = [
   },
   {
     emoji: "⚙️",
-    title: "Administration",
-    subtitle: "",
+    title: "Je suis Administrateur",
     description: "Statistiques et cartographie",
     href: "/admin",
     variant: "muted",
@@ -58,6 +55,7 @@ const variantStyles = {
     text: "text-secondary-foreground",
     desc: "text-secondary-foreground/80",
     chevron: "text-secondary-foreground/60 group-hover:text-secondary-foreground",
+    badge: "bg-secondary-foreground/20 text-secondary-foreground",
   },
   secondary: {
     card: "bg-gradient-to-br from-primary/90 to-primary/70 border-primary hover:shadow-africa",
@@ -65,6 +63,7 @@ const variantStyles = {
     text: "text-primary-foreground",
     desc: "text-primary-foreground/80",
     chevron: "text-primary-foreground/60 group-hover:text-primary-foreground",
+    badge: "bg-primary-foreground/20 text-primary-foreground",
   },
   tertiary: {
     card: "bg-gradient-to-br from-accent/80 to-accent/60 border-accent hover:shadow-lg",
@@ -72,6 +71,7 @@ const variantStyles = {
     text: "text-accent-foreground",
     desc: "text-accent-foreground/70",
     chevron: "text-accent-foreground/50 group-hover:text-accent-foreground",
+    badge: "bg-accent-foreground/10 text-accent-foreground",
   },
   muted: {
     card: "bg-card border-border hover:border-muted-foreground/30 hover:shadow-md",
@@ -79,11 +79,12 @@ const variantStyles = {
     text: "text-foreground",
     desc: "text-muted-foreground",
     chevron: "text-muted-foreground group-hover:text-foreground",
+    badge: "bg-muted text-muted-foreground",
   },
 };
 
 const sizeStyles = {
-  large: "min-h-[120px] p-6",
+  large: "min-h-[140px] p-6",
   normal: "min-h-[100px] p-5",
   small: "min-h-[88px] p-4",
 };
@@ -92,6 +93,12 @@ const iconSizes = {
   large: "w-14 h-14 text-4xl",
   normal: "w-12 h-12 text-3xl",
   small: "w-10 h-10 text-2xl",
+};
+
+const handleCardClick = () => {
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
 };
 
 const Index = () => {
@@ -127,12 +134,27 @@ const Index = () => {
               <Link
                 key={role.href}
                 to={role.href}
+                onClick={handleCardClick}
                 className={cn(
-                  "group flex items-center gap-4 w-full rounded-2xl border-2 transition-all duration-300 active:scale-[0.98]",
+                  "group relative flex items-center gap-4 w-full rounded-2xl border-2 transition-all duration-300",
+                  "hover:scale-[1.02] active:scale-[0.97]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   styles.card,
                   sizeStyles[role.size]
                 )}
               >
+                {/* Badge (si présent) */}
+                {role.badge && (
+                  <div
+                    className={cn(
+                      "absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium",
+                      styles.badge
+                    )}
+                  >
+                    {role.badge}
+                  </div>
+                )}
+
                 {/* Icône emoji */}
                 <div
                   className={cn(
@@ -164,6 +186,14 @@ const Index = () => {
               </Link>
             );
           })}
+        </div>
+
+        {/* Aide rassurante */}
+        <div className="text-center text-sm text-muted-foreground mt-8 px-4">
+          <p className="flex items-center justify-center gap-2">
+            <span>❓</span>
+            <span>Vous hésitez ? Demandez à votre agent ou à votre coopérative.</span>
+          </p>
         </div>
       </main>
 
