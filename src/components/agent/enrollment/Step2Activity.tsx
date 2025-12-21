@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import { VoiceInput } from "@/components/shared/VoiceInput";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Category {
   id: string;
@@ -30,6 +32,7 @@ const defaultCategories: Category[] = [
 
 export function Step2Activity({ data, updateField }: Step2ActivityProps) {
   const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const { language } = useLanguage();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -87,13 +90,21 @@ export function Step2Activity({ data, updateField }: Step2ActivityProps) {
         <Label htmlFor="activity_description" className="text-base font-semibold flex items-center gap-2">
           📝 Description (optionnel)
         </Label>
-        <Textarea
-          id="activity_description"
-          placeholder="Décrivez l'activité du marchand en quelques mots..."
-          value={data.activity_description}
-          onChange={(e) => updateField("activity_description", e.target.value)}
-          className="min-h-24 text-base rounded-xl border-2 focus:border-primary resize-none"
-        />
+        <div className="flex gap-2">
+          <Textarea
+            id="activity_description"
+            placeholder="Décrivez l'activité du marchand en quelques mots..."
+            value={data.activity_description}
+            onChange={(e) => updateField("activity_description", e.target.value)}
+            className="min-h-24 text-base rounded-xl border-2 focus:border-primary resize-none flex-1"
+          />
+          <VoiceInput
+            language={language}
+            onResult={(text) => updateField("activity_description", 
+              data.activity_description ? `${data.activity_description} ${text}` : text
+            )}
+          />
+        </div>
       </div>
     </div>
   );
