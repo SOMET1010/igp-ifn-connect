@@ -15,9 +15,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Plus, Calendar, Home, Wallet, User, Package } from "lucide-react";
+import { FileText, Plus, Calendar, Home, Wallet, User, Package, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { FNEInvoice, InvoiceData } from "@/components/merchant/FNEInvoice";
+import { generateSecurityHash, generateVerificationUrl } from "@/lib/invoiceUtils";
 
 interface Invoice {
   id: string;
@@ -26,18 +27,23 @@ interface Invoice {
   customer_name: string | null;
   status: string;
   created_at: string;
+  signature_hash: string | null;
+}
+
+interface MerchantData {
+  id: string;
+  full_name: string;
+  phone: string;
+  ncc: string | null;
+  fiscal_regime: string | null;
+  invoice_counter: number | null;
 }
 
 export default function MerchantInvoices() {
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [merchantId, setMerchantId] = useState<string | null>(null);
-  const [merchantData, setMerchantData] = useState<{
-    full_name: string;
-    phone: string;
-    ncc: string | null;
-  } | null>(null);
+  const [merchantData, setMerchantData] = useState<MerchantData | null>(null);
 
   const navItems = [
     { icon: Home, label: "Accueil", href: "/marchand" },
@@ -55,9 +61,7 @@ export default function MerchantInvoices() {
   const [isCreating, setIsCreating] = useState(false);
 
   // Generated invoice preview
-  const [generatedInvoice, setGeneratedInvoice] = useState<InvoiceData | null>(
-    null
-  );
+  const [generatedInvoice, setGeneratedInvoice] = useState<InvoiceData | null>(null);
 
   useEffect(() => {
     fetchMerchantAndInvoices();
@@ -67,26 +71,21 @@ export default function MerchantInvoices() {
     if (!user) return;
 
     try {
-      // Get merchant data
+      // Get merchant data including fiscal_regime
       const { data: merchant, error: merchantError } = await supabase
         .from("merchants")
-        .select("id, full_name, phone, ncc, invoice_counter")
+        .select("id, full_name, phone, ncc, fiscal_regime, invoice_counter")
         .eq("user_id", user.id)
         .single();
 
       if (merchantError) throw merchantError;
 
-      setMerchantId(merchant.id);
-      setMerchantData({
-        full_name: merchant.full_name,
-        phone: merchant.phone,
-        ncc: merchant.ncc,
-      });
+      setMerchantData(merchant as MerchantData);
 
-      // Get invoices - cast to handle type issue
+      // Get invoices
       const { data: invoicesData, error: invoicesError } = await supabase
         .from("invoices")
-        .select("id, invoice_number, amount_ttc, customer_name, status, created_at")
+        .select("id, invoice_number, amount_ttc, customer_name, status, created_at, signature_hash")
         .eq("merchant_id", merchant.id)
         .order("created_at", { ascending: false });
 
@@ -102,7 +101,7 @@ export default function MerchantInvoices() {
   };
 
   const generateInvoiceNumber = async (): Promise<string> => {
-    if (!merchantId) throw new Error("Merchant ID not found");
+    if (!merchantData) throw new Error("Merchant data not found");
 
     const year = new Date().getFullYear();
 
@@ -110,24 +109,24 @@ export default function MerchantInvoices() {
     const { data: merchant, error } = await supabase
       .from("merchants")
       .select("invoice_counter")
-      .eq("id", merchantId)
+      .eq("id", merchantData.id)
       .single();
 
     if (error) throw error;
 
     const counter = ((merchant?.invoice_counter as number) || 0) + 1;
 
-    // Update counter - use type assertion
+    // Update counter
     await supabase
       .from("merchants")
       .update({ invoice_counter: counter } as any)
-      .eq("id", merchantId);
+      .eq("id", merchantData.id);
 
     return `IFN-${year}-${counter.toString().padStart(6, "0")}`;
   };
 
   const handleCreateInvoice = async () => {
-    if (!merchantId || !merchantData) return;
+    if (!merchantData) return;
 
     const numericAmount = parseInt(amount.replace(/\D/g, ""), 10);
     if (!numericAmount || numericAmount <= 0) {
@@ -139,16 +138,27 @@ export default function MerchantInvoices() {
 
     try {
       const invoiceNumber = await generateInvoiceNumber();
-      const tvaRate = 0; // No VAT for informal sector
+      const tvaRate = 0; // No VAT for informal sector (TSU)
       const tvaAmount = 0;
       const amountHt = numericAmount;
       const amountTtc = numericAmount;
       const now = new Date();
 
-      // Insert invoice - use type assertion for new columns
+      // Generate security hash
+      const securityHash = await generateSecurityHash({
+        invoiceNumber,
+        merchantNcc: merchantData.ncc || merchantData.id,
+        amountTtc,
+        date: now.toISOString().split('T')[0],
+      });
+
+      // Generate verification URL
+      const verificationUrl = generateVerificationUrl(invoiceNumber, securityHash);
+
+      // Insert invoice with security hash
       const { error } = await supabase.from("invoices").insert({
         invoice_number: invoiceNumber,
-        merchant_id: merchantId,
+        merchant_id: merchantData.id,
         customer_name: customerName || null,
         customer_phone: customerPhone || null,
         amount_ht: amountHt,
@@ -156,6 +166,8 @@ export default function MerchantInvoices() {
         tva_amount: tvaAmount,
         amount_ttc: amountTtc,
         status: "issued",
+        signature_hash: securityHash,
+        qr_code_data: verificationUrl,
       } as any);
 
       if (error) throw error;
@@ -166,6 +178,7 @@ export default function MerchantInvoices() {
         merchantName: merchantData.full_name,
         merchantPhone: merchantData.phone,
         merchantNcc: merchantData.ncc || undefined,
+        fiscalRegime: merchantData.fiscal_regime || "TSU",
         customerName: customerName || undefined,
         customerPhone: customerPhone || undefined,
         amountHt,
@@ -174,6 +187,8 @@ export default function MerchantInvoices() {
         amountTtc,
         description,
         date: now,
+        securityHash,
+        verificationUrl,
       };
 
       setGeneratedInvoice(invoiceData);
@@ -188,7 +203,7 @@ export default function MerchantInvoices() {
       // Refresh list
       fetchMerchantAndInvoices();
 
-      toast.success("Facture créée avec succès !");
+      toast.success("Facture FNE créée avec succès !");
     } catch (error) {
       console.error("Error creating invoice:", error);
       toast.error("Erreur lors de la création de la facture");
@@ -225,6 +240,17 @@ export default function MerchantInvoices() {
       />
 
       <div className="p-4 pb-24 space-y-4">
+        {/* FNE Info Banner */}
+        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-start gap-3">
+          <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Format FNE Conforme</p>
+            <p className="text-xs text-muted-foreground">
+              Vos factures respectent le format DGI avec hash de sécurité et QR code de vérification.
+            </p>
+          </div>
+        </div>
+
         {/* Create New Invoice Button */}
         <Button
           className="w-full h-16 rounded-2xl text-lg shadow-lg"
@@ -281,10 +307,16 @@ export default function MerchantInvoices() {
                         <p className="text-sm text-muted-foreground">
                           {invoice.customer_name || "Client non spécifié"}
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(invoice.created_at).toLocaleDateString(
-                            "fr-FR"
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(invoice.created_at).toLocaleDateString("fr-FR")}
+                          </div>
+                          {invoice.signature_hash && (
+                            <div className="flex items-center gap-1 text-xs text-primary">
+                              <Shield className="w-3 h-3" />
+                              <span className="font-mono">{invoice.signature_hash.substring(0, 8)}...</span>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -314,6 +346,16 @@ export default function MerchantInvoices() {
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
+            {/* Fiscal Regime Info */}
+            {merchantData?.fiscal_regime && (
+              <div className="bg-muted/50 rounded-lg p-3 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span className="text-sm text-muted-foreground">
+                  Régime fiscal: <span className="font-medium text-foreground">{merchantData.fiscal_regime}</span>
+                </span>
+              </div>
+            )}
+
             <div>
               <Label htmlFor="amount">Montant (FCFA) *</Label>
               <Input
@@ -370,7 +412,7 @@ export default function MerchantInvoices() {
               onClick={handleCreateInvoice}
               disabled={isCreating || !amount}
             >
-              {isCreating ? "Création en cours..." : "Créer la facture"}
+              {isCreating ? "Création en cours..." : "Créer la facture FNE"}
             </Button>
           </div>
         </DialogContent>
