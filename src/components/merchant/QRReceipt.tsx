@@ -1,7 +1,8 @@
+import { useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, Check, MessageCircle, Smartphone } from "lucide-react";
+import { Share2, Check, MessageCircle, Smartphone, Download } from "lucide-react";
 import { toast } from "sonner";
 
 interface TransactionDetails {
@@ -19,6 +20,8 @@ interface QRReceiptProps {
 }
 
 export function QRReceipt({ transaction }: QRReceiptProps) {
+  const receiptRef = useRef<HTMLDivElement>(null);
+  
   const qrData = JSON.stringify({
     ref: transaction.reference,
     amount: transaction.amount,
@@ -76,8 +79,39 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
     toast.success("Reçu copié dans le presse-papier");
   };
 
+  const handleDownloadPNG = async () => {
+    if (!receiptRef.current) return;
+    
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(receiptRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      });
+      
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `recu-ifn-${transaction.reference}.png`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        toast.success("Reçu téléchargé !");
+      }, 'image/png');
+      
+    } catch (error) {
+      console.error('Erreur téléchargement:', error);
+      toast.error("Impossible de télécharger le reçu");
+    }
+  };
+
   return (
-    <Card className="border-2 border-secondary overflow-hidden">
+    <Card ref={receiptRef} className="border-2 border-secondary overflow-hidden">
       <div className="bg-secondary text-secondary-foreground p-4 text-center">
         <div className="flex items-center justify-center gap-2 mb-1">
           <div className="w-8 h-8 rounded-full bg-secondary-foreground/20 flex items-center justify-center">
@@ -160,6 +194,16 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
           >
             <Smartphone className="w-5 h-5 mr-2" />
             Envoyer par SMS
+          </Button>
+          
+          {/* Download PNG */}
+          <Button
+            variant="outline"
+            className="w-full h-14 rounded-xl text-lg border-primary text-primary hover:bg-primary/10"
+            onClick={handleDownloadPNG}
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Télécharger le reçu
           </Button>
           
           {/* Generic share / Copy */}
