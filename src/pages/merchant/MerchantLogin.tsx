@@ -248,7 +248,7 @@ export default function MerchantLogin() {
 
       <footer className="py-4 px-6 text-center">
         <p className="text-xs text-muted-foreground">
-          🇨🇮 Plateforme IGP & IFN
+          🇨🇮 Plateforme IFN
         </p>
       </footer>
     </div>

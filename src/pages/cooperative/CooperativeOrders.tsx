@@ -1,0 +1,338 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { 
+  Package, 
+  ArrowLeft,
+  Home,
+  ClipboardList,
+  User,
+  Loader2,
+  Check,
+  Truck,
+  X
+} from 'lucide-react';
+
+const BottomNav: React.FC = () => {
+  const location = useLocation();
+  const navItems = [
+    { icon: Home, label: 'Accueil', path: '/cooperative' },
+    { icon: Package, label: 'Stock', path: '/cooperative/stock' },
+    { icon: ClipboardList, label: 'Commandes', path: '/cooperative/commandes' },
+    { icon: User, label: 'Profil', path: '/cooperative/profil' },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
+      <div className="flex justify-around items-center h-16 px-2">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200",
+                isActive 
+                  ? "text-amber-700 bg-amber-100" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <Icon className="w-6 h-6 mb-1" />
+              <span className="text-xs font-medium truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
+
+interface Order {
+  id: string;
+  quantity: number;
+  unit_price: number;
+  total_amount: number;
+  status: 'pending' | 'confirmed' | 'delivered' | 'cancelled';
+  created_at: string;
+  merchant_name: string;
+  product_name: string;
+  product_unit: string;
+}
+
+const statusLabels = {
+  pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
+  confirmed: { label: 'Confirmé', color: 'bg-blue-100 text-blue-800' },
+  delivered: { label: 'Livré', color: 'bg-green-100 text-green-800' },
+  cancelled: { label: 'Annulé', color: 'bg-red-100 text-red-800' },
+};
+
+const CooperativeOrders: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [cooperativeId, setCooperativeId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+
+  const fetchOrders = async (coopId: string) => {
+    const { data: ordersData } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        quantity,
+        unit_price,
+        total_amount,
+        status,
+        created_at,
+        merchant_id,
+        product_id
+      `)
+      .eq('cooperative_id', coopId)
+      .order('created_at', { ascending: false });
+
+    if (ordersData) {
+      // Fetch merchant and product details
+      const merchantIds = ordersData.map(o => o.merchant_id);
+      const productIds = ordersData.map(o => o.product_id);
+
+      const { data: merchants } = await supabase
+        .from('merchants')
+        .select('id, full_name')
+        .in('id', merchantIds);
+
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name, unit')
+        .in('id', productIds);
+
+      const enrichedOrders = ordersData.map(order => ({
+        ...order,
+        status: order.status as Order['status'],
+        merchant_name: merchants?.find(m => m.id === order.merchant_id)?.full_name ?? 'Marchand',
+        product_name: products?.find(p => p.id === order.product_id)?.name ?? 'Produit',
+        product_unit: products?.find(p => p.id === order.product_id)?.unit ?? 'kg',
+      }));
+
+      setOrders(enrichedOrders);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+
+      const { data: coopData } = await supabase
+        .from('cooperatives')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (coopData) {
+        setCooperativeId(coopData.id);
+        await fetchOrders(coopData.id);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [user]);
+
+  const updateOrderStatus = async (orderId: string, newStatus: 'confirmed' | 'delivered' | 'cancelled') => {
+    setUpdatingOrderId(orderId);
+
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId);
+
+    if (error) {
+      toast.error('Erreur lors de la mise à jour');
+      setUpdatingOrderId(null);
+      return;
+    }
+
+    toast.success(`Commande ${statusLabels[newStatus].label.toLowerCase()}`);
+    
+    if (cooperativeId) {
+      await fetchOrders(cooperativeId);
+    }
+    
+    setUpdatingOrderId(null);
+  };
+
+  const pendingOrders = orders.filter(o => o.status === 'pending');
+  const confirmedOrders = orders.filter(o => o.status === 'confirmed');
+  const deliveredOrders = orders.filter(o => o.status === 'delivered');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+      </div>
+    );
+  }
+
+  const OrderCard = ({ order }: { order: Order }) => (
+    <Card key={order.id}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-semibold text-foreground">{order.product_name}</h3>
+            <p className="text-sm text-muted-foreground">{order.merchant_name}</p>
+          </div>
+          <Badge className={statusLabels[order.status].color}>
+            {statusLabels[order.status].label}
+          </Badge>
+        </div>
+        
+        <div className="flex items-center justify-between text-sm mb-3">
+          <span className="text-muted-foreground">
+            {order.quantity} {order.product_unit} × {order.unit_price.toLocaleString()} FCFA
+          </span>
+          <span className="font-semibold text-foreground">
+            {order.total_amount.toLocaleString()} FCFA
+          </span>
+        </div>
+
+        {order.status === 'pending' && (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() => updateOrderStatus(order.id, 'confirmed')}
+              disabled={updatingOrderId === order.id}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              {updatingOrderId === order.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Check className="h-4 w-4 mr-1" />
+                  Confirmer
+                </>
+              )}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => updateOrderStatus(order.id, 'cancelled')}
+              disabled={updatingOrderId === order.id}
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {order.status === 'confirmed' && (
+          <Button
+            size="sm"
+            onClick={() => updateOrderStatus(order.id, 'delivered')}
+            disabled={updatingOrderId === order.id}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            {updatingOrderId === order.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Truck className="h-4 w-4 mr-1" />
+                Marquer livré
+              </>
+            )}
+          </Button>
+        )}
+
+        <p className="text-xs text-muted-foreground mt-2">
+          {new Date(order.created_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/cooperative')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
+            <ArrowLeft className="h-6 w-6" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold">Commandes</h1>
+            <p className="text-sm text-white/80">{orders.length} commande(s)</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="p-4">
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="pending" className="relative">
+              En attente
+              {pendingOrders.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white rounded-full text-xs flex items-center justify-center">
+                  {pendingOrders.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="confirmed">Confirmé</TabsTrigger>
+            <TabsTrigger value="delivered">Livré</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pending" className="space-y-3">
+            {pendingOrders.length === 0 ? (
+              <Card className="p-8 text-center">
+                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucune commande en attente</p>
+              </Card>
+            ) : (
+              pendingOrders.map(order => <OrderCard key={order.id} order={order} />)
+            )}
+          </TabsContent>
+
+          <TabsContent value="confirmed" className="space-y-3">
+            {confirmedOrders.length === 0 ? (
+              <Card className="p-8 text-center">
+                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucune commande confirmée</p>
+              </Card>
+            ) : (
+              confirmedOrders.map(order => <OrderCard key={order.id} order={order} />)
+            )}
+          </TabsContent>
+
+          <TabsContent value="delivered" className="space-y-3">
+            {deliveredOrders.length === 0 ? (
+              <Card className="p-8 text-center">
+                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Aucune commande livrée</p>
+              </Card>
+            ) : (
+              deliveredOrders.map(order => <OrderCard key={order.id} order={order} />)
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+};
+
+export default CooperativeOrders;

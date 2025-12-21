@@ -25,6 +25,21 @@ import MerchantProfile from "./pages/merchant/MerchantProfile";
 import MerchantTransactions from "./pages/merchant/MerchantTransactions";
 import MerchantStock from "./pages/merchant/MerchantStock";
 
+// Cooperative pages
+import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
+import CooperativeDashboard from "./pages/cooperative/CooperativeDashboard";
+import CooperativeStock from "./pages/cooperative/CooperativeStock";
+import CooperativeOrders from "./pages/cooperative/CooperativeOrders";
+import CooperativeProfile from "./pages/cooperative/CooperativeProfile";
+
+// Admin pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminMerchants from "./pages/admin/AdminMerchants";
+import AdminAgents from "./pages/admin/AdminAgents";
+import AdminCooperatives from "./pages/admin/AdminCooperatives";
+import AdminMap from "./pages/admin/AdminMap";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,6 +71,25 @@ const App = () => (
               <Route path="/marchand/stock" element={<MerchantStock />} />
               <Route path="/marchand/cmu" element={<MerchantCMU />} />
               <Route path="/marchand/profil" element={<MerchantProfile />} />
+            </Route>
+
+            {/* Cooperative Routes */}
+            <Route path="/cooperative/login" element={<CooperativeLogin />} />
+            <Route element={<ProtectedRoute requiredRole="cooperative" redirectTo="/cooperative/login" />}>
+              <Route path="/cooperative" element={<CooperativeDashboard />} />
+              <Route path="/cooperative/stock" element={<CooperativeStock />} />
+              <Route path="/cooperative/commandes" element={<CooperativeOrders />} />
+              <Route path="/cooperative/profil" element={<CooperativeProfile />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route element={<ProtectedRoute requiredRole="admin" redirectTo="/admin/login" />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/marchands" element={<AdminMerchants />} />
+              <Route path="/admin/agents" element={<AdminAgents />} />
+              <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
+              <Route path="/admin/carte" element={<AdminMap />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

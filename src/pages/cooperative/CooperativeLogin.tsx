@@ -7,14 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Phone, ArrowLeft, Loader2, Shield, UserPlus } from 'lucide-react';
+import { Phone, ArrowLeft, Loader2, Wheat, UserPlus } from 'lucide-react';
 import { z } from 'zod';
 
 const phoneSchema = z.string().regex(/^[0-9]{10}$/, 'Numéro de téléphone invalide (10 chiffres)');
 
 type Step = 'phone' | 'otp' | 'register';
 
-const AgentLogin: React.FC = () => {
+const CooperativeLogin: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signIn, signUp, isAuthenticated, checkRole } = useAuth();
@@ -25,15 +25,13 @@ const AgentLogin: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState('');
-  const [isNewUser, setIsNewUser] = useState(false);
 
-  // Redirect if already authenticated as agent
   useEffect(() => {
     const checkAuth = async () => {
       if (isAuthenticated) {
-        const isAgent = await checkRole('agent');
-        if (isAgent) {
-          navigate('/agent');
+        const isCooperative = await checkRole('cooperative');
+        if (isCooperative) {
+          navigate('/cooperative');
         }
       }
     };
@@ -49,7 +47,7 @@ const AgentLogin: React.FC = () => {
   const handleSendOtp = async () => {
     try {
       phoneSchema.parse(phone);
-    } catch (err) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Veuillez entrer un numéro valide (10 chiffres)',
@@ -59,13 +57,9 @@ const AgentLogin: React.FC = () => {
     }
 
     setIsLoading(true);
-    
-    // Simulate OTP sending delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const code = generateMockOtp();
-    
-    // For demo purposes, show the OTP in a toast
     toast({
       title: '📱 Code OTP envoyé',
       description: `Code de démonstration: ${code}`,
@@ -88,7 +82,6 @@ const AgentLogin: React.FC = () => {
 
     setIsLoading(true);
 
-    // Verify OTP (simulated - accept the generated code)
     if (otp !== generatedOtp) {
       toast({
         title: 'Code incorrect',
@@ -99,27 +92,23 @@ const AgentLogin: React.FC = () => {
       return;
     }
 
-    // Try to sign in with existing account
-    const email = `agent_${phone}@igp-ifn.ci`;
-    const password = `agent_${phone}_secure`;
+    const email = `coop_${phone}@ifn.ci`;
+    const password = `coop_${phone}_secure`;
     
     const { error: signInError } = await signIn(email, password);
     
     if (signInError) {
-      // User doesn't exist, show registration step
-      setIsNewUser(true);
       setStep('register');
       setIsLoading(false);
       return;
     }
 
-    // Successfully signed in
     toast({
       title: '✅ Connexion réussie',
-      description: 'Bienvenue sur l\'application Agent',
+      description: 'Bienvenue sur l\'espace Coopérative',
     });
     
-    navigate('/agent');
+    navigate('/cooperative');
     setIsLoading(false);
   };
 
@@ -127,7 +116,7 @@ const AgentLogin: React.FC = () => {
     if (fullName.trim().length < 3) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez entrer votre nom complet',
+        description: 'Veuillez entrer le nom de la coopérative',
         variant: 'destructive',
       });
       return;
@@ -135,8 +124,8 @@ const AgentLogin: React.FC = () => {
 
     setIsLoading(true);
 
-    const email = `agent_${phone}@igp-ifn.ci`;
-    const password = `agent_${phone}_secure`;
+    const email = `coop_${phone}@ifn.ci`;
+    const password = `coop_${phone}_secure`;
 
     const { error } = await signUp(email, password, fullName);
 
@@ -150,14 +139,12 @@ const AgentLogin: React.FC = () => {
       return;
     }
 
-    // Note: The handle_new_user trigger creates the profile
-    // We need to assign the agent role separately
     toast({
       title: '✅ Compte créé',
-      description: 'Votre compte agent a été créé avec succès',
+      description: 'Votre espace coopérative a été créé avec succès',
     });
 
-    navigate('/agent');
+    navigate('/cooperative');
     setIsLoading(false);
   };
 
@@ -172,8 +159,7 @@ const AgentLogin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground py-6 px-4">
+      <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-primary-foreground py-6 px-4">
         <div className="flex items-center gap-3">
           {step !== 'phone' && (
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-primary-foreground/10">
@@ -182,36 +168,35 @@ const AgentLogin: React.FC = () => {
           )}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl">🇨🇮</span>
-              <span className="font-bold">République de Côte d'Ivoire</span>
+              <span className="text-2xl">🌾</span>
+              <span className="font-bold">Espace Coopérative</span>
             </div>
             <p className="text-sm text-primary-foreground/80 mt-1">
-              Direction Générale des Entreprises
+              Plateforme IFN - Commerce Vivrier
             </p>
           </div>
         </div>
       </header>
 
-      {/* Content */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md shadow-africa border-2">
+        <Card className="w-full max-w-md shadow-xl border-2">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4 w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center">
               {step === 'register' ? (
-                <UserPlus className="h-10 w-10 text-primary" />
+                <UserPlus className="h-10 w-10 text-amber-700" />
               ) : (
-                <Shield className="h-10 w-10 text-primary" />
+                <Wheat className="h-10 w-10 text-amber-700" />
               )}
             </div>
             <CardTitle className="text-2xl">
-              {step === 'phone' && 'Connexion Agent'}
+              {step === 'phone' && 'Connexion Coopérative'}
               {step === 'otp' && 'Vérification OTP'}
-              {step === 'register' && 'Créer votre profil'}
+              {step === 'register' && 'Créer votre espace'}
             </CardTitle>
             <CardDescription className="text-base">
-              {step === 'phone' && 'Entrez votre numéro de téléphone pour recevoir un code'}
+              {step === 'phone' && 'Entrez votre numéro pour recevoir un code'}
               {step === 'otp' && 'Entrez le code à 6 chiffres envoyé par SMS'}
-              {step === 'register' && 'Complétez votre profil agent'}
+              {step === 'register' && 'Enregistrez votre coopérative'}
             </CardDescription>
           </CardHeader>
 
@@ -242,7 +227,7 @@ const AgentLogin: React.FC = () => {
                 <Button
                   onClick={handleSendOtp}
                   disabled={phone.length !== 10 || isLoading}
-                  className="btn-xxl w-full bg-primary hover:bg-primary/90"
+                  className="btn-xxl w-full bg-amber-600 hover:bg-amber-700"
                 >
                   {isLoading ? (
                     <>
@@ -273,7 +258,7 @@ const AgentLogin: React.FC = () => {
                 <Button
                   onClick={handleVerifyOtp}
                   disabled={otp.length !== 6 || isLoading}
-                  className="btn-xxl w-full bg-primary hover:bg-primary/90"
+                  className="btn-xxl w-full bg-amber-600 hover:bg-amber-700"
                 >
                   {isLoading ? (
                     <>
@@ -288,7 +273,7 @@ const AgentLogin: React.FC = () => {
                 <button
                   onClick={handleSendOtp}
                   disabled={isLoading}
-                  className="w-full text-center text-primary font-medium hover:underline"
+                  className="w-full text-center text-amber-700 font-medium hover:underline"
                 >
                   Renvoyer le code
                 </button>
@@ -299,12 +284,12 @@ const AgentLogin: React.FC = () => {
               <>
                 <div className="space-y-3">
                   <Label htmlFor="fullName" className="form-label-lg">
-                    Nom complet
+                    Nom de la coopérative
                   </Label>
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder="Kouassi Konan Jean"
+                    placeholder="Coopérative des Vivriers de Bouaké"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="form-input-lg"
@@ -319,15 +304,15 @@ const AgentLogin: React.FC = () => {
                 <Button
                   onClick={handleRegister}
                   disabled={fullName.trim().length < 3 || isLoading}
-                  className="btn-xxl w-full bg-secondary hover:bg-secondary/90"
+                  className="btn-xxl w-full bg-amber-600 hover:bg-amber-700"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Création du compte...
+                      Création...
                     </>
                   ) : (
-                    'Créer mon compte Agent'
+                    'Créer mon espace Coopérative'
                   )}
                 </Button>
               </>
@@ -336,7 +321,6 @@ const AgentLogin: React.FC = () => {
         </Card>
       </div>
 
-      {/* Footer */}
       <footer className="p-4 text-center text-sm text-muted-foreground">
         <p>Plateforme IFN - © 2024</p>
       </footer>
@@ -344,4 +328,4 @@ const AgentLogin: React.FC = () => {
   );
 };
 
-export default AgentLogin;
+export default CooperativeLogin;
