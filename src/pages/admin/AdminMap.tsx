@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -261,17 +260,17 @@ const AdminMap: React.FC = () => {
               icon={getIcon(entity.type)}
             >
               <Popup>
-                <div className="p-1">
-                  <Badge className={
+                <div className="p-1 min-w-[120px]">
+                  <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
                     entity.type === 'merchant' ? 'bg-green-100 text-green-800' :
                     entity.type === 'cooperative' ? 'bg-amber-100 text-amber-800' :
                     'bg-blue-100 text-blue-800'
-                  }>
+                  }`}>
                     {getTypeLabel(entity.type)}
-                  </Badge>
-                  <h3 className="font-semibold mt-2">{entity.name}</h3>
+                  </span>
+                  <p className="font-semibold mt-2 text-gray-900">{entity.name}</p>
                   {entity.details && (
-                    <p className="text-sm text-muted-foreground">{entity.details}</p>
+                    <p className="text-sm text-gray-600">{entity.details}</p>
                   )}
                 </div>
               </Popup>
