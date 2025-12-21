@@ -15,6 +15,13 @@ import MerchantList from "./pages/agent/MerchantList";
 import AgentProfile from "./pages/agent/AgentProfile";
 import EnrollmentWizard from "./pages/agent/EnrollmentWizard";
 
+// Merchant pages
+import MerchantLogin from "./pages/merchant/MerchantLogin";
+import MerchantDashboard from "./pages/merchant/MerchantDashboard";
+import MerchantCashier from "./pages/merchant/MerchantCashier";
+import MerchantCMU from "./pages/merchant/MerchantCMU";
+import MerchantProfile from "./pages/merchant/MerchantProfile";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +41,15 @@ const App = () => (
               <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
               <Route path="/agent/marchands" element={<MerchantList />} />
               <Route path="/agent/profil" element={<AgentProfile />} />
+            </Route>
+            
+            {/* Merchant Routes */}
+            <Route path="/marchand/login" element={<MerchantLogin />} />
+            <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
+              <Route path="/marchand" element={<MerchantDashboard />} />
+              <Route path="/marchand/encaisser" element={<MerchantCashier />} />
+              <Route path="/marchand/cmu" element={<MerchantCMU />} />
+              <Route path="/marchand/profil" element={<MerchantProfile />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
