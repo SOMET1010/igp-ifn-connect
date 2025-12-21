@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, compressBase64Image } from "@/lib/imageCompression";
 
 const BUCKET_NAME = "merchant-photos";
 
@@ -21,7 +22,7 @@ export function usePhotoUpload() {
     return new Blob([byteArray], { type: contentType });
   };
 
-  // Upload a photo (File or base64 string) to storage
+  // Upload a photo (File or base64 string) to storage with compression
   const uploadPhoto = useCallback(async (
     fileOrBase64: File | string,
     merchantId: string,
@@ -31,7 +32,7 @@ export function usePhotoUpload() {
       setIsUploading(true);
       
       let fileToUpload: Blob;
-      let fileName: string;
+      const fileName = `${merchantId}/${type}_${Date.now()}.jpg`;
       
       if (typeof fileOrBase64 === "string") {
         // It's a base64 string
@@ -39,13 +40,11 @@ export function usePhotoUpload() {
           // Already a URL, return as-is
           return fileOrBase64;
         }
-        fileToUpload = base64ToBlob(fileOrBase64);
-        fileName = `${merchantId}/${type}_${Date.now()}.jpg`;
+        // Compress base64 image
+        fileToUpload = await compressBase64Image(fileOrBase64);
       } else {
-        // It's a File object
-        fileToUpload = fileOrBase64;
-        const ext = fileOrBase64.name.split(".").pop() || "jpg";
-        fileName = `${merchantId}/${type}_${Date.now()}.${ext}`;
+        // It's a File object - compress it
+        fileToUpload = await compressImage(fileOrBase64);
       }
 
       const { data, error } = await supabase.storage
@@ -53,6 +52,7 @@ export function usePhotoUpload() {
         .upload(fileName, fileToUpload, {
           cacheControl: "3600",
           upsert: false,
+          contentType: "image/jpeg",
         });
 
       if (error) {

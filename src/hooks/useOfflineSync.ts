@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { compressBase64Image } from "@/lib/imageCompression";
 
 interface OfflineData {
   id: string;
@@ -29,21 +30,23 @@ const base64ToBlob = (base64: string): Blob => {
   return new Blob([byteArray], { type: contentType });
 };
 
-// Upload photo to storage and return public URL
+// Upload photo to storage and return public URL (with compression)
 const uploadPhotoToStorage = async (
   base64: string,
   merchantId: string,
   type: "cmu" | "location"
 ): Promise<string | null> => {
   try {
-    const blob = base64ToBlob(base64);
+    // Compress the image before upload
+    const compressedBlob = await compressBase64Image(base64);
     const fileName = `${merchantId}/${type}_${Date.now()}.jpg`;
 
     const { data, error } = await supabase.storage
       .from(PHOTO_BUCKET)
-      .upload(fileName, blob, {
+      .upload(fileName, compressedBlob, {
         cacheControl: "3600",
         upsert: false,
+        contentType: "image/jpeg",
       });
 
     if (error) {
