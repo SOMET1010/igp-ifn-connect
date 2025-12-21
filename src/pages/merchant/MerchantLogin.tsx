@@ -94,15 +94,52 @@ export default function MerchantLogin() {
 
     setIsLoading(true);
 
-    const { error } = await signUp(email, "marchand123", fullName);
+    const { error, data } = await supabase.auth.signUp({
+      email,
+      password: "marchand123",
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: { full_name: fullName }
+      }
+    });
     
-    if (error) {
+    if (error || !data.user) {
       toast.error("Erreur lors de l'inscription");
       setIsLoading(false);
       return;
     }
 
-    toast.success("Compte créé avec succès !");
+    const userId = data.user.id;
+    const cleanPhone = phone.replace(/\s/g, "");
+
+    // Create merchant entry
+    const { error: merchantError } = await supabase.from("merchants").insert({
+      user_id: userId,
+      full_name: fullName,
+      phone: cleanPhone,
+      cmu_number: `CMU-${Date.now()}`,
+      activity_type: "Détaillant",
+      status: "validated"
+    });
+
+    if (merchantError) {
+      console.error("Merchant creation error:", merchantError);
+      toast.error("Erreur lors de la création du profil marchand");
+      setIsLoading(false);
+      return;
+    }
+
+    // Add merchant role
+    const { error: roleError } = await supabase.from("user_roles").insert({
+      user_id: userId,
+      role: "merchant"
+    });
+
+    if (roleError) {
+      console.error("Role assignment error:", roleError);
+    }
+
+    toast.success("Compte marchand créé avec succès !");
     setIsLoading(false);
     navigate("/marchand");
   };
