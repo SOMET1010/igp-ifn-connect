@@ -13,6 +13,7 @@ import AgentLogin from "./pages/agent/AgentLogin";
 import AgentDashboard from "./pages/agent/AgentDashboard";
 import MerchantList from "./pages/agent/MerchantList";
 import AgentProfile from "./pages/agent/AgentProfile";
+import EnrollmentWizard from "./pages/agent/EnrollmentWizard";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/agent/login" element={<AgentLogin />} />
             <Route element={<ProtectedRoute requiredRole="agent" redirectTo="/agent/login" />}>
               <Route path="/agent" element={<AgentDashboard />} />
+              <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
               <Route path="/agent/marchands" element={<MerchantList />} />
               <Route path="/agent/profil" element={<AgentProfile />} />
             </Route>
