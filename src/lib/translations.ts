@@ -178,6 +178,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "savings": "Épargne",
     "your_health_protection": "Ta protection santé est OK",
     "this_month": "ce mois",
+    "view_receipt": "Voir le reçu",
   },
   
   dioula: {
@@ -337,6 +338,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "savings": "Mara",
     "your_health_protection": "I ka kɛnɛya lakana bɛ yen",
     "this_month": "kalo nin",
+    "view_receipt": "Resu lajɛ",
   },
   
   baoule: {
@@ -494,6 +496,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "savings": "Sie",
     "your_health_protection": "Ɔ kɛnkɛn lakana o lɛ",
     "this_month": "anglo nga",
+    "view_receipt": "Nian resu",
   },
   
   bete: {
@@ -637,6 +640,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "A ta wali flɛ?",
     "collect_title": "Wali ta",
     "offline_message": "Réseau gblé? A mla.",
+    "view_receipt": "Yé rési",
   },
   
   senoufo: {
@@ -780,6 +784,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "E bɛ jɔli ta?",
     "collect_title": "Wari ta",
     "offline_message": "Kan gɛlɛn? A marala.",
+    "view_receipt": "Resu filɛ",
   },
   
   malinke: {
@@ -923,6 +928,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "I bɛ hakɛ jumen minɛ?",
     "collect_title": "Wari minɛ",
     "offline_message": "Kan gɛlɛn? A marala.",
+    "view_receipt": "Resu lajɛ",
   },
 };
 
