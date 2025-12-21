@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { HeroOverlay } from "@/components/shared/HeroOverlay";
+import { LanguageSelector } from "@/components/shared/LanguageSelector";
+import { AudioButton } from "@/components/shared/AudioButton";
+import { Pictogram, PictogramType } from "@/components/shared/Pictogram";
+import { useLanguage } from "@/contexts/LanguageContext";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 import fcfaBills from "@/assets/fcfa-bills.png";
 import agentTerrain from "@/assets/agent-terrain.png";
@@ -10,41 +14,58 @@ import adminDashboard from "@/assets/admin-dashboard.png";
 interface RoleCard {
   image: string;
   title: string;
+  titleKey: string;
   description: string;
+  descKey: string;
   href: string;
   variant: "primary" | "secondary" | "tertiary" | "muted";
   badge?: string;
+  badgeKey?: string;
+  pictogram: PictogramType;
 }
 
-const roles: RoleCard[] = [
+const rolesData: RoleCard[] = [
   {
     image: fcfaBills,
     title: "Je suis Marchand",
+    titleKey: "merchant",
     description: "Encaisser et vendre sans souci",
+    descKey: "merchant_desc",
     href: "/marchand",
     variant: "primary",
     badge: "⭐ Accès principal",
+    badgeKey: "main_access",
+    pictogram: "merchant",
   },
   {
     image: agentTerrain,
     title: "Agent terrain",
+    titleKey: "agent",
     description: "Aider les marchands",
+    descKey: "agent_desc",
     href: "/agent",
     variant: "secondary",
+    pictogram: "agent",
   },
   {
     image: cooperativeStock,
     title: "Coopérative",
+    titleKey: "cooperative",
     description: "Gérer stock et livraisons",
+    descKey: "cooperative_desc",
     href: "/cooperative",
     variant: "tertiary",
+    pictogram: "cooperative",
   },
   {
     image: adminDashboard,
     title: "Admin",
+    titleKey: "admin",
     description: "Statistiques",
+    descKey: "admin_desc",
     href: "/admin",
     variant: "muted",
+    pictogram: "admin",
   },
 ];
 
@@ -177,16 +198,26 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
 };
 
 const Index = () => {
+  const { t } = useLanguage();
+  
+  // Texte audio pour la page
+  const audioText = `${t('welcome')}. ${t('platform_title')}. ${t('who_are_you')}`;
+
   return (
     <HeroOverlay backgroundImage={marcheIvoirien}>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative">
+        {/* Sélecteur de langue */}
+        <div className="fixed top-4 right-4 z-50">
+          <LanguageSelector variant="icon" />
+        </div>
+
         {/* Header simplifié */}
         <header className="py-8 px-6">
           <div className="max-w-lg mx-auto text-center">
             <div className="text-4xl mb-3">🌍</div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Plateforme IFN</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">{t('platform_title')}</h1>
             <p className="text-sm text-white/80 mt-2">
-              Pour les marchands du vivrier
+              {t('platform_subtitle')}
             </p>
           </div>
         </header>
@@ -198,28 +229,28 @@ const Index = () => {
             style={{ animationDelay: "50ms", animationFillMode: "forwards" }}
           >
             <h2 className="text-xl font-bold text-white mb-1">
-              Qui êtes-vous ?
+              {t('who_are_you')}
             </h2>
             <p className="text-white/70 text-sm">
-              Choisissez votre accès pour continuer
+              {t('choose_access')}
             </p>
           </div>
 
           {/* Cartes de rôles - Layout hybride */}
           <div className="space-y-3">
             {/* Marchand - Featured full-width */}
-            <RoleCardVertical role={roles[0]} index={0} size="large" />
+            <RoleCardVertical role={rolesData[0]} index={0} size="large" />
 
             {/* Agent + Coopérative - Grille 2 colonnes */}
             <div className="grid grid-cols-2 gap-3">
-              <RoleCardVertical role={roles[1]} index={1} size="normal" />
-              <RoleCardVertical role={roles[2]} index={2} size="normal" />
+              <RoleCardVertical role={rolesData[1]} index={1} size="normal" />
+              <RoleCardVertical role={rolesData[2]} index={2} size="normal" />
             </div>
 
             {/* Admin - Centré et compact */}
             <div className="flex justify-center">
               <RoleCardVertical 
-                role={roles[3]} 
+                role={rolesData[3]} 
                 index={3} 
                 size="small" 
                 className="max-w-[180px]" 
@@ -231,7 +262,7 @@ const Index = () => {
           <div className="text-center text-sm text-white/60 mt-6 px-4">
             <p className="flex items-center justify-center gap-2">
               <span>❓</span>
-              <span>Tu hésites ? Demande à ton agent ou ta coopérative.</span>
+              <span>{t('help_text')}</span>
             </p>
           </div>
         </main>
@@ -239,12 +270,20 @@ const Index = () => {
         {/* Footer discret */}
         <footer className="py-6 px-4 text-center">
           <p className="text-xs text-white/70">
-            🇨🇮 République de Côte d'Ivoire
+            🇨🇮 {t('country')}
           </p>
           <p className="text-xs text-white/50 mt-1">
             DGE • ANSUT • DGI
           </p>
         </footer>
+
+        {/* Bouton audio flottant */}
+        <AudioButton 
+          textToRead={audioText}
+          variant="floating"
+          size="lg"
+          className="bottom-24 right-4"
+        />
       </div>
     </HeroOverlay>
   );
