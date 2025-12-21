@@ -203,6 +203,19 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "On t'explique simplement",
     "understand_cmu_rsti": "Comprendre CMU et RSTI",
     "understand_reassure": "Ton argent travaille pour toi !",
+    
+    // Soft POS - Billets et Pièces CFA
+    "quick_bills": "Billets rapides",
+    "add_coins": "+ Pièces",
+    "hide_coins": "Masquer pièces",
+    "bill_500": "Cinq cents francs",
+    "bill_1000": "Mille francs",
+    "bill_2000": "Deux mille francs",
+    "bill_5000": "Cinq mille francs",
+    "coin_25": "Vingt-cinq francs",
+    "coin_50": "Cinquante francs",
+    "coin_100": "Cent francs",
+    "coin_200": "Deux cents francs",
   },
   
   dioula: {
@@ -387,6 +400,19 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
     "understand_cmu_rsti": "CMU ni RSTI faamu",
     "understand_reassure": "I ka wari bɛ baara kɛ i ye!",
+    
+    // Soft POS - Billets et Pièces CFA (Dioula)
+    "quick_bills": "Wari joona",
+    "add_coins": "+ Wari dɔgɔw",
+    "hide_coins": "Wari dɔgɔw datugu",
+    "bill_500": "Wuli kɛmɛ",
+    "bill_1000": "Wuli kelen",
+    "bill_2000": "Wuli fila",
+    "bill_5000": "Wuli duuru",
+    "coin_25": "Mugan ni duuru",
+    "coin_50": "Bi duuru",
+    "coin_100": "Kɛmɛ",
+    "coin_200": "Kɛmɛ fila",
   },
   
   baoule: {
