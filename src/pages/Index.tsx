@@ -52,7 +52,7 @@ const roles: RoleCard[] = [
 
 const variantStyles = {
   primary: {
-    card: "bg-gradient-to-br from-secondary to-secondary/80 border-secondary hover:shadow-forest",
+    card: "bg-gradient-to-br from-secondary to-secondary/80 border-secondary hover:shadow-xl-forest",
     icon: "bg-secondary-foreground/20",
     text: "text-secondary-foreground",
     desc: "text-secondary-foreground/80",
@@ -60,7 +60,7 @@ const variantStyles = {
     badge: "bg-secondary-foreground/20 text-secondary-foreground",
   },
   secondary: {
-    card: "bg-gradient-to-br from-primary/90 to-primary/70 border-primary hover:shadow-africa",
+    card: "bg-gradient-to-br from-primary/90 to-primary/70 border-primary hover:shadow-xl-africa",
     icon: "bg-primary-foreground/20",
     text: "text-primary-foreground",
     desc: "text-primary-foreground/80",
@@ -68,7 +68,7 @@ const variantStyles = {
     badge: "bg-primary-foreground/20 text-primary-foreground",
   },
   tertiary: {
-    card: "bg-gradient-to-br from-accent/80 to-accent/60 border-accent hover:shadow-lg",
+    card: "bg-gradient-to-br from-accent/80 to-accent/60 border-accent hover:shadow-xl-gold",
     icon: "bg-accent-foreground/10",
     text: "text-accent-foreground",
     desc: "text-accent-foreground/70",
@@ -76,7 +76,7 @@ const variantStyles = {
     badge: "bg-accent-foreground/10 text-accent-foreground",
   },
   muted: {
-    card: "bg-card border-border hover:border-muted-foreground/30 hover:shadow-md",
+    card: "bg-card border-border hover:border-muted-foreground/30 hover:shadow-xl-muted",
     icon: "bg-muted",
     text: "text-foreground",
     desc: "text-muted-foreground",
@@ -140,7 +140,7 @@ const Index = () => {
                 onClick={handleCardClick}
                 className={cn(
                   "group relative flex items-center gap-4 w-full rounded-2xl border-2 transition-all duration-300",
-                  "hover:scale-[1.02] active:scale-[0.97]",
+                  "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.97]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   "opacity-0 animate-slide-up",
                   styles.card,
