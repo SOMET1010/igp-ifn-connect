@@ -15,7 +15,10 @@ import {
   ArrowRight,
   Loader2,
   Package,
-  AlertTriangle
+  AlertTriangle,
+  CreditCard,
+  QrCode,
+  Gift
 } from "lucide-react";
 
 const navItems = [
@@ -39,6 +42,7 @@ export default function MerchantDashboard() {
   const [todayTotal, setTodayTotal] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
   const [stockAlerts, setStockAlerts] = useState(0);
+  const [unpaidCredits, setUnpaidCredits] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +91,20 @@ export default function MerchantDashboard() {
               Number(s.quantity) <= Number(s.min_threshold)
             ).length;
             setStockAlerts(alertsCount);
+          }
+
+          // Fetch unpaid credits
+          const { data: creditsData } = await supabase
+            .from("customer_credits")
+            .select("amount_owed, amount_paid")
+            .eq("merchant_id", merchantForTx.id)
+            .neq("status", "paid");
+
+          if (creditsData) {
+            const totalUnpaid = creditsData.reduce((sum, c) => 
+              sum + (Number(c.amount_owed) - Number(c.amount_paid)), 0
+            );
+            setUnpaidCredits(totalUnpaid);
           }
         }
       }
@@ -209,6 +227,53 @@ export default function MerchantDashboard() {
                 {(merchant?.rsti_balance || 0).toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">FCFA disponibles</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Nouvelles fonctionnalités Phase 1 */}
+        <div className="grid grid-cols-3 gap-3">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => navigate("/marchand/credits")}
+          >
+            <CardContent className="p-3 text-center">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 flex items-center justify-center mb-2">
+                <CreditCard className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Crédits</h3>
+              <p className="text-xs text-muted-foreground">Clients</p>
+              {unpaidCredits > 0 && (
+                <p className="text-xs text-amber-600 font-medium mt-1">
+                  {unpaidCredits.toLocaleString()} FCFA
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => navigate("/marchand/scanner")}
+          >
+            <CardContent className="p-3 text-center">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-blue-500/10 flex items-center justify-center mb-2">
+                <QrCode className="w-5 h-5 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Scanner</h3>
+              <p className="text-xs text-muted-foreground">Code-barres</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => navigate("/marchand/promotions")}
+          >
+            <CardContent className="p-3 text-center">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-pink-500/10 flex items-center justify-center mb-2">
+                <Gift className="w-5 h-5 text-pink-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Promos</h3>
+              <p className="text-xs text-muted-foreground">Campagnes</p>
             </CardContent>
           </Card>
         </div>

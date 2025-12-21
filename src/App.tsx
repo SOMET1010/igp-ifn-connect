@@ -24,6 +24,9 @@ import MerchantCMU from "./pages/merchant/MerchantCMU";
 import MerchantProfile from "./pages/merchant/MerchantProfile";
 import MerchantTransactions from "./pages/merchant/MerchantTransactions";
 import MerchantStock from "./pages/merchant/MerchantStock";
+import MerchantCredits from "./pages/merchant/MerchantCredits";
+import MerchantScanner from "./pages/merchant/MerchantScanner";
+import MerchantPromotions from "./pages/merchant/MerchantPromotions";
 
 // Cooperative pages
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
@@ -39,6 +42,9 @@ import AdminMerchants from "./pages/admin/AdminMerchants";
 import AdminAgents from "./pages/admin/AdminAgents";
 import AdminCooperatives from "./pages/admin/AdminCooperatives";
 import AdminMap from "./pages/admin/AdminMap";
+import AdminMonitoring from "./pages/admin/AdminMonitoring";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminReports from "./pages/admin/AdminReports";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +77,9 @@ const App = () => (
               <Route path="/marchand/stock" element={<MerchantStock />} />
               <Route path="/marchand/cmu" element={<MerchantCMU />} />
               <Route path="/marchand/profil" element={<MerchantProfile />} />
+              <Route path="/marchand/credits" element={<MerchantCredits />} />
+              <Route path="/marchand/scanner" element={<MerchantScanner />} />
+              <Route path="/marchand/promotions" element={<MerchantPromotions />} />
             </Route>
 
             {/* Cooperative Routes */}
@@ -90,6 +99,9 @@ const App = () => (
               <Route path="/admin/agents" element={<AdminAgents />} />
               <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
               <Route path="/admin/carte" element={<AdminMap />} />
+              <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
+              <Route path="/admin/rapports" element={<AdminReports />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
