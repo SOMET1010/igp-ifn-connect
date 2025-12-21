@@ -1,34 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Phone, MapPin, Store, CreditCard, ChevronRight } from "lucide-react";
+import { ArrowLeft, LogOut, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Wallet, Heart, User } from "lucide-react";
-
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: Heart, label: "CMU", href: "/marchand/cmu" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
+import { LANGUAGES } from "@/lib/translations";
+import { AudioButton } from "@/components/shared/AudioButton";
+import { CardLarge, ButtonSecondary, BottomNavIFN } from "@/components/ifn";
 
 interface ProfileData {
   full_name: string;
-  phone: string;
-  cmu_number: string;
   activity_type: string;
-  rsti_balance: number;
-  market_name?: string;
 }
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [audioEnabled, setAudioEnabled] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -36,32 +29,12 @@ export default function MerchantProfile() {
 
       const { data: merchantData } = await supabase
         .from("merchants")
-        .select(`
-          full_name,
-          phone,
-          cmu_number,
-          activity_type,
-          rsti_balance,
-          market_id
-        `)
+        .select("full_name, activity_type")
         .eq("user_id", user.id)
         .single();
 
       if (merchantData) {
-        let marketName = "";
-        if (merchantData.market_id) {
-          const { data: market } = await supabase
-            .from("markets")
-            .select("name")
-            .eq("id", merchantData.market_id)
-            .single();
-          marketName = market?.name || "";
-        }
-
-        setProfile({
-          ...merchantData,
-          market_name: marketName,
-        });
+        setProfile(merchantData);
       }
 
       setIsLoading(false);
@@ -75,20 +48,27 @@ export default function MerchantProfile() {
     navigate("/marchand/login");
   };
 
-  const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) => (
-    <div className="flex items-center gap-4 py-4 border-b border-border last:border-0">
-      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-        <Icon className="w-5 h-5 text-muted-foreground" />
+  const pageAudioText = `${t("my_profile")}. ${profile?.full_name || ""}`;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
-      <div className="flex-1">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="font-medium text-foreground">{value || "—"}</p>
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
+      {/* Floating Audio Button */}
+      {audioEnabled && (
+        <AudioButton 
+          textToRead={pageAudioText}
+          className="fixed bottom-28 right-4 z-50"
+          size="lg"
+        />
+      )}
+
       {/* Header */}
       <header className="bg-gradient-forest text-primary-foreground p-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
@@ -96,104 +76,93 @@ export default function MerchantProfile() {
             variant="ghost"
             size="icon"
             onClick={() => navigate("/marchand")}
-            className="text-primary-foreground hover:bg-primary-foreground/10"
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-12 w-12"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-xl font-bold">Mon Profil</h1>
+          <h1 className="text-xl font-bold">{t("my_profile")}</h1>
         </div>
       </header>
 
-      <main className="p-4 space-y-5">
+      <main className="p-4 space-y-6">
         {/* Avatar et nom */}
-        <div className="text-center py-6">
-          <div className="w-24 h-24 mx-auto rounded-full bg-secondary/10 flex items-center justify-center text-5xl mb-4">
-            💵
+        <div className="text-center py-8">
+          <div className="w-28 h-28 mx-auto rounded-full bg-secondary/10 flex items-center justify-center text-6xl mb-4">
+            👤
           </div>
-          <h2 className="text-2xl font-bold text-foreground">
-            {profile?.full_name || "Marchand"}
+          <h2 className="text-3xl font-black text-foreground">
+            {profile?.full_name || t("merchant")}
           </h2>
-          <p className="text-muted-foreground">{profile?.activity_type || "Commerce"}</p>
+          <p className="text-lg text-muted-foreground mt-1">
+            {profile?.activity_type}
+          </p>
         </div>
 
-        {/* Infos principales */}
-        <Card>
-          <CardContent className="p-4">
-            <InfoRow 
-              icon={Phone} 
-              label="Téléphone" 
-              value={profile?.phone ? `+225 ${profile.phone}` : ""} 
-            />
-            <InfoRow 
-              icon={CreditCard} 
-              label="Numéro CMU" 
-              value={profile?.cmu_number || ""} 
-            />
-            <InfoRow 
-              icon={Store} 
-              label="Type d'activité" 
-              value={profile?.activity_type || ""} 
-            />
-            <InfoRow 
-              icon={MapPin} 
-              label="Marché" 
-              value={profile?.market_name || ""} 
-            />
-          </CardContent>
-        </Card>
+        {/* Sélecteur de langue */}
+        <CardLarge>
+          <h3 className="text-lg font-bold text-foreground mb-4">
+            {t("choose_language")}
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => setLanguage(lang.code)}
+                className={`p-4 rounded-xl text-left transition-all touch-manipulation ${
+                  language === lang.code
+                    ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                <span className="text-2xl mr-2">{lang.symbol}</span>
+                <span className="font-bold">{lang.nativeName}</span>
+              </button>
+            ))}
+          </div>
+        </CardLarge>
 
-        {/* Solde RSTI */}
-        <Card className="bg-secondary/5 border-secondary/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Solde RSTI</p>
-                <p className="text-3xl font-bold text-secondary">
-                  {(profile?.rsti_balance || 0).toLocaleString()} <span className="text-lg">FCFA</span>
-                </p>
-              </div>
-              <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center">
-                <Wallet className="w-7 h-7 text-secondary" />
-              </div>
+        {/* Toggle Audio */}
+        <CardLarge className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+              {audioEnabled ? (
+                <Volume2 className="w-6 h-6 text-secondary" />
+              ) : (
+                <VolumeX className="w-6 h-6 text-muted-foreground" />
+              )}
             </div>
-          </CardContent>
-        </Card>
+            <div>
+              <p className="text-lg font-bold text-foreground">
+                Son et audio
+              </p>
+              <p className="text-muted-foreground">
+                {audioEnabled ? "Activé" : "Désactivé"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={audioEnabled}
+            onCheckedChange={setAudioEnabled}
+            className="scale-125"
+          />
+        </CardLarge>
 
-        {/* Actions */}
-        <div className="space-y-2">
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate("/marchand/cmu")}
-          >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-red-500" />
-                </div>
-                <span className="font-medium text-foreground">Ma protection CMU</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Déconnexion */}
-        <Button
-          variant="outline"
+        {/* Bouton Déconnexion */}
+        <ButtonSecondary
           onClick={handleSignOut}
-          className="w-full h-14 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5"
+          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
         >
-          <LogOut className="w-5 h-5 mr-2" />
+          <LogOut className="w-6 h-6 mr-2" />
           Se déconnecter
-        </Button>
+        </ButtonSecondary>
 
-        {/* Footer info */}
-        <p className="text-center text-xs text-muted-foreground">
-          🇨🇮 Plateforme IGP & IFN
+        {/* Footer */}
+        <p className="text-center text-sm text-muted-foreground pt-4">
+          🇨🇮 Plateforme IFN • ANSUT × DGE
         </p>
       </main>
 
-      <BottomNav items={navItems} />
+      <BottomNavIFN />
     </div>
   );
 }

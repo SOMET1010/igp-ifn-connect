@@ -162,6 +162,23 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "Tu prends combien ?",
     "collect_title": "Encaisser",
     "offline_message": "Réseau lent ? On garde tout.",
+    
+    // UX Inclusion - Nouvelles traductions
+    "your_sales_today": "Tes ventes aujourd'hui",
+    "your_money": "Ton argent",
+    "your_sales": "Tes ventes",
+    "its_done": "C'est fait !",
+    "saved_offline": "Tout est sauvegardé",
+    "call_agent": "Appeler ton agent",
+    "listen_dioula": "Écouter en Dioula",
+    "how_to_collect": "Comment encaisser ?",
+    "view_more": "Voir plus",
+    "my_help": "Aide",
+    "my_profile": "Mon Profil",
+    "health_contribution": "Santé",
+    "savings": "Épargne",
+    "your_health_protection": "Ta protection santé est OK",
+    "this_month": "ce mois",
   },
   
   dioula: {
@@ -305,6 +322,23 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "I bɛ hakɛ jumen ta?",
     "collect_title": "Wari ta",
     "offline_message": "Kan ka gɛlɛn? A marala.",
+    
+    // UX Inclusion - Nouvelles traductions
+    "your_sales_today": "Bi jula",
+    "your_money": "I ka wari",
+    "your_sales": "I ka jula",
+    "its_done": "A kɛra!",
+    "saved_offline": "A bɛɛ marala",
+    "call_agent": "I ka ajan wele",
+    "listen_dioula": "A lamɛn Julakan na",
+    "how_to_collect": "Wari ta cogo?",
+    "view_more": "A tɔ lajɛ",
+    "my_help": "Dɛmɛ",
+    "my_profile": "Ne Ɲɛfɔli",
+    "health_contribution": "Kɛnɛya",
+    "savings": "Mara",
+    "your_health_protection": "I ka kɛnɛya lakana bɛ yen",
+    "this_month": "kalo nin",
   },
   
   baoule: {
@@ -448,6 +482,20 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "how_much": "Sika sɛ a de?",
     "collect_title": "De sika",
     "offline_message": "Internet timan? Ɔ sie.",
+    "your_sales_today": "Andɛ atɔn",
+    "your_money": "Ɔ sika",
+    "your_sales": "Ɔ atɔn mun",
+    "its_done": "Ɔ yoli!",
+    "saved_offline": "Be kwlaa sie",
+    "call_agent": "Flɛ ɔ ajan",
+    "listen_dioula": "Tie Julakan nun",
+    "how_to_collect": "Sika de wafa?",
+    "view_more": "Nian ekun",
+    "my_help": "Ukalɛ",
+    "health_contribution": "Kɛnkɛn",
+    "savings": "Sie",
+    "your_health_protection": "Ɔ kɛnkɛn lakana o lɛ",
+    "this_month": "anglo nga",
   },
   
   bete: {

@@ -30,6 +30,8 @@ import MerchantCredits from "./pages/merchant/MerchantCredits";
 import MerchantScanner from "./pages/merchant/MerchantScanner";
 import MerchantPromotions from "./pages/merchant/MerchantPromotions";
 import MerchantSuppliers from "./pages/merchant/MerchantSuppliers";
+import MerchantMoney from "./pages/merchant/MerchantMoney";
+import MerchantHelp from "./pages/merchant/MerchantHelp";
 
 // Cooperative pages
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
@@ -81,9 +83,11 @@ const App = () => (
               <Route path="/marchand" element={<MerchantDashboard />} />
               <Route path="/marchand/encaisser" element={<MerchantCashier />} />
               <Route path="/marchand/historique" element={<MerchantTransactions />} />
+              <Route path="/marchand/argent" element={<MerchantMoney />} />
+              <Route path="/marchand/aide" element={<MerchantHelp />} />
+              <Route path="/marchand/profil" element={<MerchantProfile />} />
               <Route path="/marchand/stock" element={<MerchantStock />} />
               <Route path="/marchand/cmu" element={<MerchantCMU />} />
-              <Route path="/marchand/profil" element={<MerchantProfile />} />
               <Route path="/marchand/credits" element={<MerchantCredits />} />
               <Route path="/marchand/scanner" element={<MerchantScanner />} />
               <Route path="/marchand/promotions" element={<MerchantPromotions />} />
