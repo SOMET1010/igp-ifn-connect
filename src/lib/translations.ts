@@ -157,6 +157,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "Recevez les commandes des marchands",
     "guide_coop_3": "Confirmez et livrez les commandes",
     "audio_coop_dashboard": "Bienvenue coopérative. Vous avez",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "Tu prends combien ?",
+    "collect_title": "Encaisser",
+    "offline_message": "Réseau lent ? On garde tout.",
   },
   
   dioula: {
@@ -295,6 +300,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "Julakɛlaw ka ciyɛn sɔrɔ",
     "guide_coop_3": "Ciyɛn sɛbɛn ka di",
     "audio_coop_dashboard": "I ni sɔgɔma jɛkulu. I ka",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "I bɛ hakɛ jumen ta?",
+    "collect_title": "Wari ta",
+    "offline_message": "Kan ka gɛlɛn? A marala.",
   },
   
   baoule: {
@@ -433,6 +443,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "De atonvuɛfuɛ'm be atɔnlɛ",
     "guide_coop_3": "Kle su yɛ fa kɔ",
     "audio_coop_dashboard": "Afuɛ akpɔ. A lɛ",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "Sika sɛ a de?",
+    "collect_title": "De sika",
+    "offline_message": "Internet timan? Ɔ sie.",
   },
   
   bete: {
@@ -571,6 +586,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "Gbogbo djré ta",
     "guide_coop_3": "Kpli nu gba",
     "audio_coop_dashboard": "Woué klou. A yi",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "A ta wali flɛ?",
+    "collect_title": "Wali ta",
+    "offline_message": "Réseau gblé? A mla.",
   },
   
   senoufo: {
@@ -709,6 +729,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "Jula ciyɛn sɔrɔ",
     "guide_coop_3": "Ciyɛn sɛbɛn ka di",
     "audio_coop_dashboard": "I ni cɛ ton. I ka",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "E bɛ jɔli ta?",
+    "collect_title": "Wari ta",
+    "offline_message": "Kan gɛlɛn? A marala.",
   },
   
   malinke: {
@@ -847,6 +872,11 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_coop_2": "Julakɛlaw ciyɛn sɔrɔ",
     "guide_coop_3": "Ciyɛn sɛbɛn ka di",
     "audio_coop_dashboard": "I ni kɛnɛ jɛkulu. I ka",
+    
+    // UX Inclusion - Écran Encaisser
+    "how_much": "I bɛ hakɛ jumen minɛ?",
+    "collect_title": "Wari minɛ",
+    "offline_message": "Kan gɛlɛn? A marala.",
   },
 };
 

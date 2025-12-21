@@ -80,7 +80,7 @@ export function CalculatorKeypad({ value, onChange, maxLength = 12 }: Calculator
   };
 
   return (
-    <div className="grid grid-cols-3 gap-3 p-4 bg-muted/30 rounded-2xl">
+    <div className="grid grid-cols-3 gap-3 p-3 bg-muted/30 rounded-2xl">
       {keys.map((row, rowIndex) => (
         row.map((key) => (
           <Button
@@ -88,7 +88,7 @@ export function CalculatorKeypad({ value, onChange, maxLength = 12 }: Calculator
             type="button"
             variant={key === "DEL" ? "destructive" : "outline"}
             className={`
-              h-16 sm:h-20 text-2xl sm:text-3xl font-bold rounded-xl
+              h-20 sm:h-24 text-3xl sm:text-4xl font-bold rounded-xl
               transition-all duration-150 active:scale-90
               ${key === "DEL" 
                 ? "bg-destructive/10 hover:bg-destructive/20 text-destructive border-destructive/30" 
@@ -98,7 +98,7 @@ export function CalculatorKeypad({ value, onChange, maxLength = 12 }: Calculator
             onClick={() => handleKeyPress(key)}
           >
             {key === "DEL" ? (
-              <Delete className="w-6 h-6 sm:w-8 sm:h-8" />
+              <Delete className="w-8 h-8 sm:w-10 sm:h-10" />
             ) : (
               key
             )}
