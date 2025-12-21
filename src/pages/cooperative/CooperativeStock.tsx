@@ -18,7 +18,9 @@ import {
   ClipboardList,
   User,
   Loader2,
-  Search
+  Search,
+  Bell,
+  AlertTriangle
 } from 'lucide-react';
 
 const BottomNav: React.FC = () => {
@@ -85,12 +87,16 @@ const CooperativeStock: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCheckingStock, setIsCheckingStock] = useState(false);
   
   // Form state
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unitPrice, setUnitPrice] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Low stock threshold
+  const LOW_STOCK_THRESHOLD = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,6 +213,32 @@ const CooperativeStock: React.FC = () => {
     stock.product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const lowStockItems = stocks.filter(stock => stock.quantity < LOW_STOCK_THRESHOLD);
+
+  const handleCheckLowStock = async () => {
+    setIsCheckingStock(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-low-stock', {
+        body: { type: 'cooperative' }
+      });
+      
+      if (error) {
+        console.error("Error checking stock:", error);
+        toast.error("Erreur lors de la vérification du stock");
+      } else {
+        if (data?.cooperative?.lowStockCount > 0) {
+          toast.info(`${data.cooperative.lowStockCount} produit(s) en stock bas`);
+        } else {
+          toast.success("Tous les stocks sont OK !");
+        }
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Erreur de connexion");
+    }
+    setIsCheckingStock(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -242,14 +274,40 @@ const CooperativeStock: React.FC = () => {
           />
         </div>
 
-        {/* Add button */}
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full bg-amber-600 hover:bg-amber-700">
-              <Plus className="h-5 w-5 mr-2" />
-              Ajouter un produit
-            </Button>
-          </DialogTrigger>
+        {/* Low Stock Alert */}
+        {lowStockItems.length > 0 && (
+          <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <h3 className="font-semibold text-foreground">Alertes de stock ({lowStockItems.length})</h3>
+              </div>
+              <div className="space-y-2">
+                {lowStockItems.slice(0, 3).map(item => (
+                  <div key={item.id} className="flex items-center justify-between bg-amber-100/50 dark:bg-amber-900/20 rounded-lg p-2">
+                    <span className="font-medium text-sm">{item.product.name}</span>
+                    <span className="text-sm text-amber-700">{item.quantity} {item.product.unit}</span>
+                  </div>
+                ))}
+                {lowStockItems.length > 3 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{lowStockItems.length - 3} autre(s) produit(s) en stock bas
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-2">
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+              <Button className="flex-1 bg-amber-600 hover:bg-amber-700">
+                <Plus className="h-5 w-5 mr-2" />
+                Ajouter un produit
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Ajouter au stock</DialogTitle>
@@ -305,6 +363,19 @@ const CooperativeStock: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+          <Button
+            onClick={handleCheckLowStock}
+            variant="outline"
+            disabled={isCheckingStock}
+            className="shrink-0 border-amber-300"
+          >
+            {isCheckingStock ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Bell className="w-5 h-5 text-amber-600" />
+            )}
+          </Button>
+        </div>
 
         {/* Stock list */}
         {filteredStocks.length === 0 ? (
