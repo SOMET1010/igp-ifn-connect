@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { HeroOverlay } from "@/components/shared/HeroOverlay";
-import { Users, Package, Settings, LucideIcon } from "lucide-react";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 import fcfaBills from "@/assets/fcfa-bills.png";
+import agentTerrain from "@/assets/agent-terrain.png";
+import cooperativeStock from "@/assets/cooperative-stock.png";
+import adminDashboard from "@/assets/admin-dashboard.png";
 
 interface RoleCard {
-  icon?: LucideIcon;
-  useImage?: boolean;
+  image: string;
   title: string;
   description: string;
   href: string;
@@ -17,7 +18,7 @@ interface RoleCard {
 
 const roles: RoleCard[] = [
   {
-    useImage: true,
+    image: fcfaBills,
     title: "Je suis Marchand",
     description: "Encaisser et vendre sans souci",
     href: "/marchand",
@@ -25,21 +26,21 @@ const roles: RoleCard[] = [
     badge: "⭐ Accès principal",
   },
   {
-    icon: Users,
+    image: agentTerrain,
     title: "Agent terrain",
     description: "Aider les marchands",
     href: "/agent",
     variant: "secondary",
   },
   {
-    icon: Package,
+    image: cooperativeStock,
     title: "Coopérative",
     description: "Gérer stock et livraisons",
     href: "/cooperative",
     variant: "tertiary",
   },
   {
-    icon: Settings,
+    image: adminDashboard,
     title: "Admin",
     description: "Statistiques",
     href: "/admin",
@@ -135,7 +136,7 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
       )}
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Icône ou Image */}
+      {/* Image du rôle */}
       <div
         className={cn(
           "flex-shrink-0 rounded-2xl flex items-center justify-center mb-2 overflow-hidden",
@@ -143,19 +144,11 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
           iconSizes[size]
         )}
       >
-        {role.useImage ? (
-          <img 
-            src={fcfaBills} 
-            alt="Billets FCFA" 
-            className="w-full h-full object-cover"
-          />
-        ) : role.icon ? (
-          <role.icon className={cn(
-            size === "large" && "w-10 h-10",
-            size === "normal" && "w-7 h-7",
-            size === "small" && "w-5 h-5"
-          )} />
-        ) : null}
+        <img 
+          src={role.image} 
+          alt={role.title} 
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Titre */}
