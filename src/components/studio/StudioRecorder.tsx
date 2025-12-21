@@ -149,6 +149,15 @@ export function StudioRecorder({
 
   return (
     <div className="bg-card rounded-2xl border border-border p-6 shadow-lg">
+      {/* Language indicator */}
+      <div className="mb-4 p-3 bg-primary/10 rounded-lg border border-primary/20">
+        <p className="text-sm text-center">
+          <span className="font-medium text-primary">Texte en français</span>
+          <span className="text-muted-foreground"> → </span>
+          <span className="font-medium text-foreground">Enregistrer en {language === 'dioula' ? 'Dioula' : language === 'fr' ? 'Français' : language}</span>
+        </p>
+      </div>
+
       {/* Text to record */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">

@@ -32,11 +32,12 @@ export default function AdminStudio() {
   const [sessionRecordedCount, setSessionRecordedCount] = useState(0);
 
   // Get all translation keys for selected language
+  // Always show French text as reference, recording will be in the selected language
   const translationItems = useMemo(() => {
-    const langTranslations = translations[selectedLanguage] || {};
-    return Object.entries(langTranslations).map(([key, value]) => ({
+    const frenchTranslations = translations['fr'] || {};
+    return Object.entries(frenchTranslations).map(([key, value]) => ({
       key,
-      value,
+      value, // Always show French text as reference
       category: 'general',
       isRecorded: recordingStatus[`${selectedLanguage}:${key}`] || false
     }));
