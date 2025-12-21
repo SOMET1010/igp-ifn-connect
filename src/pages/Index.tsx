@@ -108,9 +108,9 @@ const Index = () => {
       <header className="bg-gradient-africa text-primary-foreground py-8 px-6">
         <div className="max-w-lg mx-auto text-center">
           <div className="text-4xl mb-3">🌍</div>
-          <h1 className="text-2xl md:text-3xl font-bold">Plateforme IGP & IFN</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Plateforme IFN</h1>
           <p className="text-sm opacity-90 mt-2">
-            Commerce vivrier ivoirien
+            Inclusion Financière Numérique
           </p>
         </div>
       </header>

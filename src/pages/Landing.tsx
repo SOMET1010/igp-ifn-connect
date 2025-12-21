@@ -36,13 +36,13 @@ const Landing = () => {
 
           {/* Badge milieu gauche */}
           <div className="absolute top-24 left-0">
-            <BadgeChip className="bg-secondary">💰 Inclusion financière</BadgeChip>
+            <BadgeChip className="bg-secondary">💳 IFN - Inclusion Financière</BadgeChip>
           </div>
 
           {/* Badge milieu droite */}
           <div className="absolute top-20 right-0">
             <BadgeChip className="bg-accent text-accent-foreground">
-              🛒 Commerce digital
+              🌾 Commerce Vivrier
             </BadgeChip>
           </div>
 
@@ -55,17 +55,17 @@ const Landing = () => {
 
             {/* Titre principal */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight max-w-3xl mb-4">
-              Plateforme d'Inclusion Numérique
+              Plateforme IFN
             </h1>
             <h2 className="text-xl sm:text-2xl font-semibold text-white/90 mb-6">
-              Pour le Secteur Informel en Côte d'Ivoire
+              Inclusion Financière Numérique
             </h2>
 
             {/* Sous-titre descriptif */}
             <p className="text-white/75 text-base sm:text-lg max-w-xl mb-8 leading-relaxed">
-              Transformation digitale du secteur vivrier marchand&nbsp;:
+              Transformer le commerce vivrier ivoirien&nbsp;:
               <br />
-              modernisation, protection sociale et inclusion financière
+              digitalisation, protection sociale et inclusion financière
             </p>
 
             {/* Mention accessibilité */}
