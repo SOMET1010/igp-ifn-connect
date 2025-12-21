@@ -10,9 +10,10 @@ interface DemoData {
   };
 }
 
+// IDs correspondant aux données de démonstration dans la base
 const DEMO_DATA: Record<string, DemoData> = {
   agent: {
-    agentId: 'demo-agent-001',
+    agentId: 'a1111111-1111-1111-1111-111111111111',
     merchantId: '',
     cooperativeId: '',
     profile: {
@@ -22,19 +23,19 @@ const DEMO_DATA: Record<string, DemoData> = {
   },
   merchant: {
     agentId: '',
-    merchantId: 'demo-merchant-001',
+    merchantId: 'b1111111-1111-1111-1111-111111111111', // Fatou Diallo
     cooperativeId: '',
     profile: {
       full_name: 'Fatou Diallo (Démo)',
-      phone: '+225 07 00 00 02'
+      phone: '+225 07 01 00 01'
     }
   },
   cooperative: {
     agentId: '',
     merchantId: '',
-    cooperativeId: 'demo-coop-001',
+    cooperativeId: 'ab175346-7e25-4821-af18-444fabac0b96', // Coopérative Savane du Nord
     profile: {
-      full_name: 'Coopérative Attiéké Dabou',
+      full_name: 'Coopérative Savane du Nord',
       phone: '+225 07 00 00 03'
     }
   },
