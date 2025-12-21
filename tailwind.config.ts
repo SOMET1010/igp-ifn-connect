@@ -157,6 +157,11 @@ export default {
         "xl-forest": "0 20px 60px -15px hsl(var(--green) / 0.4)",
         "xl-gold": "0 20px 60px -15px hsl(var(--gold) / 0.4)",
         "xl-muted": "0 20px 40px -15px hsl(var(--muted-foreground) / 0.2)",
+        // Effets GLOW avec halo lumineux
+        "glow-green": "0 0 25px hsl(var(--green) / 0.5), 0 0 50px hsl(var(--green) / 0.3), 0 10px 30px -10px hsl(var(--green) / 0.4)",
+        "glow-orange": "0 0 25px hsl(var(--orange) / 0.5), 0 0 50px hsl(var(--orange) / 0.3), 0 10px 30px -10px hsl(var(--orange) / 0.4)",
+        "glow-gold": "0 0 25px hsl(var(--gold) / 0.5), 0 0 50px hsl(var(--gold) / 0.3), 0 10px 30px -10px hsl(var(--gold) / 0.4)",
+        "glow-muted": "0 0 20px hsl(var(--muted-foreground) / 0.25), 0 0 40px hsl(var(--muted-foreground) / 0.15)",
       },
     },
   },
