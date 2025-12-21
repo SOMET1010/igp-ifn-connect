@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, Check, MessageCircle, Smartphone, Download } from "lucide-react";
+import { Share2, Check, MessageCircle, Smartphone, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 interface TransactionDetails {
@@ -21,6 +22,7 @@ interface QRReceiptProps {
 
 export function QRReceipt({ transaction }: QRReceiptProps) {
   const receiptRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   
   const qrData = JSON.stringify({
     ref: transaction.reference,
@@ -204,6 +206,16 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
           >
             <Download className="w-5 h-5 mr-2" />
             Télécharger le reçu
+          </Button>
+
+          {/* Create FNE Invoice */}
+          <Button
+            variant="outline"
+            className="w-full h-14 rounded-xl text-lg border-secondary text-secondary hover:bg-secondary/10"
+            onClick={() => navigate("/marchand/factures")}
+          >
+            <FileText className="w-5 h-5 mr-2" />
+            Créer une facture FNE
           </Button>
           
           {/* Generic share / Copy */}

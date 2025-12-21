@@ -221,6 +221,81 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount_ht: number
+          amount_ttc: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          created_at: string
+          customer_name: string | null
+          customer_ncc: string | null
+          customer_phone: string | null
+          id: string
+          invoice_number: string
+          merchant_id: string
+          qr_code_data: string | null
+          signature_hash: string | null
+          status: string | null
+          transaction_id: string | null
+          tva_amount: number | null
+          tva_rate: number | null
+        }
+        Insert: {
+          amount_ht: number
+          amount_ttc: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_ncc?: string | null
+          customer_phone?: string | null
+          id?: string
+          invoice_number: string
+          merchant_id: string
+          qr_code_data?: string | null
+          signature_hash?: string | null
+          status?: string | null
+          transaction_id?: string | null
+          tva_amount?: number | null
+          tva_rate?: number | null
+        }
+        Update: {
+          amount_ht?: number
+          amount_ttc?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          customer_ncc?: string | null
+          customer_phone?: string | null
+          id?: string
+          invoice_number?: string
+          merchant_id?: string
+          qr_code_data?: string | null
+          signature_hash?: string | null
+          status?: string | null
+          transaction_id?: string | null
+          tva_amount?: number | null
+          tva_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markets: {
         Row: {
           commune: string
@@ -297,12 +372,15 @@ export type Database = {
           created_at: string
           enrolled_at: string
           enrolled_by: string | null
+          fiscal_regime: string | null
           full_name: string
           id: string
+          invoice_counter: number | null
           latitude: number | null
           location_photo_url: string | null
           longitude: number | null
           market_id: string | null
+          ncc: string | null
           phone: string
           rsti_balance: number | null
           status: Database["public"]["Enums"]["merchant_status"] | null
@@ -319,12 +397,15 @@ export type Database = {
           created_at?: string
           enrolled_at?: string
           enrolled_by?: string | null
+          fiscal_regime?: string | null
           full_name: string
           id?: string
+          invoice_counter?: number | null
           latitude?: number | null
           location_photo_url?: string | null
           longitude?: number | null
           market_id?: string | null
+          ncc?: string | null
           phone: string
           rsti_balance?: number | null
           status?: Database["public"]["Enums"]["merchant_status"] | null
@@ -341,12 +422,15 @@ export type Database = {
           created_at?: string
           enrolled_at?: string
           enrolled_by?: string | null
+          fiscal_regime?: string | null
           full_name?: string
           id?: string
+          invoice_counter?: number | null
           latitude?: number | null
           location_photo_url?: string | null
           longitude?: number | null
           market_id?: string | null
+          ncc?: string | null
           phone?: string
           rsti_balance?: number | null
           status?: Database["public"]["Enums"]["merchant_status"] | null
