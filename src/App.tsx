@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { DemoBanner } from "@/components/shared/DemoBanner";
+import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DemoAccess from "./pages/DemoAccess";
@@ -56,6 +58,36 @@ import AdminStudio from "./pages/admin/AdminStudio";
 
 const queryClient = new QueryClient();
 
+// Register Service Worker
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('SW registered:', registration.scope);
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available
+                console.log('New SW version available');
+              }
+            });
+          }
+        });
+      } catch (error) {
+        console.log('SW registration failed:', error);
+      }
+    });
+  }
+}
+
+// Call SW registration
+registerServiceWorker();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
@@ -65,6 +97,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <DemoBanner />
+            <OfflineIndicator />
             <Routes>
               <Route path="/" element={<Index />} />
             <Route path="/demo" element={<DemoAccess />} />

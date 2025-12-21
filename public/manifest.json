@@ -1,0 +1,18 @@
+{
+  "name": "IGP-IFN Côte d'Ivoire",
+  "short_name": "IGP-IFN",
+  "description": "Plateforme de formalisation des commerçants informels",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f97316",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "finance", "productivity"]
+}

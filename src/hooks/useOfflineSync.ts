@@ -1,19 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressBase64Image } from "@/lib/imageCompression";
+import {
+  addToOfflineQueue as addToIndexedDB,
+  getOfflineQueue as getFromIndexedDB,
+  removeFromQueue,
+  updateQueueItem,
+  openDB,
+} from "@/lib/offlineDB";
 
-interface OfflineData {
+interface OfflineItem {
   id: string;
   entity_type: string;
   entity_id: string;
   action: string;
   data: any;
   created_at: string;
+  retryCount: number;
+  lastRetry?: string;
 }
 
-const STORAGE_KEY = "igp_offline_queue";
 const PHOTO_BUCKET = "merchant-photos";
+const MAX_RETRY_COUNT = 5;
+const BASE_RETRY_DELAY = 1000; // 1 second
 
 // Convert base64 to Blob
 const base64ToBlob = (base64: string): Blob => {
@@ -30,14 +40,13 @@ const base64ToBlob = (base64: string): Blob => {
   return new Blob([byteArray], { type: contentType });
 };
 
-// Upload photo to storage and return public URL (with compression)
+// Upload photo to storage with retry
 const uploadPhotoToStorage = async (
   base64: string,
   merchantId: string,
   type: "cmu" | "location"
 ): Promise<string | null> => {
   try {
-    // Compress the image before upload
     const compressedBlob = await compressBase64Image(base64);
     const fileName = `${merchantId}/${type}_${Date.now()}.jpg`;
 
@@ -65,52 +74,81 @@ const uploadPhotoToStorage = async (
   }
 };
 
+// Calculate exponential backoff delay
+const getRetryDelay = (retryCount: number): number => {
+  return Math.min(BASE_RETRY_DELAY * Math.pow(2, retryCount), 30000);
+};
+
 export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialized = useRef(false);
 
-  // Charger la file d'attente depuis le localStorage
-  const getOfflineQueue = (): OfflineData[] => {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
+  // Initialize IndexedDB
+  useEffect(() => {
+    if (!isInitialized.current) {
+      openDB().then(() => {
+        isInitialized.current = true;
+        refreshPendingCount();
+      });
     }
-  };
+  }, []);
 
-  // Sauvegarder la file d'attente
-  const saveOfflineQueue = (queue: OfflineData[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
-    setPendingCount(queue.length);
-  };
+  // Refresh pending count from IndexedDB
+  const refreshPendingCount = useCallback(async () => {
+    try {
+      const queue = await getFromIndexedDB();
+      setPendingCount(queue.length);
+    } catch (error) {
+      console.error("Error getting queue:", error);
+    }
+  }, []);
 
-  // Ajouter une action à la file d'attente
-  const addToQueue = useCallback((entityType: string, action: string, data: any) => {
-    const queue = getOfflineQueue();
-    const newItem: OfflineData = {
+  // Add an action to the queue
+  const addToQueue = useCallback(async (
+    entityType: string, 
+    action: string, 
+    data: any
+  ): Promise<string> => {
+    const entityId = data.id || crypto.randomUUID();
+    
+    const newItem = {
       id: crypto.randomUUID(),
       entity_type: entityType,
-      entity_id: data.id || crypto.randomUUID(),
+      entity_id: entityId,
       action,
       data,
       created_at: new Date().toISOString(),
     };
-    queue.push(newItem);
-    saveOfflineQueue(queue);
-    
-    if (!navigator.onLine) {
-      toast.info("Données sauvegardées hors-ligne. Synchronisation automatique à la reconnexion.");
+
+    try {
+      await addToIndexedDB(newItem);
+      await refreshPendingCount();
+      
+      if (!navigator.onLine) {
+        toast.info("Données sauvegardées hors-ligne. Synchronisation automatique à la reconnexion.");
+      } else {
+        // Trigger sync after a short delay
+        if (syncTimeoutRef.current) {
+          clearTimeout(syncTimeoutRef.current);
+        }
+        syncTimeoutRef.current = setTimeout(() => {
+          syncWithServer();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Error adding to queue:", error);
+      toast.error("Erreur de sauvegarde locale");
     }
     
-    return newItem.entity_id;
+    return entityId;
   }, []);
 
-  // Vérifier les conflits potentiels
-  const checkConflicts = async (item: OfflineData): Promise<{ hasConflict: boolean; serverData?: any }> => {
+  // Check for conflicts
+  const checkConflicts = async (item: OfflineItem): Promise<{ hasConflict: boolean; serverData?: any }> => {
     if (item.entity_type === "merchants" && item.action === "insert") {
-      // Vérifier si un marchand avec le même numéro CMU existe déjà
       const { data: existing } = await supabase
         .from("merchants")
         .select("id, cmu_number, updated_at")
@@ -124,165 +162,245 @@ export function useOfflineSync() {
     return { hasConflict: false };
   };
 
-  // Synchroniser les données avec le serveur
+  // Sync a single item
+  const syncItem = async (item: OfflineItem): Promise<boolean> => {
+    try {
+      // Check for conflicts
+      const { hasConflict, serverData } = await checkConflicts(item);
+      
+      if (hasConflict) {
+        console.warn(`Conflit détecté pour ${item.entity_type}:`, serverData);
+        // Server wins strategy - consider synced
+        return true;
+      }
+
+      if (item.entity_type === "merchants" && item.action === "insert") {
+        const merchantData = { ...item.data };
+        const merchantId = merchantData.id || item.entity_id;
+
+        // Upload CMU photo
+        if (merchantData.cmu_photo_base64?.startsWith("data:")) {
+          const url = await uploadPhotoToStorage(
+            merchantData.cmu_photo_base64,
+            merchantId,
+            "cmu"
+          );
+          merchantData.cmu_photo_url = url;
+          delete merchantData.cmu_photo_base64;
+        }
+
+        // Upload location photo
+        if (merchantData.location_photo_base64?.startsWith("data:")) {
+          const url = await uploadPhotoToStorage(
+            merchantData.location_photo_base64,
+            merchantId,
+            "location"
+          );
+          merchantData.location_photo_url = url;
+          delete merchantData.location_photo_base64;
+        }
+
+        const { error } = await supabase.from("merchants").insert({
+          id: merchantId,
+          cmu_number: merchantData.cmu_number,
+          full_name: merchantData.full_name,
+          phone: merchantData.phone,
+          activity_type: merchantData.activity_type,
+          activity_description: merchantData.activity_description,
+          market_id: merchantData.market_id,
+          latitude: merchantData.latitude,
+          longitude: merchantData.longitude,
+          enrolled_by: merchantData.enrolled_by,
+          status: merchantData.status,
+          cmu_photo_url: merchantData.cmu_photo_url || null,
+          location_photo_url: merchantData.location_photo_url || null,
+        });
+
+        if (error) throw error;
+        return true;
+
+      } else if (item.entity_type === "transactions" && item.action === "insert") {
+        const { error } = await supabase.from("transactions").insert({
+          id: item.entity_id,
+          merchant_id: item.data.merchant_id,
+          amount: item.data.amount,
+          transaction_type: item.data.transaction_type,
+          reference: item.data.reference,
+        });
+
+        if (error) throw error;
+        return true;
+
+      } else if (item.entity_type === "invoices" && item.action === "insert") {
+        const { error } = await supabase.from("invoices").insert(item.data);
+        if (error) throw error;
+        return true;
+
+      } else if (item.entity_type === "customer_credits") {
+        if (item.action === "insert") {
+          const { error } = await supabase.from("customer_credits").insert(item.data);
+          if (error) throw error;
+        } else if (item.action === "update") {
+          const { error } = await supabase
+            .from("customer_credits")
+            .update(item.data)
+            .eq("id", item.entity_id);
+          if (error) throw error;
+        }
+        return true;
+
+      } else {
+        // Generic sync via offline_sync table
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user?.id) {
+          await supabase.from("offline_sync").insert({
+            user_id: userData.user.id,
+            entity_type: item.entity_type,
+            entity_id: item.entity_id,
+            action: item.action,
+            data: item.data,
+            synced: true,
+            synced_at: new Date().toISOString(),
+          });
+        }
+        return true;
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      return false;
+    }
+  };
+
+  // Main sync function with retry logic
   const syncWithServer = useCallback(async () => {
-    const queue = getOfflineQueue();
-    if (queue.length === 0 || isSyncing) return;
+    if (isSyncing || !navigator.onLine) return;
 
     setIsSyncing(true);
-    const successfulIds: string[] = [];
-    const conflictItems: OfflineData[] = [];
-    const failedItems: OfflineData[] = [];
-
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData?.user?.id;
-
-    for (const item of queue) {
-      try {
-        // Vérifier les conflits
-        const { hasConflict, serverData } = await checkConflicts(item);
-        
-        if (hasConflict) {
-          console.warn(`Conflit détecté pour ${item.entity_type}:`, serverData);
-          conflictItems.push(item);
-          // On garde l'item serveur (stratégie "server wins")
-          successfulIds.push(item.id);
-          continue;
-        }
-
-        // Handle merchant insertions with photo uploads
-        if (item.entity_type === "merchants" && item.action === "insert") {
-          const merchantData = { ...item.data };
-          const merchantId = merchantData.id || item.entity_id;
-
-          // Upload CMU photo if it's base64
-          if (merchantData.cmu_photo_base64?.startsWith("data:")) {
-            const url = await uploadPhotoToStorage(
-              merchantData.cmu_photo_base64,
-              merchantId,
-              "cmu"
-            );
-            merchantData.cmu_photo_url = url;
-            delete merchantData.cmu_photo_base64;
-          }
-
-          // Upload location photo if it's base64
-          if (merchantData.location_photo_base64?.startsWith("data:")) {
-            const url = await uploadPhotoToStorage(
-              merchantData.location_photo_base64,
-              merchantId,
-              "location"
-            );
-            merchantData.location_photo_url = url;
-            delete merchantData.location_photo_base64;
-          }
-
-          // Insert merchant into database
-          const { error } = await supabase.from("merchants").insert({
-            id: merchantId,
-            cmu_number: merchantData.cmu_number,
-            full_name: merchantData.full_name,
-            phone: merchantData.phone,
-            activity_type: merchantData.activity_type,
-            activity_description: merchantData.activity_description,
-            market_id: merchantData.market_id,
-            latitude: merchantData.latitude,
-            longitude: merchantData.longitude,
-            enrolled_by: merchantData.enrolled_by,
-            status: merchantData.status,
-            cmu_photo_url: merchantData.cmu_photo_url || null,
-            location_photo_url: merchantData.location_photo_url || null,
-          });
-
-          if (error) {
-            console.error("Merchant insert error:", error);
-            failedItems.push(item);
-            continue;
-          }
-
-          successfulIds.push(item.id);
-        } else if (item.entity_type === "transactions" && item.action === "insert") {
-          // Sync des transactions
-          const { error } = await supabase.from("transactions").insert({
-            id: item.entity_id,
-            merchant_id: item.data.merchant_id,
-            amount: item.data.amount,
-            transaction_type: item.data.transaction_type,
-            reference: item.data.reference,
-          });
-
-          if (error) {
-            console.error("Transaction insert error:", error);
-            failedItems.push(item);
-            continue;
-          }
-
-          successfulIds.push(item.id);
-        } else {
-          // Generic sync for other entity types
-          if (userId) {
-            await supabase.from("offline_sync").insert({
-              user_id: userId,
-              entity_type: item.entity_type,
-              entity_id: item.entity_id,
-              action: item.action,
-              data: item.data,
-              synced: true,
-              synced_at: new Date().toISOString(),
-            });
-          }
-          successfulIds.push(item.id);
-        }
-      } catch (err) {
-        console.error("Sync error for item:", item.id, err);
-        failedItems.push(item);
+    
+    try {
+      const queue = await getFromIndexedDB();
+      if (queue.length === 0) {
+        setIsSyncing(false);
+        return;
       }
-    }
 
-    // Retirer les items synchronisés de la file
-    const remainingQueue = queue.filter((item) => !successfulIds.includes(item.id));
-    saveOfflineQueue(remainingQueue);
+      let successCount = 0;
+      let failCount = 0;
+      let conflictCount = 0;
 
-    // Notifications de résultat
-    if (successfulIds.length > 0) {
-      toast.success(`${successfulIds.length} élément(s) synchronisé(s)`);
-    }
-    
-    if (conflictItems.length > 0) {
-      toast.warning(`${conflictItems.length} conflit(s) résolu(s) (données serveur conservées)`);
-    }
-    
-    if (failedItems.length > 0) {
-      toast.error(`${failedItems.length} élément(s) non synchronisé(s). Nouvelle tentative à la prochaine connexion.`);
-    }
+      for (const item of queue) {
+        // Skip items that are in backoff period
+        if (item.lastRetry) {
+          const lastRetryTime = new Date(item.lastRetry).getTime();
+          const backoffDelay = getRetryDelay(item.retryCount);
+          if (Date.now() - lastRetryTime < backoffDelay) {
+            continue;
+          }
+        }
 
-    setIsSyncing(false);
-  }, [isSyncing]);
+        const success = await syncItem(item);
 
-  // Écouter les changements de connexion
+        if (success) {
+          await removeFromQueue(item.id);
+          successCount++;
+        } else {
+          // Update retry count and schedule next retry
+          if (item.retryCount >= MAX_RETRY_COUNT) {
+            // Max retries reached, keep in queue but mark as failed
+            failCount++;
+          } else {
+            await updateQueueItem({
+              ...item,
+              retryCount: item.retryCount + 1,
+              lastRetry: new Date().toISOString(),
+            });
+            failCount++;
+          }
+        }
+      }
+
+      await refreshPendingCount();
+
+      // Show notifications
+      if (successCount > 0) {
+        toast.success(`${successCount} élément(s) synchronisé(s)`);
+      }
+      
+      if (conflictCount > 0) {
+        toast.warning(`${conflictCount} conflit(s) résolu(s)`);
+      }
+      
+      if (failCount > 0) {
+        toast.error(`${failCount} élément(s) en attente de nouvelle tentative`);
+        
+        // Schedule retry with backoff
+        const nextQueue = await getFromIndexedDB();
+        if (nextQueue.length > 0) {
+          const minRetryDelay = Math.min(
+            ...nextQueue.map(item => getRetryDelay(item.retryCount))
+          );
+          
+          syncTimeoutRef.current = setTimeout(() => {
+            if (navigator.onLine) {
+              syncWithServer();
+            }
+          }, minRetryDelay);
+        }
+      }
+    } catch (error) {
+      console.error("Sync error:", error);
+      toast.error("Erreur de synchronisation");
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [isSyncing, refreshPendingCount]);
+
+  // Listen for online/offline events
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       toast.success("Connexion rétablie");
-      syncWithServer();
+      
+      // Sync after a short delay to let the network stabilize
+      setTimeout(() => {
+        syncWithServer();
+      }, 1000);
     };
 
     const handleOffline = () => {
       setIsOnline(false);
       toast.warning("Vous êtes hors-ligne. Les données seront synchronisées automatiquement.");
+      
+      // Cancel any pending sync
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
+    };
+
+    // Listen for service worker sync messages
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SYNC_OFFLINE_DATA') {
+        syncWithServer();
+      }
     };
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    navigator.serviceWorker?.addEventListener('message', handleMessage);
 
-    // Charger le compte initial
-    setPendingCount(getOfflineQueue().length);
+    // Initial pending count
+    refreshPendingCount();
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      navigator.serviceWorker?.removeEventListener('message', handleMessage);
+      
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current);
+      }
     };
-  }, [syncWithServer]);
+  }, [syncWithServer, refreshPendingCount]);
 
   return {
     isOnline,
@@ -290,5 +408,6 @@ export function useOfflineSync() {
     isSyncing,
     addToQueue,
     syncWithServer,
+    refreshPendingCount,
   };
 }
