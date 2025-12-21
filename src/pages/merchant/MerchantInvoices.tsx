@@ -37,6 +37,7 @@ export default function MerchantInvoices() {
     full_name: string;
     phone: string;
     ncc: string | null;
+  } | null>(null);
 
   const navItems = [
     { icon: Home, label: "Accueil", href: "/marchand" },
@@ -44,7 +45,6 @@ export default function MerchantInvoices() {
     { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
     { icon: User, label: "Profil", href: "/marchand/profil" },
   ];
-
 
   // New invoice form
   const [showNewInvoice, setShowNewInvoice] = useState(false);
