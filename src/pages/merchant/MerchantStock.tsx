@@ -9,7 +9,8 @@ import {
   Search,
   RefreshCw,
   Edit2,
-  Trash2
+  Trash2,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,6 +105,7 @@ export default function MerchantStock() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedStock, setSelectedStock] = useState<StockItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCheckingStock, setIsCheckingStock] = useState(false);
 
   // Form states
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -306,6 +308,28 @@ export default function MerchantStock() {
     setShowRestockDialog(true);
   };
 
+  const handleCheckLowStock = async () => {
+    setIsCheckingStock(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-low-stock');
+      
+      if (error) {
+        console.error("Error checking stock:", error);
+        toast.error("Erreur lors de la vérification du stock");
+      } else {
+        if (data?.lowStockCount > 0) {
+          toast.info(`${data.lowStockCount} produit(s) en stock bas détecté(s)`);
+        } else {
+          toast.success("Tous les stocks sont OK !");
+        }
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      toast.error("Erreur de connexion");
+    }
+    setIsCheckingStock(false);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -407,15 +431,29 @@ export default function MerchantStock() {
           </Card>
         )}
 
-        {/* Add Product Button */}
-        <Button
-          onClick={() => setShowAddDialog(true)}
-          className="w-full bg-secondary hover:bg-secondary/90"
-          disabled={availableProducts.length === 0}
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Ajouter un produit
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className="flex-1 bg-secondary hover:bg-secondary/90"
+            disabled={availableProducts.length === 0}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Ajouter un produit
+          </Button>
+          <Button
+            onClick={handleCheckLowStock}
+            variant="outline"
+            disabled={isCheckingStock}
+            className="shrink-0"
+          >
+            {isCheckingStock ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Bell className="w-5 h-5" />
+            )}
+          </Button>
+        </div>
 
         {/* Stock List */}
         {filteredStocks.length === 0 ? (
