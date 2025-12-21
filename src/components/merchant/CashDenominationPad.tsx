@@ -14,6 +14,7 @@ const BILLS = [
   { value: 1000, bgColor: "bg-blue-100", textColor: "text-blue-900", borderColor: "border-blue-300", label: "1 000", audioKey: "bill_1000" },
   { value: 2000, bgColor: "bg-pink-100", textColor: "text-pink-900", borderColor: "border-pink-300", label: "2 000", audioKey: "bill_2000" },
   { value: 5000, bgColor: "bg-green-100", textColor: "text-green-900", borderColor: "border-green-300", label: "5 000", audioKey: "bill_5000" },
+  { value: 10000, bgColor: "bg-purple-100", textColor: "text-purple-900", borderColor: "border-purple-300", label: "10 000", audioKey: "bill_10000" },
 ];
 
 const COINS = [
@@ -143,7 +144,7 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
           {t("quick_bills") || "Billets rapides"}
         </p>
         
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {BILLS.map((bill) => (
             <Button
               key={bill.value}
