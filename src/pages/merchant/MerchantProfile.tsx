@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { ArrowLeft, LogOut, Volume2, VolumeX, Loader2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge, ButtonSecondary, BottomNavIFN } from "@/components/ifn";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 interface ProfileData {
   full_name: string;
@@ -22,6 +23,7 @@ export default function MerchantProfile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const { isSupported, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -147,7 +149,36 @@ export default function MerchantProfile() {
           />
         </CardLarge>
 
-        {/* Bouton Déconnexion */}
+        {/* Toggle Notifications Push */}
+        {isSupported && (
+          <CardLarge className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bell className={`w-6 h-6 ${isSubscribed ? 'text-primary' : 'text-muted-foreground'}`} />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">
+                  Notifications
+                </p>
+                <p className="text-muted-foreground">
+                  {isSubscribed ? "Activées" : "Désactivées"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isSubscribed}
+              onCheckedChange={async (checked) => {
+                if (checked) {
+                  await subscribe();
+                } else {
+                  await unsubscribe();
+                }
+              }}
+              disabled={notifLoading}
+              className="scale-125"
+            />
+          </CardLarge>
+        )}
         <ButtonSecondary
           onClick={handleSignOut}
           className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
