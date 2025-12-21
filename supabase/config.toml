@@ -2,3 +2,6 @@ project_id = "qnkmyehsrrljpapjlhnx"
 
 [functions.lafricamobile-tts]
 verify_jwt = false
+
+[functions.lafricamobile-stt]
+verify_jwt = false
