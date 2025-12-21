@@ -3,9 +3,11 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
 
 interface AudioButtonProps {
   textToRead: string;
+  audioKey?: string; // Clé pour trouver l'audio pré-enregistré
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'floating' | 'inline';
@@ -25,6 +27,7 @@ const VOICE_LANG_MAP: Record<string, string> = {
 
 export function AudioButton({ 
   textToRead, 
+  audioKey,
   className, 
   size = 'md',
   variant = 'floating' 
@@ -48,11 +51,8 @@ export function AudioButton({
 
   // Arrêter l'audio en cours
   const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
+    stopPrerecordedAudio(audioRef.current);
+    audioRef.current = null;
     speechSynthesis.cancel();
     setIsPlaying(false);
   }, []);
@@ -156,22 +156,41 @@ export function AudioButton({
     speechSynthesis.speak(utterance);
   }, [textToRead, language]);
 
-  // Fonction principale de lecture
-  const speak = useCallback(() => {
+  // Fonction principale de lecture avec priorité audio pré-enregistré
+  const speak = useCallback(async () => {
     // Si déjà en lecture, arrêter
     if (isPlaying) {
       stopAudio();
       return;
     }
 
-    // Utiliser LAFRICAMOBILE pour Dioula
+    // Priorité 1: Audio pré-enregistré si audioKey fourni
+    if (audioKey) {
+      setIsLoading(true);
+      const result = await playPrerecordedAudio(audioKey, language);
+      
+      if (result.success && result.audio) {
+        audioRef.current = result.audio;
+        setIsLoading(false);
+        setIsPlaying(true);
+        
+        result.audio.onended = () => {
+          setIsPlaying(false);
+          audioRef.current = null;
+        };
+        return;
+      }
+      setIsLoading(false);
+    }
+
+    // Priorité 2: LAFRICAMOBILE pour Dioula (fallback TTS)
     if (LAFRICAMOBILE_LANGUAGES.includes(language)) {
       speakWithLafricamobile();
     } else {
-      // Web Speech API pour français et autres
+      // Priorité 3: Web Speech API pour français et autres
       speakWithWebSpeech();
     }
-  }, [isPlaying, language, stopAudio, speakWithLafricamobile, speakWithWebSpeech]);
+  }, [isPlaying, language, audioKey, stopAudio, speakWithLafricamobile, speakWithWebSpeech]);
 
   // Charger les voix
   if ('speechSynthesis' in window && speechSynthesis.getVoices().length === 0) {
@@ -218,6 +237,7 @@ export function PageAudioButton({ pageKey, className }: PageAudioButtonProps) {
   return (
     <AudioButton 
       textToRead={textToRead}
+      audioKey={pageKey} // Utiliser la clé de traduction comme clé audio
       variant="floating"
       size="lg"
       className={cn("bottom-24 right-4", className)}
