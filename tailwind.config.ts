@@ -133,6 +133,10 @@ export default {
           "0%": { transform: "scale(1)", opacity: "1" },
           "100%": { transform: "scale(1.5)", opacity: "0" },
         },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -142,6 +146,7 @@ export default {
         "scale-in": "scale-in 0.2s ease-out",
         "bounce-gentle": "bounce-gentle 2s infinite",
         "pulse-ring": "pulse-ring 1.5s infinite",
+        "slide-up": "slide-up 0.4s ease-out forwards",
       },
       boxShadow: {
         "africa": "0 10px 40px -10px hsl(var(--orange) / 0.3)",
