@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
 import { ButtonSecondary } from "./ButtonSecondary";
+import { Confetti } from "@/components/shared/Confetti";
 
 interface SuccessScreenProps {
   title?: string;
@@ -52,6 +53,9 @@ const SuccessScreen = ({
       "bg-[hsl(142,76%,36%)] text-white p-6",
       className
     )}>
+      {/* Confetti animation */}
+      <Confetti duration={3000} particleCount={50} />
+
       {/* Animated checkmark */}
       <div className="animate-bounce mb-6">
         <CheckCircle2 className="w-24 h-24 sm:w-32 sm:h-32" strokeWidth={1.5} />
