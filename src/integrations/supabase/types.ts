@@ -47,6 +47,39 @@ export type Database = {
         }
         Relationships: []
       }
+      audio_recordings: {
+        Row: {
+          audio_key: string
+          created_at: string
+          duration_seconds: number | null
+          file_path: string
+          id: string
+          language_code: string
+          recorded_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_key: string
+          created_at?: string
+          duration_seconds?: number | null
+          file_path: string
+          id?: string
+          language_code: string
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_key?: string
+          created_at?: string
+          duration_seconds?: number | null
+          file_path?: string
+          id?: string
+          language_code?: string
+          recorded_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cmu_payments: {
         Row: {
           amount: number
