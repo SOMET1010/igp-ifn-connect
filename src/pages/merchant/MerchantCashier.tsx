@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Banknote, Smartphone, Home, Wallet, User, Package, RotateCcw, List } from "lucide-react";
+import { ArrowLeft, Banknote, Smartphone, Home, Wallet, User, Package, RotateCcw, List, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CalculatorKeypad, useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
-import { DailyRevenue } from "@/components/merchant/DailyRevenue";
 import { QRReceipt } from "@/components/merchant/QRReceipt";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,7 +26,6 @@ export default function MerchantCashier() {
   const [method, setMethod] = useState<PaymentMethod | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [transactionRef, setTransactionRef] = useState("");
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [merchantName, setMerchantName] = useState("");
 
   const numericAmount = parseInt(amount.replace(/\D/g, "")) || 0;
@@ -59,8 +57,8 @@ export default function MerchantCashier() {
   const getStepAudioText = () => {
     if (step === "input") {
       return numericAmount > 0 
-        ? `${t("amount")}: ${formattedAmount} FCFA`
-        : t("audio_cashier_input");
+        ? `${formattedAmount} FCFA`
+        : t("how_much");
     }
     if (step === "confirm") {
       return `${t("audio_cashier_confirm")} ${formattedAmount} FCFA ${method === "cash" ? t("cash") : t("mobile_money")}`;
@@ -133,7 +131,6 @@ export default function MerchantCashier() {
 
       setTransactionRef(ref);
       setStep("success");
-      setRefreshTrigger(prev => prev + 1);
       
       triggerSuccessFeedback();
       toast.success(t("payment_success") + " !");
@@ -161,7 +158,7 @@ export default function MerchantCashier() {
         size="lg"
       />
 
-      {/* Header */}
+      {/* Simplified Header - Just title */}
       <header className="bg-secondary text-secondary-foreground p-4 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <Button
@@ -170,73 +167,64 @@ export default function MerchantCashier() {
             onClick={() => step === "input" ? navigate("/marchand") : resetForm()}
             className="text-secondary-foreground hover:bg-secondary-foreground/10"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-6 h-6" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">{t("my_cashier")}</h1>
-            <p className="text-sm text-secondary-foreground/80">
-              {step === "input" && t("record_sale")}
-              {step === "confirm" && t("confirm_payment")}
-              {step === "success" && t("transaction_success")}
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold">{t("collect_title")}</h1>
         </div>
       </header>
 
       <main className="p-4 space-y-4">
         {step === "input" && (
-          <>
-            <DailyRevenue refreshTrigger={refreshTrigger} />
+          <div className="flex flex-col min-h-[calc(100vh-180px)] justify-between">
+            {/* Amount display - GIANT */}
+            <div className="text-center py-6">
+              <p className="text-lg text-muted-foreground font-medium mb-3">{t("how_much")}</p>
+              <div className="flex items-baseline justify-center gap-2">
+                <span className={`text-6xl sm:text-7xl font-black tracking-tight transition-all duration-200 ${
+                  numericAmount > 0 ? "text-foreground" : "text-muted-foreground/50"
+                }`}>
+                  {numericAmount > 0 ? formattedAmount : "0"}
+                </span>
+                <span className="text-2xl text-muted-foreground font-bold">FCFA</span>
+              </div>
+            </div>
 
-            <Card className="border-2 border-border">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">{t("amount_to_collect")}</p>
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className={`text-5xl sm:text-6xl font-bold transition-all duration-200 ${
-                      numericAmount > 0 ? "text-foreground" : "text-muted-foreground"
-                    }`}>
-                      {numericAmount > 0 ? formattedAmount : "0"}
-                    </span>
-                    <span className="text-xl text-muted-foreground">FCFA</span>
-                  </div>
-                  
-                  {numericAmount > 0 && (
-                    <div className="mt-4 flex justify-center gap-4 text-sm animate-fade-in">
-                      <span className="text-destructive">{t("cmu_contribution")}: -{cmuDeduction.toLocaleString()}</span>
-                      <span className="text-secondary">{t("rsti_savings")}: +{rstiDeduction.toLocaleString()}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
+            {/* Calculator Keypad XXL */}
             <CalculatorKeypad
               value={amount}
               onChange={setAmount}
               maxLength={10}
             />
 
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <Button
-                onClick={() => handleMethodSelect("cash")}
-                disabled={numericAmount < 100}
-                className="h-20 sm:h-24 flex-col gap-2 bg-success hover:bg-success/90 text-success-foreground rounded-2xl text-lg font-bold shadow-lg transition-all duration-200 active:scale-95"
-              >
-                <Banknote className="w-8 h-8 sm:w-10 sm:h-10" />
-                <span>{t("cash").toUpperCase()}</span>
-              </Button>
-              
-              <Button
-                onClick={() => handleMethodSelect("mobile_money")}
-                disabled={numericAmount < 100}
-                className="h-20 sm:h-24 flex-col gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl text-lg font-bold shadow-lg transition-all duration-200 active:scale-95"
-              >
-                <Smartphone className="w-8 h-8 sm:w-10 sm:h-10" />
-                <span>{t("mobile_money").toUpperCase()}</span>
-              </Button>
+            {/* Payment buttons XXL */}
+            <div className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={() => handleMethodSelect("cash")}
+                  disabled={numericAmount < 100}
+                  className="h-24 sm:h-28 flex-col gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/30 text-white rounded-2xl shadow-lg transition-all duration-200 active:scale-95"
+                >
+                  <Banknote className="w-10 h-10 sm:w-12 sm:h-12" />
+                  <span className="text-xl sm:text-2xl font-black">{t("cash").toUpperCase()}</span>
+                </Button>
+                
+                <Button
+                  onClick={() => handleMethodSelect("mobile_money")}
+                  disabled={numericAmount < 100}
+                  className="h-24 sm:h-28 flex-col gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/30 text-white rounded-2xl shadow-lg transition-all duration-200 active:scale-95"
+                >
+                  <Smartphone className="w-10 h-10 sm:w-12 sm:h-12" />
+                  <span className="text-xl sm:text-2xl font-black">MOBILE</span>
+                </Button>
+              </div>
+
+              {/* Offline reassurance message */}
+              <p className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2 opacity-70">
+                <Wifi className="w-4 h-4" />
+                {t("offline_message")}
+              </p>
             </div>
-          </>
+          </div>
         )}
 
         {step === "confirm" && method && (
