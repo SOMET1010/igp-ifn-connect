@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { HeroOverlay } from "@/components/shared/HeroOverlay";
+import { Users, Package, Settings, LucideIcon } from "lucide-react";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
+import fcfaBills from "@/assets/fcfa-bills.png";
 
 interface RoleCard {
-  emoji: string;
+  icon?: LucideIcon;
+  useImage?: boolean;
   title: string;
   description: string;
   href: string;
@@ -14,7 +17,7 @@ interface RoleCard {
 
 const roles: RoleCard[] = [
   {
-    emoji: "💵",
+    useImage: true,
     title: "Je suis Marchand",
     description: "Encaisser et vendre sans souci",
     href: "/marchand",
@@ -22,21 +25,21 @@ const roles: RoleCard[] = [
     badge: "⭐ Accès principal",
   },
   {
-    emoji: "👥",
+    icon: Users,
     title: "Agent terrain",
     description: "Aider les marchands",
     href: "/agent",
     variant: "secondary",
   },
   {
-    emoji: "📦",
+    icon: Package,
     title: "Coopérative",
     description: "Gérer stock et livraisons",
     href: "/cooperative",
     variant: "tertiary",
   },
   {
-    emoji: "⚙️",
+    icon: Settings,
     title: "Admin",
     description: "Statistiques",
     href: "/admin",
@@ -132,15 +135,27 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
       )}
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Icône emoji */}
+      {/* Icône ou Image */}
       <div
         className={cn(
-          "flex-shrink-0 rounded-2xl flex items-center justify-center mb-2",
+          "flex-shrink-0 rounded-2xl flex items-center justify-center mb-2 overflow-hidden",
           styles.icon,
           iconSizes[size]
         )}
       >
-        <span>{role.emoji}</span>
+        {role.useImage ? (
+          <img 
+            src={fcfaBills} 
+            alt="Billets FCFA" 
+            className="w-full h-full object-cover"
+          />
+        ) : role.icon ? (
+          <role.icon className={cn(
+            size === "large" && "w-10 h-10",
+            size === "normal" && "w-7 h-7",
+            size === "small" && "w-5 h-5"
+          )} />
+        ) : null}
       </div>
 
       {/* Titre */}
