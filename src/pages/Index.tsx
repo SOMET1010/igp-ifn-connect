@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeroOverlay } from "@/components/shared/HeroOverlay";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
@@ -10,7 +9,6 @@ interface RoleCard {
   description: string;
   href: string;
   variant: "primary" | "secondary" | "tertiary" | "muted";
-  size: "large" | "normal" | "small";
   badge?: string;
 }
 
@@ -21,32 +19,28 @@ const roles: RoleCard[] = [
     description: "Encaisser et vendre sans souci",
     href: "/marchand",
     variant: "primary",
-    size: "large",
     badge: "⭐ Accès principal",
   },
   {
     emoji: "👥",
-    title: "Je suis Agent terrain",
+    title: "Agent terrain",
     description: "Aider les marchands",
     href: "/agent",
     variant: "secondary",
-    size: "normal",
   },
   {
     emoji: "📦",
-    title: "Je suis Coopérative",
+    title: "Coopérative",
     description: "Gérer stock et livraisons",
     href: "/cooperative",
     variant: "tertiary",
-    size: "normal",
   },
   {
     emoji: "⚙️",
-    title: "Je suis Administrateur",
-    description: "Statistiques et cartographie",
+    title: "Admin",
+    description: "Statistiques",
     href: "/admin",
     variant: "muted",
-    size: "small",
   },
 ];
 
@@ -56,7 +50,6 @@ const variantStyles = {
     icon: "bg-secondary-foreground/20",
     text: "text-secondary-foreground",
     desc: "text-secondary-foreground/80",
-    chevron: "text-secondary-foreground/60 group-hover:text-secondary-foreground",
     badge: "bg-secondary-foreground/20 text-secondary-foreground",
   },
   secondary: {
@@ -64,7 +57,6 @@ const variantStyles = {
     icon: "bg-primary-foreground/20",
     text: "text-primary-foreground",
     desc: "text-primary-foreground/80",
-    chevron: "text-primary-foreground/60 group-hover:text-primary-foreground",
     badge: "bg-primary-foreground/20 text-primary-foreground",
   },
   tertiary: {
@@ -72,7 +64,6 @@ const variantStyles = {
     icon: "bg-accent-foreground/10",
     text: "text-accent-foreground",
     desc: "text-accent-foreground/70",
-    chevron: "text-accent-foreground/50 group-hover:text-accent-foreground",
     badge: "bg-accent-foreground/10 text-accent-foreground",
   },
   muted: {
@@ -80,27 +71,101 @@ const variantStyles = {
     icon: "bg-muted",
     text: "text-foreground",
     desc: "text-muted-foreground",
-    chevron: "text-muted-foreground group-hover:text-foreground",
     badge: "bg-muted text-muted-foreground",
   },
-};
-
-const sizeStyles = {
-  large: "min-h-[140px] p-6 shadow-lg",
-  normal: "min-h-[100px] p-5",
-  small: "min-h-[80px] p-4",
-};
-
-const iconSizes = {
-  large: "w-16 h-16 text-4xl",
-  normal: "w-12 h-12 text-3xl",
-  small: "w-10 h-10 text-2xl",
 };
 
 const handleCardClick = () => {
   if (navigator.vibrate) {
     navigator.vibrate(50);
   }
+};
+
+interface RoleCardProps {
+  role: RoleCard;
+  index: number;
+  size: "large" | "normal" | "small";
+  className?: string;
+}
+
+const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
+  const styles = variantStyles[role.variant];
+  const isPrimary = role.variant === "primary";
+
+  const sizeStyles = {
+    large: "min-h-[160px] p-6 shadow-lg",
+    normal: "min-h-[130px] p-4",
+    small: "min-h-[100px] p-3",
+  };
+
+  const iconSizes = {
+    large: "w-16 h-16 text-5xl",
+    normal: "w-12 h-12 text-3xl",
+    small: "w-10 h-10 text-2xl",
+  };
+
+  const titleSizes = {
+    large: "text-lg",
+    normal: "text-base",
+    small: "text-sm",
+  };
+
+  const descSizes = {
+    large: "text-sm",
+    normal: "text-xs",
+    small: "text-xs",
+  };
+
+  return (
+    <Link
+      to={role.href}
+      onClick={handleCardClick}
+      className={cn(
+        "group relative flex flex-col items-center text-center w-full rounded-2xl border-2 transition-all duration-300",
+        "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.97]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "opacity-0 animate-slide-up",
+        isPrimary && "animate-pulse-slow",
+        styles.card,
+        sizeStyles[size],
+        className
+      )}
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      {/* Icône emoji */}
+      <div
+        className={cn(
+          "flex-shrink-0 rounded-2xl flex items-center justify-center mb-2",
+          styles.icon,
+          iconSizes[size]
+        )}
+      >
+        <span>{role.emoji}</span>
+      </div>
+
+      {/* Titre */}
+      <h3 className={cn("font-bold", styles.text, titleSizes[size])}>
+        {role.title}
+      </h3>
+
+      {/* Description */}
+      <p className={cn("mt-1 leading-snug", styles.desc, descSizes[size])}>
+        {role.description}
+      </p>
+
+      {/* Badge (si présent) */}
+      {role.badge && (
+        <span
+          className={cn(
+            "mt-2 px-3 py-1 rounded-full text-xs font-medium",
+            styles.badge
+          )}
+        >
+          {role.badge}
+        </span>
+      )}
+    </Link>
+  );
 };
 
 const Index = () => {
@@ -129,71 +194,27 @@ const Index = () => {
             </p>
           </div>
 
-        {/* Cartes de rôles */}
-        <div className="space-y-3">
-          {roles.map((role, index) => {
-            const styles = variantStyles[role.variant];
-            const isPrimary = role.variant === "primary";
-            return (
-              <Link
-                key={role.href}
-                to={role.href}
-                onClick={handleCardClick}
-                className={cn(
-                  "group relative flex items-center gap-4 w-full rounded-2xl border-2 transition-all duration-300",
-                  "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.97]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "opacity-0 animate-slide-up",
-                  isPrimary && "animate-pulse-slow",
-                  styles.card,
-                  sizeStyles[role.size]
-                )}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Badge (si présent) */}
-                {role.badge && (
-                  <div
-                    className={cn(
-                      "absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium",
-                      styles.badge
-                    )}
-                  >
-                    {role.badge}
-                  </div>
-                )}
+          {/* Cartes de rôles - Layout hybride */}
+          <div className="space-y-3">
+            {/* Marchand - Featured full-width */}
+            <RoleCardVertical role={roles[0]} index={0} size="large" />
 
-                {/* Icône emoji */}
-                <div
-                  className={cn(
-                    "flex-shrink-0 rounded-2xl flex items-center justify-center",
-                    styles.icon,
-                    iconSizes[role.size]
-                  )}
-                >
-                  <span>{role.emoji}</span>
-                </div>
+            {/* Agent + Coopérative - Grille 2 colonnes */}
+            <div className="grid grid-cols-2 gap-3">
+              <RoleCardVertical role={roles[1]} index={1} size="normal" />
+              <RoleCardVertical role={roles[2]} index={2} size="normal" />
+            </div>
 
-                {/* Texte */}
-                <div className="flex-1 min-w-0">
-                  <h3 className={cn("font-bold text-lg", styles.text)}>
-                    {role.title}
-                  </h3>
-                  <p className={cn("text-sm mt-0.5 leading-snug", styles.desc)}>
-                    {role.description}
-                  </p>
-                </div>
-
-                {/* Chevron */}
-                <ChevronRight
-                  className={cn(
-                    "w-6 h-6 flex-shrink-0 transition-transform group-hover:translate-x-1",
-                    styles.chevron
-                  )}
-                />
-              </Link>
-            );
-          })}
-        </div>
+            {/* Admin - Centré et compact */}
+            <div className="flex justify-center">
+              <RoleCardVertical 
+                role={roles[3]} 
+                index={3} 
+                size="small" 
+                className="max-w-[180px]" 
+              />
+            </div>
+          </div>
 
           {/* Aide rassurante */}
           <div className="text-center text-sm text-white/60 mt-6 px-4">
