@@ -1,7 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, Download, Check } from "lucide-react";
+import { Share2, Check, MessageCircle, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 interface TransactionDetails {
@@ -35,16 +35,26 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
     transfer: "Virement",
   };
 
-  const handleShare = async () => {
-    const shareText = `
+  const shareText = `
 🧾 Reçu IFN - ${transaction.reference}
 💰 Montant: ${transaction.amount.toLocaleString()} FCFA
 💳 Paiement: ${paymentLabels[transaction.paymentMethod] || transaction.paymentMethod}
 📅 Date: ${transaction.date.toLocaleDateString("fr-FR")}
 🏥 CMU: ${transaction.cmuDeduction.toLocaleString()} FCFA
 💼 RSTI: ${transaction.rstiDeduction.toLocaleString()} FCFA
-    `.trim();
+  `.trim();
 
+  const handleShareWhatsApp = () => {
+    const encodedText = encodeURIComponent(shareText);
+    window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+  };
+
+  const handleShareSMS = () => {
+    const encodedText = encodeURIComponent(shareText);
+    window.location.href = `sms:?body=${encodedText}`;
+  };
+
+  const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
@@ -52,7 +62,6 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
           text: shareText,
         });
       } catch (err) {
-        // User cancelled or share failed
         if ((err as Error).name !== "AbortError") {
           copyToClipboard(shareText);
         }
@@ -132,15 +141,37 @@ export function QRReceipt({ transaction }: QRReceiptProps) {
           </div>
         </div>
 
-        {/* Share button */}
-        <Button
-          variant="outline"
-          className="w-full h-14 rounded-xl text-lg"
-          onClick={handleShare}
-        >
-          <Share2 className="w-5 h-5 mr-2" />
-          Partager le reçu
-        </Button>
+        {/* Share buttons */}
+        <div className="space-y-3">
+          {/* WhatsApp - Primary button */}
+          <Button
+            className="w-full h-14 rounded-xl text-lg bg-[#25D366] hover:bg-[#128C7E] text-white"
+            onClick={handleShareWhatsApp}
+          >
+            <MessageCircle className="w-5 h-5 mr-2" />
+            Partager sur WhatsApp
+          </Button>
+          
+          {/* SMS - Secondary button */}
+          <Button
+            variant="outline"
+            className="w-full h-14 rounded-xl text-lg"
+            onClick={handleShareSMS}
+          >
+            <Smartphone className="w-5 h-5 mr-2" />
+            Envoyer par SMS
+          </Button>
+          
+          {/* Generic share / Copy */}
+          <Button
+            variant="ghost"
+            className="w-full h-12 rounded-xl text-muted-foreground"
+            onClick={handleShare}
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Autres options
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
