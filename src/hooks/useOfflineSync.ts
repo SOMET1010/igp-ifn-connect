@@ -107,6 +107,23 @@ export function useOfflineSync() {
     return newItem.entity_id;
   }, []);
 
+  // Vérifier les conflits potentiels
+  const checkConflicts = async (item: OfflineData): Promise<{ hasConflict: boolean; serverData?: any }> => {
+    if (item.entity_type === "merchants" && item.action === "insert") {
+      // Vérifier si un marchand avec le même numéro CMU existe déjà
+      const { data: existing } = await supabase
+        .from("merchants")
+        .select("id, cmu_number, updated_at")
+        .eq("cmu_number", item.data.cmu_number)
+        .maybeSingle();
+      
+      if (existing) {
+        return { hasConflict: true, serverData: existing };
+      }
+    }
+    return { hasConflict: false };
+  };
+
   // Synchroniser les données avec le serveur
   const syncWithServer = useCallback(async () => {
     const queue = getOfflineQueue();
@@ -114,12 +131,25 @@ export function useOfflineSync() {
 
     setIsSyncing(true);
     const successfulIds: string[] = [];
+    const conflictItems: OfflineData[] = [];
+    const failedItems: OfflineData[] = [];
 
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData?.user?.id;
 
     for (const item of queue) {
       try {
+        // Vérifier les conflits
+        const { hasConflict, serverData } = await checkConflicts(item);
+        
+        if (hasConflict) {
+          console.warn(`Conflit détecté pour ${item.entity_type}:`, serverData);
+          conflictItems.push(item);
+          // On garde l'item serveur (stratégie "server wins")
+          successfulIds.push(item.id);
+          continue;
+        }
+
         // Handle merchant insertions with photo uploads
         if (item.entity_type === "merchants" && item.action === "insert") {
           const merchantData = { ...item.data };
@@ -166,6 +196,24 @@ export function useOfflineSync() {
 
           if (error) {
             console.error("Merchant insert error:", error);
+            failedItems.push(item);
+            continue;
+          }
+
+          successfulIds.push(item.id);
+        } else if (item.entity_type === "transactions" && item.action === "insert") {
+          // Sync des transactions
+          const { error } = await supabase.from("transactions").insert({
+            id: item.entity_id,
+            merchant_id: item.data.merchant_id,
+            amount: item.data.amount,
+            transaction_type: item.data.transaction_type,
+            reference: item.data.reference,
+          });
+
+          if (error) {
+            console.error("Transaction insert error:", error);
+            failedItems.push(item);
             continue;
           }
 
@@ -187,6 +235,7 @@ export function useOfflineSync() {
         }
       } catch (err) {
         console.error("Sync error for item:", item.id, err);
+        failedItems.push(item);
       }
     }
 
@@ -194,8 +243,17 @@ export function useOfflineSync() {
     const remainingQueue = queue.filter((item) => !successfulIds.includes(item.id));
     saveOfflineQueue(remainingQueue);
 
+    // Notifications de résultat
     if (successfulIds.length > 0) {
       toast.success(`${successfulIds.length} élément(s) synchronisé(s)`);
+    }
+    
+    if (conflictItems.length > 0) {
+      toast.warning(`${conflictItems.length} conflit(s) résolu(s) (données serveur conservées)`);
+    }
+    
+    if (failedItems.length > 0) {
+      toast.error(`${failedItems.length} élément(s) non synchronisé(s). Nouvelle tentative à la prochaine connexion.`);
     }
 
     setIsSyncing(false);
