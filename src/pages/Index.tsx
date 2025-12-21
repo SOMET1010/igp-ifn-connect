@@ -128,13 +128,13 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
         "group relative flex flex-col items-center text-center w-full rounded-2xl border-2 transition-all duration-300",
         "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.97]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "opacity-0 animate-slide-up",
+        "opacity-0 animate-slide-up-bounce",
         isPrimary && "animate-pulse-slow",
         styles.card,
         sizeStyles[size],
         className
       )}
-      style={{ animationDelay: `${index * 100}ms` }}
+      style={{ animationDelay: `${150 + index * 150}ms` }}
     >
       {/* Image du rôle */}
       <div
@@ -147,7 +147,7 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
         <img 
           src={role.image} 
           alt={role.title} 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
 
@@ -193,7 +193,10 @@ const Index = () => {
 
         {/* Question principale */}
         <main className="flex-1 max-w-lg mx-auto w-full px-4 py-6">
-          <div className="text-center mb-6">
+          <div 
+            className="text-center mb-6 opacity-0 animate-fade-in" 
+            style={{ animationDelay: "50ms", animationFillMode: "forwards" }}
+          >
             <h2 className="text-xl font-bold text-white mb-1">
               Qui êtes-vous ?
             </h2>
