@@ -1,10 +1,11 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Shield, CheckCircle2 } from "lucide-react";
+import { Download, Share2, Shield, CheckCircle2, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { FISCAL_REGIME_LABELS } from "@/lib/invoiceUtils";
+import { exportInvoiceToPDF } from "@/lib/pdfExport";
 
 export interface InvoiceData {
   invoiceNumber: string;
@@ -34,6 +35,7 @@ interface FNEInvoiceProps {
 
 export function FNEInvoice({ invoice, onClose }: FNEInvoiceProps) {
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // Enhanced QR data with verification URL
   const qrData = invoice.verificationUrl || JSON.stringify({
@@ -311,10 +313,35 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
       <div className="space-y-3">
         <Button
           className="w-full h-14 rounded-xl text-lg"
+          onClick={async () => {
+            setIsExportingPDF(true);
+            try {
+              await exportInvoiceToPDF(invoice);
+              toast.success("Facture PDF téléchargée !");
+            } catch (error) {
+              console.error("Erreur export PDF:", error);
+              toast.error("Impossible de créer le PDF");
+            } finally {
+              setIsExportingPDF(false);
+            }
+          }}
+          disabled={isExportingPDF}
+        >
+          {isExportingPDF ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <FileDown className="w-5 h-5 mr-2" />
+          )}
+          Télécharger PDF
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full h-14 rounded-xl text-lg"
           onClick={handleDownloadPNG}
         >
           <Download className="w-5 h-5 mr-2" />
-          Télécharger la facture
+          Télécharger Image
         </Button>
 
         <Button

@@ -1,20 +1,32 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Banknote, Smartphone, ChevronDown } from "lucide-react";
+import { ArrowLeft, Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { format, isToday, isYesterday } from "date-fns";
+import { format, isToday, isYesterday, startOfWeek, startOfMonth, subDays, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge, ButtonSecondary, StatusBanner, BottomNavIFN } from "@/components/ifn";
+import { exportSalesReportToPDF } from "@/lib/pdfExport";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Transaction {
   id: string;
   amount: number;
   transaction_type: "cash" | "mobile_money" | "transfer";
   created_at: string;
+  reference: string | null;
+  cmu_deduction: number | null;
+  rsti_deduction: number | null;
 }
 
 interface GroupedTransactions {
@@ -31,6 +43,9 @@ export default function MerchantTransactions() {
   const [isLoading, setIsLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(10);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportPeriod, setExportPeriod] = useState<string>("week");
+  const [merchantName, setMerchantName] = useState<string>("");
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -52,7 +67,7 @@ export default function MerchantTransactions() {
 
       const { data: merchantData } = await supabase
         .from("merchants")
-        .select("id")
+        .select("id, full_name")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -61,14 +76,16 @@ export default function MerchantTransactions() {
         return;
       }
 
+      setMerchantName(merchantData.full_name);
+
       const { data } = await supabase
         .from("transactions")
-        .select("id, amount, transaction_type, created_at")
+        .select("id, amount, transaction_type, created_at, reference, cmu_deduction, rsti_deduction")
         .eq("merchant_id", merchantData.id)
         .order("created_at", { ascending: false })
         .limit(100);
 
-      setTransactions(data || []);
+      setTransactions((data as Transaction[]) || []);
       setIsLoading(false);
     };
 
@@ -100,6 +117,86 @@ export default function MerchantTransactions() {
   Object.entries(grouped).forEach(([label, txs]) => {
     groupedTransactions.push({ label, transactions: txs });
   });
+
+  // Export PDF handler
+  const handleExportPDF = async () => {
+    if (transactions.length === 0) {
+      toast.error("Aucune transaction à exporter");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const now = new Date();
+      let startDate: Date;
+      let endDate = now;
+
+      switch (exportPeriod) {
+        case "today":
+          startDate = new Date(now.setHours(0, 0, 0, 0));
+          endDate = new Date();
+          break;
+        case "week":
+          startDate = startOfWeek(now, { weekStartsOn: 1 });
+          break;
+        case "month":
+          startDate = startOfMonth(now);
+          break;
+        case "last30":
+          startDate = subDays(now, 30);
+          break;
+        case "last3months":
+          startDate = subMonths(now, 3);
+          break;
+        default:
+          startDate = startOfWeek(now, { weekStartsOn: 1 });
+      }
+
+      // Filter transactions by period
+      const filteredTransactions = transactions.filter(tx => {
+        const txDate = new Date(tx.created_at);
+        return txDate >= startDate && txDate <= endDate;
+      });
+
+      if (filteredTransactions.length === 0) {
+        toast.error("Aucune transaction pour cette période");
+        setIsExporting(false);
+        return;
+      }
+
+      // Calculate summary
+      const totalSales = filteredTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+      const totalCmuDeductions = filteredTransactions.reduce((sum, tx) => sum + (Number(tx.cmu_deduction) || 0), 0);
+      const totalRstiDeductions = filteredTransactions.reduce((sum, tx) => sum + (Number(tx.rsti_deduction) || 0), 0);
+
+      await exportSalesReportToPDF(
+        merchantName,
+        { start: startDate, end: endDate },
+        filteredTransactions.map(tx => ({
+          reference: tx.reference || tx.id,
+          date: format(new Date(tx.created_at), "dd/MM/yy HH:mm"),
+          amount: Number(tx.amount),
+          paymentMethod: tx.transaction_type,
+          cmuDeduction: Number(tx.cmu_deduction) || 0,
+          rstiDeduction: Number(tx.rsti_deduction) || 0,
+        })),
+        {
+          totalSales,
+          totalTransactions: filteredTransactions.length,
+          totalCmuDeductions,
+          totalRstiDeductions,
+          netAmount: totalSales - totalCmuDeductions - totalRstiDeductions,
+        }
+      );
+
+      toast.success("Rapport PDF téléchargé !");
+    } catch (error) {
+      console.error("Erreur export PDF:", error);
+      toast.error("Impossible de créer le rapport");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const pageAudioText = `${t("your_sales")}. ${transactions.length} ventes.`;
 
@@ -141,6 +238,42 @@ export default function MerchantTransactions() {
       </header>
 
       <main className="p-4 space-y-6">
+        {/* Export PDF Section */}
+        {transactions.length > 0 && (
+          <CardLarge className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileDown className="w-5 h-5 text-primary" />
+              <span className="font-bold text-foreground">Exporter rapport PDF</span>
+            </div>
+            <div className="flex gap-3">
+              <Select value={exportPeriod} onValueChange={setExportPeriod}>
+                <SelectTrigger className="flex-1 h-12">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Période" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Aujourd'hui</SelectItem>
+                  <SelectItem value="week">Cette semaine</SelectItem>
+                  <SelectItem value="month">Ce mois</SelectItem>
+                  <SelectItem value="last30">30 derniers jours</SelectItem>
+                  <SelectItem value="last3months">3 derniers mois</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={handleExportPDF}
+                disabled={isExporting}
+                className="h-12 px-6"
+              >
+                {isExporting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <FileDown className="w-5 h-5" />
+                )}
+              </Button>
+            </div>
+          </CardLarge>
+        )}
+
         {transactions.length === 0 ? (
           <CardLarge className="text-center py-12">
             <div className="text-6xl mb-4">📜</div>
