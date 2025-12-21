@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, Shield, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, Shield, Loader2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -176,6 +176,24 @@ export default function MerchantMoney() {
           <p className="text-lg font-bold text-[hsl(142,76%,30%)]">
             🛡️ {t("your_health_protection")}
           </p>
+        </CardLarge>
+
+        {/* Link to understand CMU/RSTI */}
+        <CardLarge 
+          onClick={() => navigate("/marchand/comprendre")}
+          className="flex items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+        >
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <HelpCircle className="w-7 h-7 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-lg font-medium text-foreground">
+              {t("what_is_cmu_rsti")}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              {t("understand_simple")}
+            </p>
+          </div>
         </CardLarge>
 
         {/* Status Banner */}

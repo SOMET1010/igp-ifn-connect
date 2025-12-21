@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Volume2, Phone } from "lucide-react";
+import { ArrowLeft, Play, Volume2, Phone, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
@@ -80,6 +80,24 @@ export default function MerchantHelp() {
             size="lg"
             className="h-14 w-14"
           />
+        </CardLarge>
+
+        {/* Comprendre CMU et RSTI */}
+        <CardLarge 
+          onClick={() => navigate("/marchand/comprendre")}
+          className="flex items-center gap-4"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+            <BookOpen className="w-9 h-9 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-foreground">
+              {t("understand_cmu_rsti")}
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              {t("understand_simple")}
+            </p>
+          </div>
         </CardLarge>
 
         {/* Appeler mon agent */}
