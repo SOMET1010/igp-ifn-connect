@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { LogOut, User, Phone, Briefcase, MapPin, Shield, Loader2, ArrowLeft, Home, Users } from 'lucide-react';
+import { NotificationToggle } from '@/components/shared/NotificationToggle';
 
 interface AgentProfileData {
   full_name: string;
@@ -187,6 +188,14 @@ const AgentProfile: React.FC = () => {
                 <p className="text-sm text-muted-foreground">Organisation</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Notifications */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-foreground mb-3">Notifications</h3>
+            <NotificationToggle className="w-full" />
           </CardContent>
         </Card>
 

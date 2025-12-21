@@ -21,6 +21,7 @@ import {
   Users,
   Hash
 } from 'lucide-react';
+import { NotificationToggle } from '@/components/shared/NotificationToggle';
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
@@ -227,6 +228,14 @@ const CooperativeProfile: React.FC = () => {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Notifications */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-foreground mb-3">Notifications</h3>
+            <NotificationToggle className="w-full" />
           </CardContent>
         </Card>
 
