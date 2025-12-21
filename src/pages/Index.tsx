@@ -50,28 +50,28 @@ const roles: RoleCard[] = [
 
 const variantStyles = {
   primary: {
-    card: "bg-gradient-to-br from-secondary to-secondary/80 border-secondary hover:shadow-xl-forest",
+    card: "bg-gradient-to-br from-secondary to-secondary/80 border-secondary hover:shadow-glow-green",
     icon: "bg-secondary-foreground/20",
     text: "text-secondary-foreground",
     desc: "text-secondary-foreground/80",
     badge: "bg-secondary-foreground/20 text-secondary-foreground",
   },
   secondary: {
-    card: "bg-gradient-to-br from-primary/90 to-primary/70 border-primary hover:shadow-xl-africa",
+    card: "bg-gradient-to-br from-primary/90 to-primary/70 border-primary hover:shadow-glow-orange",
     icon: "bg-primary-foreground/20",
     text: "text-primary-foreground",
     desc: "text-primary-foreground/80",
     badge: "bg-primary-foreground/20 text-primary-foreground",
   },
   tertiary: {
-    card: "bg-gradient-to-br from-accent/80 to-accent/60 border-accent hover:shadow-xl-gold",
+    card: "bg-gradient-to-br from-accent/80 to-accent/60 border-accent hover:shadow-glow-gold",
     icon: "bg-accent-foreground/10",
     text: "text-accent-foreground",
     desc: "text-accent-foreground/70",
     badge: "bg-accent-foreground/10 text-accent-foreground",
   },
   muted: {
-    card: "bg-card border-border hover:border-muted-foreground/30 hover:shadow-xl-muted",
+    card: "bg-card border-border hover:border-muted-foreground/30 hover:shadow-glow-muted",
     icon: "bg-muted",
     text: "text-foreground",
     desc: "text-muted-foreground",
