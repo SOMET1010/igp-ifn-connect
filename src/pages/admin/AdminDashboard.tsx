@@ -17,7 +17,8 @@ import {
   DollarSign,
   Activity,
   BarChart3,
-  FileText
+  FileText,
+  Mic
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -324,6 +325,16 @@ const AdminDashboard: React.FC = () => {
               </div>
               <h3 className="font-semibold text-sm">Rapports</h3>
               <p className="text-xs text-muted-foreground">Export</p>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/studio')}>
+            <CardContent className="p-3 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
+                <Mic className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Studio Audio</h3>
+              <p className="text-xs text-muted-foreground">Enregistrer</p>
             </CardContent>
           </Card>
         </div>
