@@ -10,12 +10,12 @@ import { BottomNav } from "@/components/shared/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, Wallet, Heart, User, Banknote, Smartphone, CreditCard } from "lucide-react";
+import { Home, Wallet, User, Banknote, Smartphone, CreditCard, History } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Accueil", href: "/marchand" },
+  { icon: History, label: "Historique", href: "/marchand/historique" },
   { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: Heart, label: "CMU", href: "/marchand/cmu" },
   { icon: User, label: "Profil", href: "/marchand/profil" },
 ];
 
@@ -98,14 +98,14 @@ export default function MerchantCashier() {
       // Create transaction
       const ref = `TXN-${Date.now().toString(36).toUpperCase()}`;
       
-      const { error } = await supabase.from("transactions").insert({
+      const { data: txData, error } = await supabase.from("transactions").insert({
         merchant_id: merchantData.id,
         amount: numericAmount,
         transaction_type: method,
         cmu_deduction: cmuDeduction,
         rsti_deduction: rstiDeduction,
         reference: ref,
-      });
+      }).select("id").single();
 
       if (error) {
         console.error("Transaction error:", error);
@@ -114,13 +114,34 @@ export default function MerchantCashier() {
         return;
       }
 
-      // Update merchant RSTI balance
+      // Update merchant RSTI balance (increment existing balance)
+      const { data: currentMerchant } = await supabase
+        .from("merchants")
+        .select("rsti_balance")
+        .eq("id", merchantData.id)
+        .single();
+
+      const currentBalance = Number(currentMerchant?.rsti_balance || 0);
+      
       await supabase
         .from("merchants")
         .update({ 
-          rsti_balance: supabase.rpc ? undefined : rstiDeduction 
+          rsti_balance: currentBalance + rstiDeduction 
         })
         .eq("id", merchantData.id);
+
+      // Create CMU payment entry linked to transaction
+      const now = new Date();
+      const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      await supabase.from("cmu_payments").insert({
+        merchant_id: merchantData.id,
+        amount: cmuDeduction,
+        period_start: periodStart.toISOString().split("T")[0],
+        period_end: periodEnd.toISOString().split("T")[0],
+        transaction_id: txData.id,
+      });
 
       setTransactionRef(ref);
       setStep("success");
@@ -333,12 +354,19 @@ export default function MerchantCashier() {
                 Nouvelle vente
               </Button>
               <Button
-                onClick={() => navigate("/marchand")}
-                className="flex-1 h-14 rounded-xl bg-secondary hover:bg-secondary/90"
+                variant="outline"
+                onClick={() => navigate("/marchand/historique")}
+                className="flex-1 h-14 rounded-xl"
               >
-                Accueil
+                Historique
               </Button>
             </div>
+            <Button
+              onClick={() => navigate("/marchand")}
+              className="w-full h-14 rounded-xl bg-secondary hover:bg-secondary/90 mt-3"
+            >
+              Accueil
+            </Button>
           </div>
         )}
       </main>

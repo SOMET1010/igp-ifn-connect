@@ -21,6 +21,7 @@ import MerchantDashboard from "./pages/merchant/MerchantDashboard";
 import MerchantCashier from "./pages/merchant/MerchantCashier";
 import MerchantCMU from "./pages/merchant/MerchantCMU";
 import MerchantProfile from "./pages/merchant/MerchantProfile";
+import MerchantTransactions from "./pages/merchant/MerchantTransactions";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
               <Route path="/marchand" element={<MerchantDashboard />} />
               <Route path="/marchand/encaisser" element={<MerchantCashier />} />
+              <Route path="/marchand/historique" element={<MerchantTransactions />} />
               <Route path="/marchand/cmu" element={<MerchantCMU />} />
               <Route path="/marchand/profil" element={<MerchantProfile />} />
             </Route>
