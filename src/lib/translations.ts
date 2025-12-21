@@ -47,6 +47,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "transactions": "transactions",
     "view_history": "Voir l'historique",
     "collect_payment": "Encaisser un paiement",
+    "sales_evolution": "Évolution des ventes",
     "stock_alerts": "Alertes de stock",
     "products_restock": "produits à réapprovisionner",
     "my_stock": "Mon Stock",

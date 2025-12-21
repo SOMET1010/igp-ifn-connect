@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Banknote, BarChart3 } from "lucide-react";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { ButtonPrimary, ButtonSecondary, BigNumber, StatusBanner, BottomNavIFN } from "@/components/ifn";
+import { SalesChart } from "@/components/merchant/SalesChart";
 
 interface MerchantData {
   full_name: string;
@@ -147,6 +148,9 @@ export default function MerchantDashboard() {
           <BarChart3 className="w-6 h-6 mr-2" />
           {t("your_money")}
         </ButtonSecondary>
+
+        {/* Sales Evolution Chart */}
+        <SalesChart />
 
         {/* Status Banner - Offline first */}
         <StatusBanner 
