@@ -1,25 +1,26 @@
-import { useState } from "react";
-import { Plus, Coins } from "lucide-react";
+import { useState, useRef } from "react";
+import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { playPrerecordedAudio, stopAudio } from "@/lib/audioService";
 
 interface CashDenominationPadProps {
   onAddAmount: (value: number) => void;
 }
 
-// CFA Bill colors matching real bills
+// CFA Bill colors matching real bills + audio keys
 const BILLS = [
-  { value: 500, bgColor: "bg-amber-100", textColor: "text-amber-900", borderColor: "border-amber-300", label: "500" },
-  { value: 1000, bgColor: "bg-blue-100", textColor: "text-blue-900", borderColor: "border-blue-300", label: "1 000" },
-  { value: 2000, bgColor: "bg-pink-100", textColor: "text-pink-900", borderColor: "border-pink-300", label: "2 000" },
-  { value: 5000, bgColor: "bg-green-100", textColor: "text-green-900", borderColor: "border-green-300", label: "5 000" },
+  { value: 500, bgColor: "bg-amber-100", textColor: "text-amber-900", borderColor: "border-amber-300", label: "500", audioKey: "bill_500" },
+  { value: 1000, bgColor: "bg-blue-100", textColor: "text-blue-900", borderColor: "border-blue-300", label: "1 000", audioKey: "bill_1000" },
+  { value: 2000, bgColor: "bg-pink-100", textColor: "text-pink-900", borderColor: "border-pink-300", label: "2 000", audioKey: "bill_2000" },
+  { value: 5000, bgColor: "bg-green-100", textColor: "text-green-900", borderColor: "border-green-300", label: "5 000", audioKey: "bill_5000" },
 ];
 
 const COINS = [
-  { value: 25, label: "25" },
-  { value: 50, label: "50" },
-  { value: 100, label: "100" },
-  { value: 200, label: "200" },
+  { value: 25, label: "25", audioKey: "coin_25" },
+  { value: 50, label: "50", audioKey: "coin_50" },
+  { value: 100, label: "100", audioKey: "coin_100" },
+  { value: 200, label: "200", audioKey: "coin_200" },
 ];
 
 // Multi-sensory feedback for denomination tap
@@ -70,14 +71,45 @@ function FloatingAmount({ value }: FloatingAmountProps) {
   );
 }
 
+// TTS fallback using Web Speech API
+const speakWithWebSpeech = (text: string, lang: string) => {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang === 'dioula' ? 'fr-FR' : 'fr-FR'; // Use French voice for both
+    utterance.rate = 0.9;
+    utterance.volume = 0.8;
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
 export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showCoins, setShowCoins] = useState(false);
   const [floatingAmounts, setFloatingAmounts] = useState<FloatingAmountProps[]>([]);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleDenominationClick = (value: number) => {
+  const playDenominationAudio = async (audioKey: string) => {
+    // Stop any currently playing audio
+    stopAudio(currentAudioRef.current);
+    
+    // Try pre-recorded audio first
+    const result = await playPrerecordedAudio(audioKey, language);
+    if (result.success && result.audio) {
+      currentAudioRef.current = result.audio;
+    } else {
+      // Fallback to Web Speech TTS with translated text
+      const text = t(audioKey);
+      speakWithWebSpeech(text, language);
+    }
+  };
+
+  const handleDenominationClick = (value: number, audioKey: string) => {
     triggerDenominationFeedback();
     onAddAmount(value);
+    
+    // Play audio feedback
+    playDenominationAudio(audioKey);
     
     // Add floating animation
     const id = `${Date.now()}-${value}`;
@@ -124,7 +156,7 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
                 transition-all duration-150 active:scale-90 hover:brightness-95
                 shadow-sm hover:shadow-md
               `}
-              onClick={() => handleDenominationClick(bill.value)}
+              onClick={() => handleDenominationClick(bill.value, bill.audioKey)}
             >
               {/* Floating amounts for this bill */}
               {floatingAmounts
@@ -174,7 +206,7 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
                   transition-all duration-150 active:scale-90
                   shadow-sm hover:shadow-md
                 "
-                onClick={() => handleDenominationClick(coin.value)}
+                onClick={() => handleDenominationClick(coin.value, coin.audioKey)}
               >
                 {/* Floating amounts for this coin */}
                 {floatingAmounts
