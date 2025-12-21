@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/shared/BottomNav";
+import { AudioButton } from "@/components/shared/AudioButton";
+import { Pictogram } from "@/components/shared/Pictogram";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Home, 
@@ -22,13 +25,6 @@ import {
   Leaf
 } from "lucide-react";
 
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Package, label: "Stock", href: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
-
 interface MerchantData {
   full_name: string;
   cmu_number: string;
@@ -39,6 +35,7 @@ interface MerchantData {
 export default function MerchantDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
@@ -46,11 +43,17 @@ export default function MerchantDashboard() {
   const [unpaidCredits, setUnpaidCredits] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const navItems = [
+    { icon: Home, label: t("home"), href: "/marchand" },
+    { icon: Package, label: t("stock"), href: "/marchand/stock" },
+    { icon: Wallet, label: t("collect"), href: "/marchand/encaisser" },
+    { icon: User, label: t("profile"), href: "/marchand/profil" },
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
 
-      // Fetch merchant data
       const { data: merchantData } = await supabase
         .from("merchants")
         .select("full_name, cmu_number, rsti_balance, activity_type")
@@ -60,7 +63,6 @@ export default function MerchantDashboard() {
       if (merchantData) {
         setMerchant(merchantData);
 
-        // Fetch today's transactions
         const today = new Date().toISOString().split("T")[0];
         const { data: merchantForTx } = await supabase
           .from("merchants")
@@ -81,7 +83,6 @@ export default function MerchantDashboard() {
             setTodayCount(transactions.length);
           }
 
-          // Fetch stock alerts
           const { data: stocksData } = await supabase
             .from("merchant_stocks")
             .select("quantity, min_threshold")
@@ -94,7 +95,6 @@ export default function MerchantDashboard() {
             setStockAlerts(alertsCount);
           }
 
-          // Fetch unpaid credits
           const { data: creditsData } = await supabase
             .from("customer_credits")
             .select("amount_owed, amount_paid")
@@ -116,6 +116,9 @@ export default function MerchantDashboard() {
     fetchData();
   }, [user]);
 
+  // Build audio text for the page
+  const pageAudioText = `${t("audio_dashboard")}: ${todayTotal.toLocaleString()} FCFA. ${todayCount} ${t("transactions")}.`;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -126,17 +129,24 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* Floating Audio Button */}
+      <AudioButton 
+        textToRead={pageAudioText}
+        className="fixed bottom-24 right-4 z-50"
+        size="lg"
+      />
+
       {/* Header */}
       <header className="bg-gradient-forest text-primary-foreground p-5">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-primary-foreground/20 flex items-center justify-center text-3xl">
-            💵
+          <div className="w-14 h-14 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+            <Pictogram type="money" size="lg" />
           </div>
           <div className="flex-1">
-            <p className="text-sm text-primary-foreground/80">Bienvenue,</p>
-            <h1 className="text-xl font-bold">{merchant?.full_name || "Marchand"}</h1>
+            <p className="text-sm text-primary-foreground/80">{t("welcome")},</p>
+            <h1 className="text-xl font-bold">{merchant?.full_name || t("merchant")}</h1>
             <p className="text-sm text-primary-foreground/70">
-              {merchant?.activity_type || "Commerce"}
+              {merchant?.activity_type || t("commerce")}
             </p>
           </div>
         </div>
@@ -151,12 +161,12 @@ export default function MerchantDashboard() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Ventes du jour</p>
+                <p className="text-sm text-muted-foreground">{t("daily_sales")}</p>
                 <p className="text-3xl font-bold text-foreground mt-1">
                   {todayTotal.toLocaleString()} <span className="text-lg">FCFA</span>
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {todayCount} transaction{todayCount !== 1 ? "s" : ""} • Voir l'historique →
+                  {todayCount} {t("transactions")} • {t("view_history")} →
                 </p>
               </div>
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -172,7 +182,7 @@ export default function MerchantDashboard() {
           className="w-full h-20 text-xl font-bold rounded-2xl bg-secondary hover:bg-secondary/90 shadow-forest pulse-glow"
         >
           <Banknote className="w-8 h-8 mr-3" />
-          Encaisser un paiement
+          {t("collect_payment")}
         </Button>
 
         {/* Stock Alert Card */}
@@ -186,9 +196,9 @@ export default function MerchantDashboard() {
                 <AlertTriangle className="w-6 h-6 text-destructive" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-foreground">Alertes de stock</h3>
+                <h3 className="font-bold text-foreground">{t("stock_alerts")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {stockAlerts} produit{stockAlerts !== 1 ? "s" : ""} à réapprovisionner
+                  {stockAlerts} {t("products_restock")}
                 </p>
               </div>
               <ArrowRight className="w-5 h-5 text-muted-foreground" />
@@ -207,12 +217,12 @@ export default function MerchantDashboard() {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                 <Package className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-bold text-foreground">Mon Stock</h3>
+              <h3 className="font-bold text-foreground">{t("my_stock")}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Gérer mes produits
+                {t("manage_products")}
               </p>
               <div className="flex items-center text-primary text-sm mt-2 font-medium">
-                Gérer <ArrowRight className="w-4 h-4 ml-1" />
+                {t("manage")} <ArrowRight className="w-4 h-4 ml-1" />
               </div>
             </CardContent>
           </Card>
@@ -223,11 +233,11 @@ export default function MerchantDashboard() {
               <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-3">
                 <Wallet className="w-6 h-6 text-secondary" />
               </div>
-              <h3 className="font-bold text-foreground">Solde RSTI</h3>
+              <h3 className="font-bold text-foreground">{t("rsti_balance")}</h3>
               <p className="text-2xl font-bold text-secondary mt-1">
                 {(merchant?.rsti_balance || 0).toLocaleString()}
               </p>
-              <p className="text-xs text-muted-foreground">FCFA disponibles</p>
+              <p className="text-xs text-muted-foreground">FCFA {t("available")}</p>
             </CardContent>
           </Card>
         </div>
@@ -242,8 +252,8 @@ export default function MerchantDashboard() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 flex items-center justify-center mb-2">
                 <CreditCard className="w-5 h-5 text-amber-600" />
               </div>
-              <h3 className="font-semibold text-sm">Crédits</h3>
-              <p className="text-xs text-muted-foreground">Clients</p>
+              <h3 className="font-semibold text-sm">{t("credits")}</h3>
+              <p className="text-xs text-muted-foreground">{t("customers")}</p>
               {unpaidCredits > 0 && (
                 <p className="text-xs text-amber-600 font-medium mt-1">
                   {unpaidCredits.toLocaleString()} FCFA
@@ -260,8 +270,8 @@ export default function MerchantDashboard() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-blue-500/10 flex items-center justify-center mb-2">
                 <QrCode className="w-5 h-5 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-sm">Scanner</h3>
-              <p className="text-xs text-muted-foreground">Code-barres</p>
+              <h3 className="font-semibold text-sm">{t("scanner")}</h3>
+              <p className="text-xs text-muted-foreground">{t("barcode")}</p>
             </CardContent>
           </Card>
 
@@ -273,8 +283,8 @@ export default function MerchantDashboard() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-pink-500/10 flex items-center justify-center mb-2">
                 <Gift className="w-5 h-5 text-pink-600" />
               </div>
-              <h3 className="font-semibold text-sm">Promos</h3>
-              <p className="text-xs text-muted-foreground">Campagnes</p>
+              <h3 className="font-semibold text-sm">{t("promotions")}</h3>
+              <p className="text-xs text-muted-foreground">{t("campaigns")}</p>
             </CardContent>
           </Card>
 
@@ -287,8 +297,8 @@ export default function MerchantDashboard() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-green-500/10 flex items-center justify-center mb-2">
                 <Leaf className="w-5 h-5 text-green-600" />
               </div>
-              <h3 className="font-semibold text-sm">Fournisseurs</h3>
-              <p className="text-xs text-muted-foreground">Coopératives IGP</p>
+              <h3 className="font-semibold text-sm">{t("suppliers")}</h3>
+              <p className="text-xs text-muted-foreground">{t("igp_cooperatives")}</p>
             </CardContent>
           </Card>
         </div>
@@ -303,8 +313,8 @@ export default function MerchantDashboard() {
               <Shield className="w-6 h-6 text-red-500" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-foreground">Protection CMU</h3>
-              <p className="text-xs text-muted-foreground">Cotisation & avantages</p>
+              <h3 className="font-bold text-foreground">{t("cmu_protection")}</h3>
+              <p className="text-xs text-muted-foreground">{t("contribution_benefits")}</p>
             </div>
             <ArrowRight className="w-5 h-5 text-muted-foreground" />
           </CardContent>
@@ -315,14 +325,14 @@ export default function MerchantDashboard() {
           <Card className="bg-muted/30">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                <span className="text-2xl">🏥</span>
+                <Pictogram type="health" size="md" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Numéro CMU</p>
+                <p className="text-sm text-muted-foreground">{t("cmu_number")}</p>
                 <p className="font-bold text-foreground">{merchant.cmu_number}</p>
               </div>
               <div className="text-secondary text-sm font-medium">
-                Actif ✓
+                {t("active")} ✓
               </div>
             </CardContent>
           </Card>
@@ -332,11 +342,10 @@ export default function MerchantDashboard() {
         <Card className="bg-accent/10 border-accent/20">
           <CardContent className="p-4">
             <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              💡 Astuce du jour
+              💡 {t("daily_tip")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Chaque vente que vous enregistrez contribue à votre protection sociale CMU. 
-              Plus vous vendez, plus vous êtes protégé !
+              {t("tip_text")}
             </p>
           </CardContent>
         </Card>
