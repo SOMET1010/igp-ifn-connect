@@ -147,6 +147,7 @@ export default {
         "bounce-gentle": "bounce-gentle 2s infinite",
         "pulse-ring": "pulse-ring 1.5s infinite",
         "slide-up": "slide-up 0.4s ease-out forwards",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       boxShadow: {
         "africa": "0 10px 40px -10px hsl(var(--orange) / 0.3)",

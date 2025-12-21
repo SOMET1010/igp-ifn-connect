@@ -19,11 +19,11 @@ export function HeroOverlay({
     <div className={cn("relative min-h-screen overflow-hidden", className)}>
       {/* Image de fond ou fallback gradient */}
       <div className="absolute inset-0">
-        {showImage ? (
+      {showImage ? (
           <img
             src={backgroundImage}
             alt="Marché ivoirien"
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full blur-[2px] scale-105"
             onError={() => setImageError(true)}
           />
         ) : (
@@ -31,11 +31,8 @@ export function HeroOverlay({
         )}
       </div>
 
-      {/* Overlay sombre dégradé */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/75" />
-      
-      {/* Léger blur pour lisibilité */}
-      <div className="absolute inset-0 backdrop-blur-[1px]" />
+      {/* Overlay sombre uniforme */}
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Contenu */}
       <div className="relative z-10">{children}</div>

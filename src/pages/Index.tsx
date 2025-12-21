@@ -18,7 +18,7 @@ const roles: RoleCard[] = [
   {
     emoji: "💵",
     title: "Je suis Marchand",
-    description: "Encaisser et vendre en toute sécurité",
+    description: "Encaisser et vendre sans souci",
     href: "/marchand",
     variant: "primary",
     size: "large",
@@ -27,7 +27,7 @@ const roles: RoleCard[] = [
   {
     emoji: "👥",
     title: "Je suis Agent terrain",
-    description: "Enrôler et accompagner les marchands",
+    description: "Aider les marchands",
     href: "/agent",
     variant: "secondary",
     size: "normal",
@@ -35,7 +35,7 @@ const roles: RoleCard[] = [
   {
     emoji: "📦",
     title: "Je suis Coopérative",
-    description: "Gérer les stocks et commandes",
+    description: "Gérer stock et livraisons",
     href: "/cooperative",
     variant: "tertiary",
     size: "normal",
@@ -86,13 +86,13 @@ const variantStyles = {
 };
 
 const sizeStyles = {
-  large: "min-h-[140px] p-6",
+  large: "min-h-[140px] p-6 shadow-lg",
   normal: "min-h-[100px] p-5",
-  small: "min-h-[88px] p-4",
+  small: "min-h-[80px] p-4",
 };
 
 const iconSizes = {
-  large: "w-14 h-14 text-4xl",
+  large: "w-16 h-16 text-4xl",
   normal: "w-12 h-12 text-3xl",
   small: "w-10 h-10 text-2xl",
 };
@@ -113,26 +113,27 @@ const Index = () => {
             <div className="text-4xl mb-3">🌍</div>
             <h1 className="text-2xl md:text-3xl font-bold text-white">Plateforme IFN</h1>
             <p className="text-sm text-white/80 mt-2">
-              Inclusion Financière Numérique
+              Pour les marchands du vivrier
             </p>
           </div>
         </header>
 
         {/* Question principale */}
-        <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-white mb-2">
+        <main className="flex-1 max-w-lg mx-auto w-full px-4 py-6">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold text-white mb-1">
               Qui êtes-vous ?
             </h2>
-            <p className="text-white/70">
+            <p className="text-white/70 text-sm">
               Choisissez votre accès pour continuer
             </p>
           </div>
 
         {/* Cartes de rôles */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {roles.map((role, index) => {
             const styles = variantStyles[role.variant];
+            const isPrimary = role.variant === "primary";
             return (
               <Link
                 key={role.href}
@@ -143,6 +144,7 @@ const Index = () => {
                   "hover:scale-[1.02] hover:-translate-y-1 active:scale-[0.97]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   "opacity-0 animate-slide-up",
+                  isPrimary && "animate-pulse-slow",
                   styles.card,
                   sizeStyles[role.size]
                 )}
@@ -194,10 +196,10 @@ const Index = () => {
         </div>
 
           {/* Aide rassurante */}
-          <div className="text-center text-sm text-white/60 mt-8 px-4">
+          <div className="text-center text-sm text-white/60 mt-6 px-4">
             <p className="flex items-center justify-center gap-2">
               <span>❓</span>
-              <span>Vous hésitez ? Demandez à votre agent ou à votre coopérative.</span>
+              <span>Tu hésites ? Demande à ton agent ou ta coopérative.</span>
             </p>
           </div>
         </main>
