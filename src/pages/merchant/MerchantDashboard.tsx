@@ -18,7 +18,8 @@ import {
   AlertTriangle,
   CreditCard,
   QrCode,
-  Gift
+  Gift,
+  Leaf
 } from "lucide-react";
 
 const navItems = [
@@ -232,7 +233,7 @@ export default function MerchantDashboard() {
         </div>
 
         {/* Nouvelles fonctionnalités Phase 1 */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all"
             onClick={() => navigate("/marchand/credits")}
@@ -274,6 +275,20 @@ export default function MerchantDashboard() {
               </div>
               <h3 className="font-semibold text-sm">Promos</h3>
               <p className="text-xs text-muted-foreground">Campagnes</p>
+            </CardContent>
+          </Card>
+
+          {/* Fournisseurs IGP */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all border-green-200 bg-green-50/50"
+            onClick={() => navigate("/marchand/fournisseurs")}
+          >
+            <CardContent className="p-3 text-center">
+              <div className="w-10 h-10 mx-auto rounded-xl bg-green-500/10 flex items-center justify-center mb-2">
+                <Leaf className="w-5 h-5 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Fournisseurs</h3>
+              <p className="text-xs text-muted-foreground">Coopératives IGP</p>
             </CardContent>
           </Card>
         </div>
