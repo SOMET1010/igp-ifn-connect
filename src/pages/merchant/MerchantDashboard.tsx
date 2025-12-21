@@ -8,19 +8,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   Home, 
   Wallet, 
-  Heart, 
   User,
   Banknote,
   TrendingUp,
   Shield,
   ArrowRight,
-  Loader2
+  Loader2,
+  History
 } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Accueil", href: "/marchand" },
+  { icon: History, label: "Historique", href: "/marchand/historique" },
   { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: Heart, label: "CMU", href: "/marchand/cmu" },
   { icon: User, label: "Profil", href: "/marchand/profil" },
 ];
 
@@ -36,6 +36,7 @@ export default function MerchantDashboard() {
   const { user } = useAuth();
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
+  const [todayCount, setTodayCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -54,14 +55,24 @@ export default function MerchantDashboard() {
 
         // Fetch today's transactions
         const today = new Date().toISOString().split("T")[0];
-        const { data: transactions } = await supabase
-          .from("transactions")
-          .select("amount")
-          .gte("created_at", today);
+        const { data: merchantForTx } = await supabase
+          .from("merchants")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-        if (transactions) {
-          const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
-          setTodayTotal(total);
+        if (merchantForTx) {
+          const { data: transactions } = await supabase
+            .from("transactions")
+            .select("amount")
+            .eq("merchant_id", merchantForTx.id)
+            .gte("created_at", today);
+
+          if (transactions) {
+            const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+            setTodayTotal(total);
+            setTodayCount(transactions.length);
+          }
         }
       }
 
@@ -99,13 +110,19 @@ export default function MerchantDashboard() {
 
       <main className="p-4 space-y-5">
         {/* Solde du jour */}
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card 
+          className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 cursor-pointer hover:shadow-lg transition-all"
+          onClick={() => navigate("/marchand/historique")}
+        >
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Ventes du jour</p>
                 <p className="text-3xl font-bold text-foreground mt-1">
                   {todayTotal.toLocaleString()} <span className="text-lg">FCFA</span>
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {todayCount} transaction{todayCount !== 1 ? "s" : ""} • Voir l'historique →
                 </p>
               </div>
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
