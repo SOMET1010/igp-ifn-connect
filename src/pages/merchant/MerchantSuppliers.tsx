@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { BottomNav } from "@/components/shared/BottomNav";
+import { CategoryCarousel } from "@/components/market/CategoryCarousel";
+import { ProductGrid, type Product, type ProductOffer } from "@/components/market/ProductGrid";
+import { PriceCompareSheet } from "@/components/market/PriceCompareSheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { calculateDistance } from "@/lib/geoUtils";
 import { 
   ArrowLeft, Search, ShoppingCart, Package, Truck, 
-  CheckCircle, XCircle, Clock, MapPin, Plus, Minus,
+  CheckCircle, XCircle, Clock, Plus, Minus, Trash2,
   Home, CreditCard, Store, User, Leaf
 } from "lucide-react";
 
@@ -31,28 +34,6 @@ interface CartItem {
   maxQuantity: number;
 }
 
-interface StockWithProduct {
-  id: string;
-  quantity: number;
-  unit_price: number;
-  cooperative_id: string;
-  product_id: string;
-  products: {
-    id: string;
-    name: string;
-    unit: string;
-    is_igp: boolean;
-  };
-}
-
-interface Cooperative {
-  id: string;
-  name: string;
-  region: string;
-  commune: string;
-  igp_certified: boolean;
-}
-
 interface Order {
   id: string;
   quantity: number;
@@ -64,6 +45,23 @@ interface Order {
   notes: string | null;
   cooperatives: { name: string };
   products: { name: string; unit: string };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon?: string | null;
+  color?: string | null;
+}
+
+interface Cooperative {
+  id: string;
+  name: string;
+  region: string;
+  commune: string;
+  igp_certified: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const navItems = [
@@ -81,27 +79,46 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   cancelled: { label: 'Annulée', color: 'bg-red-500', icon: XCircle },
 };
 
-const REGIONS = ['Toutes', 'Abidjan', 'Korhogo', 'Bouaké', 'San-Pédro', 'Yamoussoukro', 'Daloa'];
-
 export default function MerchantSuppliers() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<string>('catalogue');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [cooperatives, setCooperatives] = useState<Cooperative[]>([]);
-  const [stocks, setStocks] = useState<Record<string, StockWithProduct[]>>({});
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [merchantId, setMerchantId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('Toutes');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Get user location on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Default to Abidjan if location not available
+          setUserLocation({ lat: 5.3599517, lng: -4.0082563 });
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -113,7 +130,7 @@ export default function MerchantSuppliers() {
     if (merchantId) {
       fetchData();
     }
-  }, [merchantId]);
+  }, [merchantId, userLocation]);
 
   const fetchMerchantId = async () => {
     const { data } = await supabase
@@ -129,41 +146,81 @@ export default function MerchantSuppliers() {
 
   const fetchData = async () => {
     setLoading(true);
-    await Promise.all([fetchCooperativesAndStocks(), fetchOrders()]);
+    await Promise.all([fetchCategoriesAndProducts(), fetchOrders()]);
     setLoading(false);
   };
 
-  const fetchCooperativesAndStocks = async () => {
-    // Fetch IGP cooperatives
+  const fetchCategoriesAndProducts = async () => {
+    // Fetch categories
+    const { data: categoriesData } = await supabase
+      .from('product_categories')
+      .select('id, name, icon, color');
+    
+    if (categoriesData) {
+      setCategories(categoriesData);
+    }
+
+    // Fetch cooperatives with location
     const { data: coopsData } = await supabase
       .from('cooperatives')
-      .select('id, name, region, commune, igp_certified')
+      .select('id, name, region, commune, igp_certified, latitude, longitude')
       .eq('igp_certified', true);
 
     if (coopsData) {
       setCooperatives(coopsData);
-      
-      // Fetch stocks for all cooperatives
-      const { data: stocksData } = await supabase
-        .from('stocks')
-        .select(`
-          id, quantity, unit_price, cooperative_id, product_id,
-          products (id, name, unit, is_igp)
-        `)
-        .in('cooperative_id', coopsData.map(c => c.id))
-        .gt('quantity', 0);
+    }
 
-      if (stocksData) {
-        // Group stocks by cooperative
-        const stocksByCooperative: Record<string, StockWithProduct[]> = {};
-        stocksData.forEach((stock: any) => {
-          if (!stocksByCooperative[stock.cooperative_id]) {
-            stocksByCooperative[stock.cooperative_id] = [];
-          }
-          stocksByCooperative[stock.cooperative_id].push(stock);
+    // Fetch all products with stocks
+    const { data: productsData } = await supabase
+      .from('products')
+      .select(`
+        id, name, unit, is_igp, image_url, category_id,
+        stocks (
+          id, quantity, unit_price, cooperative_id
+        )
+      `)
+      .gt('stocks.quantity', 0);
+
+    if (productsData && coopsData) {
+      // Transform products with offers
+      const transformedProducts: Product[] = productsData
+        .filter((p: any) => p.stocks && p.stocks.length > 0)
+        .map((p: any) => {
+          const offers: ProductOffer[] = p.stocks.map((stock: any) => {
+            const coop = coopsData.find(c => c.id === stock.cooperative_id);
+            let distance: number | undefined;
+            
+            if (userLocation && coop?.latitude && coop?.longitude) {
+              distance = calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                Number(coop.latitude),
+                Number(coop.longitude)
+              );
+            }
+
+            return {
+              stockId: stock.id,
+              cooperativeId: stock.cooperative_id,
+              cooperativeName: coop?.name || 'Coopérative',
+              price: stock.unit_price || 0,
+              quantity: stock.quantity,
+              distance,
+            };
+          });
+
+          return {
+            id: p.id,
+            name: p.name,
+            unit: p.unit,
+            isIgp: p.is_igp,
+            imageUrl: p.image_url,
+            categoryId: p.category_id,
+            offers,
+          };
         });
-        setStocks(stocksByCooperative);
-      }
+
+      setProducts(transformedProducts);
     }
   };
 
@@ -185,31 +242,32 @@ export default function MerchantSuppliers() {
     }
   };
 
-  const addToCart = (cooperative: Cooperative, stock: StockWithProduct, quantity: number) => {
-    const existingIndex = cart.findIndex(
-      item => item.stockId === stock.id
-    );
+  const addToCart = (offer: ProductOffer, quantity: number) => {
+    const product = selectedProduct;
+    if (!product) return;
+
+    const existingIndex = cart.findIndex(item => item.stockId === offer.stockId);
 
     if (existingIndex >= 0) {
       const newCart = [...cart];
-      const newQty = Math.min(newCart[existingIndex].quantity + quantity, stock.quantity);
+      const newQty = Math.min(newCart[existingIndex].quantity + quantity, offer.quantity);
       newCart[existingIndex].quantity = newQty;
       setCart(newCart);
     } else {
       setCart([...cart, {
-        cooperativeId: cooperative.id,
-        cooperativeName: cooperative.name,
-        productId: stock.product_id,
-        productName: stock.products.name,
-        quantity: Math.min(quantity, stock.quantity),
-        unitPrice: stock.unit_price || 0,
-        unit: stock.products.unit,
-        stockId: stock.id,
-        maxQuantity: stock.quantity,
+        cooperativeId: offer.cooperativeId,
+        cooperativeName: offer.cooperativeName,
+        productId: product.id,
+        productName: product.name,
+        quantity: Math.min(quantity, offer.quantity),
+        unitPrice: offer.price,
+        unit: product.unit,
+        stockId: offer.stockId,
+        maxQuantity: offer.quantity,
       }]);
     }
     
-    toast.success(`${stock.products.name} ajouté au panier`);
+    toast.success(`${product.name} ajouté au panier`);
   };
 
   const updateCartQuantity = (stockId: string, delta: number) => {
@@ -262,6 +320,11 @@ export default function MerchantSuppliers() {
 
       await Promise.all(orderPromises);
       
+      // Success feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100, 50, 200]);
+      }
+      
       toast.success('Commandes passées avec succès !');
       setCart([]);
       setShowOrderModal(false);
@@ -289,12 +352,18 @@ export default function MerchantSuppliers() {
     }
   };
 
-  const filteredCooperatives = cooperatives.filter(coop => {
-    const matchesSearch = coop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      stocks[coop.id]?.some(s => s.products.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesRegion = selectedRegion === 'Toutes' || coop.region === selectedRegion;
-    return matchesSearch && matchesRegion;
+  // Filter products
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = !selectedCategory || product.categoryId === selectedCategory;
+    return matchesSearch && matchesCategory;
   });
+
+  // Count products per category
+  const categoriesWithCount = categories.map(cat => ({
+    ...cat,
+    productCount: products.filter(p => p.categoryId === cat.id).length
+  }));
 
   if (loading) {
     return (
@@ -320,25 +389,25 @@ export default function MerchantSuppliers() {
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
               <Leaf className="h-5 w-5" />
-              Fournisseurs IGP
+              Marché Virtuel IGP
             </h1>
-            <p className="text-sm text-white/80">Commandez directement aux coopératives</p>
+            <p className="text-sm text-white/80">Commandez en 3 clics</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="p-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="catalogue" className="flex items-center gap-2">
-            <Package className="h-4 w-4" />
+        <TabsList className="grid w-full grid-cols-2 h-14">
+          <TabsTrigger value="catalogue" className="flex items-center gap-2 text-base">
+            <span className="text-2xl">🛒</span>
             Catalogue
           </TabsTrigger>
-          <TabsTrigger value="commandes" className="flex items-center gap-2">
-            <Truck className="h-4 w-4" />
-            Mes commandes
+          <TabsTrigger value="commandes" className="flex items-center gap-2 text-base">
+            <span className="text-2xl">📦</span>
+            Commandes
             {orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length > 0 && (
-              <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+              <Badge variant="destructive" className="ml-1 h-5 min-w-5 p-0 flex items-center justify-center text-xs">
                 {orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length}
               </Badge>
             )}
@@ -347,96 +416,39 @@ export default function MerchantSuppliers() {
 
         {/* Catalogue Tab */}
         <TabsContent value="catalogue" className="mt-4 space-y-4">
-          {/* Search and Filter */}
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {REGIONS.map(region => (
-                  <SelectItem key={region} value={region}>{region}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Category Carousel */}
+          <CategoryCarousel
+            categories={categoriesWithCount}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              placeholder="🔍 Rechercher un produit..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-12 text-base rounded-xl"
+            />
           </div>
 
-          {/* Cooperatives List */}
-          {filteredCooperatives.length === 0 ? (
-            <Card className="p-8 text-center">
-              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">Aucune coopérative trouvée</p>
-            </Card>
-          ) : (
-            filteredCooperatives.map(coop => (
-              <Card key={coop.id} className="overflow-hidden">
-                <CardHeader className="pb-2 bg-muted/30">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        {coop.name}
-                        {coop.igp_certified && (
-                          <Badge className="bg-green-600 text-white text-xs">
-                            <Leaf className="h-3 w-3 mr-1" />
-                            IGP
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3" />
-                        {coop.commune}, {coop.region}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-3">
-                  {stocks[coop.id]?.length > 0 ? (
-                    <div className="space-y-3">
-                      {stocks[coop.id].map(stock => (
-                        <div key={stock.id} className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{stock.products.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {stock.quantity} {stock.products.unit} disponibles • {(stock.unit_price || 0).toLocaleString()} FCFA/{stock.products.unit}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            onClick={() => addToCart(coop, stock, 1)}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Ajouter
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Aucun stock disponible
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
+          {/* Product Grid */}
+          <ProductGrid
+            products={filteredProducts}
+            onSelectProduct={setSelectedProduct}
+          />
         </TabsContent>
 
         {/* Orders Tab */}
         <TabsContent value="commandes" className="mt-4 space-y-4">
           {orders.length === 0 ? (
             <Card className="p-8 text-center">
-              <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">Aucune commande passée</p>
+              <div className="w-20 h-20 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
+                <Truck className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground font-medium">Aucune commande passée</p>
               <Button 
                 variant="link" 
                 onClick={() => setActiveTab('catalogue')}
@@ -455,8 +467,8 @@ export default function MerchantSuppliers() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="font-semibold text-sm">{order.products.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="font-semibold">{order.products.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {order.cooperatives.name}
                         </p>
                       </div>
@@ -470,34 +482,26 @@ export default function MerchantSuppliers() {
                       <span className="text-muted-foreground">
                         {order.quantity} {order.products.unit}
                       </span>
-                      <span className="font-semibold">
+                      <span className="font-bold text-lg">
                         {order.total_amount.toLocaleString()} FCFA
                       </span>
                     </div>
                     
-                    <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-                      <span>
-                        Passée le {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                    <div className="flex justify-between items-center mt-3">
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(order.created_at).toLocaleDateString('fr-FR')}
                       </span>
-                      {order.delivery_date && (
-                        <span className="flex items-center gap-1">
-                          <Truck className="h-3 w-3" />
-                          Livraison: {new Date(order.delivery_date).toLocaleDateString('fr-FR')}
-                        </span>
+                      {order.status === 'pending' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => cancelOrder(order.id)}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Annuler
+                        </Button>
                       )}
                     </div>
-                    
-                    {order.status === 'pending' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-3 text-destructive border-destructive hover:bg-destructive/10"
-                        onClick={() => cancelOrder(order.id)}
-                      >
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Annuler la commande
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -508,59 +512,65 @@ export default function MerchantSuppliers() {
 
       {/* Floating Cart */}
       {cart.length > 0 && (
-        <div className="fixed bottom-20 left-4 right-4 bg-card border rounded-xl shadow-lg p-4 animate-fade-in">
+        <div className="fixed bottom-20 left-4 right-4 bg-card border-2 border-primary rounded-2xl shadow-2xl p-4 z-40">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-primary" />
-              <span className="font-semibold">{cart.length} article(s)</span>
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold">Mon panier</p>
+                <p className="text-xs text-muted-foreground">{cart.length} article{cart.length > 1 ? 's' : ''}</p>
+              </div>
             </div>
-            <span className="font-bold text-lg">{cartTotal.toLocaleString()} FCFA</span>
+            <p className="text-xl font-bold text-primary">{cartTotal.toLocaleString()} F</p>
           </div>
-          
-          {/* Cart Items Preview */}
+
+          {/* Cart Items (collapsed view) */}
           <div className="max-h-32 overflow-y-auto space-y-2 mb-3">
             {cart.map(item => (
-              <div key={item.stockId} className="flex items-center justify-between text-sm bg-muted/50 rounded p-2">
-                <div className="flex-1">
-                  <p className="font-medium">{item.productName}</p>
+              <div key={item.stockId} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{item.productName}</p>
                   <p className="text-xs text-muted-foreground">{item.cooperativeName}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-6 w-6"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => updateCartQuantity(item.stockId, -1)}
                   >
                     <Minus className="h-3 w-3" />
                   </Button>
-                  <span className="w-8 text-center">{item.quantity}</span>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-6 w-6"
+                  <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
                     onClick={() => updateCartQuantity(item.stockId, 1)}
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 text-destructive"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-destructive"
                     onClick={() => removeFromCart(item.stockId)}
                   >
-                    <XCircle className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
-          
+
+          {/* Validate Button */}
           <Button 
-            className="w-full bg-green-600 hover:bg-green-700" 
+            className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 rounded-xl"
             onClick={() => setShowOrderModal(true)}
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
+            <CheckCircle className="h-5 w-5 mr-2" />
             Valider la commande
           </Button>
         </div>
@@ -568,61 +578,98 @@ export default function MerchantSuppliers() {
 
       {/* Order Confirmation Modal */}
       <Dialog open={showOrderModal} onOpenChange={setShowOrderModal}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmer votre commande</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <span className="text-3xl">📦</span>
+              Confirmer la commande
+            </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <p className="text-sm font-medium mb-2">Récapitulatif</p>
+          <div className="space-y-4">
+            {/* Order Summary */}
+            <div className="p-4 bg-muted rounded-xl">
+              <p className="font-medium mb-2">Récapitulatif</p>
               {cart.map(item => (
                 <div key={item.stockId} className="flex justify-between text-sm py-1">
-                  <span>{item.quantity} × {item.productName}</span>
-                  <span>{(item.quantity * item.unitPrice).toLocaleString()} FCFA</span>
+                  <span>{item.quantity} {item.unit} {item.productName}</span>
+                  <span className="font-medium">{(item.quantity * item.unitPrice).toLocaleString()} F</span>
                 </div>
               ))}
-              <div className="border-t mt-2 pt-2 flex justify-between font-semibold">
+              <div className="border-t mt-2 pt-2 flex justify-between font-bold">
                 <span>Total</span>
-                <span>{cartTotal.toLocaleString()} FCFA</span>
+                <span className="text-primary text-lg">{cartTotal.toLocaleString()} FCFA</span>
               </div>
             </div>
-            
+
+            {/* Delivery Date */}
             <div className="space-y-2">
-              <Label>Date de livraison souhaitée</Label>
+              <Label className="flex items-center gap-2">
+                <span className="text-xl">📅</span>
+                Date de livraison souhaitée
+              </Label>
               <Input
                 type="date"
                 value={deliveryDate}
                 onChange={(e) => setDeliveryDate(e.target.value)}
+                className="h-12 text-base"
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
-            
+
+            {/* Notes */}
             <div className="space-y-2">
-              <Label>Notes pour le fournisseur (optionnel)</Label>
+              <Label className="flex items-center gap-2">
+                <span className="text-xl">📝</span>
+                Notes (optionnel)
+              </Label>
               <Textarea
-                placeholder="Instructions particulières..."
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="Instructions de livraison..."
+                className="min-h-[80px]"
               />
             </div>
           </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOrderModal(false)}>
-              Annuler
-            </Button>
-            <Button 
-              className="bg-green-600 hover:bg-green-700"
+
+          <DialogFooter className="flex-col gap-2 sm:flex-col">
+            <Button
               onClick={submitOrders}
               disabled={submitting}
+              className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700"
             >
-              {submitting ? 'Envoi...' : 'Confirmer la commande'}
+              {submitting ? (
+                <>
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+                  Envoi en cours...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Confirmer ({cartTotal.toLocaleString()} FCFA)
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowOrderModal(false)}
+              className="w-full"
+            >
+              Annuler
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Product Detail Sheet */}
+      <PriceCompareSheet
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={addToCart}
+      />
+
+      {/* Bottom Nav */}
       <BottomNav items={navItems} />
     </div>
   );
