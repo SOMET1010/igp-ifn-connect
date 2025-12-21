@@ -6,8 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { DemoBanner } from "@/components/shared/DemoBanner";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import DemoAccess from "./pages/DemoAccess";
 
 // Agent pages
 import AgentLogin from "./pages/agent/AgentLogin";
@@ -55,11 +57,13 @@ const App = () => (
     <LanguageProvider>
       <AuthProvider>
         <TooltipProvider>
+          <DemoBanner />
           <Toaster />
           <Sonner />
           <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/demo" element={<DemoAccess />} />
             <Route path="/accueil" element={<Navigate to="/" replace />} />
             
             {/* Agent Routes */}

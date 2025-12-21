@@ -258,8 +258,18 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Lien vers démo */}
+          <div className="text-center mt-6">
+            <Link 
+              to="/demo" 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white/90 text-sm transition-all"
+            >
+              🧪 Mode démonstration
+            </Link>
+          </div>
+
           {/* Aide rassurante */}
-          <div className="text-center text-sm text-white/60 mt-6 px-4">
+          <div className="text-center text-sm text-white/60 mt-4 px-4">
             <p className="flex items-center justify-center gap-2">
               <span>❓</span>
               <span>{t('help_text')}</span>
