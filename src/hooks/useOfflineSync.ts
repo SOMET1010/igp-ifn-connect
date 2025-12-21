@@ -12,6 +12,55 @@ interface OfflineData {
 }
 
 const STORAGE_KEY = "igp_offline_queue";
+const PHOTO_BUCKET = "merchant-photos";
+
+// Convert base64 to Blob
+const base64ToBlob = (base64: string): Blob => {
+  const parts = base64.split(",");
+  const contentType = parts[0]?.match(/:(.*?);/)?.[1] || "image/jpeg";
+  const byteCharacters = atob(parts[1] || parts[0]);
+  const byteNumbers = new Array(byteCharacters.length);
+  
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
+};
+
+// Upload photo to storage and return public URL
+const uploadPhotoToStorage = async (
+  base64: string,
+  merchantId: string,
+  type: "cmu" | "location"
+): Promise<string | null> => {
+  try {
+    const blob = base64ToBlob(base64);
+    const fileName = `${merchantId}/${type}_${Date.now()}.jpg`;
+
+    const { data, error } = await supabase.storage
+      .from(PHOTO_BUCKET)
+      .upload(fileName, blob, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Photo upload error:", error);
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from(PHOTO_BUCKET)
+      .getPublicUrl(data.path);
+
+    return urlData.publicUrl;
+  } catch (err) {
+    console.error("Photo upload failed:", err);
+    return null;
+  }
+};
 
 export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -68,18 +117,71 @@ export function useOfflineSync() {
 
     for (const item of queue) {
       try {
-        if (userId) {
-          await supabase.from("offline_sync").insert({
-            user_id: userId,
-            entity_type: item.entity_type,
-            entity_id: item.entity_id,
-            action: item.action,
-            data: item.data,
-            synced: true,
-            synced_at: new Date().toISOString(),
+        // Handle merchant insertions with photo uploads
+        if (item.entity_type === "merchants" && item.action === "insert") {
+          const merchantData = { ...item.data };
+          const merchantId = merchantData.id || item.entity_id;
+
+          // Upload CMU photo if it's base64
+          if (merchantData.cmu_photo_base64?.startsWith("data:")) {
+            const url = await uploadPhotoToStorage(
+              merchantData.cmu_photo_base64,
+              merchantId,
+              "cmu"
+            );
+            merchantData.cmu_photo_url = url;
+            delete merchantData.cmu_photo_base64;
+          }
+
+          // Upload location photo if it's base64
+          if (merchantData.location_photo_base64?.startsWith("data:")) {
+            const url = await uploadPhotoToStorage(
+              merchantData.location_photo_base64,
+              merchantId,
+              "location"
+            );
+            merchantData.location_photo_url = url;
+            delete merchantData.location_photo_base64;
+          }
+
+          // Insert merchant into database
+          const { error } = await supabase.from("merchants").insert({
+            id: merchantId,
+            cmu_number: merchantData.cmu_number,
+            full_name: merchantData.full_name,
+            phone: merchantData.phone,
+            activity_type: merchantData.activity_type,
+            activity_description: merchantData.activity_description,
+            market_id: merchantData.market_id,
+            latitude: merchantData.latitude,
+            longitude: merchantData.longitude,
+            enrolled_by: merchantData.enrolled_by,
+            status: merchantData.status,
+            cmu_photo_url: merchantData.cmu_photo_url || null,
+            location_photo_url: merchantData.location_photo_url || null,
           });
+
+          if (error) {
+            console.error("Merchant insert error:", error);
+            continue;
+          }
+
+          successfulIds.push(item.id);
+        } else {
+          // Generic sync for other entity types
+          if (userId) {
+            await supabase.from("offline_sync").insert({
+              user_id: userId,
+              entity_type: item.entity_type,
+              entity_id: item.entity_id,
+              action: item.action,
+              data: item.data,
+              synced: true,
+              synced_at: new Date().toISOString(),
+            });
+          }
+          successfulIds.push(item.id);
         }
-        successfulIds.push(item.id);
       } catch (err) {
         console.error("Sync error for item:", item.id, err);
       }
