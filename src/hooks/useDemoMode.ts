@@ -174,8 +174,8 @@ const DEMO_DATA: Record<string, DemoData> = {
       total: 156
     },
     stock: [
-      { id: 'cs001', product_name: 'Riz de Gagnoa IGP', quantity: 500, unit: 'kg', unit_price: 650, status: 'ok' },
-      { id: 'cs002', product_name: 'Attiéké de Grand-Lahou IGP', quantity: 200, unit: 'kg', unit_price: 350, status: 'ok' },
+      { id: 'cs001', product_name: 'Riz de Gagnoa', quantity: 500, unit: 'kg', unit_price: 650, status: 'ok' },
+      { id: 'cs002', product_name: 'Attiéké de Grand-Lahou', quantity: 200, unit: 'kg', unit_price: 350, status: 'ok' },
       { id: 'cs003', product_name: 'Huile de palme artisanale', quantity: 50, unit: 'L', unit_price: 1500, status: 'low' },
       { id: 'cs004', product_name: 'Cacao en fèves', quantity: 1000, unit: 'kg', unit_price: 2200, status: 'ok' }
     ],
@@ -183,7 +183,7 @@ const DEMO_DATA: Record<string, DemoData> = {
       {
         id: 'o001',
         merchant_name: 'Fatou Diallo',
-        product_name: 'Riz de Gagnoa IGP',
+        product_name: 'Riz de Gagnoa',
         quantity: 50,
         total_amount: 32500,
         status: 'pending',
@@ -192,7 +192,7 @@ const DEMO_DATA: Record<string, DemoData> = {
       {
         id: 'o002',
         merchant_name: 'Amadou Koné',
-        product_name: 'Attiéké de Grand-Lahou IGP',
+        product_name: 'Attiéké de Grand-Lahou',
         quantity: 30,
         total_amount: 10500,
         status: 'confirmed',

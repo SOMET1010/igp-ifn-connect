@@ -67,7 +67,7 @@ interface CooperativeData {
   address: string | null;
   phone: string | null;
   email: string | null;
-  igp_certified: boolean;
+  ifn_certified?: boolean;
   total_members: number;
 }
 
@@ -136,10 +136,10 @@ const CooperativeProfile: React.FC = () => {
             <h2 className="text-xl font-bold text-foreground mb-2">
               {cooperative?.name}
             </h2>
-            {cooperative?.igp_certified && (
+            {cooperative?.ifn_certified && (
               <Badge className="bg-yellow-400 text-yellow-900 mb-2">
                 <Award className="w-4 h-4 mr-1" />
-                Certifié IGP
+                Certifié IFN
               </Badge>
             )}
             <p className="text-muted-foreground">
@@ -205,24 +205,24 @@ const CooperativeProfile: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* IGP Status */}
-        <Card className={cooperative?.igp_certified ? 'border-2 border-yellow-400' : ''}>
+        {/* IFN Status */}
+        <Card className={cooperative?.ifn_certified ? 'border-2 border-yellow-400' : ''}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                cooperative?.igp_certified ? 'bg-yellow-100' : 'bg-muted'
+                cooperative?.ifn_certified ? 'bg-yellow-100' : 'bg-muted'
               }`}>
                 <Award className={`h-6 w-6 ${
-                  cooperative?.igp_certified ? 'text-yellow-600' : 'text-muted-foreground'
+                  cooperative?.ifn_certified ? 'text-yellow-600' : 'text-muted-foreground'
                 }`} />
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">
-                  Certification IGP
+                  Certification IFN
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {cooperative?.igp_certified 
-                    ? 'Votre coopérative est certifiée IGP' 
+                  {cooperative?.ifn_certified 
+                    ? 'Votre coopérative est certifiée IFN' 
                     : 'Non certifié - Contactez la DGE pour la certification'}
                 </p>
               </div>
