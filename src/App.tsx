@@ -57,12 +57,12 @@ const App = () => (
     <LanguageProvider>
       <AuthProvider>
         <TooltipProvider>
-          <DemoBanner />
           <Toaster />
           <Sonner />
           <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
+            <DemoBanner />
+            <Routes>
+              <Route path="/" element={<Index />} />
             <Route path="/demo" element={<DemoAccess />} />
             <Route path="/accueil" element={<Navigate to="/" replace />} />
             
