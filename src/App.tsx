@@ -2,11 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
-import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 // Agent pages
@@ -57,8 +56,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/accueil" element={<Index />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/accueil" element={<Navigate to="/" replace />} />
             
             {/* Agent Routes */}
             <Route path="/agent/login" element={<AgentLogin />} />
