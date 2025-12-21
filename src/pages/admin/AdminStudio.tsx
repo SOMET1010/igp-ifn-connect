@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,6 +22,7 @@ export default function AdminStudio() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [existingAudioUrl, setExistingAudioUrl] = useState<string | null>(null);
 
   // Get all translation keys for selected language
   const translationItems = useMemo(() => {
@@ -62,6 +63,32 @@ export default function AdminStudio() {
       setIsLoading(false);
     }
   };
+
+  // Load existing audio URL when selected key changes
+  const loadExistingAudioUrl = useCallback(async () => {
+    if (!selectedKey || !recordingStatus[`${selectedLanguage}:${selectedKey}`]) {
+      setExistingAudioUrl(null);
+      return;
+    }
+
+    try {
+      const { data } = await supabase
+        .from('audio_recordings')
+        .select('file_path')
+        .eq('audio_key', selectedKey)
+        .eq('language_code', selectedLanguage)
+        .single();
+
+      setExistingAudioUrl(data?.file_path || null);
+    } catch (err) {
+      console.error('Error loading existing audio:', err);
+      setExistingAudioUrl(null);
+    }
+  }, [selectedKey, selectedLanguage, recordingStatus]);
+
+  useEffect(() => {
+    loadExistingAudioUrl();
+  }, [loadExistingAudioUrl]);
 
   const handleSaveRecording = async (audioBlob: Blob, duration: number) => {
     if (!selectedKey) return;
@@ -104,6 +131,9 @@ export default function AdminStudio() {
         [`${selectedLanguage}:${selectedKey}`]: true
       }));
 
+      // Update existing audio URL
+      setExistingAudioUrl(urlData.publicUrl);
+
       toast({
         title: "Enregistrement sauvegardé",
         description: `"${selectedKey}" a été enregistré avec succès.`
@@ -122,6 +152,53 @@ export default function AdminStudio() {
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder l'enregistrement.",
+        variant: "destructive"
+      });
+      throw err;
+    }
+  };
+
+  const handleDeleteRecording = async () => {
+    if (!selectedKey) return;
+
+    try {
+      const fileName = `${selectedLanguage}/${selectedKey}.webm`;
+
+      // Delete from Supabase Storage
+      const { error: storageError } = await supabase.storage
+        .from('audio-recordings')
+        .remove([fileName]);
+
+      if (storageError) throw storageError;
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('audio_recordings')
+        .delete()
+        .eq('audio_key', selectedKey)
+        .eq('language_code', selectedLanguage);
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      setRecordingStatus(prev => {
+        const newStatus = { ...prev };
+        delete newStatus[`${selectedLanguage}:${selectedKey}`];
+        return newStatus;
+      });
+
+      setExistingAudioUrl(null);
+
+      toast({
+        title: "Enregistrement supprimé",
+        description: `"${selectedKey}" a été supprimé.`
+      });
+
+    } catch (err) {
+      console.error('Error deleting recording:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'enregistrement.",
         variant: "destructive"
       });
       throw err;
@@ -252,8 +329,10 @@ export default function AdminStudio() {
                 textValue={selectedItem.value}
                 language={selectedLanguage}
                 isRecorded={selectedItem.isRecorded}
+                existingAudioUrl={existingAudioUrl}
                 onSave={handleSaveRecording}
                 onSkip={handleSkip}
+                onDelete={handleDeleteRecording}
               />
             ) : (
               <div className="bg-card rounded-2xl border border-border p-8 text-center">
