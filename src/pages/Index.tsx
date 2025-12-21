@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeroOverlay } from "@/components/shared/HeroOverlay";
+import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 
 interface RoleCard {
   emoji: string;
@@ -104,7 +105,7 @@ const handleCardClick = () => {
 
 const Index = () => {
   return (
-    <HeroOverlay>
+    <HeroOverlay backgroundImage={marcheIvoirien}>
       <div className="min-h-screen flex flex-col">
         {/* Header simplifié */}
         <header className="py-8 px-6">
