@@ -1,4 +1,5 @@
 import { LanguageCode } from '@/lib/translations';
+import { supabase } from '@/integrations/supabase/client';
 
 // Liste des clés audio disponibles
 export const AUDIO_KEYS = [
@@ -16,57 +17,82 @@ export const AUDIO_KEYS = [
 
 export type AudioKey = typeof AUDIO_KEYS[number];
 
-// Cache pour vérifier l'existence des fichiers audio
-const audioExistsCache = new Map<string, boolean>();
+// Cache pour les URLs des fichiers audio (local + Supabase)
+const audioUrlCache = new Map<string, string | null>();
+
+/**
+ * Récupère l'URL d'un fichier audio (local ou Supabase)
+ * Priorité: 1. Fichier local public/audio/ 2. Supabase Storage
+ */
+async function getAudioUrl(key: string, lang: LanguageCode): Promise<string | null> {
+  const cacheKey = `${lang}/${key}`;
+  
+  if (audioUrlCache.has(cacheKey)) {
+    return audioUrlCache.get(cacheKey) || null;
+  }
+
+  // 1. Essayer le fichier local d'abord
+  const localPath = `/audio/${lang}/${key}.mp3`;
+  try {
+    const response = await fetch(localPath, { method: 'HEAD' });
+    if (response.ok) {
+      audioUrlCache.set(cacheKey, localPath);
+      return localPath;
+    }
+  } catch {
+    // Continue to check Supabase
+  }
+
+  // 2. Essayer Supabase Storage
+  try {
+    const { data } = await supabase
+      .from('audio_recordings')
+      .select('file_path')
+      .eq('audio_key', key)
+      .eq('language_code', lang)
+      .maybeSingle();
+
+    if (data?.file_path) {
+      audioUrlCache.set(cacheKey, data.file_path);
+      return data.file_path;
+    }
+  } catch {
+    // No recording found
+  }
+
+  audioUrlCache.set(cacheKey, null);
+  return null;
+}
 
 /**
  * Vérifie si un fichier audio existe pour une clé et une langue données
  */
 export async function checkAudioExists(key: string, lang: LanguageCode): Promise<boolean> {
-  const cacheKey = `${lang}/${key}`;
-  
-  if (audioExistsCache.has(cacheKey)) {
-    return audioExistsCache.get(cacheKey)!;
-  }
-
-  const audioPath = `/audio/${lang}/${key}.mp3`;
-  
-  try {
-    const response = await fetch(audioPath, { method: 'HEAD' });
-    const exists = response.ok;
-    audioExistsCache.set(cacheKey, exists);
-    return exists;
-  } catch {
-    audioExistsCache.set(cacheKey, false);
-    return false;
-  }
+  const url = await getAudioUrl(key, lang);
+  return url !== null;
 }
 
 /**
- * Joue un fichier audio pré-enregistré
- * Retourne true si la lecture a réussi, false sinon (permettant le fallback)
+ * Joue un fichier audio pré-enregistré (local ou Supabase)
+ * Retourne true si la lecture a réussi, false sinon (permettant le fallback TTS)
  */
 export async function playPrerecordedAudio(
   key: string, 
   lang: LanguageCode
 ): Promise<{ success: boolean; audio?: HTMLAudioElement }> {
-  const exists = await checkAudioExists(key, lang);
+  let audioUrl = await getAudioUrl(key, lang);
   
-  if (!exists) {
-    // Essayer le français comme fallback si la langue demandée n'a pas le fichier
-    if (lang !== 'fr') {
-      const frExists = await checkAudioExists(key, 'fr');
-      if (frExists) {
-        return playPrerecordedAudio(key, 'fr');
-      }
-    }
+  // Fallback to French if not found
+  if (!audioUrl && lang !== 'fr') {
+    audioUrl = await getAudioUrl(key, 'fr');
+  }
+
+  if (!audioUrl) {
     return { success: false };
   }
 
-  const audioPath = `/audio/${lang}/${key}.mp3`;
-  
   try {
-    const audio = new Audio(audioPath);
+    const audio = new Audio(audioUrl);
     
     return new Promise((resolve) => {
       audio.oncanplaythrough = () => {
@@ -86,6 +112,13 @@ export async function playPrerecordedAudio(
   } catch {
     return { success: false };
   }
+}
+
+/**
+ * Vide le cache audio (utile après un nouvel enregistrement)
+ */
+export function clearAudioCache(): void {
+  audioUrlCache.clear();
 }
 
 /**

@@ -46,6 +46,7 @@ import AdminMap from "./pages/admin/AdminMap";
 import AdminMonitoring from "./pages/admin/AdminMonitoring";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminStudio from "./pages/admin/AdminStudio";
 
 const queryClient = new QueryClient();
 
@@ -105,6 +106,7 @@ const App = () => (
               <Route path="/admin/monitoring" element={<AdminMonitoring />} />
               <Route path="/admin/analytics" element={<AdminAnalytics />} />
               <Route path="/admin/rapports" element={<AdminReports />} />
+              <Route path="/admin/studio" element={<AdminStudio />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
