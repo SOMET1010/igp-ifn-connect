@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/shared/BottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CalculatorKeypad, useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
+import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
 import { SuccessScreen, ButtonPrimary, ButtonSecondary } from "@/components/ifn";
 import { QRReceipt } from "@/components/merchant/QRReceipt";
 import { useAuth } from "@/contexts/AuthContext";
@@ -66,6 +67,13 @@ export default function MerchantCashier() {
       return `${t("audio_cashier_confirm")} ${formattedAmount} FCFA ${method === "cash" ? t("cash") : t("mobile_money")}`;
     }
     return `${t("audio_cashier_success")}: ${formattedAmount} FCFA`;
+  };
+
+  // Handle adding amount from bill/coin denomination
+  const handleAddAmount = (value: number) => {
+    const currentAmount = parseInt(amount.replace(/\D/g, "")) || 0;
+    const newAmount = currentAmount + value;
+    setAmount(newAmount.toString());
   };
 
   const handleMethodSelect = (selectedMethod: PaymentMethod) => {
@@ -233,6 +241,9 @@ export default function MerchantCashier() {
                 </div>
               </div>
 
+              {/* CFA Bills Quick Input - Inclusive UX */}
+              <CashDenominationPad onAddAmount={handleAddAmount} />
+
               {/* Calculator Keypad XXL */}
               <CalculatorKeypad
                 value={amount}
@@ -241,7 +252,7 @@ export default function MerchantCashier() {
               />
 
               {/* Payment buttons XXL */}
-              <div className="space-y-4 pt-4">
+              <div className="space-y-4 pt-2">
                 <div className="grid grid-cols-2 gap-4">
                   <Button
                     onClick={() => handleMethodSelect("cash")}
