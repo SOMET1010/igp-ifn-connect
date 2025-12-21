@@ -106,6 +106,7 @@ const AgentDashboard: React.FC = () => {
       
       if (profileData) setProfile(profileData);
 
+      // Récupérer l'agent
       const { data: agentData } = await supabase
         .from('agents')
         .select('id, total_enrollments')
@@ -113,9 +114,32 @@ const AgentDashboard: React.FC = () => {
         .single();
 
       if (agentData) {
+        // Calculer les dates pour today et cette semaine
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+        
+        // Début de semaine (lundi)
+        const dayOfWeek = now.getDay();
+        const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
+
+        // Compter les marchands enrôlés aujourd'hui
+        const { count: todayCount } = await supabase
+          .from('merchants')
+          .select('id', { count: 'exact', head: true })
+          .eq('enrolled_by', agentData.id)
+          .gte('enrolled_at', todayStart);
+
+        // Compter les marchands enrôlés cette semaine
+        const { count: weekCount } = await supabase
+          .from('merchants')
+          .select('id', { count: 'exact', head: true })
+          .eq('enrolled_by', agentData.id)
+          .gte('enrolled_at', weekStart);
+
         setStats({
-          today: 0,
-          week: 0,
+          today: todayCount ?? 0,
+          week: weekCount ?? 0,
           total: agentData.total_enrollments ?? 0
         });
       }
