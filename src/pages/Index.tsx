@@ -131,7 +131,7 @@ const Index = () => {
 
         {/* Cartes de rôles */}
         <div className="space-y-4">
-          {roles.map((role) => {
+          {roles.map((role, index) => {
             const styles = variantStyles[role.variant];
             return (
               <Link
@@ -142,9 +142,11 @@ const Index = () => {
                   "group relative flex items-center gap-4 w-full rounded-2xl border-2 transition-all duration-300",
                   "hover:scale-[1.02] active:scale-[0.97]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "opacity-0 animate-slide-up",
                   styles.card,
                   sizeStyles[role.size]
                 )}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Badge (si présent) */}
                 {role.badge && (
