@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AudioButtonProps {
   textToRead: string;
@@ -10,10 +11,12 @@ interface AudioButtonProps {
   variant?: 'floating' | 'inline';
 }
 
-// Mapping des langues vers les codes de synthèse vocale supportés
+// Langues supportées par LAFRICAMOBILE
+const LAFRICAMOBILE_LANGUAGES = ['dioula'];
+
+// Mapping des langues vers les codes de synthèse vocale Web Speech API
 const VOICE_LANG_MAP: Record<string, string> = {
   'fr': 'fr-FR',
-  'dioula': 'fr-FR', // Fallback sur français pour les langues non supportées
   'baoule': 'fr-FR',
   'bete': 'fr-FR',
   'senoufo': 'fr-FR',
@@ -29,6 +32,7 @@ export function AudioButton({
   const { language, t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const sizeStyles = {
     sm: 'w-10 h-10 text-lg',
@@ -42,60 +46,134 @@ export function AudioButton({
     lg: 'w-8 h-8',
   };
 
-  const speak = useCallback(() => {
-    if (!('speechSynthesis' in window)) {
-      console.warn('Text-to-Speech not supported');
-      return;
+  // Arrêter l'audio en cours
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
     }
+    speechSynthesis.cancel();
+    setIsPlaying(false);
+  }, []);
 
-    // Arrêter si déjà en lecture
-    if (isPlaying) {
-      speechSynthesis.cancel();
+  // TTS via LAFRICAMOBILE pour Dioula
+  const speakWithLafricamobile = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      console.log('Calling LAFRICAMOBILE TTS for:', textToRead.substring(0, 50));
+
+      const { data, error } = await supabase.functions.invoke('lafricamobile-tts', {
+        body: {
+          text: textToRead,
+          language: 'dioula',
+          translateFromFrench: true,
+        },
+      });
+
+      if (error) {
+        console.error('LAFRICAMOBILE error:', error);
+        throw error;
+      }
+
+      if (!data?.success || !data?.audioUrl) {
+        console.error('LAFRICAMOBILE response:', data);
+        throw new Error(data?.error || 'No audio URL returned');
+      }
+
+      console.log('Playing audio from:', data.audioUrl);
+
+      // Créer et jouer l'audio
+      const audio = new Audio(data.audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => {
+        setIsLoading(false);
+        setIsPlaying(true);
+        if (navigator.vibrate) navigator.vibrate(30);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        audioRef.current = null;
+      };
+
+      audio.onerror = (e) => {
+        console.error('Audio playback error:', e);
+        setIsLoading(false);
+        setIsPlaying(false);
+        audioRef.current = null;
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('LAFRICAMOBILE TTS error:', error);
+      setIsLoading(false);
       setIsPlaying(false);
+      // Fallback vers Web Speech API en français
+      speakWithWebSpeech('fr');
+    }
+  }, [textToRead]);
+
+  // TTS via Web Speech API (français et fallback)
+  const speakWithWebSpeech = useCallback((langOverride?: string) => {
+    if (!('speechSynthesis' in window)) {
+      console.warn('Web Speech API not supported');
+      setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
 
-    // Créer l'énoncé
     const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = VOICE_LANG_MAP[language] || 'fr-FR';
-    utterance.rate = 0.9; // Légèrement plus lent pour meilleure compréhension
+    const targetLang = langOverride || VOICE_LANG_MAP[language] || 'fr-FR';
+    utterance.lang = targetLang;
+    utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 1;
 
-    // Essayer de trouver une voix adaptée
+    // Trouver une voix adaptée
     const voices = speechSynthesis.getVoices();
     const preferredVoice = voices.find(v => 
-      v.lang.startsWith(VOICE_LANG_MAP[language]?.split('-')[0] || 'fr')
+      v.lang.startsWith(targetLang.split('-')[0])
     );
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
+    if (preferredVoice) utterance.voice = preferredVoice;
 
     utterance.onstart = () => {
       setIsLoading(false);
       setIsPlaying(true);
-      // Feedback tactile
-      if (navigator.vibrate) {
-        navigator.vibrate(30);
-      }
+      if (navigator.vibrate) navigator.vibrate(30);
     };
 
-    utterance.onend = () => {
-      setIsPlaying(false);
-    };
-
+    utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => {
       setIsLoading(false);
       setIsPlaying(false);
     };
 
-    speechSynthesis.cancel(); // Annuler toute lecture en cours
+    speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
-  }, [textToRead, language, isPlaying]);
+  }, [textToRead, language]);
 
-  // S'assurer que les voix sont chargées
+  // Fonction principale de lecture
+  const speak = useCallback(() => {
+    // Si déjà en lecture, arrêter
+    if (isPlaying) {
+      stopAudio();
+      return;
+    }
+
+    // Utiliser LAFRICAMOBILE pour Dioula
+    if (LAFRICAMOBILE_LANGUAGES.includes(language)) {
+      speakWithLafricamobile();
+    } else {
+      // Web Speech API pour français et autres
+      speakWithWebSpeech();
+    }
+  }, [isPlaying, language, stopAudio, speakWithLafricamobile, speakWithWebSpeech]);
+
+  // Charger les voix
   if ('speechSynthesis' in window && speechSynthesis.getVoices().length === 0) {
     speechSynthesis.onvoiceschanged = () => {};
   }
@@ -127,7 +205,7 @@ export function AudioButton({
   );
 }
 
-// Version pour les pages avec texte automatique basé sur le contexte
+// Version pour les pages avec texte automatique
 interface PageAudioButtonProps {
   pageKey: string;
   className?: string;
@@ -135,8 +213,6 @@ interface PageAudioButtonProps {
 
 export function PageAudioButton({ pageKey, className }: PageAudioButtonProps) {
   const { t } = useLanguage();
-  
-  // Construire le texte à lire basé sur la clé de page
   const textToRead = t(pageKey);
   
   return (
