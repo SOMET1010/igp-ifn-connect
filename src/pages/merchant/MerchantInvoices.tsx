@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Plus, Calendar, Home, Wallet, User, Package, Shield } from "lucide-react";
+import { FileText, Plus, Calendar, Home, Wallet, User, Package, Shield, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { FNEInvoice, InvoiceData } from "@/components/merchant/FNEInvoice";
 import { generateSecurityHash, generateVerificationUrl } from "@/lib/invoiceUtils";
@@ -28,6 +28,8 @@ interface Invoice {
   status: string;
   created_at: string;
   signature_hash: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
 }
 
 interface MerchantData {
@@ -63,6 +65,12 @@ export default function MerchantInvoices() {
   // Generated invoice preview
   const [generatedInvoice, setGeneratedInvoice] = useState<InvoiceData | null>(null);
 
+  // Cancellation states
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [invoiceToCancel, setInvoiceToCancel] = useState<Invoice | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
+
   useEffect(() => {
     fetchMerchantAndInvoices();
   }, [user]);
@@ -85,7 +93,7 @@ export default function MerchantInvoices() {
       // Get invoices
       const { data: invoicesData, error: invoicesError } = await supabase
         .from("invoices")
-        .select("id, invoice_number, amount_ttc, customer_name, status, created_at, signature_hash")
+        .select("id, invoice_number, amount_ttc, customer_name, status, created_at, signature_hash, cancellation_reason, cancelled_at")
         .eq("merchant_id", merchant.id)
         .order("created_at", { ascending: false });
 
@@ -218,6 +226,48 @@ export default function MerchantInvoices() {
     return num.toLocaleString("fr-FR");
   };
 
+  const handleOpenCancelDialog = (invoice: Invoice) => {
+    setInvoiceToCancel(invoice);
+    setCancellationReason("");
+    setShowCancelDialog(true);
+  };
+
+  const handleCancelInvoice = async () => {
+    if (!invoiceToCancel) return;
+    
+    const trimmedReason = cancellationReason.trim();
+    if (trimmedReason.length < 10) {
+      toast.error("Le motif doit contenir au moins 10 caractères");
+      return;
+    }
+
+    setIsCancelling(true);
+
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({
+          status: "cancelled",
+          cancellation_reason: trimmedReason,
+          cancelled_at: new Date().toISOString(),
+        })
+        .eq("id", invoiceToCancel.id);
+
+      if (error) throw error;
+
+      toast.success("Facture annulée avec succès");
+      setShowCancelDialog(false);
+      setInvoiceToCancel(null);
+      setCancellationReason("");
+      fetchMerchantAndInvoices();
+    } catch (error) {
+      console.error("Error cancelling invoice:", error);
+      toast.error("Erreur lors de l'annulation de la facture");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   if (generatedInvoice) {
     return (
       <PageWrapper>
@@ -289,48 +339,83 @@ export default function MerchantInvoices() {
               </CardContent>
             </Card>
           ) : (
-            invoices.map((invoice) => (
-              <Card
-                key={invoice.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-mono font-bold text-foreground">
-                          {invoice.invoice_number}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {invoice.customer_name || "Client non spécifié"}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            {new Date(invoice.created_at).toLocaleDateString("fr-FR")}
-                          </div>
-                          {invoice.signature_hash && (
-                            <div className="flex items-center gap-1 text-xs text-primary">
-                              <Shield className="w-3 h-3" />
-                              <span className="font-mono">{invoice.signature_hash.substring(0, 8)}...</span>
+            invoices.map((invoice) => {
+              const isCancelled = invoice.status === "cancelled";
+              return (
+                <Card
+                  key={invoice.id}
+                  className={`hover:shadow-md transition-shadow ${isCancelled ? 'opacity-60 border-destructive/30' : ''}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          isCancelled ? 'bg-destructive/10' : 'bg-primary/10'
+                        }`}>
+                          {isCancelled ? (
+                            <XCircle className="w-6 h-6 text-destructive" />
+                          ) : (
+                            <FileText className="w-6 h-6 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <p className={`font-mono font-bold ${isCancelled ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                            {invoice.invoice_number}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {invoice.customer_name || "Client non spécifié"}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(invoice.created_at).toLocaleDateString("fr-FR")}
                             </div>
+                            {invoice.signature_hash && !isCancelled && (
+                              <div className="flex items-center gap-1 text-xs text-primary">
+                                <Shield className="w-3 h-3" />
+                                <span className="font-mono">{invoice.signature_hash.substring(0, 8)}...</span>
+                              </div>
+                            )}
+                            {isCancelled && (
+                              <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">
+                                Annulée
+                              </span>
+                            )}
+                          </div>
+                          {isCancelled && invoice.cancellation_reason && (
+                            <p className="text-xs text-muted-foreground mt-1 italic">
+                              Motif: {invoice.cancellation_reason}
+                            </p>
                           )}
                         </div>
                       </div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <div>
+                          <p className={`font-bold text-lg ${isCancelled ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                            {Number(invoice.amount_ttc).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">FCFA</p>
+                        </div>
+                        {!isCancelled && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenCancelDialog(invoice);
+                            }}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 text-xs"
+                          >
+                            <XCircle className="w-3 h-3 mr-1" />
+                            Annuler
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-lg text-foreground">
-                        {Number(invoice.amount_ttc).toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">FCFA</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       </div>
@@ -414,6 +499,86 @@ export default function MerchantInvoices() {
             >
               {isCreating ? "Création en cours..." : "Créer la facture FNE"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Invoice Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Annuler la facture
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            {invoiceToCancel && (
+              <div className="bg-muted/50 rounded-lg p-3">
+                <p className="font-mono font-bold text-foreground">
+                  {invoiceToCancel.invoice_number}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Montant: {Number(invoiceToCancel.amount_ttc).toLocaleString()} FCFA
+                </p>
+              </div>
+            )}
+
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive font-medium">
+                ⚠️ Attention : Cette action est irréversible
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Une facture annulée reste visible dans l'historique mais ne peut plus être modifiée.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="cancellationReason" className="text-destructive">
+                Motif d'annulation (obligatoire) *
+              </Label>
+              <Textarea
+                id="cancellationReason"
+                placeholder="Ex: Erreur sur le montant, doublon, demande client..."
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                rows={3}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Minimum 10 caractères ({cancellationReason.trim().length}/10)
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowCancelDialog(false)}
+                disabled={isCancelling}
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={handleCancelInvoice}
+                disabled={isCancelling || cancellationReason.trim().length < 10}
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Annulation...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Confirmer l'annulation
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
