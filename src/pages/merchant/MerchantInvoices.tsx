@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageWrapper } from "@/components/shared/PageWrapper";
@@ -16,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Plus, ChevronRight, Calendar } from "lucide-react";
+import { FileText, Plus, Calendar, Home, Wallet, User, Package } from "lucide-react";
 import { toast } from "sonner";
 import { FNEInvoice, InvoiceData } from "@/components/merchant/FNEInvoice";
 
@@ -30,7 +29,6 @@ interface Invoice {
 }
 
 export default function MerchantInvoices() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +37,14 @@ export default function MerchantInvoices() {
     full_name: string;
     phone: string;
     ncc: string | null;
-  } | null>(null);
+
+  const navItems = [
+    { icon: Home, label: "Accueil", href: "/marchand" },
+    { icon: Package, label: "Stock", href: "/marchand/stock" },
+    { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
+    { icon: User, label: "Profil", href: "/marchand/profil" },
+  ];
+
 
   // New invoice form
   const [showNewInvoice, setShowNewInvoice] = useState(false);
@@ -216,7 +221,7 @@ export default function MerchantInvoices() {
       <PageHeader
         title="Mes Factures"
         subtitle="Factures Normalisées Électroniques"
-        onBack={() => navigate("/marchand")}
+        showBack
       />
 
       <div className="p-4 pb-24 space-y-4">
@@ -371,7 +376,7 @@ export default function MerchantInvoices() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav role="merchant" />
+      <BottomNav items={navItems} />
     </PageWrapper>
   );
 }

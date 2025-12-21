@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Printer } from "lucide-react";
+import { Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export interface InvoiceData {
