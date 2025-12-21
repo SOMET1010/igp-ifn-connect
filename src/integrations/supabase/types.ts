@@ -146,6 +146,48 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_credits: {
+        Row: {
+          amount_owed: number
+          amount_paid: number
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          due_date: string | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_owed?: number
+          amount_paid?: number
+          created_at?: string
+          customer_name: string
+          customer_phone: string
+          due_date?: string | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_owed?: number
+          amount_paid?: number
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string
+          due_date?: string | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       markets: {
         Row: {
           commune: string
@@ -494,6 +536,57 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          end_date: string
+          id: string
+          is_active: boolean
+          merchant_id: string
+          min_purchase: number | null
+          name: string
+          product_id: string | null
+          start_date: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value: number
+          end_date: string
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          min_purchase?: number | null
+          name: string
+          product_id?: string | null
+          start_date: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          min_purchase?: number | null
+          name?: string
+          product_id?: string | null
+          start_date?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       stocks: {
         Row: {
           cooperative_id: string
@@ -544,6 +637,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_logs: {
+        Row: {
+          actor_id: string | null
+          actor_type: string | null
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          severity: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_type?: string | null
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_type?: string | null
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+        }
+        Relationships: []
       }
       transactions: {
         Row: {
