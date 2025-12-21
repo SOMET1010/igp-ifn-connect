@@ -2,8 +2,9 @@ import { useRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Share2 } from "lucide-react";
+import { Download, Share2, Shield, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { FISCAL_REGIME_LABELS } from "@/lib/invoiceUtils";
 
 export interface InvoiceData {
   invoiceNumber: string;
@@ -11,6 +12,7 @@ export interface InvoiceData {
   merchantPhone: string;
   merchantNcc?: string;
   merchantAddress?: string;
+  fiscalRegime?: string;
   customerName?: string;
   customerPhone?: string;
   customerNcc?: string;
@@ -21,6 +23,8 @@ export interface InvoiceData {
   description: string;
   date: Date;
   transactionRef?: string;
+  securityHash?: string;
+  verificationUrl?: string;
 }
 
 interface FNEInvoiceProps {
@@ -31,13 +35,19 @@ interface FNEInvoiceProps {
 export function FNEInvoice({ invoice, onClose }: FNEInvoiceProps) {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
-  const qrData = JSON.stringify({
+  // Enhanced QR data with verification URL
+  const qrData = invoice.verificationUrl || JSON.stringify({
     inv: invoice.invoiceNumber,
     amt: invoice.amountTtc,
     date: invoice.date.toISOString(),
     seller: invoice.merchantNcc || invoice.merchantName,
-    platform: "IFN-DGI",
+    hash: invoice.securityHash,
+    platform: "IFN-DGI-CI",
   });
+
+  const fiscalRegimeLabel = invoice.fiscalRegime 
+    ? FISCAL_REGIME_LABELS[invoice.fiscalRegime] || invoice.fiscalRegime
+    : null;
 
   const handleDownloadPNG = async () => {
     if (!invoiceRef.current) return;
@@ -75,9 +85,11 @@ export function FNEInvoice({ invoice, onClose }: FNEInvoiceProps) {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 N° ${invoice.invoiceNumber}
 Date: ${invoice.date.toLocaleDateString("fr-FR")}
+${invoice.securityHash ? `Hash: ${invoice.securityHash}` : ""}
 
 VENDEUR: ${invoice.merchantName}
 ${invoice.merchantNcc ? `NCC: ${invoice.merchantNcc}` : ""}
+${fiscalRegimeLabel ? `Régime: ${fiscalRegimeLabel}` : ""}
 
 ${invoice.customerName ? `CLIENT: ${invoice.customerName}` : ""}
 
@@ -88,6 +100,7 @@ TVA (${invoice.tvaRate}%): ${invoice.tvaAmount.toLocaleString()} FCFA
 TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
 
 📱 Généré via IFN - DGI Côte d'Ivoire
+⚖️ Ord. 2021-593 du 15/09/2021
     `.trim();
 
     if (navigator.share) {
@@ -111,25 +124,50 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
   return (
     <div className="space-y-4">
       <Card ref={invoiceRef} className="border-2 border-primary overflow-hidden bg-white">
-        {/* Header */}
-        <div className="bg-primary text-primary-foreground p-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <span className="text-2xl">📄</span>
-            <h3 className="text-lg font-bold uppercase tracking-wider">
-              Facture Normalisée Électronique
-            </h3>
+        {/* Official DGI Header with Badge */}
+        <div className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">🇨🇮</span>
+                <div>
+                  <h3 className="text-lg font-bold uppercase tracking-wider">
+                    Facture Normalisée
+                  </h3>
+                  <p className="text-primary-foreground/80 text-xs">
+                    République de Côte d'Ivoire
+                  </p>
+                </div>
+              </div>
+              <p className="text-primary-foreground/80 text-sm mt-1">
+                DGI - Direction Générale des Impôts
+              </p>
+            </div>
+            
+            {/* FNE Badge */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-2 text-center border border-white/30">
+              <div className="flex items-center gap-1">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="font-bold text-sm">FNE</span>
+              </div>
+              <p className="text-[10px] opacity-80">Format Conforme</p>
+            </div>
           </div>
-          <p className="text-primary-foreground/80 text-sm">
-            DGI - Direction Générale des Impôts
-          </p>
         </div>
 
         <CardContent className="p-6 space-y-5 text-foreground">
-          {/* Seller Info */}
+          {/* Seller Info with Fiscal Regime */}
           <div className="border-b border-border pb-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-              Vendeur
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                Vendeur
+              </p>
+              {fiscalRegimeLabel && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                  {invoice.fiscalRegime}
+                </span>
+              )}
+            </div>
             <p className="font-bold text-lg">{invoice.merchantName}</p>
             {invoice.merchantNcc && (
               <p className="text-sm text-muted-foreground">
@@ -139,6 +177,11 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
             <p className="text-sm text-muted-foreground">
               Tél: {invoice.merchantPhone}
             </p>
+            {fiscalRegimeLabel && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {fiscalRegimeLabel}
+              </p>
+            )}
             {invoice.merchantAddress && (
               <p className="text-sm text-muted-foreground">
                 {invoice.merchantAddress}
@@ -198,8 +241,8 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
             </div>
           </div>
 
-          {/* QR Code */}
-          <div className="flex justify-center pt-4">
+          {/* QR Code with Security Hash */}
+          <div className="flex flex-col items-center pt-4 space-y-3">
             <div className="p-3 bg-white rounded-xl border border-border shadow-sm">
               <QRCodeSVG
                 value={qrData}
@@ -210,6 +253,14 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
                 fgColor="#000000"
               />
             </div>
+            
+            {/* Security Hash Display */}
+            {invoice.securityHash && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+                <Shield className="w-3 h-3" />
+                <span className="font-mono">{invoice.securityHash}</span>
+              </div>
+            )}
           </div>
 
           {/* Invoice Number & Date */}
@@ -235,14 +286,23 @@ TOTAL TTC: ${invoice.amountTtc.toLocaleString()} FCFA
             )}
           </div>
 
-          {/* Footer */}
-          <div className="text-center pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground">
-              📱 Facture générée via la plateforme IFN
+          {/* Legal Mentions Footer */}
+          <div className="text-center pt-2 border-t border-border space-y-2">
+            <div className="flex items-center justify-center gap-2 text-xs text-primary font-medium">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>Facture certifiée conforme au format FNE</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              Document à conserver pendant 10 ans conformément à la législation fiscale
             </p>
-            <p className="text-xs text-muted-foreground">
-              Direction Générale des Impôts - Côte d'Ivoire
+            <p className="text-[10px] text-muted-foreground">
+              Réf: Ordonnance n°2021-593 du 15 septembre 2021
             </p>
+            <div className="flex items-center justify-center gap-1 pt-1">
+              <span className="text-[10px] text-muted-foreground">
+                📱 Plateforme IFN - DGI Côte d'Ivoire
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
