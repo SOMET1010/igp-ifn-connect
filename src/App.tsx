@@ -27,6 +27,7 @@ import MerchantStock from "./pages/merchant/MerchantStock";
 import MerchantCredits from "./pages/merchant/MerchantCredits";
 import MerchantScanner from "./pages/merchant/MerchantScanner";
 import MerchantPromotions from "./pages/merchant/MerchantPromotions";
+import MerchantSuppliers from "./pages/merchant/MerchantSuppliers";
 
 // Cooperative pages
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/marchand/credits" element={<MerchantCredits />} />
               <Route path="/marchand/scanner" element={<MerchantScanner />} />
               <Route path="/marchand/promotions" element={<MerchantPromotions />} />
+              <Route path="/marchand/fournisseurs" element={<MerchantSuppliers />} />
             </Route>
 
             {/* Cooperative Routes */}
