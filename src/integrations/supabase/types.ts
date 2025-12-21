@@ -529,6 +529,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           cooperative_id: string
           created_at: string
           delivery_date: string | null
@@ -544,6 +546,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           cooperative_id: string
           created_at?: string
           delivery_date?: string | null
@@ -559,6 +563,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           cooperative_id?: string
           created_at?: string
           delivery_date?: string | null
