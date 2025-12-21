@@ -10,6 +10,7 @@ import { Step4Photos } from "@/components/agent/enrollment/Step4Photos";
 import { Step5Confirm } from "@/components/agent/enrollment/Step5Confirm";
 import { useEnrollmentForm } from "@/hooks/useEnrollmentForm";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,6 +21,7 @@ export default function EnrollmentWizard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isOnline, addToQueue } = useOfflineSync();
+  const { uploadMerchantPhotos, isUploading } = usePhotoUpload();
   const {
     data,
     currentStep,
@@ -65,7 +67,7 @@ export default function EnrollmentWizard() {
       // Get agent ID
       const { data: agentData } = await supabase
         .from("agents")
-        .select("id")
+        .select("id, total_enrollments")
         .eq("user_id", user.id)
         .single();
 
@@ -75,23 +77,38 @@ export default function EnrollmentWizard() {
         return;
       }
 
-      const merchantData = {
-        cmu_number: data.cmu_number.trim(),
-        full_name: data.full_name.trim(),
-        phone: data.phone.trim(),
-        activity_type: data.activity_type,
-        activity_description: data.activity_description || null,
-        market_id: data.market_id,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        enrolled_by: agentData.id,
-        status: "pending" as const,
-        // Photos stored as base64 for now (will be uploaded to storage later)
-        cmu_photo_url: data.cmu_photo_base64 || null,
-        location_photo_url: data.location_photo_base64 || null,
-      };
+      // Generate merchant ID for file paths
+      const merchantId = crypto.randomUUID();
+
+      let cmuPhotoUrl: string | null = null;
+      let locationPhotoUrl: string | null = null;
 
       if (isOnline) {
+        // Upload photos to storage
+        const photoUrls = await uploadMerchantPhotos(
+          merchantId,
+          data.cmu_photo_file || data.cmu_photo_base64 || null,
+          data.location_photo_file || data.location_photo_base64 || null
+        );
+        cmuPhotoUrl = photoUrls.cmuPhotoUrl;
+        locationPhotoUrl = photoUrls.locationPhotoUrl;
+
+        const merchantData = {
+          id: merchantId,
+          cmu_number: data.cmu_number.trim(),
+          full_name: data.full_name.trim(),
+          phone: data.phone.trim(),
+          activity_type: data.activity_type,
+          activity_description: data.activity_description || null,
+          market_id: data.market_id,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          enrolled_by: agentData.id,
+          status: "pending" as const,
+          cmu_photo_url: cmuPhotoUrl,
+          location_photo_url: locationPhotoUrl,
+        };
+
         // Direct insert to Supabase
         const { error } = await supabase.from("merchants").insert(merchantData);
 
@@ -105,19 +122,30 @@ export default function EnrollmentWizard() {
         // Update agent enrollment count
         await supabase
           .from("agents")
-          .update({ total_enrollments: (agentData as any).total_enrollments + 1 || 1 })
-          .eq("id", agentData.id)
-          .then(() => {
-          // Ignore if RPC doesn't exist
-        });
+          .update({ total_enrollments: (agentData.total_enrollments || 0) + 1 })
+          .eq("id", agentData.id);
 
         toast.success("Marchand enrôlé avec succès !");
       } else {
-        // Save to offline queue
-        addToQueue("merchants", "insert", {
-          ...merchantData,
-          id: crypto.randomUUID(),
-        });
+        // Save to offline queue with base64 photos (will be uploaded on sync)
+        const merchantData = {
+          id: merchantId,
+          cmu_number: data.cmu_number.trim(),
+          full_name: data.full_name.trim(),
+          phone: data.phone.trim(),
+          activity_type: data.activity_type,
+          activity_description: data.activity_description || null,
+          market_id: data.market_id,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          enrolled_by: agentData.id,
+          status: "pending" as const,
+          // Store base64 for offline - will be converted to URLs on sync
+          cmu_photo_base64: data.cmu_photo_base64 || null,
+          location_photo_base64: data.location_photo_base64 || null,
+        };
+
+        addToQueue("merchants", "insert", merchantData);
         toast.success("Enrôlement sauvegardé. Synchronisation automatique à la reconnexion.");
       }
 
@@ -213,13 +241,13 @@ export default function EnrollmentWizard() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!canProceed() || isSubmitting}
+              disabled={!canProceed() || isSubmitting || isUploading}
               className="flex-1 h-14 text-lg rounded-xl bg-gradient-forest hover:opacity-90"
             >
-              {isSubmitting ? (
+              {isSubmitting || isUploading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Enregistrement...
+                  {isUploading ? "Upload photos..." : "Enregistrement..."}
                 </>
               ) : (
                 <>✅ Enregistrer le Marchand</>
