@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HeroOverlay } from "@/components/shared/HeroOverlay";
 
 interface RoleCard {
   emoji: string;
@@ -103,28 +104,29 @@ const handleCardClick = () => {
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header simplifié */}
-      <header className="bg-gradient-africa text-primary-foreground py-8 px-6">
-        <div className="max-w-lg mx-auto text-center">
-          <div className="text-4xl mb-3">🌍</div>
-          <h1 className="text-2xl md:text-3xl font-bold">Plateforme IFN</h1>
-          <p className="text-sm opacity-90 mt-2">
-            Inclusion Financière Numérique
-          </p>
-        </div>
-      </header>
+    <HeroOverlay>
+      <div className="min-h-screen flex flex-col">
+        {/* Header simplifié */}
+        <header className="py-8 px-6">
+          <div className="max-w-lg mx-auto text-center">
+            <div className="text-4xl mb-3">🌍</div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">Plateforme IFN</h1>
+            <p className="text-sm text-white/80 mt-2">
+              Inclusion Financière Numérique
+            </p>
+          </div>
+        </header>
 
-      {/* Question principale */}
-      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Qui êtes-vous ?
-          </h2>
-          <p className="text-muted-foreground">
-            Choisissez votre accès pour continuer
-          </p>
-        </div>
+        {/* Question principale */}
+        <main className="flex-1 max-w-lg mx-auto w-full px-4 py-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Qui êtes-vous ?
+            </h2>
+            <p className="text-white/70">
+              Choisissez votre accès pour continuer
+            </p>
+          </div>
 
         {/* Cartes de rôles */}
         <div className="space-y-4">
@@ -188,25 +190,26 @@ const Index = () => {
           })}
         </div>
 
-        {/* Aide rassurante */}
-        <div className="text-center text-sm text-muted-foreground mt-8 px-4">
-          <p className="flex items-center justify-center gap-2">
-            <span>❓</span>
-            <span>Vous hésitez ? Demandez à votre agent ou à votre coopérative.</span>
-          </p>
-        </div>
-      </main>
+          {/* Aide rassurante */}
+          <div className="text-center text-sm text-white/60 mt-8 px-4">
+            <p className="flex items-center justify-center gap-2">
+              <span>❓</span>
+              <span>Vous hésitez ? Demandez à votre agent ou à votre coopérative.</span>
+            </p>
+          </div>
+        </main>
 
-      {/* Footer discret */}
-      <footer className="py-6 px-4 text-center">
-        <p className="text-xs text-muted-foreground">
-          🇨🇮 République de Côte d'Ivoire
-        </p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          DGE • ANSUT • DGI
-        </p>
-      </footer>
-    </div>
+        {/* Footer discret */}
+        <footer className="py-6 px-4 text-center">
+          <p className="text-xs text-white/70">
+            🇨🇮 République de Côte d'Ivoire
+          </p>
+          <p className="text-xs text-white/50 mt-1">
+            DGE • ANSUT • DGI
+          </p>
+        </footer>
+      </div>
+    </HeroOverlay>
   );
 };
 
