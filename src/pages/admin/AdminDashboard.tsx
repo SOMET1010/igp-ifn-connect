@@ -12,10 +12,12 @@ import {
   Map, 
   LogOut,
   Home,
-  Settings,
   TrendingUp,
   Loader2,
-  DollarSign
+  DollarSign,
+  Activity,
+  BarChart3,
+  FileText
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -23,8 +25,9 @@ const BottomNav: React.FC = () => {
   const location = useLocation();
   const navItems = [
     { icon: Home, label: 'Dashboard', path: '/admin' },
+    { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
+    { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
     { icon: Map, label: 'Carte', path: '/admin/carte' },
-    { icon: Settings, label: 'Paramètres', path: '/admin' },
   ];
 
   return (
@@ -285,6 +288,42 @@ const AdminDashboard: React.FC = () => {
               </div>
               <h3 className="font-semibold text-foreground">Cartographie</h3>
               <p className="text-sm text-muted-foreground">Voir la carte</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Outils avancés */}
+        <h3 className="font-semibold text-foreground mt-2 flex items-center gap-2">
+          🛠️ Outils avancés
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/monitoring')}>
+            <CardContent className="p-3 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
+                <Activity className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Monitoring</h3>
+              <p className="text-xs text-muted-foreground">Surveillance</p>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/analytics')}>
+            <CardContent className="p-3 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center mb-2">
+                <BarChart3 className="h-6 w-6 text-cyan-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Analytics</h3>
+              <p className="text-xs text-muted-foreground">Statistiques</p>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/rapports')}>
+            <CardContent className="p-3 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-2">
+                <FileText className="h-6 w-6 text-teal-600" />
+              </div>
+              <h3 className="font-semibold text-sm">Rapports</h3>
+              <p className="text-xs text-muted-foreground">Export</p>
             </CardContent>
           </Card>
         </div>
