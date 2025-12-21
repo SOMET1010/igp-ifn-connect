@@ -13,6 +13,12 @@
     --background: 45 30% 97%;
     --foreground: 25 30% 15%;
 
+    /* Design ANSUT - Couleurs institutionnelles */
+    --ansut-accent: 36 95% 51%;
+    --ansut-night: 214 70% 9%;
+    --ansut-overlay: 214 50% 5%;
+    --ansut-glass: 0 0% 100%;
+
     /* Cartes */
     --card: 45 40% 99%;
     --card-foreground: 25 30% 15%;
