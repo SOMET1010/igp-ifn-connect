@@ -3,9 +3,11 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { AudioButton } from '@/components/shared/AudioButton';
 import { 
   UserPlus, 
   Users, 
@@ -47,12 +49,12 @@ const StatCard: React.FC<{
 };
 
 // Simple Bottom Nav component
-const BottomNav: React.FC = () => {
+const BottomNav: React.FC<{ t: (key: string) => string }> = ({ t }) => {
   const location = useLocation();
   const navItems = [
-    { icon: Home, label: 'Accueil', path: '/agent' },
-    { icon: Users, label: 'Marchands', path: '/agent/marchands' },
-    { icon: User, label: 'Profil', path: '/agent/profil' },
+    { icon: Home, label: t("home"), path: '/agent' },
+    { icon: Users, label: t("merchants"), path: '/agent/marchands' },
+    { icon: User, label: t("profile"), path: '/agent/profil' },
   ];
 
   return (
@@ -85,6 +87,7 @@ const BottomNav: React.FC = () => {
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { isOnline, pendingCount, isSyncing, syncWithServer } = useOfflineSync();
   
   const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
@@ -128,21 +131,32 @@ const AgentDashboard: React.FC = () => {
     navigate('/agent/login');
   };
 
+  // Audio text dynamique
+  const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}.`;
+
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* AudioButton flottant */}
+      <AudioButton 
+        textToRead={audioText}
+        variant="floating"
+        size="lg"
+        className="bottom-24 right-4 z-50"
+      />
+
       {/* Header */}
       <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-primary-foreground/80">Bienvenue,</p>
-            <h1 className="text-xl font-bold">{profile?.full_name ?? 'Agent'}</h1>
+            <p className="text-sm text-primary-foreground/80">{t("welcome")},</p>
+            <h1 className="text-xl font-bold">{profile?.full_name ?? t("agent")}</h1>
           </div>
           <div className="flex items-center gap-2">
             <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm ${
               isOnline ? 'bg-secondary/20 text-secondary' : 'bg-destructive/20 text-destructive'
             }`}>
               {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-              {isOnline ? 'En ligne' : 'Hors ligne'}
+              {isOnline ? t("online") : t("offline")}
             </div>
             
             <button className="p-2 rounded-full hover:bg-primary-foreground/10 relative">
@@ -171,10 +185,10 @@ const AgentDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">
-                    {pendingCount} enrôlement{pendingCount > 1 ? 's' : ''} en attente
+                    {pendingCount} {t("pending_enrollments")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {isOnline ? 'Prêt à synchroniser' : 'En attente de connexion'}
+                    {isOnline ? t("ready_to_sync") : t("waiting_connection")}
                   </p>
                 </div>
               </div>
@@ -185,7 +199,7 @@ const AgentDashboard: React.FC = () => {
                   onClick={syncWithServer}
                   disabled={isSyncing}
                 >
-                  {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sync'}
+                  {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : t("sync")}
                 </Button>
               )}
             </CardContent>
@@ -194,19 +208,19 @@ const AgentDashboard: React.FC = () => {
 
         <div className="grid grid-cols-3 gap-3">
           <StatCard
-            title="Aujourd'hui"
+            title={t("today")}
             value={isLoadingStats ? '-' : stats.today.toString()}
             icon={<Calendar className="h-5 w-5" />}
             color="primary"
           />
           <StatCard
-            title="Cette semaine"
+            title={t("this_week")}
             value={isLoadingStats ? '-' : stats.week.toString()}
             icon={<TrendingUp className="h-5 w-5" />}
             color="secondary"
           />
           <StatCard
-            title="Total"
+            title={t("total")}
             value={isLoadingStats ? '-' : stats.total.toString()}
             icon={<Users className="h-5 w-5" />}
             color="accent"
@@ -218,7 +232,7 @@ const AgentDashboard: React.FC = () => {
           className="btn-xxl w-full bg-primary hover:bg-primary/90 pulse-glow"
         >
           <UserPlus className="h-6 w-6" />
-          Nouvel Enrôlement
+          {t("new_enrollment")}
         </Button>
 
         <div className="grid grid-cols-2 gap-4">
@@ -227,8 +241,8 @@ const AgentDashboard: React.FC = () => {
               <div className="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mb-3">
                 <Users className="h-7 w-7 text-secondary" />
               </div>
-              <h3 className="font-semibold text-foreground">Mes Marchands</h3>
-              <p className="text-sm text-muted-foreground">Voir la liste</p>
+              <h3 className="font-semibold text-foreground">{t("my_merchants")}</h3>
+              <p className="text-sm text-muted-foreground">{t("view_list")}</p>
             </CardContent>
           </Card>
 
@@ -237,8 +251,8 @@ const AgentDashboard: React.FC = () => {
               <div className="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mb-3">
                 <span className="text-2xl">👤</span>
               </div>
-              <h3 className="font-semibold text-foreground">Mon Profil</h3>
-              <p className="text-sm text-muted-foreground">Paramètres</p>
+              <h3 className="font-semibold text-foreground">{t("my_profile")}</h3>
+              <p className="text-sm text-muted-foreground">{t("settings")}</p>
             </CardContent>
           </Card>
         </div>
@@ -246,27 +260,27 @@ const AgentDashboard: React.FC = () => {
         <Card className="bg-muted/30">
           <CardContent className="p-4">
             <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-              <span>📋</span> Guide rapide
+              <span>📋</span> {t("quick_guide")}
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="text-primary">1.</span>
-                <span>Cliquez sur "Nouvel Enrôlement" pour inscrire un marchand</span>
+                <span>{t("guide_agent_1")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">2.</span>
-                <span>Remplissez les 5 étapes du formulaire</span>
+                <span>{t("guide_agent_2")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">3.</span>
-                <span>Les données sont sauvegardées même hors-ligne</span>
+                <span>{t("guide_agent_3")}</span>
               </li>
             </ul>
           </CardContent>
         </Card>
       </div>
 
-      <BottomNav />
+      <BottomNav t={t} />
     </div>
   );
 };

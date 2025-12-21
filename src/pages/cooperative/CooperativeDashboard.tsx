@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { AudioButton } from '@/components/shared/AudioButton';
 import { 
   Package, 
   ShoppingCart, 
@@ -18,13 +20,13 @@ import {
   Loader2
 } from 'lucide-react';
 
-const BottomNav: React.FC = () => {
+const BottomNav: React.FC<{ t: (key: string) => string }> = ({ t }) => {
   const location = useLocation();
   const navItems = [
-    { icon: Home, label: 'Accueil', path: '/cooperative' },
-    { icon: Package, label: 'Stock', path: '/cooperative/stock' },
-    { icon: ClipboardList, label: 'Commandes', path: '/cooperative/commandes' },
-    { icon: User, label: 'Profil', path: '/cooperative/profil' },
+    { icon: Home, label: t("home"), path: '/cooperative' },
+    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
+    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
+    { icon: User, label: t("profile"), path: '/cooperative/profil' },
   ];
 
   return (
@@ -71,6 +73,7 @@ interface Stats {
 const CooperativeDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   
   const [cooperative, setCooperative] = useState<CooperativeData | null>(null);
   const [stats, setStats] = useState<Stats>({ products: 0, pendingOrders: 0 });
@@ -120,6 +123,9 @@ const CooperativeDashboard: React.FC = () => {
     navigate('/cooperative/login');
   };
 
+  // Audio text dynamique
+  const audioText = `${t("audio_coop_dashboard")} ${cooperative?.total_members ?? 0} ${t("members")}, ${stats.products} ${t("products")}, ${stats.pendingOrders} ${t("pending_orders")}.`;
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -130,6 +136,14 @@ const CooperativeDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* AudioButton flottant */}
+      <AudioButton 
+        textToRead={audioText}
+        variant="floating"
+        size="lg"
+        className="bottom-24 right-4 z-50"
+      />
+
       {/* Header */}
       <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
@@ -139,7 +153,7 @@ const CooperativeDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold">{cooperative?.name ?? 'Coopérative'}</h1>
+                <h1 className="text-lg font-bold">{cooperative?.name ?? t("cooperative")}</h1>
                 {cooperative?.igp_certified && (
                   <Badge className="bg-yellow-400 text-yellow-900 text-xs">
                     <Award className="w-3 h-3 mr-1" />
@@ -167,7 +181,7 @@ const CooperativeDashboard: React.FC = () => {
                 <Users className="h-5 w-5 text-amber-700" />
               </div>
               <p className="text-2xl font-bold text-foreground">{cooperative?.total_members ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Membres</p>
+              <p className="text-xs text-muted-foreground">{t("members")}</p>
             </CardContent>
           </Card>
           
@@ -177,7 +191,7 @@ const CooperativeDashboard: React.FC = () => {
                 <Package className="h-5 w-5 text-green-700" />
               </div>
               <p className="text-2xl font-bold text-foreground">{stats.products}</p>
-              <p className="text-xs text-muted-foreground">Produits</p>
+              <p className="text-xs text-muted-foreground">{t("products")}</p>
             </CardContent>
           </Card>
           
@@ -187,7 +201,7 @@ const CooperativeDashboard: React.FC = () => {
                 <ShoppingCart className="h-5 w-5 text-blue-700" />
               </div>
               <p className="text-2xl font-bold text-foreground">{stats.pendingOrders}</p>
-              <p className="text-xs text-muted-foreground">En attente</p>
+              <p className="text-xs text-muted-foreground">{t("pending")}</p>
             </CardContent>
           </Card>
         </div>
@@ -202,10 +216,10 @@ const CooperativeDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">
-                    {stats.pendingOrders} commande{stats.pendingOrders > 1 ? 's' : ''} en attente
+                    {stats.pendingOrders} {t("pending_orders")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    À confirmer ou traiter
+                    {t("to_confirm_or_process")}
                   </p>
                 </div>
               </div>
@@ -215,7 +229,7 @@ const CooperativeDashboard: React.FC = () => {
                 onClick={() => navigate('/cooperative/commandes')}
                 className="border-amber-500 text-amber-700 hover:bg-amber-100"
               >
-                Voir
+                {t("view")}
               </Button>
             </CardContent>
           </Card>
@@ -227,7 +241,7 @@ const CooperativeDashboard: React.FC = () => {
           className="btn-xxl w-full bg-amber-600 hover:bg-amber-700"
         >
           <Package className="h-6 w-6" />
-          Gérer mon stock
+          {t("manage_my_stock")}
         </Button>
 
         {/* Navigation cards */}
@@ -237,8 +251,8 @@ const CooperativeDashboard: React.FC = () => {
               <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3">
                 <Package className="h-7 w-7 text-green-700" />
               </div>
-              <h3 className="font-semibold text-foreground">Mon Stock</h3>
-              <p className="text-sm text-muted-foreground">{stats.products} produits</p>
+              <h3 className="font-semibold text-foreground">{t("my_stock")}</h3>
+              <p className="text-sm text-muted-foreground">{stats.products} {t("products")}</p>
             </CardContent>
           </Card>
 
@@ -247,8 +261,8 @@ const CooperativeDashboard: React.FC = () => {
               <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                 <ClipboardList className="h-7 w-7 text-blue-700" />
               </div>
-              <h3 className="font-semibold text-foreground">Commandes</h3>
-              <p className="text-sm text-muted-foreground">Gérer les demandes</p>
+              <h3 className="font-semibold text-foreground">{t("orders")}</h3>
+              <p className="text-sm text-muted-foreground">{t("manage_requests")}</p>
             </CardContent>
           </Card>
         </div>
@@ -257,27 +271,27 @@ const CooperativeDashboard: React.FC = () => {
         <Card className="bg-muted/30">
           <CardContent className="p-4">
             <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-              <span>📋</span> Guide rapide
+              <span>📋</span> {t("quick_guide")}
             </h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="text-amber-600">1.</span>
-                <span>Ajoutez vos produits dans la section "Stock"</span>
+                <span>{t("guide_coop_1")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-amber-600">2.</span>
-                <span>Recevez les commandes des marchands</span>
+                <span>{t("guide_coop_2")}</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-amber-600">3.</span>
-                <span>Confirmez et livrez les commandes</span>
+                <span>{t("guide_coop_3")}</span>
               </li>
             </ul>
           </CardContent>
         </Card>
       </div>
 
-      <BottomNav />
+      <BottomNav t={t} />
     </div>
   );
 };
