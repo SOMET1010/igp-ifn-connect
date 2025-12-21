@@ -14,12 +14,13 @@ import {
   Shield,
   ArrowRight,
   Loader2,
-  History
+  Package,
+  AlertTriangle
 } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: History, label: "Historique", href: "/marchand/historique" },
+  { icon: Package, label: "Stock", href: "/marchand/stock" },
   { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
   { icon: User, label: "Profil", href: "/marchand/profil" },
 ];
@@ -37,6 +38,7 @@ export default function MerchantDashboard() {
   const [merchant, setMerchant] = useState<MerchantData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
+  const [stockAlerts, setStockAlerts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -72,6 +74,19 @@ export default function MerchantDashboard() {
             const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
             setTodayTotal(total);
             setTodayCount(transactions.length);
+          }
+
+          // Fetch stock alerts
+          const { data: stocksData } = await supabase
+            .from("merchant_stocks")
+            .select("quantity, min_threshold")
+            .eq("merchant_id", merchantForTx.id);
+
+          if (stocksData) {
+            const alertsCount = stocksData.filter(s => 
+              Number(s.quantity) <= Number(s.min_threshold)
+            ).length;
+            setStockAlerts(alertsCount);
           }
         }
       }
@@ -141,23 +156,44 @@ export default function MerchantDashboard() {
           Encaisser un paiement
         </Button>
 
+        {/* Stock Alert Card */}
+        {stockAlerts > 0 && (
+          <Card 
+            className="border-destructive/50 bg-destructive/5 cursor-pointer hover:shadow-lg transition-all"
+            onClick={() => navigate("/marchand/stock")}
+          >
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-foreground">Alertes de stock</h3>
+                <p className="text-sm text-muted-foreground">
+                  {stockAlerts} produit{stockAlerts !== 1 ? "s" : ""} à réapprovisionner
+                </p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Grille actions */}
         <div className="grid grid-cols-2 gap-4">
-          {/* CMU */}
+          {/* Stock */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-primary/30"
-            onClick={() => navigate("/marchand/cmu")}
+            onClick={() => navigate("/marchand/stock")}
           >
             <CardContent className="p-4">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center mb-3">
-                <Shield className="w-6 h-6 text-red-500" />
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                <Package className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-bold text-foreground">Protection CMU</h3>
+              <h3 className="font-bold text-foreground">Mon Stock</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                Cotisation & avantages
+                Gérer mes produits
               </p>
               <div className="flex items-center text-primary text-sm mt-2 font-medium">
-                Voir <ArrowRight className="w-4 h-4 ml-1" />
+                Gérer <ArrowRight className="w-4 h-4 ml-1" />
               </div>
             </CardContent>
           </Card>
@@ -176,6 +212,23 @@ export default function MerchantDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* CMU Card */}
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-all border-2 hover:border-primary/30"
+          onClick={() => navigate("/marchand/cmu")}
+        >
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-red-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-foreground">Protection CMU</h3>
+              <p className="text-xs text-muted-foreground">Cotisation & avantages</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground" />
+          </CardContent>
+        </Card>
 
         {/* Info CMU */}
         {merchant?.cmu_number && (

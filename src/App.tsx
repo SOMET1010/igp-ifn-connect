@@ -22,6 +22,7 @@ import MerchantCashier from "./pages/merchant/MerchantCashier";
 import MerchantCMU from "./pages/merchant/MerchantCMU";
 import MerchantProfile from "./pages/merchant/MerchantProfile";
 import MerchantTransactions from "./pages/merchant/MerchantTransactions";
+import MerchantStock from "./pages/merchant/MerchantStock";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/marchand" element={<MerchantDashboard />} />
               <Route path="/marchand/encaisser" element={<MerchantCashier />} />
               <Route path="/marchand/historique" element={<MerchantTransactions />} />
+              <Route path="/marchand/stock" element={<MerchantStock />} />
               <Route path="/marchand/cmu" element={<MerchantCMU />} />
               <Route path="/marchand/profil" element={<MerchantProfile />} />
             </Route>

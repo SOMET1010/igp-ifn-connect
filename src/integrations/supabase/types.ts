@@ -176,6 +176,42 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_stocks: {
+        Row: {
+          created_at: string
+          id: string
+          last_restocked_at: string | null
+          merchant_id: string
+          min_threshold: number | null
+          product_id: string
+          quantity: number
+          unit_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_restocked_at?: string | null
+          merchant_id: string
+          min_threshold?: number | null
+          product_id: string
+          quantity?: number
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_restocked_at?: string | null
+          merchant_id?: string
+          min_threshold?: number | null
+          product_id?: string
+          quantity?: number
+          unit_price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       merchants: {
         Row: {
           activity_description: string | null

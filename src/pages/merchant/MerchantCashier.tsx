@@ -10,11 +10,11 @@ import { BottomNav } from "@/components/shared/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, Wallet, User, Banknote, Smartphone, CreditCard, History } from "lucide-react";
+import { Home, Wallet, User, Banknote, Smartphone, CreditCard, Package } from "lucide-react";
 
 const navItems = [
   { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: History, label: "Historique", href: "/marchand/historique" },
+  { icon: Package, label: "Stock", href: "/marchand/stock" },
   { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
   { icon: User, label: "Profil", href: "/marchand/profil" },
 ];

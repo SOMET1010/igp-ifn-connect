@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Home, Wallet, Heart, User, History } from "lucide-react";
+import { Home, Wallet, User, History, Package } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ import {
 
 const navItems = [
   { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: History, label: "Historique", href: "/marchand/historique" },
+  { icon: Package, label: "Stock", href: "/marchand/stock" },
   { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
   { icon: User, label: "Profil", href: "/marchand/profil" },
 ];
