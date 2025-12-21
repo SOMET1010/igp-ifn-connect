@@ -1,5 +1,5 @@
 // IndexedDB wrapper for offline data persistence
-const DB_NAME = 'igp_ifn_offline';
+const DB_NAME = 'ifn_offline';
 const DB_VERSION = 1;
 
 interface OfflineItem {

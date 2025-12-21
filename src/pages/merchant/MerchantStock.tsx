@@ -47,7 +47,7 @@ interface Product {
   id: string;
   name: string;
   unit: string;
-  is_igp: boolean;
+  is_ifn?: boolean;
   category_id: string | null;
 }
 
@@ -450,8 +450,8 @@ export default function MerchantStock() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold text-foreground">{stock.product?.name}</h4>
-                            {stock.product?.is_igp && (
-                              <Badge variant="outline" className="text-xs">IGP</Badge>
+                            {stock.product?.is_ifn && (
+                              <Badge variant="outline" className="text-xs">IFN</Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-1">

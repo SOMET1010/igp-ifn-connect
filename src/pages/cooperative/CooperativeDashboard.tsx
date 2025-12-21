@@ -61,7 +61,7 @@ interface CooperativeData {
   name: string;
   region: string;
   commune: string;
-  igp_certified: boolean;
+  ifn_certified?: boolean;
   total_members: number;
 }
 
@@ -154,10 +154,10 @@ const CooperativeDashboard: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold">{cooperative?.name ?? t("cooperative")}</h1>
-                {cooperative?.igp_certified && (
+                {cooperative?.ifn_certified && (
                   <Badge className="bg-yellow-400 text-yellow-900 text-xs">
                     <Award className="w-3 h-3 mr-1" />
-                    IGP
+                    IFN
                   </Badge>
                 )}
               </div>

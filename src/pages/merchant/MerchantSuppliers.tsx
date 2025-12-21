@@ -59,7 +59,7 @@ interface Cooperative {
   name: string;
   region: string;
   commune: string;
-  igp_certified: boolean;
+  ifn_certified?: boolean;
   latitude?: number | null;
   longitude?: number | null;
 }
@@ -163,8 +163,7 @@ export default function MerchantSuppliers() {
     // Fetch cooperatives with location
     const { data: coopsData } = await supabase
       .from('cooperatives')
-      .select('id, name, region, commune, igp_certified, latitude, longitude')
-      .eq('igp_certified', true);
+      .select('id, name, region, commune, latitude, longitude');
 
     if (coopsData) {
       setCooperatives(coopsData);
@@ -174,7 +173,7 @@ export default function MerchantSuppliers() {
     const { data: productsData } = await supabase
       .from('products')
       .select(`
-        id, name, unit, is_igp, image_url, category_id,
+        id, name, unit, image_url, category_id,
         stocks (
           id, quantity, unit_price, cooperative_id
         )
@@ -213,7 +212,7 @@ export default function MerchantSuppliers() {
             id: p.id,
             name: p.name,
             unit: p.unit,
-            isIgp: p.is_igp,
+            isIfn: true,
             imageUrl: p.image_url,
             categoryId: p.category_id,
             offers,
@@ -389,7 +388,7 @@ export default function MerchantSuppliers() {
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
               <Leaf className="h-5 w-5" />
-              Marché Virtuel IGP
+              Marché Virtuel IFN
             </h1>
             <p className="text-sm text-white/80">Commandez en 3 clics</p>
           </div>

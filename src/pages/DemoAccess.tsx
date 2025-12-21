@@ -50,13 +50,13 @@ const demoAccounts: DemoAccount[] = [
   {
     role: 'cooperative',
     title: 'Coopérative',
-    description: 'Gère les stocks de produits IGP et les commandes',
+    description: 'Gère les stocks de produits et les commandes',
     code: 'COOP-DEMO',
     icon: <Wheat className="h-8 w-8" />,
     color: 'bg-amber-500',
     loginPath: '/cooperative/login',
     dashboardPath: '/cooperative',
-    features: ['Stock produits IGP', 'Commandes marchands', 'Certification IGP']
+    features: ['Stock produits', 'Commandes marchands', 'Certification IFN']
   },
   {
     role: 'admin',

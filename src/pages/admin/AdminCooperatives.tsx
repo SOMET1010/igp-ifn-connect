@@ -19,7 +19,7 @@ interface Cooperative {
   code: string;
   region: string;
   commune: string;
-  igp_certified: boolean;
+  ifn_certified?: boolean;
   total_members: number;
 }
 
@@ -109,10 +109,10 @@ const AdminCooperatives: React.FC = () => {
                         <p className="text-sm text-muted-foreground font-mono">{coop.code}</p>
                       </div>
                     </div>
-                    {coop.igp_certified && (
+                    {coop.ifn_certified && (
                       <Badge className="bg-yellow-100 text-yellow-800">
                         <Award className="w-3 h-3 mr-1" />
-                        IGP
+                        IFN
                       </Badge>
                     )}
                   </div>
