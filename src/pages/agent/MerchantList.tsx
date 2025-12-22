@@ -5,9 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, MapPin, Phone, Clock, Loader2, Home, Users, User, ClipboardList } from 'lucide-react';
+import { Search, MapPin, Phone, Clock, Home, Users, User, ClipboardList } from 'lucide-react';
 import { SecondaryPageHeader } from '@/components/shared/SecondaryPageHeader';
 import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
+import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import type { Database } from '@/integrations/supabase/types';
 
 type Merchant = Database['public']['Tables']['merchants']['Row'];
@@ -115,21 +116,15 @@ const MerchantList: React.FC = () => {
       {/* List */}
       <div className="p-4 space-y-3 max-w-lg mx-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <LoadingState message="Chargement des marchands..." />
         ) : filteredMerchants.length === 0 ? (
-          <div className="text-center py-12">
-            <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              {searchQuery ? 'Aucun résultat' : 'Aucun marchand'}
-            </h3>
-            <p className="text-muted-foreground">
-              {searchQuery
-                ? 'Essayez une autre recherche'
-                : 'Commencez par enrôler votre premier marchand'}
-            </p>
-          </div>
+          <EmptyState
+            Icon={ClipboardList}
+            title={searchQuery ? 'Aucun résultat' : 'Aucun marchand enrôlé'}
+            message={searchQuery
+              ? 'Essayez avec d\'autres termes de recherche'
+              : 'Commencez par enrôler votre premier marchand'}
+          />
         ) : (
           filteredMerchants.map((merchant) => (
             <Card key={merchant.id} className="card-institutional hover:border-primary/30 transition-colors">
