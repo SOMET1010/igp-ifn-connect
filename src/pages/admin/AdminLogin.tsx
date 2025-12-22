@@ -7,9 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
-import { z } from 'zod';
-
-const emailSchema = z.string().email('Adresse email invalide');
+import { emailSchema, passwordSchema, getValidationError } from '@/lib/validationSchemas';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -33,21 +31,23 @@ const AdminLogin: React.FC = () => {
   }, [isAuthenticated, checkRole, navigate]);
 
   const handleLogin = async () => {
-    try {
-      emailSchema.parse(email);
-    } catch {
+    // Validate email
+    const emailError = getValidationError(emailSchema, email);
+    if (emailError) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez entrer une adresse email valide',
+        description: emailError,
         variant: 'destructive',
       });
       return;
     }
 
-    if (password.length < 6) {
+    // Validate password
+    const passwordError = getValidationError(passwordSchema, password);
+    if (passwordError) {
       toast({
         title: 'Erreur',
-        description: 'Le mot de passe doit contenir au moins 6 caractères',
+        description: passwordError,
         variant: 'destructive',
       });
       return;
