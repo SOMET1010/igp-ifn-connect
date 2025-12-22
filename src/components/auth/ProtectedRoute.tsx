@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import type { Database } from '@/integrations/supabase/types';
@@ -82,9 +82,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <p className="text-muted-foreground text-center mb-6">
           Vous n'avez pas les permissions nécessaires pour accéder à cette page.
         </p>
-        <a href="/" className="text-primary hover:underline">
+        <Link to="/" className="text-primary hover:underline">
           Retour à l'accueil
-        </a>
+        </Link>
       </div>
     );
   }

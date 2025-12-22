@@ -8,7 +8,12 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { DemoBanner } from "@/components/shared/DemoBanner";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
-import { useEffect } from "react";
+import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import React, { Suspense, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+
+// Lazy load heavy components
+const AdminMap = React.lazy(() => import("./pages/admin/AdminMap"));
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DemoAccess from "./pages/DemoAccess";
@@ -50,11 +55,18 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminMerchants from "./pages/admin/AdminMerchants";
 import AdminAgents from "./pages/admin/AdminAgents";
 import AdminCooperatives from "./pages/admin/AdminCooperatives";
-import AdminMap from "./pages/admin/AdminMap";
+// AdminMap is lazy loaded above
 import AdminMonitoring from "./pages/admin/AdminMonitoring";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminStudio from "./pages/admin/AdminStudio";
+
+// Loading fallback for lazy components
+const LazyLoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -89,79 +101,83 @@ function registerServiceWorker() {
 registerServiceWorker();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <DemoBanner />
-            <OfflineIndicator />
-            <Routes>
-              <Route path="/" element={<Index />} />
-            <Route path="/demo" element={<DemoAccess />} />
-            <Route path="/accueil" element={<Navigate to="/" replace />} />
-            
-            {/* Agent Routes */}
-            <Route path="/agent/login" element={<AgentLogin />} />
-            <Route element={<ProtectedRoute requiredRole="agent" redirectTo="/agent/login" />}>
-              <Route path="/agent" element={<AgentDashboard />} />
-              <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
-              <Route path="/agent/marchands" element={<MerchantList />} />
-              <Route path="/agent/profil" element={<AgentProfile />} />
-            </Route>
-            
-            {/* Merchant Routes */}
-            <Route path="/marchand/login" element={<MerchantLogin />} />
-            <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
-              <Route path="/marchand" element={<MerchantDashboard />} />
-              <Route path="/marchand/encaisser" element={<MerchantCashier />} />
-              <Route path="/marchand/historique" element={<MerchantTransactions />} />
-              <Route path="/marchand/argent" element={<MerchantMoney />} />
-              <Route path="/marchand/aide" element={<MerchantHelp />} />
-              <Route path="/marchand/profil" element={<MerchantProfile />} />
-              <Route path="/marchand/stock" element={<MerchantStock />} />
-              <Route path="/marchand/cmu" element={<MerchantCMU />} />
-              <Route path="/marchand/credits" element={<MerchantCredits />} />
-              <Route path="/marchand/scanner" element={<MerchantScanner />} />
-              <Route path="/marchand/promotions" element={<MerchantPromotions />} />
-              <Route path="/marchand/fournisseurs" element={<MerchantSuppliers />} />
-              <Route path="/marchand/comprendre" element={<MerchantUnderstand />} />
-              <Route path="/marchand/factures" element={<MerchantInvoices />} />
-            </Route>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <DemoBanner />
+              <OfflineIndicator />
+              <Suspense fallback={<LazyLoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/demo" element={<DemoAccess />} />
+                  <Route path="/accueil" element={<Navigate to="/" replace />} />
+                  
+                  {/* Agent Routes */}
+                  <Route path="/agent/login" element={<AgentLogin />} />
+                  <Route element={<ProtectedRoute requiredRole="agent" redirectTo="/agent/login" />}>
+                    <Route path="/agent" element={<AgentDashboard />} />
+                    <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
+                    <Route path="/agent/marchands" element={<MerchantList />} />
+                    <Route path="/agent/profil" element={<AgentProfile />} />
+                  </Route>
+                  
+                  {/* Merchant Routes */}
+                  <Route path="/marchand/login" element={<MerchantLogin />} />
+                  <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
+                    <Route path="/marchand" element={<MerchantDashboard />} />
+                    <Route path="/marchand/encaisser" element={<MerchantCashier />} />
+                    <Route path="/marchand/historique" element={<MerchantTransactions />} />
+                    <Route path="/marchand/argent" element={<MerchantMoney />} />
+                    <Route path="/marchand/aide" element={<MerchantHelp />} />
+                    <Route path="/marchand/profil" element={<MerchantProfile />} />
+                    <Route path="/marchand/stock" element={<MerchantStock />} />
+                    <Route path="/marchand/cmu" element={<MerchantCMU />} />
+                    <Route path="/marchand/credits" element={<MerchantCredits />} />
+                    <Route path="/marchand/scanner" element={<MerchantScanner />} />
+                    <Route path="/marchand/promotions" element={<MerchantPromotions />} />
+                    <Route path="/marchand/fournisseurs" element={<MerchantSuppliers />} />
+                    <Route path="/marchand/comprendre" element={<MerchantUnderstand />} />
+                    <Route path="/marchand/factures" element={<MerchantInvoices />} />
+                  </Route>
 
-            {/* Cooperative Routes */}
-            <Route path="/cooperative/login" element={<CooperativeLogin />} />
-            <Route element={<ProtectedRoute requiredRole="cooperative" redirectTo="/cooperative/login" />}>
-              <Route path="/cooperative" element={<CooperativeDashboard />} />
-              <Route path="/cooperative/stock" element={<CooperativeStock />} />
-              <Route path="/cooperative/commandes" element={<CooperativeOrders />} />
-              <Route path="/cooperative/profil" element={<CooperativeProfile />} />
-            </Route>
+                  {/* Cooperative Routes */}
+                  <Route path="/cooperative/login" element={<CooperativeLogin />} />
+                  <Route element={<ProtectedRoute requiredRole="cooperative" redirectTo="/cooperative/login" />}>
+                    <Route path="/cooperative" element={<CooperativeDashboard />} />
+                    <Route path="/cooperative/stock" element={<CooperativeStock />} />
+                    <Route path="/cooperative/commandes" element={<CooperativeOrders />} />
+                    <Route path="/cooperative/profil" element={<CooperativeProfile />} />
+                  </Route>
 
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route element={<ProtectedRoute requiredRole="admin" redirectTo="/admin/login" />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/marchands" element={<AdminMerchants />} />
-              <Route path="/admin/agents" element={<AdminAgents />} />
-              <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
-              <Route path="/admin/carte" element={<AdminMap />} />
-              <Route path="/admin/monitoring" element={<AdminMonitoring />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/rapports" element={<AdminReports />} />
-              <Route path="/admin/studio" element={<AdminStudio />} />
-            </Route>
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+                  {/* Admin Routes */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route element={<ProtectedRoute requiredRole="admin" redirectTo="/admin/login" />}>
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/marchands" element={<AdminMerchants />} />
+                    <Route path="/admin/agents" element={<AdminAgents />} />
+                    <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
+                    <Route path="/admin/carte" element={<AdminMap />} />
+                    <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+                    <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                    <Route path="/admin/rapports" element={<AdminReports />} />
+                    <Route path="/admin/studio" element={<AdminStudio />} />
+                  </Route>
+                  
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
