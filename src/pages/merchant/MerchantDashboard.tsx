@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { useDataFetching } from "@/hooks/useDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,21 +29,21 @@ const hasAlreadyCelebratedToday = (): boolean => {
 const markAsCelebratedToday = () => {
   const today = new Date().toISOString().split('T')[0];
   localStorage.setItem(`${CONFETTI_KEY_PREFIX}${today}`, 'true');
-  // Nettoyer la clé d'hier pour éviter l'accumulation
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
   localStorage.removeItem(`${CONFETTI_KEY_PREFIX}${yesterday}`);
 };
+
+interface DashboardData {
+  merchant: MerchantDashboardViewData;
+  todayTotal: number;
+}
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [merchant, setMerchant] = useState<MerchantDashboardViewData | null>(null);
-  const [todayTotal, setTodayTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [error, setError] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   const navItems = [
@@ -52,6 +53,7 @@ export default function MerchantDashboard() {
     { icon: User, label: t("profile"), path: '/marchand/profil' },
   ];
 
+  // Gestion online/offline
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -65,92 +67,87 @@ export default function MerchantDashboard() {
     };
   }, []);
 
-  const fetchData = async () => {
-    if (!user) return;
+  // Fonction de fetch des données
+  const fetchDashboardData = useCallback(async (): Promise<DashboardData> => {
+    if (!user) throw new Error("Utilisateur non connecté");
 
     merchantLogger.debug('Chargement données dashboard', { userId: user.id });
 
-    try {
-      setError(null);
-      const { data: merchantData, error: merchantError } = await supabase
-        .from("merchants")
-        .select("full_name, activity_type, market_id")
-        .eq("user_id", user.id)
+    const { data: merchantData, error: merchantError } = await supabase
+      .from("merchants")
+      .select("id, full_name, activity_type, market_id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (merchantError) throw merchantError;
+
+    let marketName = "";
+    if (merchantData.market_id) {
+      const { data: market } = await supabase
+        .from("markets")
+        .select("name")
+        .eq("id", merchantData.market_id)
         .single();
-
-      if (merchantError) throw merchantError;
-
-      if (merchantData) {
-        let marketName = "";
-        if (merchantData.market_id) {
-          const { data: market } = await supabase
-            .from("markets")
-            .select("name")
-            .eq("id", merchantData.market_id)
-            .single();
-          marketName = market?.name || "";
-        }
-
-        setMerchant({
-          full_name: merchantData.full_name,
-          activity_type: merchantData.activity_type,
-          market_name: marketName,
-        });
-
-        const today = new Date().toISOString().split("T")[0];
-        const { data: merchantForTx } = await supabase
-          .from("merchants")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (merchantForTx) {
-          const { data: transactions } = await supabase
-            .from("transactions")
-            .select("amount")
-            .eq("merchant_id", merchantForTx.id)
-            .gte("created_at", today);
-
-          if (transactions) {
-            const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
-            setTodayTotal(total);
-            
-            // Confetti et toast pour la première vente du jour
-            if (total > 0 && !hasAlreadyCelebratedToday()) {
-              setShowConfetti(true);
-              markAsCelebratedToday();
-              toast({
-                title: `🎉 ${t("congratulations")}`,
-                description: `${t("first_sale_today")}: ${total.toLocaleString()} FCFA`,
-                duration: 5000,
-              });
-              setTimeout(() => setShowConfetti(false), 3500);
-            }
-            
-            merchantLogger.info('Données dashboard chargées', { 
-              merchantName: merchantData.full_name,
-              todayTotal: total 
-            });
-          }
-        }
-      }
-    } catch (err) {
-      merchantLogger.error('Échec chargement données marchand', err, { userId: user.id });
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
-    } finally {
-      setIsLoading(false);
+      marketName = market?.name || "";
     }
-  };
 
-  useEffect(() => {
-    fetchData();
+    const today = new Date().toISOString().split("T")[0];
+    const { data: transactions } = await supabase
+      .from("transactions")
+      .select("amount")
+      .eq("merchant_id", merchantData.id)
+      .gte("created_at", today);
+
+    const todayTotal = transactions?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;
+
+    merchantLogger.info('Données dashboard chargées', { 
+      merchantName: merchantData.full_name,
+      todayTotal 
+    });
+
+    return {
+      merchant: {
+        full_name: merchantData.full_name,
+        activity_type: merchantData.activity_type,
+        market_name: marketName,
+      },
+      todayTotal,
+    };
   }, [user]);
+
+  // Hook useDataFetching pour gérer loading/error/retry
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    isNetworkError, 
+    refetch 
+  } = useDataFetching<DashboardData>({
+    fetchFn: fetchDashboardData,
+    deps: [user?.id],
+    enabled: !!user,
+    onSuccess: (result) => {
+      // Confetti et toast pour la première vente du jour
+      if (result.todayTotal > 0 && !hasAlreadyCelebratedToday()) {
+        setShowConfetti(true);
+        markAsCelebratedToday();
+        toast({
+          title: `🎉 ${t("congratulations")}`,
+          description: `${t("first_sale_today")}: ${result.todayTotal.toLocaleString()} FCFA`,
+          duration: 5000,
+        });
+        setTimeout(() => setShowConfetti(false), 3500);
+      }
+    },
+  });
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/marchand/login');
   };
 
+  const merchant = data?.merchant;
+  const todayTotal = data?.todayTotal || 0;
   const pageAudioText = `${t("welcome")} ${merchant?.full_name || ""}. ${t("your_sales_today")}: ${todayTotal.toLocaleString()} FCFA.`;
 
   if (isLoading) {
@@ -170,12 +167,9 @@ export default function MerchantDashboard() {
           onSignOut={handleSignOut}
         />
         <ErrorState
-          message={error}
-          onRetry={() => {
-            setIsLoading(true);
-            fetchData();
-          }}
-          isNetworkError
+          message={error.userMessage}
+          onRetry={refetch}
+          isNetworkError={isNetworkError}
         />
         <InstitutionalBottomNav items={navItems} />
       </div>
