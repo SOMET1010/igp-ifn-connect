@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowRight, ArrowLeft, Shield, UserPlus, Lock, Smartphone, Headphones } from "lucide-react";
+import { Loader2, ArrowLeft, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,24 +11,14 @@ import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
-import { ContextualBanner } from '@/components/shared/ContextualBanner';
-import { SecondaryFeatures } from '@/components/shared/SecondaryFeatures';
 import { LoginCard } from '@/components/shared/LoginCard';
 
 type Step = "phone" | "otp" | "register";
 
-// Messages contextuels selon l'étape
-const STEP_BANNERS: Record<Step, { icon: string; message: string }> = {
-  phone: { icon: '🛒', message: 'Accès réservé aux marchands enregistrés' },
-  otp: { icon: '🔒', message: 'Ne partagez jamais votre code de vérification' },
-  register: { icon: '✨', message: 'Créez votre compte marchand en 30 secondes' },
-};
-
-// Configuration du stepper
-const STEPS_CONFIG: Record<Step, { number: number; title: string; subtitle: string }> = {
-  phone: { number: 1, title: 'Connexion Marchand', subtitle: 'Étape 1 · Numéro de téléphone' },
-  otp: { number: 2, title: 'Vérification OTP', subtitle: 'Étape 2 · Code de sécurité' },
-  register: { number: 3, title: 'Créer votre compte', subtitle: 'Étape 3 · Informations marchand' },
+const STEPS_CONFIG: Record<Step, { title: string; subtitle: string }> = {
+  phone: { title: 'Connexion Marchand', subtitle: 'Étape 1 · Numéro de téléphone' },
+  otp: { title: 'Vérification', subtitle: 'Étape 2 · Code de sécurité' },
+  register: { title: 'Création de compte', subtitle: 'Étape 3 · Informations marchand' },
 };
 
 export default function MerchantLogin() {
@@ -43,8 +33,6 @@ export default function MerchantLogin() {
   const [isNewUser, setIsNewUser] = useState(false);
 
   const email = `${phone.replace(/\s/g, "")}@marchand.igp.ci`;
-  const currentConfig = STEPS_CONFIG[step];
-  const currentBanner = STEP_BANNERS[step];
 
   const handlePhoneSubmit = async () => {
     const error = getValidationError(phoneSchema, phone);
@@ -101,7 +89,7 @@ export default function MerchantLogin() {
       }
     }
 
-    toast.success("Connexion réussie !");
+    toast.success("Connexion réussie");
     setIsLoading(false);
     navigate("/marchand");
   };
@@ -158,99 +146,92 @@ export default function MerchantLogin() {
       console.error("Role assignment error:", roleError);
     }
 
-    toast.success("Compte marchand créé avec succès !");
+    toast.success("Compte marchand créé avec succès");
     setIsLoading(false);
     navigate("/marchand");
   };
 
+  const handleBack = () => {
+    if (step === 'otp') {
+      setStep('phone');
+      setOtp('');
+    } else if (step === 'register') {
+      setStep('otp');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header institutionnel */}
       <InstitutionalHeader
         subtitle="Espace Marchand"
         showBackButton={step !== 'phone'}
-        onBack={() => setStep(step === 'register' ? 'otp' : 'phone')}
-        showOfficialBadge={true}
+        onBack={handleBack}
       />
 
-      {/* Bandeau contextuel */}
-      <ContextualBanner
-        icon={currentBanner.icon}
-        message={currentBanner.message}
-        variant="compact"
-        maxWidth="md"
-        fontWeight="medium"
-      />
-
-      <main className="flex-1 max-w-md mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+      <main className="flex-1 flex flex-col items-center justify-center p-4">
         <LoginCard
-          variant="compact"
-          icon={step === 'phone' ? Smartphone : step === 'otp' ? Lock : UserPlus}
-          currentStep={currentConfig.number}
-          title={currentConfig.title}
-          subtitle={currentConfig.subtitle}
-          showSecurityNote={false}
+          title={STEPS_CONFIG[step].title}
+          subtitle={STEPS_CONFIG[step].subtitle}
         >
           {step === "phone" && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-base font-semibold">
-                  📱 Téléphone
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="phone" className="form-label-lg">
+                  Numéro de téléphone
                 </Label>
                 <div className="flex gap-2">
-                  <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
+                  <div className="flex items-center justify-center h-12 px-3 bg-muted rounded-md text-sm font-medium text-muted-foreground">
                     +225
                   </div>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="07 12 34 56 78"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-14 text-lg rounded-xl border-2 flex-1"
-                  />
+                  <div className="relative flex-1">
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="07 12 34 56 78"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="input-institutional"
+                    />
+                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
               </div>
 
               <Button
                 onClick={handlePhoneSubmit}
                 disabled={isLoading || phone.length < 8}
-                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
                   <>
-                    Continuer
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Envoi...
                   </>
+                ) : (
+                  'Continuer'
                 )}
               </Button>
-              
-              {/* Note de sécurité */}
-              <p className="text-xs text-muted-foreground text-center">
-                🔒 Connexion chiffrée · Vos données sont protégées
-              </p>
-            </div>
+            </>
           )}
 
           {step === "otp" && (
-            <div className="space-y-4">
-              <div className="text-center mb-4">
-                <p className="text-sm text-primary font-medium">
-                  +225 {phone}
+            <>
+              <div className="space-y-3">
+                <p className="text-center text-xs text-muted-foreground">
+                  Code envoyé au +225 {phone}
                 </p>
+                <div className="flex justify-center">
+                  <OTPInput value={otp} onChange={setOtp} />
+                </div>
               </div>
-
-              <OTPInput value={otp} onChange={setOtp} />
 
               <Button
                 onClick={handleOtpSubmit}
                 disabled={isLoading || otp.length !== 6}
-                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   "Valider"
                 )}
@@ -263,19 +244,14 @@ export default function MerchantLogin() {
                 <ArrowLeft className="w-4 h-4" />
                 Modifier le numéro
               </button>
-              
-              {/* Note de sécurité */}
-              <p className="text-xs text-muted-foreground text-center">
-                🔒 Ne partagez jamais ce code avec quiconque
-              </p>
-            </div>
+            </>
           )}
 
           {step === "register" && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-base font-semibold">
-                  👤 Votre nom complet
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName" className="form-label-lg">
+                  Nom complet
                 </Label>
                 <Input
                   id="fullName"
@@ -283,22 +259,22 @@ export default function MerchantLogin() {
                   placeholder="Ex: Kouamé Adjoua"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="h-14 text-lg rounded-xl border-2"
+                  className="input-institutional"
                 />
               </div>
 
               <Button
                 onClick={handleRegisterSubmit}
                 disabled={isLoading || fullName.length < 3}
-                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
                   <>
-                    Créer mon compte
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Création...
                   </>
+                ) : (
+                  'Créer mon compte'
                 )}
               </Button>
               
@@ -309,32 +285,17 @@ export default function MerchantLogin() {
                 <ArrowLeft className="w-4 h-4" />
                 Retour
               </button>
-              
-              {/* Note de sécurité */}
-              <p className="text-xs text-muted-foreground text-center">
-                🔒 Vos informations sont sécurisées
-              </p>
-            </div>
+            </>
           )}
         </LoginCard>
 
-        {/* Zone features secondaire */}
-        <div className="mt-6">
-          <SecondaryFeatures
-            variant="compact"
-            features={[
-              { icon: Shield, title: 'Sécurisé', description: 'Paiements protégés', colorClass: 'bg-primary/10 text-primary' },
-              { icon: Smartphone, title: 'Officiel', description: 'Plateforme DGE', colorClass: 'bg-primary/10 text-primary' },
-              { icon: Headphones, title: 'Support', description: 'Assistance 24/7', colorClass: 'bg-primary/10 text-primary' },
-            ]}
-            showInstitutionalNote={true}
-            maxWidth="md"
-          />
-        </div>
+        {/* Note institutionnelle */}
+        <p className="text-xs text-muted-foreground text-center mt-6 max-w-sm">
+          Plateforme opérée par l'ANSUT pour le compte de la DGE
+        </p>
       </main>
 
-      {/* Footer institutionnel */}
-      <InstitutionalFooter variant="compact" showSupportButton={true} maxWidth="md" />
+      <InstitutionalFooter />
     </div>
   );
 }

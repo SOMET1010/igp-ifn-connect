@@ -6,28 +6,18 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Phone, Loader2, Wheat, UserPlus } from 'lucide-react';
+import { Phone, Loader2 } from 'lucide-react';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
-import { ContextualBanner } from '@/components/shared/ContextualBanner';
-import { SecondaryFeatures } from '@/components/shared/SecondaryFeatures';
 import { LoginCard } from '@/components/shared/LoginCard';
 
 type Step = 'phone' | 'otp' | 'register';
 
-// Messages contextuels selon l'étape
-const STEP_BANNERS: Record<Step, { icon: string; message: string }> = {
-  phone: { icon: '🌾', message: 'Accès réservé aux coopératives agricoles' },
-  otp: { icon: '🔒', message: 'Ne partagez jamais votre code de vérification' },
-  register: { icon: '✨', message: 'Créez votre espace coopérative en 30 secondes' },
-};
-
-// Configuration du stepper
-const STEPS_CONFIG: Record<Step, { number: number; title: string; subtitle: string }> = {
-  phone: { number: 1, title: 'Connexion Coopérative', subtitle: 'Étape 1 · Numéro de téléphone' },
-  otp: { number: 2, title: 'Vérification OTP', subtitle: 'Étape 2 · Code de sécurité' },
-  register: { number: 3, title: 'Créer votre espace', subtitle: 'Étape 3 · Informations coopérative' },
+const STEPS_CONFIG: Record<Step, { title: string; subtitle: string }> = {
+  phone: { title: 'Connexion Coopérative', subtitle: 'Étape 1 · Numéro de téléphone' },
+  otp: { title: 'Vérification', subtitle: 'Étape 2 · Code de sécurité' },
+  register: { title: 'Création de compte', subtitle: 'Étape 3 · Informations coopérative' },
 };
 
 const CooperativeLogin: React.FC = () => {
@@ -76,7 +66,7 @@ const CooperativeLogin: React.FC = () => {
     
     const code = generateMockOtp();
     toast({
-      title: '📱 Code OTP envoyé',
+      title: 'Code OTP envoyé',
       description: `Code de démonstration: ${code}`,
       duration: 10000,
     });
@@ -120,7 +110,7 @@ const CooperativeLogin: React.FC = () => {
     }
 
     toast({
-      title: '✅ Connexion réussie',
+      title: 'Connexion réussie',
       description: 'Bienvenue sur l\'espace Coopérative',
     });
     
@@ -157,7 +147,7 @@ const CooperativeLogin: React.FC = () => {
     }
 
     toast({
-      title: '✅ Compte créé',
+      title: 'Compte créé',
       description: 'Votre espace coopérative a été créé avec succès',
     });
 
@@ -174,69 +164,53 @@ const CooperativeLogin: React.FC = () => {
     }
   };
 
-  const currentStepNumber = STEPS_CONFIG[step].number;
-  const currentBanner = STEP_BANNERS[step];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      {/* Header Institutionnel */}
+    <div className="min-h-screen bg-background flex flex-col">
       <InstitutionalHeader
         subtitle="Espace Coopérative"
         showBackButton={step !== 'phone'}
         onBack={handleBack}
-        showOfficialBadge={true}
       />
 
-      {/* Bandeau Contextuel */}
-      <ContextualBanner
-        icon={currentBanner.icon}
-        message={currentBanner.message}
-        variant="default"
-        maxWidth="2xl"
-      />
-
-      {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+      <main className="flex-1 flex flex-col items-center justify-center p-4">
         <LoginCard
-          variant="default"
-          icon={step === 'register' ? UserPlus : Wheat}
-          currentStep={currentStepNumber}
           title={STEPS_CONFIG[step].title}
           subtitle={STEPS_CONFIG[step].subtitle}
-          showSecurityNote={true}
         >
           {step === 'phone' && (
             <>
-              <div className="space-y-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="phone" className="form-label-lg">
                   Numéro de téléphone
                 </Label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                <div className="flex gap-2">
+                  <div className="flex items-center justify-center h-12 px-3 bg-muted rounded-md text-sm font-medium text-muted-foreground">
                     +225
-                  </span>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="0701020304"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="form-input-lg pl-16"
-                    maxLength={10}
-                  />
-                  <Phone className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="relative flex-1">
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="07 01 02 03 04"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      className="input-institutional"
+                      maxLength={10}
+                    />
+                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
               </div>
 
               <Button
                 onClick={handleSendOtp}
                 disabled={phone.length !== 10 || isLoading}
-                className="btn-xxl w-full bg-primary hover:bg-primary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Envoi en cours...
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Envoi...
                   </>
                 ) : (
                   'Recevoir le code OTP'
@@ -247,26 +221,26 @@ const CooperativeLogin: React.FC = () => {
 
           {step === 'otp' && (
             <>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Label className="form-label-lg text-center block">
                   Code de vérification
                 </Label>
                 <div className="flex justify-center">
                   <OTPInput value={otp} onChange={setOtp} disabled={isLoading} />
                 </div>
-                <p className="text-center text-sm text-muted-foreground">
-                  Code envoyé au <span className="font-medium">+225 {phone}</span>
+                <p className="text-center text-xs text-muted-foreground">
+                  Code envoyé au +225 {phone}
                 </p>
               </div>
 
               <Button
                 onClick={handleVerifyOtp}
                 disabled={otp.length !== 6 || isLoading}
-                className="btn-xxl w-full bg-primary hover:bg-primary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Vérification...
                   </>
                 ) : (
@@ -277,7 +251,7 @@ const CooperativeLogin: React.FC = () => {
               <button
                 onClick={handleSendOtp}
                 disabled={isLoading}
-                className="w-full text-center text-primary font-medium hover:underline"
+                className="w-full text-center text-sm text-primary hover:underline"
               >
                 Renvoyer le code
               </button>
@@ -286,7 +260,7 @@ const CooperativeLogin: React.FC = () => {
 
           {step === 'register' && (
             <>
-              <div className="space-y-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="fullName" className="form-label-lg">
                   Nom de la coopérative
                 </Label>
@@ -296,41 +270,40 @@ const CooperativeLogin: React.FC = () => {
                   placeholder="Coopérative des Vivriers de Bouaké"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="form-input-lg"
+                  className="input-institutional"
                 />
               </div>
 
-              <div className="bg-muted/50 rounded-xl p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">📱 Téléphone vérifié</p>
-                <p>+225 {phone}</p>
+              <div className="bg-muted rounded-md p-3 text-sm">
+                <p className="text-xs text-muted-foreground">Téléphone vérifié</p>
+                <p className="font-medium text-foreground">+225 {phone}</p>
               </div>
 
               <Button
                 onClick={handleRegister}
                 disabled={fullName.trim().length < 3 || isLoading}
-                className="btn-xxl w-full bg-secondary hover:bg-secondary/90"
+                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Création du compte...
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Création...
                   </>
                 ) : (
-                  'Créer mon espace Coopérative'
+                  'Créer mon espace'
                 )}
               </Button>
             </>
           )}
         </LoginCard>
 
-        {/* Zone informative secondaire */}
-        <div className="w-full max-w-md mt-6">
-          <SecondaryFeatures variant="default" showInstitutionalNote={true} maxWidth="md" />
-        </div>
-      </div>
+        {/* Note institutionnelle */}
+        <p className="text-xs text-muted-foreground text-center mt-6 max-w-sm">
+          Plateforme opérée par l'ANSUT pour le compte de la DGE
+        </p>
+      </main>
 
-      {/* Footer Institutionnel */}
-      <InstitutionalFooter variant="default" showSupportButton={true} maxWidth="2xl" />
+      <InstitutionalFooter />
     </div>
   );
 };
