@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Loader2, ArrowRight, ArrowLeft, Shield, UserPlus, Lock, Smartphone, Headphones } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, Shield, UserPlus, Lock, Smartphone, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/li
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { ContextualBanner } from '@/components/shared/ContextualBanner';
+import { SecondaryFeatures } from '@/components/shared/SecondaryFeatures';
 
 type Step = "phone" | "otp" | "register";
 
@@ -339,28 +340,18 @@ export default function MerchantLogin() {
         </Card>
 
         {/* Zone features secondaire */}
-        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 rounded-xl bg-muted/50">
-            <Shield className="w-5 h-5 mx-auto text-primary mb-1" />
-            <p className="text-xs font-medium">Sécurisé</p>
-            <p className="text-[10px] text-muted-foreground">Paiements protégés</p>
-          </div>
-          <div className="p-3 rounded-xl bg-muted/50">
-            <Smartphone className="w-5 h-5 mx-auto text-primary mb-1" />
-            <p className="text-xs font-medium">Officiel</p>
-            <p className="text-[10px] text-muted-foreground">Plateforme DGE</p>
-          </div>
-          <div className="p-3 rounded-xl bg-muted/50">
-            <Headphones className="w-5 h-5 mx-auto text-primary mb-1" />
-            <p className="text-xs font-medium">Support</p>
-            <p className="text-[10px] text-muted-foreground">Assistance 24/7</p>
-          </div>
+        <div className="mt-6">
+          <SecondaryFeatures
+            variant="compact"
+            features={[
+              { icon: Shield, title: 'Sécurisé', description: 'Paiements protégés', colorClass: 'bg-primary/10 text-primary' },
+              { icon: Smartphone, title: 'Officiel', description: 'Plateforme DGE', colorClass: 'bg-primary/10 text-primary' },
+              { icon: Headphones, title: 'Support', description: 'Assistance 24/7', colorClass: 'bg-primary/10 text-primary' },
+            ]}
+            showInstitutionalNote={true}
+            maxWidth="md"
+          />
         </div>
-
-        {/* Mention institutionnelle */}
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          Plateforme opérée par l'ANSUT pour le compte de la DGE
-        </p>
       </main>
 
       {/* Footer institutionnel */}
