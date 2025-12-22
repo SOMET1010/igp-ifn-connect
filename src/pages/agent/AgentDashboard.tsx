@@ -13,7 +13,8 @@ import { DashboardHeader } from '@/components/shared/DashboardHeader';
 import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
 import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
 import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
-import { 
+import { RetryIndicator } from '@/components/shared/RetryIndicator';
+import {
   UserPlus, 
   Users, 
   Calendar, 
@@ -101,11 +102,15 @@ const AgentDashboard: React.FC = () => {
     isLoading, 
     error, 
     isNetworkError, 
-    refetch 
+    refetch,
+    nextRetryIn,
+    retryCount,
   } = useDataFetching<AgentDashboardData>({
     fetchFn: fetchDashboardData,
     deps: [user?.id],
     enabled: !!user,
+    retryDelay: 2000,
+    maxRetries: 3,
   });
 
   const profile = data?.profile ?? null;
@@ -126,11 +131,20 @@ const AgentDashboard: React.FC = () => {
           subtitle="Plateforme IFN – Espace Agent"
           onSignOut={handleSignOut}
         />
-        <ErrorState
-          message={error.userMessage}
-          onRetry={refetch}
-          isNetworkError={isNetworkError}
-        />
+        <div className="p-4 space-y-4 max-w-2xl mx-auto">
+          <ErrorState
+            message={error.userMessage}
+            onRetry={refetch}
+            isNetworkError={isNetworkError}
+          />
+          {nextRetryIn !== null && (
+            <RetryIndicator
+              nextRetryIn={nextRetryIn}
+              retryCount={retryCount}
+              maxRetries={3}
+            />
+          )}
+        </div>
         <InstitutionalBottomNav items={navItems} />
       </div>
     );
