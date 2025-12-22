@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calend
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday, startOfWeek, startOfMonth, subDays, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -38,27 +39,14 @@ export default function MerchantTransactions() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isOnline } = useOnlineStatus();
   
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(10);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isExporting, setIsExporting] = useState(false);
   const [exportPeriod, setExportPeriod] = useState<string>("week");
   const [merchantName, setMerchantName] = useState<string>("");
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchTransactions = async () => {

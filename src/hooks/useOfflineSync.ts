@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { compressBase64Image } from "@/lib/imageCompression";
@@ -9,6 +9,7 @@ import {
   updateQueueItem,
   openDB,
 } from "@/lib/offlineDB";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface OfflineItem {
   id: string;
@@ -80,21 +81,10 @@ const getRetryDelay = (retryCount: number): number => {
 };
 
 export function useOfflineSync() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [pendingCount, setPendingCount] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialized = useRef(false);
-
-  // Initialize IndexedDB
-  useEffect(() => {
-    if (!isInitialized.current) {
-      openDB().then(() => {
-        isInitialized.current = true;
-        refreshPendingCount();
-      });
-    }
-  }, []);
 
   // Refresh pending count from IndexedDB
   const refreshPendingCount = useCallback(async () => {
@@ -105,7 +95,6 @@ export function useOfflineSync() {
       console.error("Error getting queue:", error);
     }
   }, []);
-
   // Add an action to the queue
   const addToQueue = useCallback(async (
     entityType: string, 
@@ -355,45 +344,38 @@ export function useOfflineSync() {
     }
   }, [isSyncing, refreshPendingCount]);
 
-  // Listen for online/offline events
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
+  // Utiliser useOnlineStatus avec callbacks pour la sync
+  const { isOnline } = useOnlineStatus({
+    onOnline: () => {
       toast.success("Connexion rétablie");
-      
       // Sync after a short delay to let the network stabilize
       setTimeout(() => {
         syncWithServer();
       }, 1000);
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
+    },
+    onOffline: () => {
       toast.warning("Vous êtes hors-ligne. Les données seront synchronisées automatiquement.");
-      
       // Cancel any pending sync
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
-    };
+    },
+  });
 
-    // Listen for service worker sync messages
+  // Listen for service worker sync messages
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'SYNC_OFFLINE_DATA') {
         syncWithServer();
       }
     };
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
     navigator.serviceWorker?.addEventListener('message', handleMessage);
 
     // Initial pending count
     refreshPendingCount();
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
       navigator.serviceWorker?.removeEventListener('message', handleMessage);
       
       if (syncTimeoutRef.current) {
@@ -401,6 +383,16 @@ export function useOfflineSync() {
       }
     };
   }, [syncWithServer, refreshPendingCount]);
+
+  // Initialize IndexedDB
+  useEffect(() => {
+    if (!isInitialized.current) {
+      openDB().then(() => {
+        isInitialized.current = true;
+        refreshPendingCount();
+      });
+    }
+  }, [refreshPendingCount]);
 
   return {
     isOnline,

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, Shield, Loader2, HelpCircle 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { BigNumber, CardLarge, StatusBanner, BottomNavIFN } from "@/components/ifn";
@@ -19,6 +20,7 @@ export default function MerchantMoney() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const { isOnline } = useOnlineStatus();
   const [data, setData] = useState<MoneyData>({
     totalSales: 0,
     totalCMU: 0,
@@ -26,20 +28,6 @@ export default function MerchantMoney() {
     netAmount: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
