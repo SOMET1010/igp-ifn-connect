@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { DashboardHeader } from "@/components/shared/DashboardHeader";
 import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
+import { InstitutionalActionCard } from "@/components/shared/InstitutionalActionCard";
+import { BigNumberCard } from "@/components/shared/BigNumberCard";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { merchantLogger } from "@/infra/logger";
@@ -173,17 +175,11 @@ export default function MerchantDashboard() {
         </div>
 
         {/* Today's sales - Big Number */}
-        <Card className="card-institutional">
-          <CardContent className="p-6 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-              {t("your_sales_today")}
-            </p>
-            <p className="text-4xl font-bold text-primary">
-              {todayTotal.toLocaleString('fr-FR')}
-            </p>
-            <p className="text-lg text-muted-foreground">FCFA</p>
-          </CardContent>
-        </Card>
+        <BigNumberCard
+          label={t("your_sales_today")}
+          value={todayTotal}
+          unit="FCFA"
+        />
 
         {/* Action buttons */}
         <Button 
@@ -205,6 +201,51 @@ export default function MerchantDashboard() {
 
         {/* Sales Evolution Chart */}
         <SalesChart />
+
+        {/* Quick Actions */}
+        <div className="space-y-3">
+          <InstitutionalActionCard
+            title={t("stock")}
+            description={t("manage_products")}
+            icon={Package}
+            onClick={() => navigate('/marchand/stock')}
+          />
+          <InstitutionalActionCard
+            title={t("invoices") || "Factures"}
+            description={t("view_history")}
+            icon={Receipt}
+            onClick={() => navigate('/marchand/factures')}
+          />
+          <InstitutionalActionCard
+            title={t("my_profile")}
+            description={t("settings")}
+            icon={User}
+            onClick={() => navigate('/marchand/profil')}
+          />
+        </div>
+
+        {/* Quick Guide */}
+        <Card className="card-institutional">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-foreground mb-3">
+              {t("quick_guide")}
+            </h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-medium">1.</span>
+                <span>Appuyez sur "Encaisser" pour enregistrer une vente</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-medium">2.</span>
+                <span>Saisissez le montant et choisissez le mode de paiement</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary font-medium">3.</span>
+                <span>Partagez le reçu avec votre client</span>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
 
         {/* Status indicator */}
         <div className={`text-center text-sm ${isOnline ? 'text-muted-foreground' : 'text-destructive'}`}>
