@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useDataFetching } from "@/hooks/useDataFetching";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { Confetti } from "@/components/shared/Confetti";
 import { merchantLogger } from "@/infra/logger";
+import { useState } from "react";
 import type { MerchantDashboardViewData } from "@/shared/types";
 
 const CONFETTI_KEY_PREFIX = 'ifn_first_sale_celebrated_';
@@ -43,7 +45,7 @@ export default function MerchantDashboard() {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { isOnline } = useOnlineStatus();
   const [showConfetti, setShowConfetti] = useState(false);
 
   const navItems = [
@@ -52,20 +54,6 @@ export default function MerchantDashboard() {
     { icon: Package, label: t("stock"), path: '/marchand/stock' },
     { icon: User, label: t("profile"), path: '/marchand/profil' },
   ];
-
-  // Gestion online/offline
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
 
   // Fonction de fetch des données
   const fetchDashboardData = useCallback(async (): Promise<DashboardData> => {
