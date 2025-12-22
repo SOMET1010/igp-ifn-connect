@@ -1,16 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, Loader2, ArrowRight } from "lucide-react";
+import { Phone, Loader2, ArrowRight, ArrowLeft, Shield, UserPlus, Lock, Smartphone, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import OTPInput from "@/components/auth/OTPInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
+import logoDGE from '@/assets/logo-dge.png';
+import logoANSUT from '@/assets/logo-ansut.png';
 
 type Step = "phone" | "otp" | "register";
+
+// Messages contextuels selon l'étape
+const STEP_BANNERS: Record<Step, { icon: string; message: string }> = {
+  phone: { icon: '🛒', message: 'Accès réservé aux marchands enregistrés' },
+  otp: { icon: '🔒', message: 'Ne partagez jamais votre code de vérification' },
+  register: { icon: '✨', message: 'Créez votre compte marchand en 30 secondes' },
+};
+
+// Configuration du stepper
+const STEPS_CONFIG: Record<Step, { number: number; title: string; subtitle: string }> = {
+  phone: { number: 1, title: 'Connexion Marchand', subtitle: 'Étape 1 · Numéro de téléphone' },
+  otp: { number: 2, title: 'Vérification OTP', subtitle: 'Étape 2 · Code de sécurité' },
+  register: { number: 3, title: 'Créer votre compte', subtitle: 'Étape 3 · Informations marchand' },
+};
 
 export default function MerchantLogin() {
   const navigate = useNavigate();
@@ -24,9 +41,10 @@ export default function MerchantLogin() {
   const [isNewUser, setIsNewUser] = useState(false);
 
   const email = `${phone.replace(/\s/g, "")}@marchand.igp.ci`;
+  const currentConfig = STEPS_CONFIG[step];
+  const currentBanner = STEP_BANNERS[step];
 
   const handlePhoneSubmit = async () => {
-    // Validate phone with Zod
     const error = getValidationError(phoneSchema, phone);
     if (error) {
       toast.error(error);
@@ -35,7 +53,6 @@ export default function MerchantLogin() {
 
     setIsLoading(true);
 
-    // Check if merchant exists
     const { data: existingMerchant } = await supabase
       .from("merchants")
       .select("id, full_name")
@@ -49,7 +66,6 @@ export default function MerchantLogin() {
       setIsNewUser(true);
     }
 
-    // Simulate OTP send
     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
     toast.success(`Code de vérification : ${generatedOtp}`, { duration: 10000 });
     
@@ -58,7 +74,6 @@ export default function MerchantLogin() {
   };
 
   const handleOtpSubmit = async () => {
-    // Validate OTP with Zod
     const validationError = getValidationError(otpSchema, otp);
     if (validationError) {
       toast.error(validationError);
@@ -73,11 +88,9 @@ export default function MerchantLogin() {
       return;
     }
 
-    // Existing user - sign in
     const { error: signInError } = await signIn(email, "marchand123");
     
     if (signInError) {
-      // Try signing up if user doesn't exist in auth
       const { error: signUpError } = await signUp(email, "marchand123", fullName);
       if (signUpError) {
         toast.error("Erreur de connexion");
@@ -92,7 +105,6 @@ export default function MerchantLogin() {
   };
 
   const handleRegisterSubmit = async () => {
-    // Validate name with Zod
     const validationError = getValidationError(fullNameSchema, fullName);
     if (validationError) {
       toast.error(validationError);
@@ -119,7 +131,6 @@ export default function MerchantLogin() {
     const userId = data.user.id;
     const cleanPhone = phone.replace(/\s/g, "");
 
-    // Create merchant entry
     const { error: merchantError } = await supabase.from("merchants").insert({
       user_id: userId,
       full_name: fullName,
@@ -136,7 +147,6 @@ export default function MerchantLogin() {
       return;
     }
 
-    // Add merchant role
     const { error: roleError } = await supabase.from("user_roles").insert({
       user_id: userId,
       role: "merchant"
@@ -153,147 +163,254 @@ export default function MerchantLogin() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="bg-gradient-forest text-primary-foreground py-8 px-6">
-        <div className="max-w-md mx-auto text-center">
-          <div className="text-5xl mb-4">💵</div>
-          <h1 className="text-2xl font-bold">Espace Marchand</h1>
-          <p className="text-sm opacity-90 mt-2">
-            Encaisser, vendre et être protégé
-          </p>
+      {/* Header institutionnel */}
+      <header className="bg-primary text-primary-foreground py-4 sm:py-6 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto">
+          {/* Ligne supérieure avec logos */}
+          <div className="flex items-center justify-between mb-3">
+            {/* Logo DGE (gauche) */}
+            <div className="bg-white rounded-lg p-1.5 shadow-sm">
+              <img 
+                src={logoDGE} 
+                alt="Direction Générale des Entreprises" 
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            
+            {/* Titre central */}
+            <div className="text-center flex-1 px-2 sm:px-4">
+              <h1 className="text-sm sm:text-lg font-bold tracking-tight">Plateforme IFN</h1>
+              <p className="text-[10px] sm:text-xs text-primary-foreground/70">Espace Marchand</p>
+            </div>
+            
+            {/* Logo ANSUT (droite) */}
+            <div className="bg-white rounded-lg p-1.5 shadow-sm">
+              <img 
+                src={logoANSUT} 
+                alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" 
+                className="h-8 w-auto object-contain"
+              />
+            </div>
+          </div>
+          
+          {/* Sous-titre ministériel */}
+          <div className="text-center">
+            <p className="text-xs sm:text-sm text-primary-foreground/80">
+              🇨🇮 République de Côte d'Ivoire · Direction Générale des Entreprises
+            </p>
+            <p className="text-[10px] text-primary-foreground/60 mt-1">
+              🏛️ Portail officiel sécurisé
+            </p>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 max-w-md mx-auto w-full px-6 py-8">
-        {step === "phone" && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold text-foreground">Connexion</h2>
-              <p className="text-muted-foreground mt-1">
-                Entrez votre numéro de téléphone
-              </p>
-            </div>
+      {/* Bandeau contextuel */}
+      <div className="bg-muted/60 border-b border-border/50 py-2.5 px-4">
+        <div className="max-w-md mx-auto flex items-center justify-center gap-2 text-sm">
+          <span>{currentBanner.icon}</span>
+          <span className="text-muted-foreground font-medium">{currentBanner.message}</span>
+        </div>
+      </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-base font-semibold">
-                  📱 Téléphone
-                </Label>
-                <div className="flex gap-2">
-                  <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
-                    +225
+      <main className="flex-1 max-w-md mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+        <Card className="shadow-lg border-border/50">
+          <CardHeader className="text-center pb-4">
+            {/* Icône réduite */}
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
+              {step === 'phone' && <Smartphone className="w-7 h-7 text-primary" />}
+              {step === 'otp' && <Lock className="w-7 h-7 text-primary" />}
+              {step === 'register' && <UserPlus className="w-7 h-7 text-primary" />}
+            </div>
+            
+            {/* Stepper visuel */}
+            <div className="flex items-center justify-center gap-1.5 mb-3">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    n <= currentConfig.number 
+                      ? 'bg-primary' 
+                      : 'bg-muted-foreground/20'
+                  }`}
+                />
+              ))}
+            </div>
+            
+            <CardTitle className="text-xl">{currentConfig.title}</CardTitle>
+            <CardDescription className="text-sm">{currentConfig.subtitle}</CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            {step === "phone" && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-base font-semibold">
+                    📱 Téléphone
+                  </Label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
+                      +225
+                    </div>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="07 12 34 56 78"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="h-14 text-lg rounded-xl border-2 flex-1"
+                    />
                   </div>
+                </div>
+
+                <Button
+                  onClick={handlePhoneSubmit}
+                  disabled={isLoading || phone.length < 8}
+                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Continuer
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+                
+                {/* Note de sécurité */}
+                <p className="text-xs text-muted-foreground text-center">
+                  🔒 Connexion chiffrée · Vos données sont protégées
+                </p>
+              </div>
+            )}
+
+            {step === "otp" && (
+              <div className="space-y-4">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-primary font-medium">
+                    +225 {phone}
+                  </p>
+                </div>
+
+                <OTPInput value={otp} onChange={setOtp} />
+
+                <Button
+                  onClick={handleOtpSubmit}
+                  disabled={isLoading || otp.length !== 6}
+                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    "Valider"
+                  )}
+                </Button>
+
+                <button
+                  onClick={() => setStep("phone")}
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Modifier le numéro
+                </button>
+                
+                {/* Note de sécurité */}
+                <p className="text-xs text-muted-foreground text-center">
+                  🔒 Ne partagez jamais ce code avec quiconque
+                </p>
+              </div>
+            )}
+
+            {step === "register" && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-base font-semibold">
+                    👤 Votre nom complet
+                  </Label>
                   <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="07 12 34 56 78"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-14 text-lg rounded-xl border-2 flex-1"
+                    id="fullName"
+                    type="text"
+                    placeholder="Ex: Kouamé Adjoua"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="h-14 text-lg rounded-xl border-2"
                   />
                 </div>
+
+                <Button
+                  onClick={handleRegisterSubmit}
+                  disabled={isLoading || fullName.length < 3}
+                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      Créer mon compte
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </>
+                  )}
+                </Button>
+                
+                <button
+                  onClick={() => setStep("otp")}
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Retour
+                </button>
+                
+                {/* Note de sécurité */}
+                <p className="text-xs text-muted-foreground text-center">
+                  🔒 Vos informations sont sécurisées
+                </p>
               </div>
+            )}
+          </CardContent>
+        </Card>
 
-              <Button
-                onClick={handlePhoneSubmit}
-                disabled={isLoading || phone.length < 8}
-                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    Continuer
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
-              </Button>
-            </div>
+        {/* Zone features secondaire */}
+        <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          <div className="p-3 rounded-xl bg-muted/50">
+            <Shield className="w-5 h-5 mx-auto text-primary mb-1" />
+            <p className="text-xs font-medium">Sécurisé</p>
+            <p className="text-[10px] text-muted-foreground">Paiements protégés</p>
           </div>
-        )}
-
-        {step === "otp" && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold text-foreground">Vérification</h2>
-              <p className="text-muted-foreground mt-1">
-                Entrez le code reçu par SMS
-              </p>
-              <p className="text-sm text-primary mt-2 font-medium">
-                +225 {phone}
-              </p>
-            </div>
-
-            <OTPInput value={otp} onChange={setOtp} />
-
-            <Button
-              onClick={handleOtpSubmit}
-              disabled={isLoading || otp.length !== 6}
-              className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                "Valider"
-              )}
-            </Button>
-
-            <button
-              onClick={() => setStep("phone")}
-              className="w-full text-center text-muted-foreground text-sm"
-            >
-              ← Modifier le numéro
-            </button>
+          <div className="p-3 rounded-xl bg-muted/50">
+            <Smartphone className="w-5 h-5 mx-auto text-primary mb-1" />
+            <p className="text-xs font-medium">Officiel</p>
+            <p className="text-[10px] text-muted-foreground">Plateforme DGE</p>
           </div>
-        )}
-
-        {step === "register" && (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-bold text-foreground">Bienvenue !</h2>
-              <p className="text-muted-foreground mt-1">
-                Créez votre compte marchand
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-base font-semibold">
-                  👤 Votre nom complet
-                </Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Ex: Kouamé Adjoua"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="h-14 text-lg rounded-xl border-2"
-                />
-              </div>
-
-              <Button
-                onClick={handleRegisterSubmit}
-                disabled={isLoading || fullName.length < 3}
-                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    Créer mon compte
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="p-3 rounded-xl bg-muted/50">
+            <Headphones className="w-5 h-5 mx-auto text-primary mb-1" />
+            <p className="text-xs font-medium">Support</p>
+            <p className="text-[10px] text-muted-foreground">Assistance 24/7</p>
           </div>
-        )}
+        </div>
+
+        {/* Mention institutionnelle */}
+        <p className="text-xs text-muted-foreground text-center mt-4">
+          Plateforme opérée par l'ANSUT pour le compte de la DGE
+        </p>
       </main>
 
-      <footer className="py-4 px-6 text-center">
-        <p className="text-xs text-muted-foreground">
-          🇨🇮 Plateforme IFN
-        </p>
+      {/* Footer institutionnel */}
+      <footer className="py-4 px-4 sm:px-6 border-t border-border/30 bg-muted/30">
+        <div className="max-w-md mx-auto text-center space-y-2">
+          <p className="text-xs font-medium text-foreground/80">
+            Direction Générale des Entreprises (DGE)
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            Plateforme IFN opérée par l'ANSUT
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            © République de Côte d'Ivoire – 2024 · v1.0.0
+          </p>
+          <Button variant="ghost" size="sm" className="text-xs h-8 mt-2">
+            📞 Support technique
+          </Button>
+        </div>
       </footer>
     </div>
   );
