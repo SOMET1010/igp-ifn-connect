@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
+import { ContextualBanner } from '@/components/shared/ContextualBanner';
 
 type Step = "phone" | "otp" | "register";
 
@@ -172,12 +173,13 @@ export default function MerchantLogin() {
       />
 
       {/* Bandeau contextuel */}
-      <div className="bg-muted/60 border-b border-border/50 py-2.5 px-4">
-        <div className="max-w-md mx-auto flex items-center justify-center gap-2 text-sm">
-          <span>{currentBanner.icon}</span>
-          <span className="text-muted-foreground font-medium">{currentBanner.message}</span>
-        </div>
-      </div>
+      <ContextualBanner
+        icon={currentBanner.icon}
+        message={currentBanner.message}
+        variant="compact"
+        maxWidth="md"
+        fontWeight="medium"
+      />
 
       <main className="flex-1 max-w-md mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
         <Card className="shadow-lg border-border/50">
