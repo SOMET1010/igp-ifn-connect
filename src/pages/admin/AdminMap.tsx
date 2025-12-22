@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import type { Map as LeafletMap } from 'leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -253,29 +254,36 @@ const AdminMap: React.FC = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          {filteredEntities.map((entity) => (
-            <Marker
-              key={`${entity.type}-${entity.id}`}
-              position={[entity.lat, entity.lng]}
-              icon={getIcon(entity.type)}
-            >
-              <Popup>
-                <div className="p-1 min-w-[120px]">
-                  <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
-                    entity.type === 'merchant' ? 'bg-green-100 text-green-800' :
-                    entity.type === 'cooperative' ? 'bg-amber-100 text-amber-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {getTypeLabel(entity.type)}
-                  </span>
-                  <p className="font-semibold mt-2 text-gray-900">{entity.name}</p>
-                  {entity.details && (
-                    <p className="text-sm text-gray-600">{entity.details}</p>
-                  )}
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+          {filteredEntities.map((entity) => {
+            const popupContent = `
+              <div class="p-1 min-w-[120px]">
+                <span class="inline-block px-2 py-0.5 text-xs font-medium rounded ${
+                  entity.type === 'merchant' ? 'bg-green-100 text-green-800' :
+                  entity.type === 'cooperative' ? 'bg-amber-100 text-amber-800' :
+                  'bg-blue-100 text-blue-800'
+                }">
+                  ${getTypeLabel(entity.type)}
+                </span>
+                <p class="font-semibold mt-2 text-gray-900">${entity.name}</p>
+                ${entity.details ? `<p class="text-sm text-gray-600">${entity.details}</p>` : ''}
+              </div>
+            `;
+            return (
+              <Marker
+                key={`${entity.type}-${entity.id}`}
+                position={[entity.lat, entity.lng]}
+                icon={getIcon(entity.type)}
+                eventHandlers={{
+                  click: (e) => {
+                    L.popup()
+                      .setLatLng(e.latlng)
+                      .setContent(popupContent)
+                      .openOn(e.target._map);
+                  }
+                }}
+              />
+            );
+          })}
         </MapContainer>
 
         {/* Legend */}
