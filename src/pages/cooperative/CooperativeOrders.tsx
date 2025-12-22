@@ -25,6 +25,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
+import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 
 interface Order {
   id: string;
@@ -206,7 +207,7 @@ const CooperativeOrders: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+        <LoadingState message="Chargement des commandes..." />
       </div>
     );
   }
@@ -352,10 +353,11 @@ const CooperativeOrders: React.FC = () => {
 
           <TabsContent value="pending" className="space-y-3">
             {pendingOrders.length === 0 ? (
-              <Card className="p-8 text-center">
-                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucune commande en attente</p>
-              </Card>
+              <EmptyState
+                Icon={ClipboardList}
+                title="Aucune commande en attente"
+                variant="card"
+              />
             ) : (
               pendingOrders.map(order => <OrderCard key={order.id} order={order} />)
             )}
@@ -363,10 +365,11 @@ const CooperativeOrders: React.FC = () => {
 
           <TabsContent value="confirmed" className="space-y-3">
             {confirmedOrders.length === 0 ? (
-              <Card className="p-8 text-center">
-                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucune commande confirmée</p>
-              </Card>
+              <EmptyState
+                Icon={ClipboardList}
+                title="Aucune commande confirmée"
+                variant="card"
+              />
             ) : (
               confirmedOrders.map(order => <OrderCard key={order.id} order={order} />)
             )}
@@ -374,10 +377,11 @@ const CooperativeOrders: React.FC = () => {
 
           <TabsContent value="delivered" className="space-y-3">
             {deliveredOrders.length === 0 ? (
-              <Card className="p-8 text-center">
-                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucune commande livrée</p>
-              </Card>
+              <EmptyState
+                Icon={ClipboardList}
+                title="Aucune commande livrée"
+                variant="card"
+              />
             ) : (
               deliveredOrders.map(order => <OrderCard key={order.id} order={order} />)
             )}
@@ -385,10 +389,11 @@ const CooperativeOrders: React.FC = () => {
 
           <TabsContent value="cancelled" className="space-y-3">
             {cancelledOrders.length === 0 ? (
-              <Card className="p-8 text-center">
-                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Aucune commande annulée</p>
-              </Card>
+              <EmptyState
+                Icon={ClipboardList}
+                title="Aucune commande annulée"
+                variant="card"
+              />
             ) : (
               cancelledOrders.map(order => <OrderCard key={order.id} order={order} />)
             )}

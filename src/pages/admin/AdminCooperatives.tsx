@@ -7,11 +7,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   ArrowLeft,
   Search,
-  Loader2,
   MapPin,
   Users,
-  Award
+  Award,
+  Building2
 } from 'lucide-react';
+import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 
 interface Cooperative {
   id: string;
@@ -57,7 +58,7 @@ const AdminCooperatives: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-violet-600" />
+        <LoadingState message="Chargement des coopératives..." />
       </div>
     );
   }
@@ -91,9 +92,12 @@ const AdminCooperatives: React.FC = () => {
 
         {/* Cooperatives list */}
         {filteredCooperatives.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Aucune coopérative trouvée</p>
-          </Card>
+          <EmptyState
+            Icon={Building2}
+            title="Aucune coopérative trouvée"
+            message={searchQuery ? 'Essayez avec d\'autres termes de recherche' : undefined}
+            variant="card"
+          />
         ) : (
           <div className="space-y-3">
             {filteredCooperatives.map((coop) => (

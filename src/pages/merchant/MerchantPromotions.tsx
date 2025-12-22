@@ -19,12 +19,12 @@ import {
   Gift,
   Calendar,
   Tag,
-  Loader2,
   ToggleLeft,
   ToggleRight,
   Trash2,
   TrendingUp
 } from "lucide-react";
+import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import {
   Dialog,
   DialogContent,
@@ -205,7 +205,7 @@ export default function MerchantPromotions() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <LoadingState message="Chargement des promotions..." />
       </div>
     );
   }
@@ -366,12 +366,12 @@ export default function MerchantPromotions() {
         {/* Promotions List */}
         <div className="space-y-3">
           {filteredPromos.length === 0 ? (
-            <Card className="bg-muted/30">
-              <CardContent className="p-8 text-center">
-                <Gift className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">Aucune promotion</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              Icon={Gift}
+              title="Aucune promotion"
+              message={filter !== 'all' ? 'Aucune promotion dans cette catégorie' : undefined}
+              variant="card"
+            />
           ) : (
             filteredPromos.map((promo) => (
               <Card 
