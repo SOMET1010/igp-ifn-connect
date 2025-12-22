@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
@@ -51,27 +50,6 @@ const marketIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
 });
-
-// Custom cluster icon
-const createClusterCustomIcon = (cluster: { getChildCount: () => number }) => {
-  const count = cluster.getChildCount();
-  let size = 'small';
-  let dimension = 30;
-  
-  if (count >= 10 && count < 50) {
-    size = 'medium';
-    dimension = 40;
-  } else if (count >= 50) {
-    size = 'large';
-    dimension = 50;
-  }
-
-  return L.divIcon({
-    html: `<div class="cluster-icon cluster-${size}">${count}</div>`,
-    className: 'custom-cluster-marker',
-    iconSize: L.point(dimension, dimension, true),
-  });
-};
 
 interface MapEntity {
   id: string;
@@ -275,37 +253,29 @@ const AdminMap: React.FC = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MarkerClusterGroup
-            chunkedLoading
-            iconCreateFunction={createClusterCustomIcon}
-            maxClusterRadius={60}
-            spiderfyOnMaxZoom={true}
-            showCoverageOnHover={false}
-          >
-            {filteredEntities.map((entity) => (
-              <Marker
-                key={`${entity.type}-${entity.id}`}
-                position={[entity.lat, entity.lng]}
-                icon={getIcon(entity.type)}
-              >
-                <Popup>
-                  <div className="p-1 min-w-[120px]">
-                    <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
-                      entity.type === 'merchant' ? 'bg-green-100 text-green-800' :
-                      entity.type === 'cooperative' ? 'bg-amber-100 text-amber-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {getTypeLabel(entity.type)}
-                    </span>
-                    <p className="font-semibold mt-2 text-gray-900">{entity.name}</p>
-                    {entity.details && (
-                      <p className="text-sm text-gray-600">{entity.details}</p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
+          {filteredEntities.map((entity) => (
+            <Marker
+              key={`${entity.type}-${entity.id}`}
+              position={[entity.lat, entity.lng]}
+              icon={getIcon(entity.type)}
+            >
+              <Popup>
+                <div className="p-1 min-w-[120px]">
+                  <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded ${
+                    entity.type === 'merchant' ? 'bg-green-100 text-green-800' :
+                    entity.type === 'cooperative' ? 'bg-amber-100 text-amber-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {getTypeLabel(entity.type)}
+                  </span>
+                  <p className="font-semibold mt-2 text-gray-900">{entity.name}</p>
+                  {entity.details && (
+                    <p className="text-sm text-gray-600">{entity.details}</p>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
 
         {/* Legend */}
