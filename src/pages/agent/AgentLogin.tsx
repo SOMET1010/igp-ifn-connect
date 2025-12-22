@@ -7,10 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Phone, ArrowLeft, Loader2, Shield, UserPlus } from 'lucide-react';
+import { Phone, ArrowLeft, Loader2, Shield, UserPlus, Lock, Smartphone, Headphones } from 'lucide-react';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 
 type Step = 'phone' | 'otp' | 'register';
+
+// Messages contextuels selon l'étape
+const STEP_BANNERS: Record<Step, { icon: string; message: string }> = {
+  phone: { icon: '🔐', message: 'Accès réservé aux agents habilités par la DGE' },
+  otp: { icon: '🔒', message: 'Ne partagez jamais votre code de vérification' },
+  register: { icon: '✨', message: 'Créez votre profil agent en 30 secondes' },
+};
+
+// Configuration du stepper
+const STEPS_CONFIG: Record<Step, { number: number; title: string; subtitle: string }> = {
+  phone: { number: 1, title: 'Identification Agent', subtitle: 'Étape 1 · Numéro de téléphone' },
+  otp: { number: 2, title: 'Vérification OTP', subtitle: 'Étape 2 · Code de sécurité' },
+  register: { number: 3, title: 'Créer votre profil', subtitle: 'Étape 3 · Informations agent' },
+};
 
 const AgentLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -169,52 +183,105 @@ const AgentLogin: React.FC = () => {
     }
   };
 
+  const currentStepNumber = STEPS_CONFIG[step].number;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground py-6 px-4">
-        <div className="flex items-center gap-3">
-          {step !== 'phone' && (
-            <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-primary-foreground/10">
-              <ArrowLeft className="h-6 w-6" />
-            </button>
-          )}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🇨🇮</span>
-              <span className="font-bold">République de Côte d'Ivoire</span>
+      {/* Header Institutionnel */}
+      <header className="bg-primary text-primary-foreground py-4 px-4">
+        <div className="max-w-2xl mx-auto">
+          {/* Ligne supérieure avec logos */}
+          <div className="flex items-center justify-between mb-3">
+            {/* Badge DGE (gauche) */}
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-1.5">
+              <span className="text-lg">🏛️</span>
+              <span className="text-xs font-semibold">DGE</span>
             </div>
-            <p className="text-sm text-primary-foreground/80 mt-1">
-              Direction Générale des Entreprises
-            </p>
+            
+            {/* Titre central */}
+            <div className="text-center flex-1 px-2">
+              <h1 className="font-bold text-sm sm:text-base">Plateforme IFN</h1>
+              <p className="text-[10px] sm:text-xs text-primary-foreground/70">Accès Agent</p>
+            </div>
+            
+            {/* Badge ANSUT (droite) */}
+            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-1.5">
+              <span className="text-lg">🔒</span>
+              <span className="text-xs font-semibold">ANSUT</span>
+            </div>
+          </div>
+          
+          {/* Ligne inférieure avec navigation */}
+          <div className="flex items-center gap-3">
+            {step !== 'phone' && (
+              <button 
+                onClick={handleBack} 
+                className="p-2 -ml-2 rounded-full hover:bg-primary-foreground/10 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🇨🇮</span>
+                <span className="font-medium text-sm">République de Côte d'Ivoire</span>
+              </div>
+              <p className="text-xs text-primary-foreground/70 mt-0.5">
+                Direction Générale des Entreprises · Ministère de l'Économie
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
+      {/* Bandeau Contextuel */}
+      <div className="bg-muted/60 border-b border-border/50">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <span>{STEP_BANNERS[step].icon}</span>
+            <span>{STEP_BANNERS[step].message}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-md shadow-africa border-2">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+        <Card className="w-full max-w-md shadow-lg border-2">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+            {/* Icône réduite */}
+            <div className="mx-auto mb-3 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
               {step === 'register' ? (
-                <UserPlus className="h-10 w-10 text-primary" />
+                <UserPlus className="h-8 w-8 text-primary" />
               ) : (
-                <Shield className="h-10 w-10 text-primary" />
+                <Shield className="h-8 w-8 text-primary" />
               )}
             </div>
-            <CardTitle className="text-2xl">
-              {step === 'phone' && 'Connexion Agent'}
-              {step === 'otp' && 'Vérification OTP'}
-              {step === 'register' && 'Créer votre profil'}
+            
+            {/* Stepper visuel */}
+            <div className="flex items-center justify-center gap-2 mb-3">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    n === currentStepNumber 
+                      ? 'bg-primary' 
+                      : n < currentStepNumber 
+                        ? 'bg-primary/50' 
+                        : 'bg-muted-foreground/30'
+                  }`}
+                />
+              ))}
+            </div>
+            
+            <CardTitle className="text-xl sm:text-2xl">
+              {STEPS_CONFIG[step].title}
             </CardTitle>
-            <CardDescription className="text-base">
-              {step === 'phone' && 'Entrez votre numéro de téléphone pour recevoir un code'}
-              {step === 'otp' && 'Entrez le code à 6 chiffres envoyé par SMS'}
-              {step === 'register' && 'Complétez votre profil agent'}
+            <CardDescription className="text-sm sm:text-base">
+              {STEPS_CONFIG[step].subtitle}
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6 pt-4">
+          <CardContent className="space-y-5 pt-2">
             {step === 'phone' && (
               <>
                 <div className="space-y-3">
@@ -331,13 +398,71 @@ const AgentLogin: React.FC = () => {
                 </Button>
               </>
             )}
+
+            {/* Note de sécurité */}
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2">
+              <Lock className="h-3.5 w-3.5" />
+              <span>Connexion chiffrée et sécurisée</span>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Zone informative secondaire */}
+        <div className="w-full max-w-md mt-6">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Lock className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-xs font-medium text-foreground">Sécurisé</p>
+              <p className="text-[10px] text-muted-foreground">Données chiffrées</p>
+            </div>
+            
+            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
+              <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Smartphone className="h-5 w-5 text-secondary" />
+              </div>
+              <p className="text-xs font-medium text-foreground">Officiel</p>
+              <p className="text-[10px] text-muted-foreground">Plateforme DGE</p>
+            </div>
+            
+            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
+              <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Headphones className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <p className="text-xs font-medium text-foreground">Support</p>
+              <p className="text-[10px] text-muted-foreground">Assistance 24/7</p>
+            </div>
+          </div>
+          
+          {/* Mention institutionnelle */}
+          <p className="text-center text-[10px] text-muted-foreground mt-4">
+            Plateforme opérée par l'ANSUT pour le compte de la DGE
+          </p>
+        </div>
       </div>
 
-      {/* Footer */}
-      <footer className="p-4 text-center text-sm text-muted-foreground">
-        <p>Plateforme IFN - © 2024</p>
+      {/* Footer Institutionnel */}
+      <footer className="bg-muted/30 border-t border-border/50 py-4 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="text-center sm:text-left">
+              <p className="font-medium text-foreground">Direction Générale des Entreprises (DGE)</p>
+              <p>Plateforme IFN opérée par l'ANSUT</p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <span>© République de Côte d'Ivoire – 2024</span>
+              <span className="hidden sm:inline">·</span>
+              <span className="text-muted-foreground/70">v1.0.0</span>
+            </div>
+            
+            <button className="flex items-center gap-1.5 text-primary hover:underline">
+              <Headphones className="h-3.5 w-3.5" />
+              <span>Support technique</span>
+            </button>
+          </div>
+        </div>
       </footer>
     </div>
   );
