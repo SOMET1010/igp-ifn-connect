@@ -16,6 +16,7 @@ import { InstitutionalActionCard } from "@/components/shared/InstitutionalAction
 import { BigNumberCard } from "@/components/shared/BigNumberCard";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
+import { RetryIndicator } from "@/components/shared/RetryIndicator";
 import { Confetti } from "@/components/shared/Confetti";
 import { merchantLogger } from "@/infra/logger";
 import { useState } from "react";
@@ -109,11 +110,15 @@ export default function MerchantDashboard() {
     isLoading, 
     error, 
     isNetworkError, 
-    refetch 
+    refetch,
+    nextRetryIn,
+    retryCount,
   } = useDataFetching<DashboardData>({
     fetchFn: fetchDashboardData,
     deps: [user?.id],
     enabled: !!user,
+    retryDelay: 2000,
+    maxRetries: 3,
     onSuccess: (result) => {
       // Confetti et toast pour la première vente du jour
       if (result.todayTotal > 0 && !hasAlreadyCelebratedToday()) {
@@ -154,11 +159,20 @@ export default function MerchantDashboard() {
           subtitle="Plateforme IFN – Espace Marchand"
           onSignOut={handleSignOut}
         />
-        <ErrorState
-          message={error.userMessage}
-          onRetry={refetch}
-          isNetworkError={isNetworkError}
-        />
+        <div className="p-4 space-y-4 max-w-2xl mx-auto">
+          <ErrorState
+            message={error.userMessage}
+            onRetry={refetch}
+            isNetworkError={isNetworkError}
+          />
+          {nextRetryIn !== null && (
+            <RetryIndicator
+              nextRetryIn={nextRetryIn}
+              retryCount={retryCount}
+              maxRetries={3}
+            />
+          )}
+        </div>
         <InstitutionalBottomNav items={navItems} />
       </div>
     );
