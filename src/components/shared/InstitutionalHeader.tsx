@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import logoDGE from '@/assets/logo-dge.png';
 import logoANSUT from '@/assets/logo-ansut.png';
+import { ThemeToggle } from './ThemeToggle';
 
 interface InstitutionalHeaderProps {
   subtitle: string;
@@ -45,12 +46,15 @@ export const InstitutionalHeader: React.FC<InstitutionalHeaderProps> = ({
             </p>
           </div>
           
-          {/* Logo ANSUT */}
-          <img 
-            src={logoANSUT} 
-            alt="ANSUT" 
-            className="h-7 w-auto object-contain"
-          />
+          {/* Toggle thème + Logo ANSUT */}
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <img 
+              src={logoANSUT} 
+              alt="ANSUT" 
+              className="h-7 w-auto object-contain"
+            />
+          </div>
         </div>
       </div>
     </header>
