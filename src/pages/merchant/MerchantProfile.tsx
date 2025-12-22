@@ -10,17 +10,14 @@ import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge, ButtonSecondary, BottomNavIFN } from "@/components/ifn";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-
-interface ProfileData {
-  full_name: string;
-  activity_type: string;
-}
+import { merchantLogger } from "@/infra/logger";
+import type { MerchantProfileViewData } from "@/shared/types";
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profile, setProfile] = useState<MerchantProfileViewData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const { isSupported, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
@@ -29,17 +26,29 @@ export default function MerchantProfile() {
     const fetchProfile = async () => {
       if (!user) return;
 
-      const { data: merchantData } = await supabase
-        .from("merchants")
-        .select("full_name, activity_type")
-        .eq("user_id", user.id)
-        .single();
+      merchantLogger.debug('Chargement profil marchand', { userId: user.id });
 
-      if (merchantData) {
-        setProfile(merchantData);
+      try {
+        const { data: merchantData, error } = await supabase
+          .from("merchants")
+          .select("full_name, activity_type")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          merchantLogger.warn('Erreur chargement profil', { error: error.message });
+          return;
+        }
+
+        if (merchantData) {
+          setProfile(merchantData);
+          merchantLogger.info('Profil marchand chargé', { name: merchantData.full_name });
+        }
+      } catch (err) {
+        merchantLogger.error('Échec chargement profil', err, { userId: user.id });
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     fetchProfile();
