@@ -8,18 +8,14 @@ import { AudioButton } from "@/components/shared/AudioButton";
 import { ButtonPrimary, ButtonSecondary, BigNumber, StatusBanner, BottomNavIFN } from "@/components/ifn";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
-
-interface MerchantData {
-  full_name: string;
-  activity_type: string;
-  market_name?: string;
-}
+import { merchantLogger } from "@/infra/logger";
+import type { MerchantDashboardViewData } from "@/shared/types";
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useLanguage();
-  const [merchant, setMerchant] = useState<MerchantData | null>(null);
+  const [merchant, setMerchant] = useState<MerchantDashboardViewData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -40,6 +36,8 @@ export default function MerchantDashboard() {
 
   const fetchData = async () => {
     if (!user) return;
+
+    merchantLogger.debug('Chargement données dashboard', { userId: user.id });
 
     try {
       setError(null);
@@ -86,11 +84,16 @@ export default function MerchantDashboard() {
           if (transactions) {
             const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
             setTodayTotal(total);
+            
+            merchantLogger.info('Données dashboard chargées', { 
+              merchantName: merchantData.full_name,
+              todayTotal: total 
+            });
           }
         }
       }
     } catch (err) {
-      console.error('Error fetching merchant data:', err);
+      merchantLogger.error('Échec chargement données marchand', err, { userId: user.id });
       setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setIsLoading(false);

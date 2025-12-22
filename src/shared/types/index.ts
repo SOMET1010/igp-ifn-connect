@@ -49,6 +49,17 @@ export type AudioRecording = Database['public']['Tables']['audio_recordings']['R
 // ============================================
 // TYPES MÉTIER COMPOSÉS
 // ============================================
+// TYPES VUE DASHBOARD
+// ============================================
+
+/** Données affichées sur le dashboard marchand (avec jointure marché) */
+export interface MerchantDashboardViewData {
+  full_name: string;
+  activity_type: string;
+  market_name?: string;
+}
+
+// ============================================
 
 export interface MerchantWithAgent extends Merchant {
   agent?: Agent | null;
