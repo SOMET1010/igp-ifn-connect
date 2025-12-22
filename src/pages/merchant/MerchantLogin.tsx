@@ -4,7 +4,6 @@ import { Loader2, ArrowRight, ArrowLeft, Shield, UserPlus, Lock, Smartphone, Hea
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import OTPInput from "@/components/auth/OTPInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +13,7 @@ import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { ContextualBanner } from '@/components/shared/ContextualBanner';
 import { SecondaryFeatures } from '@/components/shared/SecondaryFeatures';
+import { LoginCard } from '@/components/shared/LoginCard';
 
 type Step = "phone" | "otp" | "register";
 
@@ -183,161 +183,140 @@ export default function MerchantLogin() {
       />
 
       <main className="flex-1 max-w-md mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
-        <Card className="shadow-lg border-border/50">
-          <CardHeader className="text-center pb-4">
-            {/* Icône réduite */}
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
-              {step === 'phone' && <Smartphone className="w-7 h-7 text-primary" />}
-              {step === 'otp' && <Lock className="w-7 h-7 text-primary" />}
-              {step === 'register' && <UserPlus className="w-7 h-7 text-primary" />}
-            </div>
-            
-            {/* Stepper visuel */}
-            <div className="flex items-center justify-center gap-1.5 mb-3">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    n <= currentConfig.number 
-                      ? 'bg-primary' 
-                      : 'bg-muted-foreground/20'
-                  }`}
-                />
-              ))}
-            </div>
-            
-            <CardTitle className="text-xl">{currentConfig.title}</CardTitle>
-            <CardDescription className="text-sm">{currentConfig.subtitle}</CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {step === "phone" && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-base font-semibold">
-                    📱 Téléphone
-                  </Label>
-                  <div className="flex gap-2">
-                    <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
-                      +225
-                    </div>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="07 12 34 56 78"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="h-14 text-lg rounded-xl border-2 flex-1"
-                    />
+        <LoginCard
+          variant="compact"
+          icon={step === 'phone' ? Smartphone : step === 'otp' ? Lock : UserPlus}
+          currentStep={currentConfig.number}
+          title={currentConfig.title}
+          subtitle={currentConfig.subtitle}
+          showSecurityNote={false}
+        >
+          {step === "phone" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-base font-semibold">
+                  📱 Téléphone
+                </Label>
+                <div className="flex gap-2">
+                  <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
+                    +225
                   </div>
-                </div>
-
-                <Button
-                  onClick={handlePhoneSubmit}
-                  disabled={isLoading || phone.length < 8}
-                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Continuer
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-                
-                {/* Note de sécurité */}
-                <p className="text-xs text-muted-foreground text-center">
-                  🔒 Connexion chiffrée · Vos données sont protégées
-                </p>
-              </div>
-            )}
-
-            {step === "otp" && (
-              <div className="space-y-4">
-                <div className="text-center mb-4">
-                  <p className="text-sm text-primary font-medium">
-                    +225 {phone}
-                  </p>
-                </div>
-
-                <OTPInput value={otp} onChange={setOtp} />
-
-                <Button
-                  onClick={handleOtpSubmit}
-                  disabled={isLoading || otp.length !== 6}
-                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    "Valider"
-                  )}
-                </Button>
-
-                <button
-                  onClick={() => setStep("phone")}
-                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Modifier le numéro
-                </button>
-                
-                {/* Note de sécurité */}
-                <p className="text-xs text-muted-foreground text-center">
-                  🔒 Ne partagez jamais ce code avec quiconque
-                </p>
-              </div>
-            )}
-
-            {step === "register" && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-base font-semibold">
-                    👤 Votre nom complet
-                  </Label>
                   <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Ex: Kouamé Adjoua"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="h-14 text-lg rounded-xl border-2"
+                    id="phone"
+                    type="tel"
+                    placeholder="07 12 34 56 78"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="h-14 text-lg rounded-xl border-2 flex-1"
                   />
                 </div>
+              </div>
 
-                <Button
-                  onClick={handleRegisterSubmit}
-                  disabled={isLoading || fullName.length < 3}
-                  className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Créer mon compte
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-                
-                <button
-                  onClick={() => setStep("otp")}
-                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Retour
-                </button>
-                
-                {/* Note de sécurité */}
-                <p className="text-xs text-muted-foreground text-center">
-                  🔒 Vos informations sont sécurisées
+              <Button
+                onClick={handlePhoneSubmit}
+                disabled={isLoading || phone.length < 8}
+                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    Continuer
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+              
+              {/* Note de sécurité */}
+              <p className="text-xs text-muted-foreground text-center">
+                🔒 Connexion chiffrée · Vos données sont protégées
+              </p>
+            </div>
+          )}
+
+          {step === "otp" && (
+            <div className="space-y-4">
+              <div className="text-center mb-4">
+                <p className="text-sm text-primary font-medium">
+                  +225 {phone}
                 </p>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <OTPInput value={otp} onChange={setOtp} />
+
+              <Button
+                onClick={handleOtpSubmit}
+                disabled={isLoading || otp.length !== 6}
+                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Valider"
+                )}
+              </Button>
+
+              <button
+                onClick={() => setStep("phone")}
+                className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Modifier le numéro
+              </button>
+              
+              {/* Note de sécurité */}
+              <p className="text-xs text-muted-foreground text-center">
+                🔒 Ne partagez jamais ce code avec quiconque
+              </p>
+            </div>
+          )}
+
+          {step === "register" && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-base font-semibold">
+                  👤 Votre nom complet
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="Ex: Kouamé Adjoua"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="h-14 text-lg rounded-xl border-2"
+                />
+              </div>
+
+              <Button
+                onClick={handleRegisterSubmit}
+                disabled={isLoading || fullName.length < 3}
+                className="w-full btn-xxl bg-secondary hover:bg-secondary/90"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    Créer mon compte
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+              
+              <button
+                onClick={() => setStep("otp")}
+                className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour
+              </button>
+              
+              {/* Note de sécurité */}
+              <p className="text-xs text-muted-foreground text-center">
+                🔒 Vos informations sont sécurisées
+              </p>
+            </div>
+          )}
+        </LoginCard>
 
         {/* Zone features secondaire */}
         <div className="mt-6">
