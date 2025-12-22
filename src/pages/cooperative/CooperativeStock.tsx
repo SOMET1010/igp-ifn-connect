@@ -12,13 +12,13 @@ import { toast } from 'sonner';
 import { 
   Package, 
   Plus, 
-  ArrowLeft,
   Loader2,
   Search,
   Bell,
   AlertTriangle
 } from 'lucide-react';
 import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
+import { SecondaryPageHeader } from '@/components/shared/SecondaryPageHeader';
 
 interface StockItem {
   id: string;
@@ -63,7 +63,6 @@ const CooperativeStock: React.FC = () => {
     const fetchData = async () => {
       if (!user) return;
 
-      // Get cooperative ID
       const { data: coopData } = await supabase
         .from('cooperatives')
         .select('id')
@@ -73,7 +72,6 @@ const CooperativeStock: React.FC = () => {
       if (coopData) {
         setCooperativeId(coopData.id);
 
-        // Fetch stocks with product info
         const { data: stocksData } = await supabase
           .from('stocks')
           .select(`
@@ -86,7 +84,6 @@ const CooperativeStock: React.FC = () => {
           .eq('cooperative_id', coopData.id);
 
         if (stocksData) {
-          // Fetch product details for each stock
           const productIds = stocksData.map(s => s.product_id);
           const { data: productsData } = await supabase
             .from('products')
@@ -102,7 +99,6 @@ const CooperativeStock: React.FC = () => {
         }
       }
 
-      // Fetch all available products
       const { data: allProducts } = await supabase
         .from('products')
         .select('id, name, unit')
@@ -203,27 +199,20 @@ const CooperativeStock: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/cooperative')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Mon Stock</h1>
-            <p className="text-sm text-white/80">{stocks.length} produits en stock</p>
-          </div>
-        </div>
-      </header>
+      <SecondaryPageHeader
+        title="Mon Stock"
+        subtitle={`${stocks.length} produit${stocks.length !== 1 ? 's' : ''} en stock`}
+        onBack={() => navigate('/cooperative')}
+      />
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-lg mx-auto">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -237,17 +226,17 @@ const CooperativeStock: React.FC = () => {
 
         {/* Low Stock Alert */}
         {lowStockItems.length > 0 && (
-          <Card className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+          <Card className="border-warning/50 bg-warning/5">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-5 h-5 text-amber-600" />
+                <AlertTriangle className="w-5 h-5 text-warning" />
                 <h3 className="font-semibold text-foreground">Alertes de stock ({lowStockItems.length})</h3>
               </div>
               <div className="space-y-2">
                 {lowStockItems.slice(0, 3).map(item => (
-                  <div key={item.id} className="flex items-center justify-between bg-amber-100/50 dark:bg-amber-900/20 rounded-lg p-2">
+                  <div key={item.id} className="flex items-center justify-between bg-warning/10 rounded-lg p-2">
                     <span className="font-medium text-sm">{item.product.name}</span>
-                    <span className="text-sm text-amber-700">{item.quantity} {item.product.unit}</span>
+                    <span className="text-sm text-muted-foreground">{item.quantity} {item.product.unit}</span>
                   </div>
                 ))}
                 {lowStockItems.length > 3 && (
@@ -264,97 +253,99 @@ const CooperativeStock: React.FC = () => {
         <div className="flex gap-2">
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
-              <Button className="flex-1 bg-amber-600 hover:bg-amber-700">
+              <Button className="flex-1">
                 <Plus className="h-5 w-5 mr-2" />
                 Ajouter un produit
               </Button>
             </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ajouter au stock</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label>Produit</Label>
-                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un produit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product.name} ({product.unit})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ajouter au stock</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label>Produit</Label>
+                  <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un produit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map((product) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.name} ({product.unit})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>Quantité</Label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 100"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label>Quantité</Label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 100"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label>Prix unitaire (FCFA) - optionnel</Label>
-                <Input
-                  type="number"
-                  placeholder="Ex: 500"
-                  value={unitPrice}
-                  onChange={(e) => setUnitPrice(e.target.value)}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label>Prix unitaire (FCFA) - optionnel</Label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 500"
+                    value={unitPrice}
+                    onChange={(e) => setUnitPrice(e.target.value)}
+                  />
+                </div>
 
-              <Button
-                onClick={handleAddStock}
-                disabled={isSaving || !selectedProduct || !quantity}
-                className="w-full bg-amber-600 hover:bg-amber-700"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  'Ajouter'
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+                <Button
+                  onClick={handleAddStock}
+                  disabled={isSaving || !selectedProduct || !quantity}
+                  className="w-full"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    'Ajouter'
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
             onClick={handleCheckLowStock}
             variant="outline"
             disabled={isCheckingStock}
-            className="shrink-0 border-amber-300"
+            className="shrink-0"
           >
             {isCheckingStock ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Bell className="w-5 h-5 text-amber-600" />
+              <Bell className="w-5 h-5" />
             )}
           </Button>
         </div>
 
         {/* Stock list */}
         {filteredStocks.length === 0 ? (
-          <Card className="p-8 text-center">
-            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-foreground mb-2">Aucun stock</h3>
-            <p className="text-sm text-muted-foreground">
-              Ajoutez vos premiers produits en stock
-            </p>
+          <Card className="bg-muted/30">
+            <CardContent className="p-8 text-center">
+              <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="font-semibold text-foreground mb-2">Aucun stock</h3>
+              <p className="text-sm text-muted-foreground">
+                Ajoutez vos premiers produits en stock
+              </p>
+            </CardContent>
           </Card>
         ) : (
           <div className="space-y-3">
             {filteredStocks.map((stock) => (
-              <Card key={stock.id}>
+              <Card key={stock.id} className="card-institutional hover:border-primary/30 transition-colors">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">🌾</span>
+                    <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                      <Package className="w-5 h-5 text-muted-foreground" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{stock.product.name}</h3>

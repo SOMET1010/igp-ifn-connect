@@ -1,17 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Volume2, VolumeX, Loader2, Bell } from "lucide-react";
+import { LogOut, Volume2, VolumeX, Loader2, Bell, User, Home, Package, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { CardLarge, ButtonSecondary, BottomNavIFN } from "@/components/ifn";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { merchantLogger } from "@/infra/logger";
+import { SecondaryPageHeader } from "@/components/shared/SecondaryPageHeader";
+import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
 import type { MerchantProfileViewData } from "@/shared/types";
+
+const merchantNavItems = [
+  { icon: Home, label: "Accueil", path: "/marchand" },
+  { icon: Package, label: "Stock", path: "/marchand/stock" },
+  { icon: Wallet, label: "Encaisser", path: "/marchand/encaisser" },
+  { icon: User, label: "Profil", path: "/marchand/profil" },
+];
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
@@ -80,129 +89,118 @@ export default function MerchantProfile() {
         />
       )}
 
-      {/* Header */}
-      <header className="bg-gradient-forest text-primary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-12 w-12"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-bold">{t("my_profile")}</h1>
-        </div>
-      </header>
+      <SecondaryPageHeader
+        title={t("my_profile")}
+        onBack={() => navigate("/marchand")}
+      />
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 max-w-lg mx-auto">
         {/* Avatar et nom */}
-        <div className="text-center py-8">
-          <div className="w-28 h-28 mx-auto rounded-full bg-secondary/10 flex items-center justify-center text-6xl mb-4">
-            👤
+        <div className="text-center py-6">
+          <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
+            <User className="w-10 h-10 text-muted-foreground" />
           </div>
-          <h2 className="text-3xl font-black text-foreground">
+          <h2 className="text-2xl font-bold text-foreground">
             {profile?.full_name || t("merchant")}
           </h2>
-          <p className="text-lg text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {profile?.activity_type}
           </p>
         </div>
 
         {/* Sélecteur de langue */}
-        <CardLarge>
-          <h3 className="text-lg font-bold text-foreground mb-4">
-            {t("choose_language")}
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setLanguage(lang.code)}
-                className={`p-4 rounded-xl text-left transition-all touch-manipulation ${
-                  language === lang.code
-                    ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                    : "bg-muted hover:bg-muted/80"
-                }`}
-              >
-                <span className="text-2xl mr-2">{lang.symbol}</span>
-                <span className="font-bold">{lang.nativeName}</span>
-              </button>
-            ))}
-          </div>
-        </CardLarge>
+        <Card className="card-institutional">
+          <CardContent className="p-4">
+            <h3 className="font-medium text-foreground mb-4">
+              {t("choose_language")}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => setLanguage(lang.code)}
+                  className={`p-3 rounded-lg text-left transition-all touch-manipulation border ${
+                    language === lang.code
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted hover:bg-muted/80 border-transparent"
+                  }`}
+                >
+                  <span className="text-xl mr-2">{lang.symbol}</span>
+                  <span className="font-medium text-sm">{lang.nativeName}</span>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Toggle Audio */}
-        <CardLarge className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+        <Card className="card-institutional">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
               {audioEnabled ? (
-                <Volume2 className="w-6 h-6 text-secondary" />
+                <Volume2 className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <VolumeX className="w-6 h-6 text-muted-foreground" />
+                <VolumeX className="w-5 h-5 text-muted-foreground" />
               )}
-            </div>
-            <div>
-              <p className="text-lg font-bold text-foreground">
-                Son et audio
-              </p>
-              <p className="text-muted-foreground">
-                {audioEnabled ? "Activé" : "Désactivé"}
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={audioEnabled}
-            onCheckedChange={setAudioEnabled}
-            className="scale-125"
-          />
-        </CardLarge>
-
-        {/* Toggle Notifications Push */}
-        {isSupported && (
-          <CardLarge className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bell className={`w-6 h-6 ${isSubscribed ? 'text-primary' : 'text-muted-foreground'}`} />
-              </div>
               <div>
-                <p className="text-lg font-bold text-foreground">
-                  Notifications
-                </p>
-                <p className="text-muted-foreground">
-                  {isSubscribed ? "Activées" : "Désactivées"}
+                <p className="font-medium text-foreground">Son et audio</p>
+                <p className="text-sm text-muted-foreground">
+                  {audioEnabled ? "Activé" : "Désactivé"}
                 </p>
               </div>
             </div>
             <Switch
-              checked={isSubscribed}
-              onCheckedChange={async (checked) => {
-                if (checked) {
-                  await subscribe();
-                } else {
-                  await unsubscribe();
-                }
-              }}
-              disabled={notifLoading}
-              className="scale-125"
+              checked={audioEnabled}
+              onCheckedChange={setAudioEnabled}
             />
-          </CardLarge>
+          </CardContent>
+        </Card>
+
+        {/* Toggle Notifications Push */}
+        {isSupported && (
+          <Card className="card-institutional">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className={`w-5 h-5 ${isSubscribed ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div>
+                  <p className="font-medium text-foreground">Notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isSubscribed ? "Activées" : "Désactivées"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={isSubscribed}
+                onCheckedChange={async (checked) => {
+                  if (checked) {
+                    await subscribe();
+                  } else {
+                    await unsubscribe();
+                  }
+                }}
+                disabled={notifLoading}
+              />
+            </CardContent>
+          </Card>
         )}
-        <ButtonSecondary
+
+        {/* Logout Button */}
+        <Button
           onClick={handleSignOut}
-          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+          variant="outline"
+          className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
         >
-          <LogOut className="w-6 h-6 mr-2" />
+          <LogOut className="w-4 h-4 mr-2" />
           Se déconnecter
-        </ButtonSecondary>
+        </Button>
 
         {/* Footer */}
-        <p className="text-center text-sm text-muted-foreground pt-4">
-          🇨🇮 Plateforme IFN • ANSUT × DGE
+        <p className="text-center text-xs text-muted-foreground pt-4">
+          Plateforme IFN • ANSUT × DGE
         </p>
       </main>
 
-      <BottomNavIFN />
+      <InstitutionalBottomNav items={merchantNavItems} />
     </div>
   );
 }

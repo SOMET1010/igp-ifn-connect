@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, 
   Package, 
   Plus, 
   AlertTriangle, 
@@ -10,13 +9,15 @@ import {
   RefreshCw,
   Edit2,
   Trash2,
-  Bell
+  Bell,
+  Home,
+  Wallet,
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BottomNav } from "@/components/shared/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -35,13 +36,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Home, Wallet, User, History } from "lucide-react";
+import { SecondaryPageHeader } from "@/components/shared/SecondaryPageHeader";
+import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
 
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Package, label: "Stock", href: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
+const merchantNavItems = [
+  { icon: Home, label: "Accueil", path: "/marchand" },
+  { icon: Package, label: "Stock", path: "/marchand/stock" },
+  { icon: Wallet, label: "Encaisser", path: "/marchand/encaisser" },
+  { icon: User, label: "Profil", path: "/marchand/profil" },
 ];
 
 interface Product {
@@ -82,9 +84,9 @@ function getStatusBadge(status: StockStatus) {
     case "out":
       return <Badge variant="destructive" className="text-xs">Rupture</Badge>;
     case "low":
-      return <Badge className="bg-amber-500 hover:bg-amber-500/80 text-xs">Stock bas</Badge>;
+      return <Badge className="bg-warning text-warning-foreground text-xs">Stock bas</Badge>;
     case "ok":
-      return <Badge className="bg-green-500 hover:bg-green-500/80 text-xs">En stock</Badge>;
+      return <Badge className="bg-secondary text-secondary-foreground text-xs">En stock</Badge>;
   }
 }
 
@@ -119,7 +121,6 @@ export default function MerchantStock() {
 
     setIsLoading(true);
 
-    // Get merchant ID
     const { data: merchantData } = await supabase
       .from("merchants")
       .select("id")
@@ -133,18 +134,15 @@ export default function MerchantStock() {
 
     setMerchantId(merchantData.id);
 
-    // Fetch stocks with products
     const { data: stocksData } = await supabase
       .from("merchant_stocks")
       .select("*")
       .eq("merchant_id", merchantData.id);
 
-    // Fetch all products
     const { data: productsData } = await supabase
       .from("products")
       .select("*");
 
-    // Fetch categories
     const { data: categoriesData } = await supabase
       .from("product_categories")
       .select("*");
@@ -152,7 +150,6 @@ export default function MerchantStock() {
     if (productsData) setProducts(productsData);
     if (categoriesData) setCategories(categoriesData);
 
-    // Merge stocks with product info
     if (stocksData && productsData) {
       const mergedStocks = stocksData.map(stock => ({
         ...stock,
@@ -340,35 +337,23 @@ export default function MerchantStock() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-secondary text-secondary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-secondary-foreground hover:bg-secondary-foreground/10"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">Mon Stock</h1>
-            <p className="text-sm text-secondary-foreground/80">
-              {stocks.length} produit{stocks.length !== 1 ? "s" : ""} • {alertCount > 0 && `${alertCount} alerte${alertCount !== 1 ? "s" : ""}`}
-            </p>
-          </div>
+      <SecondaryPageHeader
+        title="Mon Stock"
+        subtitle={`${stocks.length} produit${stocks.length !== 1 ? "s" : ""}${alertCount > 0 ? ` • ${alertCount} alerte${alertCount !== 1 ? "s" : ""}` : ""}`}
+        onBack={() => navigate("/marchand")}
+        rightContent={
           <Button
             variant="ghost"
             size="icon"
             onClick={() => fetchData()}
-            className="text-secondary-foreground hover:bg-secondary-foreground/10"
+            className="h-10 w-10"
           >
             <RefreshCw className="w-5 h-5" />
           </Button>
-        </div>
-      </header>
+        }
+      />
 
-      <main className="p-4 space-y-4">
+      <main className="p-4 space-y-4 max-w-lg mx-auto">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -392,7 +377,7 @@ export default function MerchantStock() {
                 {outOfStockItems.map(item => (
                   <div key={item.id} className="flex items-center justify-between bg-destructive/10 rounded-lg p-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🔴</span>
+                      <span className="w-2 h-2 rounded-full bg-destructive" />
                       <span className="font-medium text-sm">{item.product?.name}</span>
                     </div>
                     <Button 
@@ -407,9 +392,9 @@ export default function MerchantStock() {
                   </div>
                 ))}
                 {lowStockItems.map(item => (
-                  <div key={item.id} className="flex items-center justify-between bg-amber-500/10 rounded-lg p-2">
+                  <div key={item.id} className="flex items-center justify-between bg-warning/10 rounded-lg p-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">🟡</span>
+                      <span className="w-2 h-2 rounded-full bg-warning" />
                       <span className="font-medium text-sm">{item.product?.name}</span>
                       <span className="text-xs text-muted-foreground">
                         ({item.quantity} {item.product?.unit})
@@ -435,7 +420,7 @@ export default function MerchantStock() {
         <div className="flex gap-2">
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="flex-1 bg-secondary hover:bg-secondary/90"
+            className="flex-1"
             disabled={availableProducts.length === 0}
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -473,17 +458,12 @@ export default function MerchantStock() {
             {filteredStocks.map(stock => {
               const status = getStockStatus(Number(stock.quantity), Number(stock.min_threshold));
               return (
-                <Card key={stock.id} className="hover:shadow-md transition-shadow">
+                <Card key={stock.id} className="card-institutional hover:border-primary/30 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          status === "out" ? "bg-destructive/10" : 
-                          status === "low" ? "bg-amber-500/10" : "bg-green-500/10"
-                        }`}>
-                          <span className="text-2xl">
-                            {status === "out" ? "📦" : status === "low" ? "📦" : "📦"}
-                          </span>
+                        <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                          <Package className="w-5 h-5 text-muted-foreground" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -599,7 +579,6 @@ export default function MerchantStock() {
             <Button 
               onClick={handleAddProduct} 
               disabled={!selectedProductId || isSaving}
-              className="bg-secondary hover:bg-secondary/90"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Ajouter"}
             </Button>
@@ -640,7 +619,6 @@ export default function MerchantStock() {
             <Button 
               onClick={handleRestock} 
               disabled={!restockQuantity || isSaving}
-              className="bg-secondary hover:bg-secondary/90"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Valider"}
             </Button>
@@ -692,7 +670,6 @@ export default function MerchantStock() {
             <Button 
               onClick={handleUpdateStock} 
               disabled={isSaving}
-              className="bg-secondary hover:bg-secondary/90"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Enregistrer"}
             </Button>
@@ -700,7 +677,7 @@ export default function MerchantStock() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav items={navItems} />
+      <InstitutionalBottomNav items={merchantNavItems} />
     </div>
   );
 }
