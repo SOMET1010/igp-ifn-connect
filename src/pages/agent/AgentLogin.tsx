@@ -9,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
 import { Phone, ArrowLeft, Loader2, Shield, UserPlus, Lock, Smartphone, Headphones } from 'lucide-react';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
+import logoDGE from '@/assets/logo-dge.png';
+import logoANSUT from '@/assets/logo-ansut.png';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -192,10 +194,13 @@ const AgentLogin: React.FC = () => {
         <div className="max-w-2xl mx-auto">
           {/* Ligne supérieure avec logos */}
           <div className="flex items-center justify-between mb-3">
-            {/* Badge DGE (gauche) */}
-            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-1.5">
-              <span className="text-lg">🏛️</span>
-              <span className="text-xs font-semibold">DGE</span>
+            {/* Logo DGE (gauche) */}
+            <div className="bg-white rounded-lg p-1.5 shadow-sm">
+              <img 
+                src={logoDGE} 
+                alt="Direction Générale des Entreprises" 
+                className="h-10 w-auto object-contain"
+              />
             </div>
             
             {/* Titre central */}
@@ -204,10 +209,13 @@ const AgentLogin: React.FC = () => {
               <p className="text-[10px] sm:text-xs text-primary-foreground/70">Accès Agent</p>
             </div>
             
-            {/* Badge ANSUT (droite) */}
-            <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-3 py-1.5">
-              <span className="text-lg">🔒</span>
-              <span className="text-xs font-semibold">ANSUT</span>
+            {/* Logo ANSUT (droite) */}
+            <div className="bg-white rounded-lg p-1.5 shadow-sm">
+              <img 
+                src={logoANSUT} 
+                alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" 
+                className="h-8 w-auto object-contain"
+              />
             </div>
           </div>
           
