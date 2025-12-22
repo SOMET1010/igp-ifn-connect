@@ -89,41 +89,55 @@
   }
 
   .dark {
-    --background: 25 30% 8%;
-    --foreground: 45 30% 95%;
+    /* Fond institutionnel sombre - sobre et professionnel */
+    --background: 220 15% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 25 25% 12%;
-    --card-foreground: 45 30% 95%;
+    /* Cartes légèrement plus claires */
+    --card: 220 15% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 25 25% 12%;
-    --popover-foreground: 45 30% 95%;
+    --popover: 220 15% 12%;
+    --popover-foreground: 0 0% 95%;
 
+    /* Primary (orange) - accent identique */
     --primary: 28 95% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 145 45% 40%;
+    /* Secondary (vert) légèrement plus lumineux en sombre */
+    --secondary: 145 45% 45%;
     --secondary-foreground: 0 0% 100%;
 
+    /* Accent */
     --accent: 45 85% 50%;
-    --accent-foreground: 25 30% 10%;
+    --accent-foreground: 220 15% 10%;
 
-    --muted: 25 20% 18%;
-    --muted-foreground: 45 15% 60%;
+    /* Muted sobre */
+    --muted: 220 10% 18%;
+    --muted-foreground: 0 0% 65%;
 
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 25% 20%;
-    --input: 25 25% 20%;
+    /* Bordures discrètes */
+    --border: 220 10% 20%;
+    --input: 220 10% 20%;
     --ring: 28 95% 55%;
 
-    --sidebar-background: 25 35% 10%;
-    --sidebar-foreground: 45 30% 95%;
+    /* Success et Warning */
+    --success: 145 45% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 85% 50%;
+    --warning-foreground: 220 15% 10%;
+
+    /* Sidebar sombre */
+    --sidebar-background: 220 15% 6%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 28 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 30% 18%;
-    --sidebar-accent-foreground: 45 30% 95%;
-    --sidebar-border: 25 25% 18%;
+    --sidebar-accent: 220 10% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 10% 18%;
     --sidebar-ring: 28 95% 55%;
   }
 }
