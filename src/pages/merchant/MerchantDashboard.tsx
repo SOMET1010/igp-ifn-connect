@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function MerchantDashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [merchant, setMerchant] = useState<MerchantDashboardViewData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,10 +115,15 @@ export default function MerchantDashboard() {
             const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
             setTodayTotal(total);
             
-            // Confetti pour la première vente du jour
+            // Confetti et toast pour la première vente du jour
             if (total > 0 && !hasAlreadyCelebratedToday()) {
               setShowConfetti(true);
               markAsCelebratedToday();
+              toast({
+                title: `🎉 ${t("congratulations")}`,
+                description: `${t("first_sale_today")}: ${total.toLocaleString()} FCFA`,
+                duration: 5000,
+              });
               setTimeout(() => setShowConfetti(false), 3500);
             }
             

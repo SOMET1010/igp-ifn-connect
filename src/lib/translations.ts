@@ -221,6 +221,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "coin_50": "Cinquante francs",
     "coin_100": "Cent francs",
     "coin_200": "Deux cents francs",
+    
+    // Toast première vente
+    "congratulations": "Félicitations !",
+    "first_sale_today": "Première vente du jour",
   },
   
   dioula: {
@@ -422,6 +426,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "coin_50": "Bi duuru",
     "coin_100": "Kɛmɛ",
     "coin_200": "Kɛmɛ fila",
+    
+    // Toast première vente
+    "congratulations": "I ni cɛ !",
+    "first_sale_today": "Tile in ka fɔlɔ feere",
   },
   
   baoule: {
@@ -607,6 +615,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "E kle i kpa",
     "understand_cmu_rsti": "Ti CMU nin RSTI",
     "understand_reassure": "Ɔ sika su junman man ɔ!",
+    
+    // Toast première vente
+    "congratulations": "Mo ti ɔ !",
+    "first_sale_today": "Andɛ jue klikli",
   },
   
   bete: {
@@ -778,6 +790,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "A kle i kpa",
     "understand_cmu_rsti": "Nya CMU nu RSTI",
     "understand_reassure": "I wali djré i ti!",
+    
+    // Toast première vente
+    "congratulations": "O dré !",
+    "first_sale_today": "Dré tile la gbu",
   },
   
   senoufo: {
@@ -949,6 +965,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
     "understand_cmu_rsti": "CMU ni RSTI faamu",
     "understand_reassure": "I wari bɛ baara kɛ i ye!",
+    
+    // Toast première vente
+    "congratulations": "I ni cɛ !",
+    "first_sale_today": "Tile in feere fɔlɔ",
   },
   
   malinke: {
@@ -1120,6 +1140,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
     "understand_cmu_rsti": "CMU ni RSTI faamu",
     "understand_reassure": "I wari bɛ baara kɛ i ye!",
+    
+    // Toast première vente
+    "congratulations": "I ni cɛ !",
+    "first_sale_today": "Tile in feere fɔlɔ",
   },
 };
 
