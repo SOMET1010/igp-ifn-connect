@@ -10,6 +10,7 @@ import OTPInput from '@/components/auth/OTPInput';
 import { Phone, Loader2, Shield, UserPlus, Lock, Smartphone, Headphones } from 'lucide-react';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
+import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -405,27 +406,7 @@ const AgentLogin: React.FC = () => {
       </div>
 
       {/* Footer Institutionnel */}
-      <footer className="bg-muted/30 border-t border-border/50 py-4 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <div className="text-center sm:text-left">
-              <p className="font-medium text-foreground">Direction Générale des Entreprises (DGE)</p>
-              <p>Plateforme IFN opérée par l'ANSUT</p>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <span>© République de Côte d'Ivoire – 2024</span>
-              <span className="hidden sm:inline">·</span>
-              <span className="text-muted-foreground/70">v1.0.0</span>
-            </div>
-            
-            <button className="flex items-center gap-1.5 text-primary hover:underline">
-              <Headphones className="h-3.5 w-3.5" />
-              <span>Support technique</span>
-            </button>
-          </div>
-        </div>
-      </footer>
+      <InstitutionalFooter variant="default" showSupportButton={true} maxWidth="2xl" />
     </div>
   );
 };

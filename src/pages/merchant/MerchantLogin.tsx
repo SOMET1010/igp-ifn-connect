@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
+import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 
 type Step = "phone" | "otp" | "register";
 
@@ -361,22 +362,7 @@ export default function MerchantLogin() {
       </main>
 
       {/* Footer institutionnel */}
-      <footer className="py-4 px-4 sm:px-6 border-t border-border/30 bg-muted/30">
-        <div className="max-w-md mx-auto text-center space-y-2">
-          <p className="text-xs font-medium text-foreground/80">
-            Direction Générale des Entreprises (DGE)
-          </p>
-          <p className="text-[10px] text-muted-foreground">
-            Plateforme IFN opérée par l'ANSUT
-          </p>
-          <p className="text-[10px] text-muted-foreground">
-            © République de Côte d'Ivoire – 2024 · v1.0.0
-          </p>
-          <Button variant="ghost" size="sm" className="text-xs h-8 mt-2">
-            📞 Support technique
-          </Button>
-        </div>
-      </footer>
+      <InstitutionalFooter variant="compact" showSupportButton={true} maxWidth="md" />
     </div>
   );
 }
