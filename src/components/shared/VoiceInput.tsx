@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Mic, MicOff, Loader2, Square } from "lucide-react";
+import { Mic, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageCode } from "@/lib/translations";
+import logger from "@/infra/logger";
 
 interface VoiceInputProps {
   onResult: (text: string) => void;
@@ -89,7 +90,7 @@ export function VoiceInput({
     try {
       const base64Audio = await blobToBase64(audioBlob);
       
-      console.log('Sending audio to LAFRICAMOBILE STT...');
+      logger.debug('Sending audio to LAFRICAMOBILE STT', { module: 'VoiceInput' });
       
       const { data, error } = await supabase.functions.invoke('lafricamobile-stt', {
         body: { 
@@ -99,7 +100,7 @@ export function VoiceInput({
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        logger.error('Edge function error', error, { module: 'VoiceInput' });
         throw new Error(error.message || 'Erreur de transcription');
       }
 
@@ -114,7 +115,7 @@ export function VoiceInput({
         toast.warning("Aucune parole détectée");
       }
     } catch (error) {
-      console.error('LAFRICAMOBILE STT error:', error);
+      logger.error('LAFRICAMOBILE STT error', error, { module: 'VoiceInput' });
       toast.error("Erreur de reconnaissance vocale");
     } finally {
       setIsProcessing(false);
@@ -160,7 +161,7 @@ export function VoiceInput({
       };
 
       mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
+        logger.error('MediaRecorder error', event, { module: 'VoiceInput' });
         toast.error("Erreur d'enregistrement");
         stopRecording();
       };
@@ -177,7 +178,7 @@ export function VoiceInput({
       }, 30000);
 
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      logger.error('Failed to start recording', error, { module: 'VoiceInput' });
       if ((error as Error).name === 'NotAllowedError') {
         toast.error("Accès au microphone refusé");
       } else {
@@ -205,7 +206,7 @@ export function VoiceInput({
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      logger.error('Speech recognition error', event.error, { module: 'VoiceInput' });
       setIsListening(false);
       if (event.error === 'not-allowed') {
         toast.error("Accès au microphone refusé");

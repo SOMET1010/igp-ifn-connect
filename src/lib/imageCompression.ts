@@ -1,3 +1,5 @@
+import logger from "@/infra/logger";
+
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 const MAX_DIMENSION = 1920;
 const INITIAL_QUALITY = 0.8;
@@ -51,7 +53,7 @@ export async function compressImage(file: File | Blob): Promise<Blob> {
 
             // If under max size or quality is at minimum, return the blob
             if (blob.size <= MAX_FILE_SIZE || quality <= MIN_QUALITY) {
-              console.log(`Image compressed: ${(blob.size / 1024).toFixed(1)}KB at ${(quality * 100).toFixed(0)}% quality`);
+              logger.debug('Image compressed', { module: 'ImageCompression', sizeKB: (blob.size / 1024).toFixed(1), quality: (quality * 100).toFixed(0) });
               resolve(blob);
             } else {
               // Try again with lower quality

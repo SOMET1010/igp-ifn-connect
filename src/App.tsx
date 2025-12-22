@@ -77,7 +77,7 @@ function registerServiceWorker() {
     window.addEventListener('load', async () => {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('SW registered:', registration.scope);
+        // SW registered successfully - no logging in production
         
         // Check for updates
         registration.addEventListener('updatefound', () => {
@@ -85,14 +85,13 @@ function registerServiceWorker() {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New version available
-                console.log('New SW version available');
+                // New version available - handled silently
               }
             });
           }
         });
-      } catch (error) {
-        console.log('SW registration failed:', error);
+      } catch {
+        // SW registration failed - handled silently
       }
     });
   }
