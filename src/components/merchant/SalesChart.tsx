@@ -107,7 +107,7 @@ export function SalesChart() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="card-institutional">
         <CardContent className="p-6 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
@@ -117,7 +117,7 @@ export function SalesChart() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="card-institutional">
         <CardContent className="p-6 flex flex-col items-center justify-center space-y-3">
           <AlertCircle className="h-8 w-8 text-destructive/70" />
           <p className="text-sm text-muted-foreground">{error}</p>
@@ -138,15 +138,16 @@ export function SalesChart() {
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="card-institutional overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">
-            📊 {t('sales_evolution') || 'Évolution des ventes'}
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            {t('sales_evolution') || 'Évolution des ventes'}
           </CardTitle>
           {trend !== 0 && (
             <div className={`flex items-center gap-1 text-sm font-medium ${
-              trend > 0 ? 'text-emerald-600' : 'text-red-500'
+              trend > 0 ? 'text-secondary' : 'text-destructive'
             }`}>
               {trend > 0 ? (
                 <TrendingUp className="h-4 w-4" />
