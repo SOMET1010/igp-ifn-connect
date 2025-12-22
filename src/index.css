@@ -52,7 +52,7 @@
     --input: 25 20% 85%;
     --ring: 28 95% 55%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
     /* Couleurs personnalisées */
     --orange: 28 95% 55%;
@@ -138,23 +138,24 @@
     font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
   }
 
-  /* Boutons tactiles XXL */
+  /* Bouton institutionnel sobre */
+  .btn-institutional {
+    @apply h-12 px-6 text-base font-medium rounded-md transition-colors;
+  }
+
+  /* Carte institutionnelle sobre */
+  .card-institutional {
+    @apply bg-card border border-border rounded-md;
+  }
+
+  /* Input institutionnel sobre */
+  .input-institutional {
+    @apply h-12 text-base rounded-md border border-border focus:border-primary focus:ring-1 focus:ring-primary/30;
+  }
+
+  /* Boutons tactiles XXL (legacy) */
   .btn-xxl {
-    @apply min-h-14 px-6 text-lg font-bold rounded-xl shadow-lg active:scale-95 transition-all duration-200;
-  }
-
-  /* Animation de pulsation pour les boutons importants */
-  .pulse-glow {
-    animation: pulse-glow 2s infinite;
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
-    }
-    50% {
-      box-shadow: 0 0 20px 10px hsl(var(--primary) / 0.2);
-    }
+    @apply min-h-12 px-6 text-base font-medium rounded-md transition-colors;
   }
 
   /* Carte de succès */
@@ -162,13 +163,13 @@
     @apply bg-secondary/10 border-2 border-secondary rounded-2xl p-4;
   }
 
-  /* Styles pour formulaires accessibles */
+  /* Styles pour formulaires institutionnels */
   .form-label-lg {
-    @apply text-lg font-semibold text-foreground mb-2 block;
+    @apply text-sm font-medium text-foreground mb-1.5 block;
   }
 
   .form-input-lg {
-    @apply h-14 text-lg rounded-xl border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all;
+    @apply h-12 text-base rounded-md border border-border focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors;
   }
 
   /* Icônes circulaires */
