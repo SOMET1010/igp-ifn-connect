@@ -1,60 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from '@/lib/utils';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { 
   Package, 
   ShoppingCart, 
   Users, 
   LogOut,
-  Home,
   ClipboardList,
-  User,
   Award,
   Loader2
 } from 'lucide-react';
-
-const BottomNav: React.FC<{ t: (key: string) => string }> = ({ t }) => {
-  const location = useLocation();
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/cooperative' },
-    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
-    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
-    { icon: User, label: t("profile"), path: '/cooperative/profil' },
-  ];
-
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-      <div className="flex justify-around items-center h-16 px-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200",
-                isActive 
-                  ? "text-amber-700 bg-amber-100" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              )}
-            >
-              <Icon className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium truncate">{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
-  );
-};
+import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
 
 interface CooperativeData {
   id: string;
@@ -291,7 +253,7 @@ const CooperativeDashboard: React.FC = () => {
         </Card>
       </div>
 
-      <BottomNav t={t} />
+      <CooperativeBottomNav />
     </div>
   );
 };
