@@ -142,6 +142,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Cliquez sur 'Nouvel Enrôlement' pour inscrire un marchand",
     "guide_agent_2": "Remplissez les 5 étapes du formulaire",
     "guide_agent_3": "Les données sont sauvegardées même hors-ligne",
+    "guide_merchant_1": "Appuyez sur \"Encaisser\" pour recevoir un paiement",
+    "guide_merchant_2": "Saisissez le montant en chiffres ou avec les billets",
+    "guide_merchant_3": "Partagez le reçu avec votre client",
     "audio_agent_dashboard": "Bienvenue agent. Enrôlements aujourd'hui",
     
     // Cooperative Dashboard
@@ -340,6 +343,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Digi 'Sɛbɛn Kura' ka julakɛla sɛbɛn",
     "guide_agent_2": "Fɔli 5 dan fa",
     "guide_agent_3": "Kunnafoni marala hali ni kan tɛ",
+    "guide_merchant_1": "Digi \"Wari ta\" ka wari sɔrɔ",
+    "guide_merchant_2": "Hakɛ sɛbɛn wala wari bilɛ don",
+    "guide_merchant_3": "Resu tila ni i jigifɛla",
     "audio_agent_dashboard": "I ni sɔgɔma ajan. Bi sɛbɛn ye",
     
     // Cooperative Dashboard
@@ -538,6 +544,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Tin 'Sɛbɛnlɛ Uflɛ' su naan sɛ atonvuɛfuɛ kun klɛ",
     "guide_agent_2": "Fa junman 5 mun'n be kwlaa",
     "guide_agent_3": "Ndɛ'm be sie sɛ internet o lɛ annzɛ o lɛ man",
+    "guide_merchant_1": "Tin \"De sika\" su ka sika sɔ",
+    "guide_merchant_2": "Klɛ sika nuan annzɛ fa sika",
+    "guide_merchant_3": "Fa resu'n kle ɔ jue difuɛ",
     "audio_agent_dashboard": "Afuɛ ajan. Andɛ sɛbɛnlɛ ti",
     
     // Cooperative Dashboard
@@ -720,6 +729,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Dré 'Sébén Flon' gbogbo sébén",
     "guide_agent_2": "Pli djré 5 la",
     "guide_agent_3": "Djré mla nlin o lé non o",
+    "guide_merchant_1": "Dré \"Wali ta\" wali ta",
+    "guide_merchant_2": "Klé wali kplo o wali la",
+    "guide_merchant_3": "Tila rési nu i gbogbo",
     "audio_agent_dashboard": "Woué ajan. Andé sébén yi",
     
     // Cooperative Dashboard
@@ -888,6 +900,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Digi 'Sɛbɛn Kura' jula sɛbɛn",
     "guide_agent_2": "Fɔli 5 dan fa",
     "guide_agent_3": "Kunnafoni mara hali kan t'yen",
+    "guide_merchant_1": "Digi \"Wari ta\" wari sɔrɔ",
+    "guide_merchant_2": "Hakɛ sɛbɛn wala wari bilɛ",
+    "guide_merchant_3": "Resu tila i mɔgɔ la",
     "audio_agent_dashboard": "I ni cɛ ajan. Bi sɛbɛn ye",
     
     // Cooperative Dashboard
@@ -1056,6 +1071,9 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "guide_agent_1": "Digi 'Sɛbɛn Kura' julakɛla sɛbɛn",
     "guide_agent_2": "Fɔli 5 dan fa",
     "guide_agent_3": "Kunnafoni mara hali kan tɛ",
+    "guide_merchant_1": "Digi \"Wari minɛ\" wari sɔrɔ",
+    "guide_merchant_2": "Jate sɛbɛn wala wari bilɛ",
+    "guide_merchant_3": "Resu tila i feeredela",
     "audio_agent_dashboard": "I ni kɛnɛ ajan. Bi sɛbɛn ye",
     
     // Cooperative Dashboard
