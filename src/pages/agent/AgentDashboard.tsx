@@ -8,6 +8,7 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { AudioButton } from '@/components/shared/AudioButton';
+import { ErrorState } from '@/components/shared/StateComponents';
 import { 
   UserPlus, 
   Users, 
@@ -93,25 +94,32 @@ const AgentDashboard: React.FC = () => {
   const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
   const [profile, setProfile] = useState<{ full_name: string } | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+  const fetchData = async () => {
+    if (!user) return;
 
-      const { data: profileData } = await supabase
+    try {
+      setError(null);
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('user_id', user.id)
         .single();
       
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
       if (profileData) setProfile(profileData);
 
       // Récupérer l'agent
-      const { data: agentData } = await supabase
+      const { data: agentData, error: agentError } = await supabase
         .from('agents')
         .select('id, total_enrollments')
         .eq('user_id', user.id)
         .single();
+
+      if (agentError) throw agentError;
 
       if (agentData) {
         // Calculer les dates pour today et cette semaine
@@ -143,10 +151,15 @@ const AgentDashboard: React.FC = () => {
           total: agentData.total_enrollments ?? 0
         });
       }
-
+    } catch (err) {
+      console.error('Error fetching agent data:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
+    } finally {
       setIsLoadingStats(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [user]);
 
@@ -157,6 +170,25 @@ const AgentDashboard: React.FC = () => {
 
   // Audio text dynamique
   const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}.`;
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
+          <h1 className="text-xl font-bold">{t("agent")}</h1>
+        </header>
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            setIsLoadingStats(true);
+            fetchData();
+          }}
+          isNetworkError={!isOnline}
+        />
+        <BottomNav t={t} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">

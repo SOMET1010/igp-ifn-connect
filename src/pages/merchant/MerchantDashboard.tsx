@@ -7,6 +7,7 @@ import { Loader2, Banknote, BarChart3 } from "lucide-react";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { ButtonPrimary, ButtonSecondary, BigNumber, StatusBanner, BottomNavIFN } from "@/components/ifn";
 import { SalesChart } from "@/components/merchant/SalesChart";
+import { ErrorState } from "@/components/shared/StateComponents";
 
 interface MerchantData {
   full_name: string;
@@ -22,6 +23,7 @@ export default function MerchantDashboard() {
   const [todayTotal, setTodayTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -36,15 +38,18 @@ export default function MerchantDashboard() {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+  const fetchData = async () => {
+    if (!user) return;
 
-      const { data: merchantData } = await supabase
+    try {
+      setError(null);
+      const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
         .select("full_name, activity_type, market_id")
         .eq("user_id", user.id)
         .single();
+
+      if (merchantError) throw merchantError;
 
       if (merchantData) {
         let marketName = "";
@@ -84,10 +89,15 @@ export default function MerchantDashboard() {
           }
         }
       }
-
+    } catch (err) {
+      console.error('Error fetching merchant data:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
+    } finally {
       setIsLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [user]);
 
@@ -97,6 +107,25 @@ export default function MerchantDashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <header className="bg-gradient-forest text-primary-foreground p-6">
+          <h1 className="text-2xl font-black">{t("merchant")}</h1>
+        </header>
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            setIsLoading(true);
+            fetchData();
+          }}
+          isNetworkError
+        />
+        <BottomNavIFN />
       </div>
     );
   }

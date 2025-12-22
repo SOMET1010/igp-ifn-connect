@@ -129,12 +129,16 @@ export default function MerchantScanner() {
               if (barcodes.length > 0) {
                 handleBarcodeScan(barcodes[0].rawValue);
               }
-            } catch {}
+            } catch (detectError) {
+              // Detection can fail intermittently during scanning - this is normal
+              console.debug('Barcode detection frame skipped');
+            }
             requestAnimationFrame(detect);
           }
         };
         detect();
-      } catch {
+      } catch (initError) {
+        console.warn('BarcodeDetector initialization failed:', initError);
         toast({
           title: "Info",
           description: "Utilisez la saisie manuelle du code"
