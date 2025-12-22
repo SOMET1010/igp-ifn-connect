@@ -13,8 +13,24 @@ import { InstitutionalActionCard } from "@/components/shared/InstitutionalAction
 import { BigNumberCard } from "@/components/shared/BigNumberCard";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
+import { Confetti } from "@/components/shared/Confetti";
 import { merchantLogger } from "@/infra/logger";
 import type { MerchantDashboardViewData } from "@/shared/types";
+
+const CONFETTI_KEY_PREFIX = 'ifn_first_sale_celebrated_';
+
+const hasAlreadyCelebratedToday = (): boolean => {
+  const today = new Date().toISOString().split('T')[0];
+  return localStorage.getItem(`${CONFETTI_KEY_PREFIX}${today}`) === 'true';
+};
+
+const markAsCelebratedToday = () => {
+  const today = new Date().toISOString().split('T')[0];
+  localStorage.setItem(`${CONFETTI_KEY_PREFIX}${today}`, 'true');
+  // Nettoyer la clé d'hier pour éviter l'accumulation
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  localStorage.removeItem(`${CONFETTI_KEY_PREFIX}${yesterday}`);
+};
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
@@ -25,6 +41,7 @@ export default function MerchantDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [error, setError] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const navItems = [
     { icon: Home, label: t("home"), path: '/marchand' },
@@ -96,6 +113,13 @@ export default function MerchantDashboard() {
             const total = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
             setTodayTotal(total);
             
+            // Confetti pour la première vente du jour
+            if (total > 0 && !hasAlreadyCelebratedToday()) {
+              setShowConfetti(true);
+              markAsCelebratedToday();
+              setTimeout(() => setShowConfetti(false), 3500);
+            }
+            
             merchantLogger.info('Données dashboard chargées', { 
               merchantName: merchantData.full_name,
               todayTotal: total 
@@ -153,6 +177,8 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {showConfetti && <Confetti duration={3000} particleCount={60} />}
+      
       <AudioButton 
         textToRead={pageAudioText}
         className="fixed bottom-24 right-4 z-50"
