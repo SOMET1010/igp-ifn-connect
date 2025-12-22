@@ -7,11 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Phone, Loader2, Shield, UserPlus, Lock, Smartphone, Headphones } from 'lucide-react';
+import { Phone, Loader2, Shield, UserPlus, Lock } from 'lucide-react';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { ContextualBanner } from '@/components/shared/ContextualBanner';
+import { SecondaryFeatures } from '@/components/shared/SecondaryFeatures';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -371,36 +372,7 @@ const AgentLogin: React.FC = () => {
 
         {/* Zone informative secondaire */}
         <div className="w-full max-w-md mt-6">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Lock className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-xs font-medium text-foreground">Sécurisé</p>
-              <p className="text-[10px] text-muted-foreground">Données chiffrées</p>
-            </div>
-            
-            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
-              <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Smartphone className="h-5 w-5 text-secondary" />
-              </div>
-              <p className="text-xs font-medium text-foreground">Officiel</p>
-              <p className="text-[10px] text-muted-foreground">Plateforme DGE</p>
-            </div>
-            
-            <div className="bg-card rounded-xl p-3 text-center shadow-sm border">
-              <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Headphones className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <p className="text-xs font-medium text-foreground">Support</p>
-              <p className="text-[10px] text-muted-foreground">Assistance 24/7</p>
-            </div>
-          </div>
-          
-          {/* Mention institutionnelle */}
-          <p className="text-center text-[10px] text-muted-foreground mt-4">
-            Plateforme opérée par l'ANSUT pour le compte de la DGE
-          </p>
+          <SecondaryFeatures variant="default" showInstitutionalNote={true} maxWidth="md" />
         </div>
       </div>
 
