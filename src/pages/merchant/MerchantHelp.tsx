@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge, BottomNavIFN } from "@/components/ifn";
+import { toast } from "sonner";
 
 export default function MerchantHelp() {
   const navigate = useNavigate();
@@ -44,8 +45,8 @@ export default function MerchantHelp() {
         {/* Vidéo Comment encaisser */}
         <CardLarge 
           onClick={() => {
-            // TODO: Ouvrir modal vidéo
-            console.log("Ouvrir vidéo tutoriel");
+            // TODO: Implémenter modal vidéo
+            toast.info("Vidéo tutoriel bientôt disponible");
           }}
           className="flex items-center gap-4"
         >

@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
+import logger from '@/infra/logger';
 
 interface AudioButtonProps {
   textToRead: string;
@@ -62,7 +63,7 @@ export function AudioButton({
     setIsLoading(true);
 
     try {
-      console.log('Calling LAFRICAMOBILE TTS for:', textToRead.substring(0, 50));
+      logger.debug('Calling LAFRICAMOBILE TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
 
       const { data, error } = await supabase.functions.invoke('lafricamobile-tts', {
         body: {
@@ -73,16 +74,16 @@ export function AudioButton({
       });
 
       if (error) {
-        console.error('LAFRICAMOBILE error:', error);
+        logger.error('LAFRICAMOBILE error', error, { module: 'AudioButton' });
         throw error;
       }
 
       if (!data?.success || !data?.audioUrl) {
-        console.error('LAFRICAMOBILE response:', data);
+        logger.error('LAFRICAMOBILE response invalid', null, { module: 'AudioButton', data });
         throw new Error(data?.error || 'No audio URL returned');
       }
 
-      console.log('Playing audio from:', data.audioUrl);
+      logger.debug('Playing audio', { module: 'AudioButton', url: data.audioUrl });
 
       // Créer et jouer l'audio
       const audio = new Audio(data.audioUrl);
@@ -100,7 +101,7 @@ export function AudioButton({
       };
 
       audio.onerror = (e) => {
-        console.error('Audio playback error:', e);
+        logger.error('Audio playback error', e, { module: 'AudioButton' });
         setIsLoading(false);
         setIsPlaying(false);
         audioRef.current = null;
@@ -108,7 +109,7 @@ export function AudioButton({
 
       await audio.play();
     } catch (error) {
-      console.error('LAFRICAMOBILE TTS error:', error);
+      logger.error('LAFRICAMOBILE TTS error', error, { module: 'AudioButton' });
       setIsLoading(false);
       setIsPlaying(false);
       // Fallback vers Web Speech API en français
@@ -119,7 +120,7 @@ export function AudioButton({
   // TTS via Web Speech API (français et fallback)
   const speakWithWebSpeech = useCallback((langOverride?: string) => {
     if (!('speechSynthesis' in window)) {
-      console.warn('Web Speech API not supported');
+      logger.warn('Web Speech API not supported', { module: 'AudioButton' });
       setIsLoading(false);
       return;
     }
