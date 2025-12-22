@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Phone, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { PhoneInput } from '@/components/shared/PhoneInput';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
@@ -179,28 +180,11 @@ const AgentLogin: React.FC = () => {
         >
           {step === 'phone' && (
             <>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone" className="form-label-lg">
-                  Numéro de téléphone
-                </Label>
-                <div className="flex gap-2">
-                  <div className="flex items-center justify-center h-12 px-3 bg-muted rounded-md text-sm font-medium text-muted-foreground">
-                    +225
-                  </div>
-                  <div className="relative flex-1">
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="07 01 02 03 04"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                      className="input-institutional"
-                      maxLength={10}
-                    />
-                    <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-              </div>
+              <PhoneInput
+                value={phone}
+                onChange={setPhone}
+                disabled={isLoading}
+              />
 
               <Button
                 onClick={handleSendOtp}
