@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,18 +7,20 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
-import { ErrorState } from '@/components/shared/StateComponents';
+import { ErrorState, LoadingState } from '@/components/shared/StateComponents';
 import { DashboardHeader } from '@/components/shared/DashboardHeader';
 import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
 import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
 import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
+import { useDataFetching } from '@/hooks/useDataFetching';
+import { RetryIndicator } from '@/components/shared/RetryIndicator';
+import { coopLogger } from '@/infra/logger';
 import { 
   Package, 
   ShoppingCart, 
   Users, 
   ClipboardList,
   Award,
-  Loader2,
   Home,
   User,
   AlertCircle
@@ -38,15 +40,15 @@ interface Stats {
   pendingOrders: number;
 }
 
+interface DashboardData {
+  cooperative: CooperativeData;
+  stats: Stats;
+}
+
 const CooperativeDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
-  
-  const [cooperative, setCooperative] = useState<CooperativeData | null>(null);
-  const [stats, setStats] = useState<Stats>({ products: 0, pendingOrders: 0 });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const navItems = [
     { icon: Home, label: t("home"), path: '/cooperative' },
@@ -55,49 +57,71 @@ const CooperativeDashboard: React.FC = () => {
     { icon: User, label: t("profile"), path: '/cooperative/profil' },
   ];
 
-  const fetchData = async () => {
-    if (!user) return;
+  const fetchDashboardData = async (): Promise<DashboardData> => {
+    if (!user) throw new Error('Utilisateur non connecté');
 
-    try {
-      setError(null);
-      const { data: coopData, error: coopError } = await supabase
-        .from('cooperatives')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (coopError) throw coopError;
+    coopLogger.info('Fetching cooperative dashboard data', { userId: user.id });
 
-      if (coopData) {
-        setCooperative(coopData);
-
-        const { count: stockCount } = await supabase
-          .from('stocks')
-          .select('*', { count: 'exact', head: true })
-          .eq('cooperative_id', coopData.id);
-
-        const { count: ordersCount } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-          .eq('cooperative_id', coopData.id)
-          .eq('status', 'pending');
-
-        setStats({
-          products: stockCount ?? 0,
-          pendingOrders: ordersCount ?? 0
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching cooperative data:', err);
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
-    } finally {
-      setIsLoading(false);
+    const { data: coopData, error: coopError } = await supabase
+      .from('cooperatives')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (coopError) {
+      coopLogger.error('Failed to fetch cooperative', { error: coopError });
+      throw coopError;
     }
+    
+    if (!coopData) {
+      throw new Error('Coopérative non trouvée');
+    }
+
+    const [stockResult, ordersResult] = await Promise.all([
+      supabase
+        .from('stocks')
+        .select('*', { count: 'exact', head: true })
+        .eq('cooperative_id', coopData.id),
+      supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('cooperative_id', coopData.id)
+        .eq('status', 'pending'),
+    ]);
+
+    coopLogger.info('Dashboard data fetched successfully', {
+      cooperativeId: coopData.id,
+      stockCount: stockResult.count,
+      pendingOrders: ordersResult.count,
+    });
+
+    return {
+      cooperative: coopData,
+      stats: {
+        products: stockResult.count ?? 0,
+        pendingOrders: ordersResult.count ?? 0,
+      },
+    };
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    isNetworkError, 
+    refetch,
+    nextRetryIn,
+    retryCount,
+  } = useDataFetching<DashboardData>({
+    fetchFn: fetchDashboardData,
+    deps: [user?.id],
+    enabled: !!user,
+    retryDelay: 2000,
+    maxRetries: 3,
+  });
+
+  const cooperative = data?.cooperative ?? null;
+  const stats = data?.stats ?? { products: 0, pendingOrders: 0 };
 
   const handleSignOut = async () => {
     await signOut();
@@ -108,8 +132,14 @@ const CooperativeDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="min-h-screen bg-background pb-20">
+        <DashboardHeader
+          title={t("cooperative")}
+          subtitle="Plateforme IFN – Espace Coopérative"
+          onSignOut={handleSignOut}
+        />
+        <LoadingState message="Chargement du tableau de bord..." />
+        <InstitutionalBottomNav items={navItems} />
       </div>
     );
   }
@@ -122,14 +152,20 @@ const CooperativeDashboard: React.FC = () => {
           subtitle="Plateforme IFN – Espace Coopérative"
           onSignOut={handleSignOut}
         />
-        <ErrorState
-          message={error}
-          onRetry={() => {
-            setIsLoading(true);
-            fetchData();
-          }}
-          isNetworkError
-        />
+        <div className="p-4 space-y-4 max-w-2xl mx-auto">
+          <ErrorState
+            message={error.userMessage}
+            onRetry={refetch}
+            isNetworkError={isNetworkError}
+          />
+          {nextRetryIn !== null && (
+            <RetryIndicator
+              nextRetryIn={nextRetryIn}
+              retryCount={retryCount}
+              maxRetries={3}
+            />
+          )}
+        </div>
         <InstitutionalBottomNav items={navItems} />
       </div>
     );
