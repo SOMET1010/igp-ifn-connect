@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Banknote, BarChart3 } from "lucide-react";
+import { Loader2, Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { ButtonPrimary, ButtonSecondary, BigNumber, StatusBanner, BottomNavIFN } from "@/components/ifn";
+import { DashboardHeader } from "@/components/shared/DashboardHeader";
+import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { merchantLogger } from "@/infra/logger";
@@ -13,13 +16,20 @@ import type { MerchantDashboardViewData } from "@/shared/types";
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const [merchant, setMerchant] = useState<MerchantDashboardViewData | null>(null);
   const [todayTotal, setTodayTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [error, setError] = useState<string | null>(null);
+
+  const navItems = [
+    { icon: Home, label: t("home"), path: '/marchand' },
+    { icon: Receipt, label: t("invoices"), path: '/marchand/factures' },
+    { icon: Package, label: t("stock"), path: '/marchand/stock' },
+    { icon: User, label: t("profile"), path: '/marchand/profil' },
+  ];
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -66,7 +76,6 @@ export default function MerchantDashboard() {
           market_name: marketName,
         });
 
-        // Get today's sales
         const today = new Date().toISOString().split("T")[0];
         const { data: merchantForTx } = await supabase
           .from("merchants")
@@ -104,6 +113,11 @@ export default function MerchantDashboard() {
     fetchData();
   }, [user]);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/marchand/login');
+  };
+
   const pageAudioText = `${t("welcome")} ${merchant?.full_name || ""}. ${t("your_sales_today")}: ${todayTotal.toLocaleString()} FCFA.`;
 
   if (isLoading) {
@@ -116,10 +130,12 @@ export default function MerchantDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background pb-24">
-        <header className="bg-gradient-forest text-primary-foreground p-6">
-          <h1 className="text-2xl font-black">{t("merchant")}</h1>
-        </header>
+      <div className="min-h-screen bg-background pb-20">
+        <DashboardHeader
+          title={t("merchant")}
+          subtitle="Plateforme IFN – Espace Marchand"
+          onSignOut={handleSignOut}
+        />
         <ErrorState
           message={error}
           onRetry={() => {
@@ -128,70 +144,75 @@ export default function MerchantDashboard() {
           }}
           isNetworkError
         />
-        <BottomNavIFN />
+        <InstitutionalBottomNav items={navItems} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Floating Audio Button */}
+    <div className="min-h-screen bg-background pb-20">
       <AudioButton 
         textToRead={pageAudioText}
-        className="fixed bottom-28 right-4 z-50"
+        className="fixed bottom-24 right-4 z-50"
         size="lg"
       />
 
-      {/* Header simple */}
-      <header className="bg-gradient-forest text-primary-foreground p-6">
-        <p className="text-lg opacity-90">🌍 {t("welcome")},</p>
-        <h1 className="text-2xl font-black mt-1">
-          {merchant?.full_name || t("merchant")}
-        </h1>
-        <p className="text-sm opacity-80 mt-1">
-          {merchant?.activity_type}
-          {merchant?.market_name && ` • ${merchant.market_name}`}
-        </p>
-      </header>
+      <DashboardHeader
+        title={merchant?.full_name || t("merchant")}
+        subtitle="Plateforme IFN – Espace Marchand"
+        onSignOut={handleSignOut}
+      />
 
-      <main className="p-4 space-y-6">
-        {/* BigNumber - Ventes du jour */}
-        <div className="py-6">
-          <BigNumber 
-            value={todayTotal}
-            label={t("your_sales_today")}
-            color="primary"
-          />
+      <main className="p-4 space-y-6 max-w-2xl mx-auto">
+        {/* Merchant info */}
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            {merchant?.activity_type}
+            {merchant?.market_name && ` • ${merchant.market_name}`}
+          </p>
         </div>
 
-        {/* Bouton GÉANT Encaisser */}
-        <ButtonPrimary 
-          onClick={() => navigate("/marchand/encaisser")}
-          className="h-24 text-2xl"
-        >
-          <Banknote className="w-10 h-10 mr-3" />
-          {t("collect_payment")}
-        </ButtonPrimary>
+        {/* Today's sales - Big Number */}
+        <Card className="card-institutional">
+          <CardContent className="p-6 text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+              {t("your_sales_today")}
+            </p>
+            <p className="text-4xl font-bold text-primary">
+              {todayTotal.toLocaleString('fr-FR')}
+            </p>
+            <p className="text-lg text-muted-foreground">FCFA</p>
+          </CardContent>
+        </Card>
 
-        {/* Bouton secondaire - Mon argent */}
-        <ButtonSecondary 
-          onClick={() => navigate("/marchand/argent")}
+        {/* Action buttons */}
+        <Button 
+          onClick={() => navigate("/marchand/encaisser")}
+          className="btn-institutional w-full h-14 text-lg"
         >
-          <BarChart3 className="w-6 h-6 mr-2" />
+          <Banknote className="w-6 h-6 mr-2" />
+          {t("collect_payment")}
+        </Button>
+
+        <Button 
+          onClick={() => navigate("/marchand/argent")}
+          variant="outline"
+          className="btn-institutional-outline w-full"
+        >
+          <BarChart3 className="w-5 h-5 mr-2" />
           {t("your_money")}
-        </ButtonSecondary>
+        </Button>
 
         {/* Sales Evolution Chart */}
         <SalesChart />
 
-        {/* Status Banner - Offline first */}
-        <StatusBanner 
-          isOnline={isOnline}
-          message={isOnline ? t("saved_offline") : t("offline_message")}
-        />
+        {/* Status indicator */}
+        <div className={`text-center text-sm ${isOnline ? 'text-muted-foreground' : 'text-destructive'}`}>
+          {isOnline ? t("saved_offline") : t("offline_message")}
+        </div>
       </main>
 
-      <BottomNavIFN />
+      <InstitutionalBottomNav items={navItems} />
     </div>
   );
 }
