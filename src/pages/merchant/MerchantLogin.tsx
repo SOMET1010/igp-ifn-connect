@@ -10,8 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
-import logoDGE from '@/assets/logo-dge.png';
-import logoANSUT from '@/assets/logo-ansut.png';
+import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 
 type Step = "phone" | "otp" | "register";
 
@@ -164,46 +163,12 @@ export default function MerchantLogin() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header institutionnel */}
-      <header className="bg-primary text-primary-foreground py-4 sm:py-6 px-4 sm:px-6">
-        <div className="max-w-2xl mx-auto">
-          {/* Ligne supérieure avec logos */}
-          <div className="flex items-center justify-between mb-3">
-            {/* Logo DGE (gauche) */}
-            <div className="bg-white rounded-lg p-1.5 shadow-sm">
-              <img 
-                src={logoDGE} 
-                alt="Direction Générale des Entreprises" 
-                className="h-10 w-auto object-contain"
-              />
-            </div>
-            
-            {/* Titre central */}
-            <div className="text-center flex-1 px-2 sm:px-4">
-              <h1 className="text-sm sm:text-lg font-bold tracking-tight">Plateforme IFN</h1>
-              <p className="text-[10px] sm:text-xs text-primary-foreground/70">Espace Marchand</p>
-            </div>
-            
-            {/* Logo ANSUT (droite) */}
-            <div className="bg-white rounded-lg p-1.5 shadow-sm">
-              <img 
-                src={logoANSUT} 
-                alt="ANSUT - Agence Nationale du Service Universel des Télécommunications" 
-                className="h-8 w-auto object-contain"
-              />
-            </div>
-          </div>
-          
-          {/* Sous-titre ministériel */}
-          <div className="text-center">
-            <p className="text-xs sm:text-sm text-primary-foreground/80">
-              🇨🇮 République de Côte d'Ivoire · Direction Générale des Entreprises
-            </p>
-            <p className="text-[10px] text-primary-foreground/60 mt-1">
-              🏛️ Portail officiel sécurisé
-            </p>
-          </div>
-        </div>
-      </header>
+      <InstitutionalHeader
+        subtitle="Espace Marchand"
+        showBackButton={step !== 'phone'}
+        onBack={() => setStep(step === 'register' ? 'otp' : 'phone')}
+        showOfficialBadge={true}
+      />
 
       {/* Bandeau contextuel */}
       <div className="bg-muted/60 border-b border-border/50 py-2.5 px-4">
