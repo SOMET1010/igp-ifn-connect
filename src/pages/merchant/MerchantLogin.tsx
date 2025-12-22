@@ -8,6 +8,7 @@ import OTPInput from "@/components/auth/OTPInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
 
 type Step = "phone" | "otp" | "register";
 
@@ -25,8 +26,10 @@ export default function MerchantLogin() {
   const email = `${phone.replace(/\s/g, "")}@marchand.igp.ci`;
 
   const handlePhoneSubmit = async () => {
-    if (phone.length < 8) {
-      toast.error("Numéro de téléphone invalide");
+    // Validate phone with Zod
+    const error = getValidationError(phoneSchema, phone);
+    if (error) {
+      toast.error(error);
       return;
     }
 
@@ -55,8 +58,10 @@ export default function MerchantLogin() {
   };
 
   const handleOtpSubmit = async () => {
-    if (otp.length !== 6) {
-      toast.error("Code invalide");
+    // Validate OTP with Zod
+    const validationError = getValidationError(otpSchema, otp);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
@@ -69,9 +74,9 @@ export default function MerchantLogin() {
     }
 
     // Existing user - sign in
-    const { error } = await signIn(email, "marchand123");
+    const { error: signInError } = await signIn(email, "marchand123");
     
-    if (error) {
+    if (signInError) {
       // Try signing up if user doesn't exist in auth
       const { error: signUpError } = await signUp(email, "marchand123", fullName);
       if (signUpError) {
@@ -87,14 +92,16 @@ export default function MerchantLogin() {
   };
 
   const handleRegisterSubmit = async () => {
-    if (fullName.length < 3) {
-      toast.error("Nom trop court");
+    // Validate name with Zod
+    const validationError = getValidationError(fullNameSchema, fullName);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     setIsLoading(true);
 
-    const { error, data } = await supabase.auth.signUp({
+    const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password: "marchand123",
       options: {
@@ -103,7 +110,7 @@ export default function MerchantLogin() {
       }
     });
     
-    if (error || !data.user) {
+    if (signUpError || !data.user) {
       toast.error("Erreur lors de l'inscription");
       setIsLoading(false);
       return;

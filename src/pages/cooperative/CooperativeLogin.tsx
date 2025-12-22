@@ -8,9 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
 import { Phone, ArrowLeft, Loader2, Wheat, UserPlus } from 'lucide-react';
-import { z } from 'zod';
-
-const phoneSchema = z.string().regex(/^[0-9]{10}$/, 'Numéro de téléphone invalide (10 chiffres)');
+import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -45,12 +43,11 @@ const CooperativeLogin: React.FC = () => {
   };
 
   const handleSendOtp = async () => {
-    try {
-      phoneSchema.parse(phone);
-    } catch {
+    const validationError = getValidationError(phoneSchema, phone);
+    if (validationError) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez entrer un numéro valide (10 chiffres)',
+        description: validationError,
         variant: 'destructive',
       });
       return;
@@ -71,10 +68,11 @@ const CooperativeLogin: React.FC = () => {
   };
 
   const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
+    const validationError = getValidationError(otpSchema, otp);
+    if (validationError) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez entrer le code à 6 chiffres',
+        description: validationError,
         variant: 'destructive',
       });
       return;
@@ -113,10 +111,11 @@ const CooperativeLogin: React.FC = () => {
   };
 
   const handleRegister = async () => {
-    if (fullName.trim().length < 3) {
+    const validationError = getValidationError(fullNameSchema, fullName);
+    if (validationError) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez entrer le nom de la coopérative',
+        description: validationError,
         variant: 'destructive',
       });
       return;
