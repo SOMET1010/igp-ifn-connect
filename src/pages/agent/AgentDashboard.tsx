@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useDataFetching } from '@/hooks/useDataFetching';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState } from '@/components/shared/StateComponents';
@@ -25,16 +26,16 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+interface AgentDashboardData {
+  profile: { full_name: string } | null;
+  stats: { today: number; week: number; total: number };
+}
+
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isOnline, pendingCount, isSyncing, syncWithServer } = useOfflineSync();
-  
-  const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
-  const [profile, setProfile] = useState<{ full_name: string } | null>(null);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const navItems = [
     { icon: Home, label: t("home"), path: '/agent' },
@@ -42,67 +43,73 @@ const AgentDashboard: React.FC = () => {
     { icon: User, label: t("profile"), path: '/agent/profil' },
   ];
 
-  const fetchData = async () => {
-    if (!user) return;
+  const fetchDashboardData = useCallback(async (): Promise<AgentDashboardData> => {
+    if (!user) throw new Error('User not authenticated');
 
-    try {
-      setError(null);
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (profileError && profileError.code !== 'PGRST116') {
-        throw profileError;
-      }
-      if (profileData) setProfile(profileData);
-
-      const { data: agentData, error: agentError } = await supabase
-        .from('agents')
-        .select('id, total_enrollments')
-        .eq('user_id', user.id)
-        .single();
-
-      if (agentError) throw agentError;
-
-      if (agentData) {
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-        
-        const dayOfWeek = now.getDay();
-        const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
-
-        const { count: todayCount } = await supabase
-          .from('merchants')
-          .select('id', { count: 'exact', head: true })
-          .eq('enrolled_by', agentData.id)
-          .gte('enrolled_at', todayStart);
-
-        const { count: weekCount } = await supabase
-          .from('merchants')
-          .select('id', { count: 'exact', head: true })
-          .eq('enrolled_by', agentData.id)
-          .gte('enrolled_at', weekStart);
-
-        setStats({
-          today: todayCount ?? 0,
-          week: weekCount ?? 0,
-          total: agentData.total_enrollments ?? 0
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching agent data:', err);
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
-    } finally {
-      setIsLoadingStats(false);
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (profileError && profileError.code !== 'PGRST116') {
+      throw profileError;
     }
-  };
 
-  useEffect(() => {
-    fetchData();
+    const { data: agentData, error: agentError } = await supabase
+      .from('agents')
+      .select('id, total_enrollments')
+      .eq('user_id', user.id)
+      .single();
+
+    if (agentError) throw agentError;
+
+    let stats = { today: 0, week: 0, total: 0 };
+
+    if (agentData) {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      
+      const dayOfWeek = now.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
+
+      const { count: todayCount } = await supabase
+        .from('merchants')
+        .select('id', { count: 'exact', head: true })
+        .eq('enrolled_by', agentData.id)
+        .gte('enrolled_at', todayStart);
+
+      const { count: weekCount } = await supabase
+        .from('merchants')
+        .select('id', { count: 'exact', head: true })
+        .eq('enrolled_by', agentData.id)
+        .gte('enrolled_at', weekStart);
+
+      stats = {
+        today: todayCount ?? 0,
+        week: weekCount ?? 0,
+        total: agentData.total_enrollments ?? 0
+      };
+    }
+
+    return { profile: profileData, stats };
   }, [user]);
+
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    isNetworkError, 
+    refetch 
+  } = useDataFetching<AgentDashboardData>({
+    fetchFn: fetchDashboardData,
+    deps: [user?.id],
+    enabled: !!user,
+  });
+
+  const profile = data?.profile ?? null;
+  const stats = data?.stats ?? { today: 0, week: 0, total: 0 };
 
   const handleSignOut = async () => {
     await signOut();
@@ -120,12 +127,9 @@ const AgentDashboard: React.FC = () => {
           onSignOut={handleSignOut}
         />
         <ErrorState
-          message={error}
-          onRetry={() => {
-            setIsLoadingStats(true);
-            fetchData();
-          }}
-          isNetworkError={!isOnline}
+          message={error.userMessage}
+          onRetry={refetch}
+          isNetworkError={isNetworkError}
         />
         <InstitutionalBottomNav items={navItems} />
       </div>
@@ -189,17 +193,17 @@ const AgentDashboard: React.FC = () => {
         <div className="grid grid-cols-3 gap-3">
           <InstitutionalStatCard
             title={t("today")}
-            value={isLoadingStats ? '-' : stats.today.toString()}
+            value={isLoading ? '-' : stats.today.toString()}
             icon={Calendar}
           />
           <InstitutionalStatCard
             title={t("this_week")}
-            value={isLoadingStats ? '-' : stats.week.toString()}
+            value={isLoading ? '-' : stats.week.toString()}
             icon={TrendingUp}
           />
           <InstitutionalStatCard
             title={t("total")}
-            value={isLoadingStats ? '-' : stats.total.toString()}
+            value={isLoading ? '-' : stats.total.toString()}
             icon={Users}
           />
         </div>
