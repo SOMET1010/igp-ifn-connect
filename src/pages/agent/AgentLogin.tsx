@@ -11,6 +11,7 @@ import { Phone, Loader2, Shield, UserPlus, Lock, Smartphone, Headphones } from '
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
+import { ContextualBanner } from '@/components/shared/ContextualBanner';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -198,14 +199,12 @@ const AgentLogin: React.FC = () => {
       />
 
       {/* Bandeau Contextuel */}
-      <div className="bg-muted/60 border-b border-border/50">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <span>{STEP_BANNERS[step].icon}</span>
-            <span>{STEP_BANNERS[step].message}</span>
-          </div>
-        </div>
-      </div>
+      <ContextualBanner
+        icon={STEP_BANNERS[step].icon}
+        message={STEP_BANNERS[step].message}
+        variant="default"
+        maxWidth="2xl"
+      />
 
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
