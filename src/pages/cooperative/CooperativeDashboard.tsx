@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
+import { ErrorState } from '@/components/shared/StateComponents';
 import { 
   Package, 
   ShoppingCart, 
@@ -40,18 +41,22 @@ const CooperativeDashboard: React.FC = () => {
   const [cooperative, setCooperative] = useState<CooperativeData | null>(null);
   const [stats, setStats] = useState<Stats>({ products: 0, pendingOrders: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+  const fetchData = async () => {
+    if (!user) return;
 
+    try {
+      setError(null);
       // Fetch cooperative data
-      const { data: coopData } = await supabase
+      const { data: coopData, error: coopError } = await supabase
         .from('cooperatives')
         .select('*')
         .eq('user_id', user.id)
         .single();
       
+      if (coopError) throw coopError;
+
       if (coopData) {
         setCooperative(coopData);
 
@@ -73,10 +78,15 @@ const CooperativeDashboard: React.FC = () => {
           pendingOrders: ordersCount ?? 0
         });
       }
-
+    } catch (err) {
+      console.error('Error fetching cooperative data:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
+    } finally {
       setIsLoading(false);
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [user]);
 
@@ -92,6 +102,25 @@ const CooperativeDashboard: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
+          <h1 className="text-lg font-bold">{t("cooperative")}</h1>
+        </header>
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            setIsLoading(true);
+            fetchData();
+          }}
+          isNetworkError
+        />
+        <CooperativeBottomNav />
       </div>
     );
   }

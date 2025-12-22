@@ -98,8 +98,14 @@ export function PriceCompareSheet({
     try {
       const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleRwBAAAA');
       audio.volume = 0.3;
-      audio.play().catch(() => {});
-    } catch {}
+      audio.play().catch((e) => {
+        // Audio autoplay blocked by browser - this is expected behavior
+        console.debug('Audio play blocked:', e.message);
+      });
+    } catch (audioError) {
+      // Audio creation failed - non-critical, continue silently
+      console.debug('Audio creation failed:', audioError);
+    }
     
     onAddToCart(selectedOffer, quantity);
     setAddedOffers(prev => new Set(prev).add(selectedOffer.stockId));

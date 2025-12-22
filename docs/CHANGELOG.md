@@ -10,20 +10,30 @@
 - Ajout validation Zod sur tous les formulaires de login
 
 ### 🐛 Corrections
-- Ajout ErrorBoundary global pour éviter les écrans blancs
-- Gestion erreurs réseau avec messages utilisateur
-- Remplacement `<a>` par `<Link>` dans ProtectedRoute
-- Fix empty catch blocks dans MerchantScanner
+- **ErrorBoundary global** pour éviter les écrans blancs sur erreur JS
+- **Gestion erreurs réseau** dans MerchantDashboard, AgentDashboard, CooperativeDashboard
+- **Gestion erreurs SalesChart** avec état d'erreur et bouton retry
+- Remplacement `<a>` par `<Link>` dans ProtectedRoute (navigation SPA)
+- **Fix empty catch blocks** dans MerchantScanner (logging explicatif)
+- **Fix empty catch block** dans PriceCompareSheet (audio play blocked)
+- **Chart AdminDashboard** utilise désormais les vraies données d'enrôlement
+- **Empty state chart** quand aucun enrôlement sur 7 jours
 
 ### ⚡ Performance
-- Memoisation AuthContext value
-- Lazy loading route AdminMap
+- Memoisation AuthContext value avec useMemo
+- Lazy loading route AdminMap avec React.lazy + Suspense
 
 ### 📝 Documentation
-- Création docs/BUGLOG.md
-- Création docs/PERF_NOTES.md
-- Création docs/RELEASE_CHECKLIST.md
-- Création docs/STABILITY_PLAN.md
+- Création docs/BUGLOG.md (tracking des bugs et corrections)
+- Création docs/PERF_NOTES.md (optimisations et goulots)
+- Création docs/RELEASE_CHECKLIST.md (Go/No-Go criteria)
+- Création docs/STABILITY_PLAN.md (plan de stabilisation P0/P1/P2)
+- Mise à jour docs/CHANGELOG.md
+
+### 🏗️ Composants partagés
+- Création `ErrorState` composant réutilisable (erreur + retry)
+- Création `EmptyState` composant réutilisable (état vide)
+- Création `LoadingState` composant réutilisable (chargement)
 
 ---
 
