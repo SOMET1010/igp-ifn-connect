@@ -59,6 +59,12 @@ export interface MerchantDashboardViewData {
   market_name?: string;
 }
 
+/** Données affichées sur le profil marchand */
+export interface MerchantProfileViewData {
+  full_name: string;
+  activity_type: string;
+}
+
 // ============================================
 
 export interface MerchantWithAgent extends Merchant {

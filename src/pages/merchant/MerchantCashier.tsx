@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { merchantLogger } from "@/infra/logger";
 
 type PaymentMethod = "cash" | "mobile_money";
 type Step = "input" | "confirm" | "success";
@@ -89,6 +90,11 @@ export default function MerchantCashier() {
     if (!user || !method) return;
 
     setIsLoading(true);
+    merchantLogger.debug('Confirmation paiement initiée', { 
+      amount: numericAmount, 
+      method,
+      userId: user.id 
+    });
 
     try {
       const { data: merchantData } = await supabase
@@ -115,7 +121,11 @@ export default function MerchantCashier() {
       }).select("id").single();
 
       if (error) {
-        console.error("Transaction error:", error);
+        merchantLogger.error('Échec insertion transaction', error, { 
+          userId: user.id, 
+          amount: numericAmount,
+          method 
+        });
         toast.error(t("min_amount_error"));
         setIsLoading(false);
         return;
@@ -142,10 +152,18 @@ export default function MerchantCashier() {
       setTransactionRef(ref);
       setStep("success");
       
+      merchantLogger.info('Transaction réussie', { 
+        reference: ref,
+        amount: numericAmount,
+        method,
+        cmu: cmuDeduction,
+        rsti: rstiDeduction
+      });
+      
       triggerSuccessFeedback();
       toast.success(t("payment_success") + " !");
     } catch (error) {
-      console.error("Error:", error);
+      merchantLogger.error('Échec confirmation paiement', error, { userId: user.id });
       toast.error(t("min_amount_error"));
     } finally {
       setIsLoading(false);
