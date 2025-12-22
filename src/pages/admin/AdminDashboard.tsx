@@ -9,7 +9,7 @@ import {
   Users, 
   Store, 
   Wheat, 
-  Map, 
+  Map as MapIcon, 
   LogOut,
   Home,
   TrendingUp,
@@ -28,7 +28,7 @@ const BottomNav: React.FC = () => {
     { icon: Home, label: 'Dashboard', path: '/admin' },
     { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
     { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
-    { icon: Map, label: 'Carte', path: '/admin/carte' },
+    { icon: MapIcon, label: 'Carte', path: '/admin/carte' },
   ];
 
   return (
@@ -82,53 +82,87 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch merchants count
-      const { count: merchantsCount } = await supabase
-        .from('merchants')
-        .select('*', { count: 'exact', head: true });
+      try {
+        // Fetch merchants count
+        const { count: merchantsCount } = await supabase
+          .from('merchants')
+          .select('*', { count: 'exact', head: true });
 
-      const { count: pendingCount } = await supabase
-        .from('merchants')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+        const { count: pendingCount } = await supabase
+          .from('merchants')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
 
-      // Fetch agents count
-      const { count: agentsCount } = await supabase
-        .from('agents')
-        .select('*', { count: 'exact', head: true });
+        // Fetch agents count
+        const { count: agentsCount } = await supabase
+          .from('agents')
+          .select('*', { count: 'exact', head: true });
 
-      // Fetch cooperatives count
-      const { count: cooperativesCount } = await supabase
-        .from('cooperatives')
-        .select('*', { count: 'exact', head: true });
+        // Fetch cooperatives count
+        const { count: cooperativesCount } = await supabase
+          .from('cooperatives')
+          .select('*', { count: 'exact', head: true });
 
-      // Fetch total transactions
-      const { data: transactionsData } = await supabase
-        .from('transactions')
-        .select('amount');
+        // Fetch total transactions
+        const { data: transactionsData } = await supabase
+          .from('transactions')
+          .select('amount');
 
-      const totalAmount = transactionsData?.reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
+        const totalAmount = transactionsData?.reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
 
-      setStats({
-        merchants: merchantsCount ?? 0,
-        pendingMerchants: pendingCount ?? 0,
-        agents: agentsCount ?? 0,
-        cooperatives: cooperativesCount ?? 0,
-        totalTransactions: totalAmount
-      });
+        setStats({
+          merchants: merchantsCount ?? 0,
+          pendingMerchants: pendingCount ?? 0,
+          agents: agentsCount ?? 0,
+          cooperatives: cooperativesCount ?? 0,
+          totalTransactions: totalAmount
+        });
 
-      // Generate mock chart data for enrollments
-      const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (6 - i));
-        return {
-          date: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-          enrollments: Math.floor(Math.random() * 20) + 5
-        };
-      });
-      setChartData(last7Days);
+        // Fetch real enrollment data for the last 7 days
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
 
-      setIsLoading(false);
+        const { data: enrollmentData } = await supabase
+          .from('merchants')
+          .select('enrolled_at')
+          .gte('enrolled_at', sevenDaysAgo.toISOString())
+          .order('enrolled_at', { ascending: true });
+
+        // Group enrollments by date
+        const enrollmentsByDate = new Map<string, number>();
+        
+        // Initialize all 7 days with 0
+        for (let i = 0; i < 7; i++) {
+          const date = new Date();
+          date.setDate(date.getDate() - (6 - i));
+          const dateKey = date.toISOString().split('T')[0];
+          enrollmentsByDate.set(dateKey, 0);
+        }
+
+        // Count actual enrollments
+        enrollmentData?.forEach((merchant) => {
+          const dateKey = merchant.enrolled_at.split('T')[0];
+          if (enrollmentsByDate.has(dateKey)) {
+            enrollmentsByDate.set(dateKey, (enrollmentsByDate.get(dateKey) ?? 0) + 1);
+          }
+        });
+
+        // Convert to chart format
+        const chartDataArray = Array.from(enrollmentsByDate.entries()).map(([dateStr, count]) => {
+          const date = new Date(dateStr);
+          return {
+            date: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+            enrollments: count
+          };
+        });
+
+        setChartData(chartDataArray);
+      } catch (error) {
+        console.error('Error fetching admin dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -285,7 +319,7 @@ const AdminDashboard: React.FC = () => {
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/admin/carte')}>
             <CardContent className="p-4 flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-violet-100 rounded-full flex items-center justify-center mb-3">
-                <Map className="h-7 w-7 text-violet-700" />
+                <MapIcon className="h-7 w-7 text-violet-700" />
               </div>
               <h3 className="font-semibold text-foreground">Cartographie</h3>
               <p className="text-sm text-muted-foreground">Voir la carte</p>
