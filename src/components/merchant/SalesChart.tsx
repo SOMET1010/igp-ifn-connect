@@ -8,6 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { Loader2, TrendingUp, TrendingDown, RefreshCw, AlertCircle } from 'lucide-react';
 import { format, subDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { merchantLogger } from '@/infra/logger';
 
 interface DailySales {
   date: string;
@@ -92,7 +93,7 @@ export function SalesChart() {
         setTrend(100);
       }
     } catch (err) {
-      console.error('Error fetching sales data:', err);
+      merchantLogger.error('Error fetching sales data', err);
       setError('Erreur de chargement');
     } finally {
       setIsLoading(false);

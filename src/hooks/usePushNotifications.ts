@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-
+import { logger } from '@/infra/logger';
 // VAPID public key - this should match your server's public key
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -57,7 +57,7 @@ export function usePushNotifications() {
           setIsSubscribed(false);
         }
       } catch (error) {
-        console.error('Error checking subscription:', error);
+        logger.error('Error checking subscription', error, { module: 'Push' });
       }
     };
 
@@ -128,7 +128,7 @@ export function usePushNotifications() {
       toast.success("Notifications activées !");
       return true;
     } catch (error) {
-      console.error('Error subscribing to push:', error);
+      logger.error('Error subscribing to push', error, { module: 'Push' });
       toast.error("Erreur lors de l'activation des notifications");
       return false;
     } finally {
@@ -161,7 +161,7 @@ export function usePushNotifications() {
       toast.success("Notifications désactivées");
       return true;
     } catch (error) {
-      console.error('Error unsubscribing:', error);
+      logger.error('Error unsubscribing', error, { module: 'Push' });
       toast.error("Erreur lors de la désactivation");
       return false;
     } finally {

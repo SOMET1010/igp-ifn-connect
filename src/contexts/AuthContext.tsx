@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, useCall
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-
+import { authLogger } from '@/infra/logger';
 type AppRole = Database['public']['Enums']['app_role'];
 
 interface AuthContextType {
@@ -42,12 +42,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
       
       if (error) {
-        console.error('Error fetching user role:', error);
+        authLogger.warn('Error fetching user role', { userId, error: error.message });
         return null;
       }
       return data?.role as AppRole;
     } catch (err) {
-      console.error('Error in fetchUserRole:', err);
+      authLogger.error('Error in fetchUserRole', err, { userId });
       return null;
     }
   };
@@ -132,13 +132,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
-        console.error('Error checking role:', error);
+        authLogger.warn('Error checking role', { role, error: error.message });
         return false;
       }
       
       return data ?? false;
     } catch (err) {
-      console.error('Error in checkRole:', err);
+      authLogger.error('Error in checkRole', err, { role });
       return false;
     }
   }, [user]);

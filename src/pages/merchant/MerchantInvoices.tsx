@@ -19,6 +19,7 @@ import { FileText, Plus, Calendar, Home, Wallet, User, Package, Shield, XCircle,
 import { toast } from "sonner";
 import { FNEInvoice, InvoiceData } from "@/components/merchant/FNEInvoice";
 import { generateSecurityHash, generateVerificationUrl } from "@/lib/invoiceUtils";
+import { merchantLogger } from "@/infra/logger";
 
 interface Invoice {
   id: string;
@@ -101,7 +102,7 @@ export default function MerchantInvoices() {
 
       setInvoices((invoicesData as Invoice[]) || []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      merchantLogger.error("Error fetching invoices", error);
       toast.error("Erreur lors du chargement des factures");
     } finally {
       setLoading(false);
@@ -213,7 +214,7 @@ export default function MerchantInvoices() {
 
       toast.success("Facture FNE créée avec succès !");
     } catch (error) {
-      console.error("Error creating invoice:", error);
+      merchantLogger.error("Error creating invoice", error);
       toast.error("Erreur lors de la création de la facture");
     } finally {
       setIsCreating(false);
@@ -261,7 +262,7 @@ export default function MerchantInvoices() {
       setCancellationReason("");
       fetchMerchantAndInvoices();
     } catch (error) {
-      console.error("Error cancelling invoice:", error);
+      merchantLogger.error("Error cancelling invoice", error);
       toast.error("Erreur lors de l'annulation de la facture");
     } finally {
       setIsCancelling(false);
