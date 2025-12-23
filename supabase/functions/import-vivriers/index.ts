@@ -164,9 +164,9 @@ Deno.serve(async (req) => {
       results.push(coopResult);
     }
 
-    // Import members
+    // Import members using UPSERT on actor_key (unique constraint)
     if (members && Array.isArray(members)) {
-      console.log(`Importing ${members.length} members...`);
+      console.log(`Importing ${members.length} members using upsert on actor_key...`);
       const memberResult: ImportResult = {
         table: 'vivriers_members',
         inserted: 0,
@@ -175,94 +175,99 @@ Deno.serve(async (req) => {
         errors: [],
       };
 
-      const BATCH_SIZE = 500;
-      for (let i = 0; i < members.length; i += BATCH_SIZE) {
-        const batch = members.slice(i, i + BATCH_SIZE);
+      const BATCH_SIZE = 100; // Smaller batches for upsert
+      const validMembers: Array<{
+        actor_key: string;
+        cooperative_name: string;
+        row_number: number | null;
+        full_name: string;
+        identifier_code: string | null;
+        phone: string | null;
+        phone2: string | null;
+        cmu_status: string | null;
+        cnps_status: string | null;
+        notes: string | null;
+      }> = [];
+      
+      // First pass: validate and prepare data
+      for (let j = 0; j < members.length; j++) {
+        const member: MemberCSVRow = members[j];
+        const rowIndex = j + 1;
         
-        for (let j = 0; j < batch.length; j++) {
-          const member: MemberCSVRow = batch[j];
-          const rowIndex = i + j + 1;
-          
-          try {
-            // Map CSV columns: market_name → cooperative_name, row_no → row_number
-            const cooperativeName = member.market_name || member.cooperative_name;
-            const rowNumber = parseInt(String(member.row_no || member.row_number || 0)) || null;
-            
-            if (!member.actor_key || !member.full_name || !cooperativeName) {
-              memberResult.rejected++;
-              memberResult.errors.push({ 
-                row: rowIndex, 
-                error: 'Missing required fields (actor_key, full_name, or market_name/cooperative_name)' 
-              });
-              continue;
-            }
+        // Map CSV columns: market_name → cooperative_name, row_no → row_number
+        const cooperativeName = member.market_name || member.cooperative_name;
+        const rowNumber = parseInt(String(member.row_no || member.row_number || 0)) || null;
+        
+        if (!member.actor_key || !member.full_name || !cooperativeName) {
+          memberResult.rejected++;
+          memberResult.errors.push({ 
+            row: rowIndex, 
+            error: 'Missing required fields (actor_key, full_name, or market_name/cooperative_name)' 
+          });
+          continue;
+        }
 
-            // Normalize phone and identifier
-            const normalizedPhone = member.phone?.replace(/\D/g, '') || null;
-            const normalizedPhone2 = member.phone2?.replace(/\D/g, '') || null;
-            const normalizedIdentifier = member.identifier_code?.replace(/\s/g, '') || null;
+        // Normalize phone and identifier
+        const normalizedPhone = member.phone?.replace(/\D/g, '') || null;
+        const normalizedPhone2 = member.phone2?.replace(/\D/g, '') || null;
+        const normalizedIdentifier = member.identifier_code?.replace(/\s/g, '') || null;
 
-            const { data: existing } = await supabase
-              .from('vivriers_members')
-              .select('id')
-              .eq('actor_key', member.actor_key)
-              .maybeSingle();
+        validMembers.push({
+          actor_key: member.actor_key,
+          cooperative_name: cooperativeName,
+          row_number: rowNumber,
+          full_name: member.full_name,
+          identifier_code: normalizedIdentifier,
+          phone: normalizedPhone,
+          phone2: normalizedPhone2,
+          cmu_status: member.cmu_status || null,
+          cnps_status: member.cnps_status || null,
+          notes: member.notes || null,
+        });
+      }
 
-            if (existing) {
-              // Update
-              const { error } = await supabase
+      // Second pass: upsert in batches
+      for (let i = 0; i < validMembers.length; i += BATCH_SIZE) {
+        const batch = validMembers.slice(i, i + BATCH_SIZE);
+        
+        try {
+          const { data, error } = await supabase
+            .from('vivriers_members')
+            .upsert(batch, { 
+              onConflict: 'actor_key',
+              ignoreDuplicates: false 
+            })
+            .select('actor_key');
+
+          if (error) {
+            // If batch fails, try one by one
+            console.warn(`Batch upsert failed, falling back to individual inserts: ${error.message}`);
+            for (const memberData of batch) {
+              const { error: singleError } = await supabase
                 .from('vivriers_members')
-                .update({
-                  cooperative_name: cooperativeName,
-                  row_number: rowNumber,
-                  full_name: member.full_name,
-                  identifier_code: normalizedIdentifier,
-                  phone: normalizedPhone,
-                  phone2: normalizedPhone2,
-                  cmu_status: member.cmu_status || null,
-                  cnps_status: member.cnps_status || null,
-                  notes: member.notes || null,
-                })
-                .eq('id', existing.id);
-
-              if (error) {
+                .upsert(memberData, { onConflict: 'actor_key' });
+              
+              if (singleError) {
                 memberResult.rejected++;
-                memberResult.errors.push({ row: rowIndex, error: error.message });
-              } else {
-                memberResult.updated++;
-              }
-            } else {
-              // Insert
-              const { error } = await supabase
-                .from('vivriers_members')
-                .insert({
-                  actor_key: member.actor_key,
-                  cooperative_name: cooperativeName,
-                  row_number: rowNumber,
-                  full_name: member.full_name,
-                  identifier_code: normalizedIdentifier,
-                  phone: normalizedPhone,
-                  phone2: normalizedPhone2,
-                  cmu_status: member.cmu_status || null,
-                  cnps_status: member.cnps_status || null,
-                  notes: member.notes || null,
+                memberResult.errors.push({ 
+                  row: validMembers.indexOf(memberData) + 1, 
+                  error: singleError.message 
                 });
-
-              if (error) {
-                memberResult.rejected++;
-                memberResult.errors.push({ row: rowIndex, error: error.message });
               } else {
-                memberResult.inserted++;
+                memberResult.updated++; // Count as updated since we use upsert
               }
             }
-          } catch (err) {
-            memberResult.rejected++;
-            memberResult.errors.push({ row: rowIndex, error: String(err) });
+          } else {
+            // All succeeded - count as inserted/updated
+            memberResult.updated += batch.length;
           }
+        } catch (err) {
+          memberResult.rejected += batch.length;
+          memberResult.errors.push({ row: i + 1, error: String(err) });
         }
       }
 
-      console.log(`Members import complete: ${memberResult.inserted} inserted, ${memberResult.updated} updated, ${memberResult.rejected} rejected`);
+      console.log(`Members import complete: ${memberResult.inserted} inserted, ${memberResult.updated} upserted, ${memberResult.rejected} rejected`);
       results.push(memberResult);
     }
 

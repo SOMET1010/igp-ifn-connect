@@ -180,6 +180,7 @@ const AdminVivriers: React.FC = () => {
   const filteredMembers = members.filter(member =>
     member.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.cooperative_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    member.actor_key.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.identifier_code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -309,7 +310,7 @@ const AdminVivriers: React.FC = () => {
       {/* Search */}
       <div className="px-4">
         <Input
-          placeholder="Rechercher..."
+          placeholder="Rechercher par nom, coopérative ou numéro (ex: PACA-001)..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="mb-4"
@@ -385,19 +386,19 @@ const AdminVivriers: React.FC = () => {
                 <Card key={member.id}>
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary" className="font-mono text-xs bg-primary/10 text-primary">
+                            {member.actor_key}
+                          </Badge>
+                        </div>
                         <h3 className="font-semibold">{member.full_name}</h3>
                         <p className="text-sm text-muted-foreground">{member.cooperative_name}</p>
-                        {member.identifier_code && (
-                          <p className="text-xs font-mono text-muted-foreground">
-                            ID: {member.identifier_code}
-                          </p>
-                        )}
                         {member.phone && (
-                          <p className="text-xs text-muted-foreground">{member.phone}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{member.phone}</p>
                         )}
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex flex-col items-end gap-1">
                         {member.cmu_status && (
                           <Badge variant={member.cmu_status === 'oui' ? 'default' : 'outline'} className="text-xs">
                             CMU
