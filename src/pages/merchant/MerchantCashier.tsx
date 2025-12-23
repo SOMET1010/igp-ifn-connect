@@ -97,14 +97,15 @@ export default function MerchantCashier() {
     });
 
     try {
-      const { data: merchantData } = await supabase
+      const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
         .select("id, rsti_balance")
         .eq("user_id", user.id)
         .single();
 
-      if (!merchantData) {
-        toast.error(t("min_amount_error"));
+      if (merchantError || !merchantData) {
+        merchantLogger.warn('Marchand non trouvé', { userId: user.id, error: merchantError?.message });
+        toast.error("Compte marchand introuvable. Veuillez vous reconnecter.");
         setIsLoading(false);
         return;
       }
@@ -126,7 +127,7 @@ export default function MerchantCashier() {
           amount: numericAmount,
           method 
         });
-        toast.error(t("min_amount_error"));
+        toast.error("Échec de l'enregistrement. Veuillez réessayer.");
         setIsLoading(false);
         return;
       }
@@ -164,7 +165,7 @@ export default function MerchantCashier() {
       toast.success(t("payment_success") + " !");
     } catch (error) {
       merchantLogger.error('Échec confirmation paiement', error, { userId: user.id });
-      toast.error(t("min_amount_error"));
+      toast.error("Erreur de connexion. Vérifiez votre réseau.");
     } finally {
       setIsLoading(false);
     }
