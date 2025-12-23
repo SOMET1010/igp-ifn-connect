@@ -1,6 +1,9 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+type StatCardVariant = 'default' | 'warning' | 'success';
 
 interface InstitutionalStatCardProps {
   title: string;
@@ -8,18 +11,36 @@ interface InstitutionalStatCardProps {
   icon?: LucideIcon;
   subtitle?: string;
   onClick?: () => void;
+  variant?: StatCardVariant;
 }
+
+const variantStyles: Record<StatCardVariant, string> = {
+  default: '',
+  warning: 'border-amber-500/50 bg-amber-500/5',
+  success: 'border-green-500/50 bg-green-500/5'
+};
+
+const subtitleVariantStyles: Record<StatCardVariant, string> = {
+  default: 'text-muted-foreground',
+  warning: 'text-amber-600 dark:text-amber-400 font-medium',
+  success: 'text-green-600 dark:text-green-400 font-medium'
+};
 
 export const InstitutionalStatCard: React.FC<InstitutionalStatCardProps> = ({
   title,
   value,
   icon: Icon,
   subtitle,
-  onClick
+  onClick,
+  variant = 'default'
 }) => {
   return (
     <Card 
-      className={`card-institutional ${onClick ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
+      className={cn(
+        'card-institutional transition-colors',
+        onClick && 'cursor-pointer hover:border-primary/50',
+        variantStyles[variant]
+      )}
       onClick={onClick}
     >
       <CardContent className="p-4">
@@ -33,7 +54,7 @@ export const InstitutionalStatCard: React.FC<InstitutionalStatCardProps> = ({
           {value}
         </p>
         {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className={cn('text-xs mt-1', subtitleVariantStyles[variant])}>
             {subtitle}
           </p>
         )}
