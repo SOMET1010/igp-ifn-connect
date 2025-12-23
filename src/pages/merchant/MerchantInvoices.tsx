@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { PageWrapper } from "@/components/shared/PageWrapper";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { useNavigate } from "react-router-dom";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Plus, Calendar, Home, Wallet, User, Package, Shield, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { FileText, Plus, Calendar, Shield, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { FNEInvoice, InvoiceData } from "@/components/merchant/FNEInvoice";
 import { generateSecurityHash, generateVerificationUrl } from "@/lib/invoiceUtils";
@@ -44,16 +45,10 @@ interface MerchantData {
 
 export default function MerchantInvoices() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [merchantData, setMerchantData] = useState<MerchantData | null>(null);
-
-  const navItems = [
-    { icon: Home, label: "Accueil", href: "/marchand" },
-    { icon: Package, label: "Stock", href: "/marchand/stock" },
-    { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-    { icon: User, label: "Profil", href: "/marchand/profil" },
-  ];
 
   // New invoice form
   const [showNewInvoice, setShowNewInvoice] = useState(false);
@@ -271,26 +266,27 @@ export default function MerchantInvoices() {
 
   if (generatedInvoice) {
     return (
-      <PageWrapper>
+      <div className="min-h-screen bg-background">
         <div className="p-4 max-w-md mx-auto">
           <FNEInvoice
             invoice={generatedInvoice}
             onClose={() => setGeneratedInvoice(null)}
           />
         </div>
-      </PageWrapper>
+      </div>
     );
   }
 
   return (
-    <PageWrapper>
-      <PageHeader
+    <div className="min-h-screen bg-background pb-20">
+      <UnifiedHeader
         title="Mes Factures"
         subtitle="Factures Normalisées Électroniques"
         showBack
+        backTo="/marchand"
       />
 
-      <div className="p-4 pb-24 space-y-4">
+      <div className="p-4 space-y-4 max-w-lg mx-auto">
         {/* FNE Info Banner */}
         <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-start gap-3">
           <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
@@ -584,7 +580,7 @@ export default function MerchantInvoices() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav items={navItems} />
-    </PageWrapper>
+      <UnifiedBottomNav items={merchantNavItems} />
+    </div>
   );
 }

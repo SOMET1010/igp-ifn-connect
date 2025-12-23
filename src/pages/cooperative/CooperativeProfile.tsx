@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  ArrowLeft,
   Loader2,
   LogOut,
   MapPin,
@@ -14,10 +13,13 @@ import {
   Mail,
   Award,
   Users,
-  Hash
+  Hash,
+  User
 } from 'lucide-react';
 import { NotificationToggle } from '@/components/shared/NotificationToggle';
-import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { cooperativeNavItems } from '@/config/navigation';
 
 interface CooperativeData {
   id: string;
@@ -67,38 +69,32 @@ const CooperativeProfile: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/cooperative')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Profil Coopérative</h1>
-            <p className="text-sm text-white/80">Informations et paramètres</p>
-          </div>
-        </div>
-      </header>
+      <UnifiedHeader
+        title="Profil Coopérative"
+        subtitle="Informations et paramètres"
+        showBack
+        backTo="/cooperative"
+      />
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-lg mx-auto">
         {/* Profile header */}
         <Card>
           <CardContent className="p-6 text-center">
-            <div className="w-20 h-20 bg-amber-100 rounded-full mx-auto flex items-center justify-center mb-4">
+            <div className="w-20 h-20 bg-primary/10 rounded-full mx-auto flex items-center justify-center mb-4">
               <span className="text-4xl">🌾</span>
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">
               {cooperative?.name}
             </h2>
             {cooperative?.ifn_certified && (
-              <Badge className="bg-yellow-400 text-yellow-900 mb-2">
+              <Badge className="bg-primary/20 text-primary mb-2">
                 <Award className="w-4 h-4 mr-1" />
                 Certifié IFN
               </Badge>
@@ -167,14 +163,14 @@ const CooperativeProfile: React.FC = () => {
         </Card>
 
         {/* IFN Status */}
-        <Card className={cooperative?.ifn_certified ? 'border-2 border-yellow-400' : ''}>
+        <Card className={cooperative?.ifn_certified ? 'border-2 border-primary/50' : ''}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                cooperative?.ifn_certified ? 'bg-yellow-100' : 'bg-muted'
+                cooperative?.ifn_certified ? 'bg-primary/10' : 'bg-muted'
               }`}>
                 <Award className={`h-6 w-6 ${
-                  cooperative?.ifn_certified ? 'text-yellow-600' : 'text-muted-foreground'
+                  cooperative?.ifn_certified ? 'text-primary' : 'text-muted-foreground'
                 }`} />
               </div>
               <div>
@@ -203,7 +199,7 @@ const CooperativeProfile: React.FC = () => {
         <Button
           onClick={handleSignOut}
           variant="outline"
-          className="w-full border-red-300 text-red-600 hover:bg-red-50"
+          className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
         >
           <LogOut className="h-5 w-5 mr-2" />
           Se déconnecter
@@ -214,7 +210,7 @@ const CooperativeProfile: React.FC = () => {
         </p>
       </div>
 
-      <CooperativeBottomNav />
+      <UnifiedBottomNav items={cooperativeNavItems} />
     </div>
   );
 };

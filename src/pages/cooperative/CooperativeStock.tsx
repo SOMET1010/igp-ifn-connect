@@ -10,8 +10,9 @@ import {
   Search,
   Bell,
 } from 'lucide-react';
-import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
-import { SecondaryPageHeader } from '@/components/shared/SecondaryPageHeader';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock } from '@/hooks/useCooperativeStock';
 import { StockCard, LowStockAlert, AddStockDialog } from '@/components/cooperative/stock';
 
@@ -45,10 +46,11 @@ const CooperativeStock: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SecondaryPageHeader
+      <UnifiedHeader
         title="Mon Stock"
         subtitle={`${stocks.length} produit${stocks.length !== 1 ? 's' : ''} en stock`}
-        onBack={() => navigate('/cooperative')}
+        showBack
+        backTo="/cooperative"
       />
 
       <div className="p-4 space-y-4 max-w-lg mx-auto">
@@ -107,7 +109,7 @@ const CooperativeStock: React.FC = () => {
         )}
       </div>
 
-      <CooperativeBottomNav />
+      <UnifiedBottomNav items={cooperativeNavItems} />
     </div>
   );
 };
