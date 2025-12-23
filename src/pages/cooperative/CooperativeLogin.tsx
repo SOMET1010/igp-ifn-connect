@@ -130,6 +130,29 @@ const CooperativeLogin: React.FC = () => {
       if (signInError) {
         throw signInError;
       }
+      
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const cleanPhone = phone.replace(/\s/g, "");
+        
+        // Lier la coopérative existante (sans user_id) à cet utilisateur
+        await supabase
+          .from("cooperatives")
+          .update({ user_id: user.id })
+          .eq("phone", cleanPhone)
+          .is("user_id", null);
+        
+        // Assigner le rôle coopérative
+        const { error: roleError } = await supabase.rpc('assign_cooperative_role', {
+          p_user_id: user.id
+        });
+        
+        if (roleError) {
+          authLogger.warn("Role assignment error:", { error: roleError.message });
+        }
+      }
+      
       return true;
     });
 
