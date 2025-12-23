@@ -13,6 +13,8 @@ import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Cooperative {
@@ -349,7 +351,7 @@ const AdminVivriers: React.FC = () => {
       </div>
 
       {/* Liste des données */}
-      <div className="px-4 max-w-4xl mx-auto space-y-3">
+      <div className="px-4 max-w-4xl mx-auto">
         {selectedView === 'cooperatives' ? (
           <>
             {filteredCooperatives.length === 0 ? (
@@ -359,33 +361,36 @@ const AdminVivriers: React.FC = () => {
                 message="Importez un fichier CSV pour commencer"
               />
             ) : (
-              filteredCooperatives.map((coop) => (
-                <UnifiedListCard
-                  key={coop.id}
-                  entityType="cooperative"
-                  title={coop.name}
-                  subtitle={coop.code || undefined}
-                  avatarFallback="🌾"
-                  status="active"
-                  statusLabel={`${coop.effectif_total} membres`}
-                  metadata={[
-                    ...(coop.commune || coop.region ? [{
-                      icon: MapPin,
-                      text: [coop.commune, coop.region].filter(Boolean).join(', ')
-                    }] : []),
-                    ...(coop.effectif_cmu > 0 ? [{
-                      icon: HeartPulse,
-                      text: `CMU: ${coop.effectif_cmu}`,
-                      className: 'text-green-600'
-                    }] : []),
-                    ...(coop.effectif_cnps > 0 ? [{
-                      icon: Shield,
-                      text: `CNPS: ${coop.effectif_cnps}`,
-                      className: 'text-blue-600'
-                    }] : []),
-                  ]}
-                />
-              ))
+              <AnimatedList className="space-y-3">
+                {filteredCooperatives.map((coop) => (
+                  <AnimatedListItem key={coop.id}>
+                    <UnifiedListCard
+                      entityType="cooperative"
+                      title={coop.name}
+                      subtitle={coop.code || undefined}
+                      avatarFallback="🌾"
+                      status="active"
+                      statusLabel={`${coop.effectif_total} membres`}
+                      metadata={[
+                        ...(coop.commune || coop.region ? [{
+                          icon: MapPin,
+                          text: [coop.commune, coop.region].filter(Boolean).join(', ')
+                        }] : []),
+                        ...(coop.effectif_cmu > 0 ? [{
+                          icon: HeartPulse,
+                          text: `CMU: ${coop.effectif_cmu}`,
+                          className: 'text-green-600'
+                        }] : []),
+                        ...(coop.effectif_cnps > 0 ? [{
+                          icon: Shield,
+                          text: `CNPS: ${coop.effectif_cnps}`,
+                          className: 'text-blue-600'
+                        }] : []),
+                      ]}
+                    />
+                  </AnimatedListItem>
+                ))}
+              </AnimatedList>
             )}
           </>
         ) : (
@@ -398,39 +403,42 @@ const AdminVivriers: React.FC = () => {
               />
             ) : (
               <>
-                {filteredMembers.slice(0, 100).map((member) => (
-                  <UnifiedListCard
-                    key={member.id}
-                    entityType="user"
-                    title={member.full_name}
-                    subtitle={`${member.actor_key} • ${member.cooperative_name}`}
-                    avatarFallback={member.full_name.slice(0, 2).toUpperCase()}
-                    status={member.cmu_status === 'oui' ? 'active' : undefined}
-                    statusLabel={member.cmu_status === 'oui' ? 'CMU' : undefined}
-                    metadata={[
-                      ...(member.phone ? [{
-                        icon: Phone,
-                        text: member.phone
-                      }] : []),
-                      ...(member.cnps_status === 'oui' ? [{
-                        icon: Shield,
-                        text: 'CNPS',
-                        className: 'text-blue-600'
-                      }] : []),
-                    ]}
-                    actions={
-                      <div className="flex gap-1">
-                        {member.cmu_status === 'oui' && (
-                          <Badge variant="default" className="text-xs">CMU</Badge>
-                        )}
-                        {member.cnps_status === 'oui' && (
-                          <Badge variant="secondary" className="text-xs">CNPS</Badge>
-                        )}
-                      </div>
-                    }
-                    showChevron={false}
-                  />
-                ))}
+                <AnimatedList className="space-y-3">
+                  {filteredMembers.slice(0, 100).map((member) => (
+                    <AnimatedListItem key={member.id}>
+                      <UnifiedListCard
+                        entityType="user"
+                        title={member.full_name}
+                        subtitle={`${member.actor_key} • ${member.cooperative_name}`}
+                        avatarFallback={member.full_name.slice(0, 2).toUpperCase()}
+                        status={member.cmu_status === 'oui' ? 'active' : undefined}
+                        statusLabel={member.cmu_status === 'oui' ? 'CMU' : undefined}
+                        metadata={[
+                          ...(member.phone ? [{
+                            icon: Phone,
+                            text: member.phone
+                          }] : []),
+                          ...(member.cnps_status === 'oui' ? [{
+                            icon: Shield,
+                            text: 'CNPS',
+                            className: 'text-blue-600'
+                          }] : []),
+                        ]}
+                        actions={
+                          <div className="flex gap-1">
+                            {member.cmu_status === 'oui' && (
+                              <Badge variant="default" className="text-xs">CMU</Badge>
+                            )}
+                            {member.cnps_status === 'oui' && (
+                              <Badge variant="secondary" className="text-xs">CNPS</Badge>
+                            )}
+                          </div>
+                        }
+                        showChevron={false}
+                      />
+                    </AnimatedListItem>
+                  ))}
+                </AnimatedList>
                 {filteredMembers.length > 100 && (
                   <p className="text-center text-sm text-muted-foreground py-4">
                     Affichage limité à 100 membres. Utilisez la recherche pour filtrer.

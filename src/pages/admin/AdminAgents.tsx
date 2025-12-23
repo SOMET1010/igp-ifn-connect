@@ -8,6 +8,8 @@ import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { LayoutDashboard, Store, Wheat } from 'lucide-react';
 
 interface Agent {
@@ -156,32 +158,33 @@ const AdminAgents: React.FC = () => {
             variant="card"
           />
         ) : (
-          <div className="space-y-3">
+          <AnimatedList className="space-y-3">
             {filteredAgents.map((agent) => (
-              <UnifiedListCard
-                key={agent.id}
-                entityType="agent"
-                title={agent.full_name || 'Agent'}
-                subtitle={agent.organization}
-                avatar={agent.full_name?.charAt(0).toUpperCase()}
-                status={agent.is_active ? 'active' : 'inactive'}
-                metadata={[
-                  { 
-                    icon: Building2, 
-                    text: agent.employee_id 
-                  },
-                  { 
-                    icon: Users, 
-                    text: `${agent.total_enrollments} enrôlements` 
-                  },
-                  ...(agent.zone ? [{ 
-                    icon: MapPin, 
-                    text: agent.zone 
-                  }] : [])
-                ]}
-              />
+              <AnimatedListItem key={agent.id}>
+                <UnifiedListCard
+                  entityType="agent"
+                  title={agent.full_name || 'Agent'}
+                  subtitle={agent.organization}
+                  avatar={agent.full_name?.charAt(0).toUpperCase()}
+                  status={agent.is_active ? 'active' : 'inactive'}
+                  metadata={[
+                    { 
+                      icon: Building2, 
+                      text: agent.employee_id 
+                    },
+                    { 
+                      icon: Users, 
+                      text: `${agent.total_enrollments} enrôlements` 
+                    },
+                    ...(agent.zone ? [{ 
+                      icon: MapPin, 
+                      text: agent.zone 
+                    }] : [])
+                  ]}
+                />
+              </AnimatedListItem>
             ))}
-          </div>
+          </AnimatedList>
         )}
       </div>
 

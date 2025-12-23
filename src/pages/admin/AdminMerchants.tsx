@@ -20,6 +20,8 @@ import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { adminNavItems } from '@/config/navigation';
 import type { StatusType } from '@/components/shared/StatusBadge';
 
@@ -195,78 +197,81 @@ const AdminMerchants: React.FC = () => {
       </div>
 
       {/* Liste des marchands */}
-      <div className="p-4 space-y-3 max-w-lg mx-auto">
+      <div className="p-4 max-w-lg mx-auto">
         {filteredMerchants.length === 0 ? (
           <div className="text-center py-12">
             <Store className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">Aucun marchand trouvé</p>
           </div>
         ) : (
-          filteredMerchants.map((merchant) => (
-            <UnifiedListCard
-              key={merchant.id}
-              title={merchant.full_name}
-              subtitle={merchant.activity_type}
-              avatarFallback={merchant.full_name}
-              entityType="merchant"
-              status={statusToStatusType[merchant.status]}
-              showChevron={false}
-              metadata={[
-                { icon: Phone, text: `+225 ${merchant.phone}` },
-                ...(merchant.market_name ? [{ icon: MapPin, text: merchant.market_name }] : []),
-                { icon: Calendar, text: formatDate(merchant.enrolled_at) },
-              ]}
-              actions={
-                <>
-                  {merchant.status === 'pending' && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => updateStatus(merchant.id, 'validated')}
-                        disabled={updatingId === merchant.id}
-                        className="flex-1 bg-secondary hover:bg-secondary/90"
-                      >
-                        {updatingId === merchant.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Check className="h-4 w-4 mr-1" />
-                            Valider
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateStatus(merchant.id, 'rejected')}
-                        disabled={updatingId === merchant.id}
-                        className="border-destructive/50 text-destructive hover:bg-destructive/10"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+          <AnimatedList className="space-y-3">
+            {filteredMerchants.map((merchant) => (
+              <AnimatedListItem key={merchant.id}>
+                <UnifiedListCard
+                  title={merchant.full_name}
+                  subtitle={merchant.activity_type}
+                  avatarFallback={merchant.full_name}
+                  entityType="merchant"
+                  status={statusToStatusType[merchant.status]}
+                  showChevron={false}
+                  metadata={[
+                    { icon: Phone, text: `+225 ${merchant.phone}` },
+                    ...(merchant.market_name ? [{ icon: MapPin, text: merchant.market_name }] : []),
+                    { icon: Calendar, text: formatDate(merchant.enrolled_at) },
+                  ]}
+                  actions={
+                    <>
+                      {merchant.status === 'pending' && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => updateStatus(merchant.id, 'validated')}
+                            disabled={updatingId === merchant.id}
+                            className="flex-1 bg-secondary hover:bg-secondary/90"
+                          >
+                            {updatingId === merchant.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Check className="h-4 w-4 mr-1" />
+                                Valider
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateStatus(merchant.id, 'rejected')}
+                            disabled={updatingId === merchant.id}
+                            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
 
-                  {merchant.status === 'validated' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => updateStatus(merchant.id, 'suspended')}
-                      disabled={updatingId === merchant.id}
-                      className="w-full"
-                    >
-                      <Pause className="h-4 w-4 mr-1" />
-                      Suspendre
-                    </Button>
-                  )}
+                      {merchant.status === 'validated' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateStatus(merchant.id, 'suspended')}
+                          disabled={updatingId === merchant.id}
+                          className="w-full"
+                        >
+                          <Pause className="h-4 w-4 mr-1" />
+                          Suspendre
+                        </Button>
+                      )}
 
-                  <p className="text-xs text-muted-foreground mt-2">
-                    CMU: {merchant.cmu_number}
-                  </p>
-                </>
-              }
-            />
-          ))
+                      <p className="text-xs text-muted-foreground mt-2">
+                        CMU: {merchant.cmu_number}
+                      </p>
+                    </>
+                  }
+                />
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
         )}
       </div>
 

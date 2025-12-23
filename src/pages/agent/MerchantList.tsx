@@ -8,6 +8,8 @@ import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { agentNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import type { Database } from '@/integrations/supabase/types';
@@ -147,7 +149,7 @@ const MerchantList: React.FC = () => {
       </div>
 
       {/* Liste */}
-      <div className="p-4 space-y-3 max-w-lg mx-auto">
+      <div className="p-4 max-w-lg mx-auto">
         {isLoading ? (
           <LoadingState message="Chargement des marchands..." />
         ) : filteredMerchants.length === 0 ? (
@@ -159,26 +161,29 @@ const MerchantList: React.FC = () => {
               : 'Commencez par enrôler votre premier marchand'}
           />
         ) : (
-          filteredMerchants.map((merchant) => (
-            <UnifiedListCard
-              key={merchant.id}
-              title={merchant.full_name}
-              subtitle={merchant.activity_type}
-              avatarFallback={merchant.full_name}
-              entityType="merchant"
-              status={statusToStatusType[merchant.status ?? 'pending']}
-              showChevron={false}
-              metadata={[
-                { icon: Phone, text: merchant.phone },
-                { icon: Calendar, text: `Enrôlé le ${formatDate(merchant.enrolled_at)}` },
-                ...(merchant.latitude && merchant.longitude 
-                  ? [{ icon: MapPin, text: 'GPS capturé', className: 'text-secondary' }] 
-                  : []
-                ),
-              ]}
-              description={`CMU: ${merchant.cmu_number}`}
-            />
-          ))
+          <AnimatedList className="space-y-3">
+            {filteredMerchants.map((merchant) => (
+              <AnimatedListItem key={merchant.id}>
+                <UnifiedListCard
+                  title={merchant.full_name}
+                  subtitle={merchant.activity_type}
+                  avatarFallback={merchant.full_name}
+                  entityType="merchant"
+                  status={statusToStatusType[merchant.status ?? 'pending']}
+                  showChevron={false}
+                  metadata={[
+                    { icon: Phone, text: merchant.phone },
+                    { icon: Calendar, text: `Enrôlé le ${formatDate(merchant.enrolled_at)}` },
+                    ...(merchant.latitude && merchant.longitude 
+                      ? [{ icon: MapPin, text: 'GPS capturé', className: 'text-secondary' }] 
+                      : []
+                    ),
+                  ]}
+                  description={`CMU: ${merchant.cmu_number}`}
+                />
+              </AnimatedListItem>
+            ))}
+          </AnimatedList>
         )}
       </div>
 
