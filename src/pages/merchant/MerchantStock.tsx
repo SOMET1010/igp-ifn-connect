@@ -5,6 +5,9 @@ import {
   Loader2,
   RefreshCw,
   Bell,
+  AlertTriangle,
+  TrendingDown,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,10 +66,10 @@ export default function MerchantStock() {
   });
 
   const filterOptions: FilterOption[] = [
-    { value: "all", label: "Tous", count: stocks.length },
-    { value: "out", label: "Rupture", count: outOfStockItems.length },
-    { value: "low", label: "Stock bas", count: lowStockItems.length },
-    { value: "ok", label: "En stock", count: okStockItems.length },
+    { value: "all", label: "Tous", count: stocks.length, icon: Package },
+    { value: "out", label: "Rupture", count: outOfStockItems.length, icon: AlertTriangle },
+    { value: "low", label: "Stock bas", count: lowStockItems.length, icon: TrendingDown },
+    { value: "ok", label: "En stock", count: okStockItems.length, icon: CheckCircle },
   ];
 
   const alertCount = outOfStockItems.length + lowStockItems.length;
