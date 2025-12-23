@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.check-low-stock]
 verify_jwt = false
+
+[functions.import-vivriers]
+verify_jwt = false
