@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Banknote, Smartphone, Home, Wallet, User, Package, Wifi } from "lucide-react";
+import { ArrowLeft, Banknote, Smartphone, Home, Wallet, User, Package, Wifi, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/shared/BottomNav";
@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { merchantLogger } from "@/infra/logger";
+import { useRetryOperation } from "@/hooks/useRetryOperation";
 
 type PaymentMethod = "cash" | "mobile_money";
 type Step = "input" | "confirm" | "success";
@@ -86,6 +87,18 @@ export default function MerchantCashier() {
     setStep("confirm");
   };
 
+  // Hook de retry pour les opérations réseau critiques
+  const { execute: executeWithRetry, state: retryState } = useRetryOperation<string>({
+    maxRetries: 3,
+    baseDelay: 1500,
+    onRetry: (attempt) => {
+      toast.info(`Nouvelle tentative (${attempt}/3)...`);
+    },
+    onExhausted: () => {
+      toast.error("Échec après plusieurs tentatives. Vérifiez votre connexion.");
+    },
+  });
+
   const handleConfirm = async () => {
     if (!user || !method) return;
 
@@ -96,7 +109,8 @@ export default function MerchantCashier() {
       userId: user.id 
     });
 
-    try {
+    const result = await executeWithRetry(async () => {
+      // Récupérer le marchand
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants")
         .select("id, rsti_balance")
@@ -105,13 +119,12 @@ export default function MerchantCashier() {
 
       if (merchantError || !merchantData) {
         merchantLogger.warn('Marchand non trouvé', { userId: user.id, error: merchantError?.message });
-        toast.error("Compte marchand introuvable. Veuillez vous reconnecter.");
-        setIsLoading(false);
-        return;
+        throw new Error("Compte marchand introuvable");
       }
 
       const ref = `TXN-${Date.now().toString(36).toUpperCase()}`;
       
+      // Insérer la transaction
       const { data: txData, error } = await supabase.from("transactions").insert({
         merchant_id: merchantData.id,
         amount: numericAmount,
@@ -127,17 +140,17 @@ export default function MerchantCashier() {
           amount: numericAmount,
           method 
         });
-        toast.error("Échec de l'enregistrement. Veuillez réessayer.");
-        setIsLoading(false);
-        return;
+        throw error;
       }
 
+      // Mettre à jour le solde RSTI
       const currentBalance = Number(merchantData.rsti_balance || 0);
       await supabase
         .from("merchants")
         .update({ rsti_balance: currentBalance + rstiDeduction })
         .eq("id", merchantData.id);
 
+      // Enregistrer le paiement CMU
       const now = new Date();
       const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -150,11 +163,17 @@ export default function MerchantCashier() {
         transaction_id: txData.id,
       });
 
-      setTransactionRef(ref);
+      return ref;
+    });
+
+    setIsLoading(false);
+
+    if (result) {
+      setTransactionRef(result);
       setStep("success");
       
       merchantLogger.info('Transaction réussie', { 
-        reference: ref,
+        reference: result,
         amount: numericAmount,
         method,
         cmu: cmuDeduction,
@@ -163,11 +182,6 @@ export default function MerchantCashier() {
       
       triggerSuccessFeedback();
       toast.success(t("payment_success") + " !");
-    } catch (error) {
-      merchantLogger.error('Échec confirmation paiement', error, { userId: user.id });
-      toast.error("Erreur de connexion. Vérifiez votre réseau.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -292,11 +306,18 @@ export default function MerchantCashier() {
                   </Button>
                 </div>
 
-                {/* Offline reassurance message */}
-                <p className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2 opacity-70">
-                  <Wifi className="w-4 h-4" />
-                  {t("offline_message")}
-                </p>
+                {/* Retry indicator or offline message */}
+                {retryState.isRetrying ? (
+                  <p className="text-center text-sm text-warning flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Nouvelle tentative en cours...
+                  </p>
+                ) : (
+                  <p className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2 opacity-70">
+                    <Wifi className="w-4 h-4" />
+                    {t("offline_message")}
+                  </p>
+                )}
               </div>
             </div>
           )}
