@@ -5,9 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, MapPin, Phone, Clock, Home, Users, User, ClipboardList } from 'lucide-react';
-import { SecondaryPageHeader } from '@/components/shared/SecondaryPageHeader';
-import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
+import { Search, MapPin, Phone, Clock, ClipboardList } from 'lucide-react';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { agentNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -21,11 +22,6 @@ const statusConfig: Record<MerchantStatus, { label: string; className: string }>
   suspended: { label: 'Suspendu', className: 'bg-muted text-muted-foreground border-muted' },
 };
 
-const agentNavItems = [
-  { icon: Home, label: 'Accueil', path: '/agent' },
-  { icon: Users, label: 'Marchands', path: '/agent/marchands' },
-  { icon: User, label: 'Profil', path: '/agent/profil' },
-];
 
 const MerchantList: React.FC = () => {
   const navigate = useNavigate();
@@ -94,10 +90,11 @@ const MerchantList: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SecondaryPageHeader
+      <UnifiedHeader
         title="Mes Marchands"
         subtitle={`${merchants.length} enrôlé${merchants.length !== 1 ? 's' : ''}`}
-        onBack={() => navigate('/agent')}
+        showBack
+        backTo="/agent"
       />
 
       {/* Search */}
@@ -172,7 +169,7 @@ const MerchantList: React.FC = () => {
         )}
       </div>
 
-      <InstitutionalBottomNav items={agentNavItems} />
+      <UnifiedBottomNav items={agentNavItems} />
     </div>
   );
 };

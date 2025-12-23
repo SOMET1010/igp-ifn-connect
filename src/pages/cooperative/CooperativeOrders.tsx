@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, ClipboardList } from 'lucide-react';
-import { CooperativeBottomNav } from '@/components/cooperative/CooperativeBottomNav';
+import { ClipboardList } from 'lucide-react';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { cooperativeNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import { useCooperativeOrders } from '@/hooks/useCooperativeOrders';
 import { OrderCard, CancelOrderDialog, Order } from '@/components/cooperative/orders';
@@ -41,17 +43,12 @@ const CooperativeOrders: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <header className="bg-gradient-to-r from-amber-700 to-amber-600 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/cooperative')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Commandes</h1>
-            <p className="text-sm text-white/80">{orders.length} commande(s)</p>
-          </div>
-        </div>
-      </header>
+      <UnifiedHeader
+        title="Commandes"
+        subtitle={`${orders.length} commande(s)`}
+        showBack
+        backTo="/cooperative"
+      />
 
       <div className="p-4">
         <Tabs defaultValue="pending" className="w-full">
@@ -149,7 +146,7 @@ const CooperativeOrders: React.FC = () => {
         onConfirm={cancelOrder}
       />
 
-      <CooperativeBottomNav />
+      <UnifiedBottomNav items={cooperativeNavItems} />
     </div>
   );
 };

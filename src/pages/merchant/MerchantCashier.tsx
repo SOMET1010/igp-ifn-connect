@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Banknote, Smartphone, Home, Wallet, User, Package, Wifi, RefreshCw } from "lucide-react";
+import { ArrowLeft, Banknote, Smartphone, Wifi, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CalculatorKeypad, useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
 import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
@@ -38,12 +39,6 @@ export default function MerchantCashier() {
   const rstiDeduction = Math.round(numericAmount * 0.005);
   const formattedAmount = numericAmount.toLocaleString("fr-FR");
 
-  const navItems = [
-    { icon: Home, label: t("home"), href: "/marchand" },
-    { icon: Package, label: t("stock"), href: "/marchand/stock" },
-    { icon: Wallet, label: t("collect"), href: "/marchand/encaisser" },
-    { icon: User, label: t("profile"), href: "/marchand/profil" },
-  ];
 
   useEffect(() => {
     const fetchMerchantName = async () => {
@@ -394,7 +389,7 @@ export default function MerchantCashier() {
           )}
         </main>
 
-        <BottomNav items={navItems} />
+        <UnifiedBottomNav items={merchantNavItems} />
       </div>
     </>
   );

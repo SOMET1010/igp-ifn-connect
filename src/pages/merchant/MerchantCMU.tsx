@@ -4,17 +4,10 @@ import { ArrowLeft, Shield, Calendar, CreditCard, FileText, Check } from "lucide
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Wallet, Heart, User } from "lucide-react";
-
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: Heart, label: "CMU", href: "/marchand/cmu" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
 
 interface CMUData {
   cmu_number: string;
@@ -227,7 +220,7 @@ export default function MerchantCMU() {
         </Card>
       </main>
 
-      <BottomNav items={navItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { CategoryCarousel } from "@/components/market/CategoryCarousel";
 import { ProductGrid, type Product, type ProductOffer } from "@/components/market/ProductGrid";
 import { PriceCompareSheet } from "@/components/market/PriceCompareSheet";
@@ -18,8 +19,7 @@ import { toast } from "sonner";
 import { calculateDistance } from "@/lib/geoUtils";
 import { 
   ArrowLeft, Search, ShoppingCart, Package, Truck, 
-  CheckCircle, XCircle, Clock, Plus, Minus, Trash2,
-  Home, CreditCard, Store, User, Leaf
+  CheckCircle, XCircle, Clock, Plus, Minus, Trash2, Leaf
 } from "lucide-react";
 
 interface CartItem {
@@ -64,12 +64,6 @@ interface Cooperative {
   longitude?: number | null;
 }
 
-const navItems = [
-  { icon: Home, label: 'Accueil', href: '/marchand' },
-  { icon: CreditCard, label: 'Caisse', href: '/marchand/encaisser' },
-  { icon: Store, label: 'Stock', href: '/marchand/stock' },
-  { icon: User, label: 'Profil', href: '/marchand/profil' },
-];
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<any> }> = {
   pending: { label: 'En attente', color: 'bg-yellow-500', icon: Clock },
@@ -669,7 +663,7 @@ export default function MerchantSuppliers() {
       />
 
       {/* Bottom Nav */}
-      <BottomNav items={navItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }
