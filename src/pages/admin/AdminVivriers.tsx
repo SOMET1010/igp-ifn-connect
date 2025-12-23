@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Users, Building2, RefreshCw, FileText } from 'lucide-react';
+import { Upload, Users, Building2, RefreshCw, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { LoadingState } from '@/components/shared/StateComponents';
-
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
 interface Cooperative {
   id: string;
   name: string;
@@ -193,43 +194,29 @@ const AdminVivriers: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-primary text-primary-foreground p-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/dashboard')}>
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Données Vivriers</h1>
-            <p className="text-sm opacity-80">Import et gestion des coopératives</p>
-          </div>
-        </div>
-      </div>
+      <UnifiedHeader
+        title="Données Vivriers"
+        subtitle="Import et gestion des coopératives"
+        showBack
+        backTo="/admin"
+      />
 
       {/* Stats */}
-      <div className="p-4 grid grid-cols-2 gap-4">
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Building2 className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold">{totalCoops}</p>
-              <p className="text-sm text-muted-foreground">Coopératives</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Users className="h-8 w-8 text-primary" />
-            <div>
-              <p className="text-2xl font-bold">{totalMembers}</p>
-              <p className="text-sm text-muted-foreground">Membres</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="p-4 grid grid-cols-2 gap-4 max-w-4xl mx-auto">
+        <UnifiedStatCard
+          title="Coopératives"
+          value={totalCoops}
+          icon={Building2}
+        />
+        <UnifiedStatCard
+          title="Membres"
+          value={totalMembers}
+          icon={Users}
+        />
       </div>
 
       {/* Import Section */}
-      <div className="p-4">
+      <div className="p-4 max-w-4xl mx-auto">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -308,7 +295,7 @@ const AdminVivriers: React.FC = () => {
       </div>
 
       {/* Search */}
-      <div className="px-4">
+      <div className="px-4 max-w-4xl mx-auto">
         <Input
           placeholder="Rechercher par nom, coopérative ou numéro (ex: PACA-001)..."
           value={searchQuery}
@@ -318,7 +305,7 @@ const AdminVivriers: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="px-4 pb-24">
+      <div className="px-4 pb-8 max-w-4xl mx-auto">
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="cooperatives">
