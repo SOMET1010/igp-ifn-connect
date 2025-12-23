@@ -3,34 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Home,
-  Package,
-  Wallet,
-  User,
   ArrowLeft,
   Camera,
   QrCode,
   Search,
   Loader2,
-  Flashlight,
   X,
   Plus,
   Minus,
-  ShoppingCart
+  ShoppingCart,
+  Package,
+  Wallet
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Package, label: "Stock", href: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
 
 interface ScannedProduct {
   id: string;
@@ -445,7 +437,7 @@ export default function MerchantScanner() {
         </Card>
       </main>
 
-      <BottomNav items={navItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

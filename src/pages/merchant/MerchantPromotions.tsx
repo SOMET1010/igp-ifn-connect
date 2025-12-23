@@ -4,15 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Home,
-  Package,
-  Wallet,
-  User,
   ArrowLeft,
   Plus,
   Percent,
@@ -43,12 +40,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Package, label: "Stock", href: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
 
 interface Promotion {
   id: string;
@@ -464,7 +455,7 @@ export default function MerchantPromotions() {
         </div>
       </main>
 
-      <BottomNav items={navItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

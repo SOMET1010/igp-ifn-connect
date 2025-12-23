@@ -4,15 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BottomNav } from "@/components/shared/BottomNav";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Home,
-  Package,
-  Wallet,
-  User,
   ArrowLeft,
   Plus,
   Phone,
@@ -22,7 +19,6 @@ import {
   CheckCircle,
   Clock,
   Loader2,
-  X,
   Banknote
 } from "lucide-react";
 import {
@@ -35,12 +31,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 
-const navItems = [
-  { icon: Home, label: "Accueil", href: "/marchand" },
-  { icon: Package, label: "Stock", href: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", href: "/marchand/encaisser" },
-  { icon: User, label: "Profil", href: "/marchand/profil" },
-];
 
 interface CustomerCredit {
   id: string;
@@ -437,7 +427,7 @@ export default function MerchantCredits() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav items={navItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }
