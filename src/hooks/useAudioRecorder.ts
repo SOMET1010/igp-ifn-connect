@@ -70,6 +70,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const chunksRef = useRef<Blob[]>([]);
   const startTimeRef = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopRecordingRef = useRef<(() => void) | null>(null);
 
   // Vérifier les permissions au montage
   useEffect(() => {
@@ -215,7 +216,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         // Auto-stop après 30 secondes
         if (elapsed >= 30) {
           logger.info('Auto-stopping recording after 30 seconds', { module: 'useAudioRecorder' });
-          stopRecording();
+          stopRecordingRef.current?.();
         }
       }, 100);
 
@@ -241,7 +242,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       setError(errorMessage);
       setIsRecording(false);
     }
-  }, [isSupported]);
+  }, [isSupported, startAnalysis]);
 
   const stopRecording = useCallback(() => {
     logger.info('Stop recording requested', { module: 'useAudioRecorder' });
@@ -265,6 +266,11 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     
     setIsRecording(false);
   }, [stopAnalysis]);
+
+  // Garder la référence à jour pour l'auto-stop
+  useEffect(() => {
+    stopRecordingRef.current = stopRecording;
+  }, [stopRecording]);
 
   const resetRecording = useCallback(() => {
     logger.debug('Resetting recording state', { module: 'useAudioRecorder' });
