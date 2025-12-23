@@ -4,10 +4,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminDashboardData } from '@/hooks/useAdminDashboardData';
-import { DashboardHeader } from '@/components/shared/DashboardHeader';
-import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
-import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
-import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { 
   Users, 
@@ -68,33 +68,34 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <DashboardHeader
+      <UnifiedHeader
         title="Administration IFN"
         subtitle="Direction Générale des Entreprises"
+        showSignOut
         onSignOut={handleSignOut}
       />
 
       <div className="p-4 space-y-6 max-w-4xl mx-auto">
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-3">
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title="Marchands"
             value={stats.merchants}
             icon={Store}
             subtitle={stats.pendingMerchants > 0 ? `${stats.pendingMerchants} en attente` : undefined}
             variant={stats.pendingMerchants > 0 ? 'warning' : 'default'}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title="Agents"
             value={stats.agents}
             icon={Users}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title="Coopératives"
             value={stats.cooperatives}
             icon={Wheat}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title="Transactions"
             value={`${(stats.totalTransactions / 1000000).toFixed(1)}M`}
             icon={DollarSign}
@@ -152,25 +153,25 @@ const AdminDashboard: React.FC = () => {
 
         {/* Navigation cards */}
         <div className="grid grid-cols-2 gap-3">
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Marchands"
             description={`${stats.merchants} inscrits`}
             icon={Store}
             onClick={() => navigate('/admin/marchands')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Agents"
             description={`${stats.agents} actifs`}
             icon={Users}
             onClick={() => navigate('/admin/agents')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Coopératives"
             description={`${stats.cooperatives} enregistrées`}
             icon={Wheat}
             onClick={() => navigate('/admin/cooperatives')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Cartographie"
             description="Voir la carte"
             icon={MapIcon}
@@ -183,31 +184,31 @@ const AdminDashboard: React.FC = () => {
           Outils avancés
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Monitoring"
             description="Surveillance"
             icon={Activity}
             onClick={() => navigate('/admin/monitoring')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Analytics"
             description="Statistiques"
             icon={BarChart3}
             onClick={() => navigate('/admin/analytics')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Rapports"
             description="Export"
             icon={FileText}
             onClick={() => navigate('/admin/rapports')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Studio Audio"
             description="Enregistrer"
             icon={Mic}
             onClick={() => navigate('/admin/studio')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title="Vivriers"
             description="Import coopératives"
             icon={Leaf}
@@ -216,7 +217,7 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <InstitutionalBottomNav items={navItems} />
+      <UnifiedBottomNav items={navItems} />
     </div>
   );
 };

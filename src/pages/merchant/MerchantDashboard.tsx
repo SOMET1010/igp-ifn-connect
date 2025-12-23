@@ -9,10 +9,10 @@ import { Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { DashboardHeader } from "@/components/shared/DashboardHeader";
-import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
-import { InstitutionalActionCard } from "@/components/shared/InstitutionalActionCard";
-import { BigNumberCard } from "@/components/shared/BigNumberCard";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { UnifiedActionCard } from "@/components/shared/UnifiedActionCard";
+import { UnifiedBigNumber } from "@/components/shared/UnifiedBigNumber";
 import { SalesChart } from "@/components/merchant/SalesChart";
 import { MerchantDashboardSkeleton } from "@/components/merchant/MerchantDashboardSkeleton";
 import { ErrorState } from "@/components/shared/StateComponents";
@@ -75,9 +75,10 @@ export default function MerchantDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <DashboardHeader
+        <UnifiedHeader
           title={t("merchant")}
           subtitle="Plateforme IFN – Espace Marchand"
+          showSignOut
           onSignOut={handleSignOut}
         />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -87,7 +88,7 @@ export default function MerchantDashboard() {
             isNetworkError={!isOnline}
           />
         </div>
-        <InstitutionalBottomNav items={navItems} />
+        <UnifiedBottomNav items={navItems} />
       </div>
     );
   }
@@ -102,9 +103,10 @@ export default function MerchantDashboard() {
         size="lg"
       />
 
-      <DashboardHeader
+      <UnifiedHeader
         title={merchant?.full_name || t("merchant")}
         subtitle="Plateforme IFN – Espace Marchand"
+        showSignOut
         onSignOut={handleSignOut}
       />
 
@@ -122,7 +124,7 @@ export default function MerchantDashboard() {
             </div>
 
             {/* Today's sales - Big Number */}
-            <BigNumberCard
+            <UnifiedBigNumber
               label={t("your_sales_today")}
               value={todayTotal}
               unit="FCFA"
@@ -155,19 +157,19 @@ export default function MerchantDashboard() {
 
             {/* Quick Actions */}
             <div className="space-y-3">
-              <InstitutionalActionCard
+              <UnifiedActionCard
                 title={t("stock")}
                 description={t("manage_products")}
                 icon={Package}
                 onClick={() => navigate('/marchand/stock')}
               />
-              <InstitutionalActionCard
+              <UnifiedActionCard
                 title={t("invoices") || "Factures"}
                 description={t("view_history")}
                 icon={Receipt}
                 onClick={() => navigate('/marchand/factures')}
               />
-              <InstitutionalActionCard
+              <UnifiedActionCard
                 title={t("my_profile")}
                 description={t("settings")}
                 icon={User}
@@ -206,7 +208,7 @@ export default function MerchantDashboard() {
         )}
       </main>
 
-      <InstitutionalBottomNav items={navItems} />
+      <UnifiedBottomNav items={navItems} />
     </div>
   );
 }

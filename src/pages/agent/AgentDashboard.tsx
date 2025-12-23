@@ -9,10 +9,10 @@ import { useDataFetching } from '@/hooks/useDataFetching';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState } from '@/components/shared/StateComponents';
-import { DashboardHeader } from '@/components/shared/DashboardHeader';
-import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
-import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
-import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
 import {
   UserPlus, 
@@ -126,9 +126,10 @@ const AgentDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <DashboardHeader
+        <UnifiedHeader
           title={t("agent")}
           subtitle="Plateforme IFN – Espace Agent"
+          showSignOut
           onSignOut={handleSignOut}
         />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -145,7 +146,7 @@ const AgentDashboard: React.FC = () => {
             />
           )}
         </div>
-        <InstitutionalBottomNav items={navItems} />
+        <UnifiedBottomNav items={navItems} />
       </div>
     );
   }
@@ -159,10 +160,10 @@ const AgentDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50"
       />
 
-      <DashboardHeader
+      <UnifiedHeader
         title={t("agent")}
         subtitle="Plateforme IFN – Espace Agent"
-        userName={profile?.full_name}
+        showSignOut
         onSignOut={handleSignOut}
         rightContent={
           <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
@@ -205,17 +206,17 @@ const AgentDashboard: React.FC = () => {
         )}
 
         <div className="grid grid-cols-3 gap-3">
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("today")}
             value={isLoading ? '-' : stats.today.toString()}
             icon={Calendar}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("this_week")}
             value={isLoading ? '-' : stats.week.toString()}
             icon={TrendingUp}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("total")}
             value={isLoading ? '-' : stats.total.toString()}
             icon={Users}
@@ -231,13 +232,13 @@ const AgentDashboard: React.FC = () => {
         </Button>
 
         <div className="space-y-3">
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title={t("my_merchants")}
             description={t("view_list")}
             icon={Users}
             onClick={() => navigate('/agent/marchands')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title={t("my_profile")}
             description={t("settings")}
             icon={User}
@@ -268,7 +269,7 @@ const AgentDashboard: React.FC = () => {
         </Card>
       </div>
 
-      <InstitutionalBottomNav items={navItems} />
+      <UnifiedBottomNav items={navItems} />
     </div>
   );
 };

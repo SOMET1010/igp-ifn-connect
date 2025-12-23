@@ -8,10 +8,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState, LoadingState } from '@/components/shared/StateComponents';
-import { DashboardHeader } from '@/components/shared/DashboardHeader';
-import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
-import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
-import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { useDataFetching } from '@/hooks/useDataFetching';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
 import { coopLogger } from '@/infra/logger';
@@ -133,13 +133,14 @@ const CooperativeDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <DashboardHeader
+        <UnifiedHeader
           title={t("cooperative")}
           subtitle="Plateforme IFN – Espace Coopérative"
+          showSignOut
           onSignOut={handleSignOut}
         />
         <LoadingState message="Chargement du tableau de bord..." />
-        <InstitutionalBottomNav items={navItems} />
+        <UnifiedBottomNav items={navItems} />
       </div>
     );
   }
@@ -147,9 +148,10 @@ const CooperativeDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <DashboardHeader
+        <UnifiedHeader
           title={t("cooperative")}
           subtitle="Plateforme IFN – Espace Coopérative"
+          showSignOut
           onSignOut={handleSignOut}
         />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -166,7 +168,7 @@ const CooperativeDashboard: React.FC = () => {
             />
           )}
         </div>
-        <InstitutionalBottomNav items={navItems} />
+        <UnifiedBottomNav items={navItems} />
       </div>
     );
   }
@@ -180,9 +182,10 @@ const CooperativeDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50"
       />
 
-      <DashboardHeader
+      <UnifiedHeader
         title={cooperative?.name ?? t("cooperative")}
         subtitle="Plateforme IFN – Espace Coopérative"
+        showSignOut
         onSignOut={handleSignOut}
         rightContent={
           cooperative?.igp_certified && (
@@ -204,17 +207,17 @@ const CooperativeDashboard: React.FC = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("members")}
             value={cooperative?.total_members ?? 0}
             icon={Users}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("products")}
             value={stats.products}
             icon={Package}
           />
-          <InstitutionalStatCard
+          <UnifiedStatCard
             title={t("pending")}
             value={stats.pendingOrders}
             icon={ShoppingCart}
@@ -240,7 +243,6 @@ const CooperativeDashboard: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={() => navigate('/cooperative/commandes')}
-                className="btn-institutional-outline"
               >
                 {t("view")}
               </Button>
@@ -259,13 +261,13 @@ const CooperativeDashboard: React.FC = () => {
 
         {/* Navigation cards */}
         <div className="space-y-3">
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title={t("my_stock")}
             description={`${stats.products} ${t("products")}`}
             icon={Package}
             onClick={() => navigate('/cooperative/stock')}
           />
-          <InstitutionalActionCard
+          <UnifiedActionCard
             title={t("orders")}
             description={t("manage_requests")}
             icon={ClipboardList}
@@ -297,7 +299,7 @@ const CooperativeDashboard: React.FC = () => {
         </Card>
       </div>
 
-      <InstitutionalBottomNav items={navItems} />
+      <UnifiedBottomNav items={navItems} />
     </div>
   );
 };
