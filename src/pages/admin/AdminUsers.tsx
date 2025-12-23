@@ -13,6 +13,7 @@ import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav'
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { useAdminUsersData, AdminUserData, ExpectedEntityType } from '@/hooks/useAdminUsersData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -460,15 +461,11 @@ const AdminUsers: React.FC = () => {
         )}
 
         {/* Search */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Rechercher par nom, téléphone..."
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
+        <SearchInput
+          value={filters.search}
+          onChange={(value) => setFilters({ ...filters, search: value })}
+          placeholder="Rechercher par nom, téléphone..."
+        />
 
         {/* Results count + Export */}
         <div className="flex justify-between items-center">

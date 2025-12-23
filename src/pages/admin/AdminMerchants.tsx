@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
-  Search,
   Check,
   X,
   Pause,
@@ -22,6 +20,7 @@ import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { adminNavItems } from '@/config/navigation';
 import type { StatusType } from '@/components/shared/StatusBadge';
 
@@ -184,17 +183,12 @@ const AdminMerchants: React.FC = () => {
       </PageHero>
 
       {/* Barre de recherche */}
-      <div className="p-4 sticky top-[73px] bg-background z-10 border-b border-border">
-        <div className="relative max-w-lg mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par nom, téléphone, CMU..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12"
-          />
-        </div>
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Rechercher par nom, téléphone, CMU..."
+        sticky
+      />
 
       {/* Liste des marchands */}
       <div className="p-4 max-w-lg mx-auto">

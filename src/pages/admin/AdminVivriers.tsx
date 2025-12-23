@@ -15,6 +15,7 @@ import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Cooperative {
@@ -239,22 +240,12 @@ const AdminVivriers: React.FC = () => {
         </div>
 
         {/* Recherche */}
-        <div className="relative mb-4">
-          <Input
-            placeholder="Rechercher par nom, coopérative ou code..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-background/90 border-0 pl-10"
-          />
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Rechercher par nom, coopérative ou code..."
+          className="mb-4"
+        />
 
         {/* FilterChips pour basculer entre vues */}
         <FilterChips

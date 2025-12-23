@@ -10,6 +10,7 @@ import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav'
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { LayoutDashboard, Store, Wheat } from 'lucide-react';
 
 interface Agent {
@@ -139,15 +140,11 @@ const AdminAgents: React.FC = () => {
 
       <div className="p-4 space-y-3">
         {/* Search integrated */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Rechercher un agent..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Rechercher un agent..."
+        />
 
         {/* Agents list */}
         {filteredAgents.length === 0 ? (
