@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import logger from '@/infra/logger';
+import { useAudioLevel } from './useAudioLevel';
 
 interface UseAudioRecorderReturn {
   isRecording: boolean;
@@ -12,6 +13,9 @@ interface UseAudioRecorderReturn {
   error: string | null;
   isSupported: boolean;
   permissionStatus: 'granted' | 'denied' | 'prompt' | 'unknown';
+  audioLevel: number;
+  peakLevel: number;
+  isClipping: boolean;
 }
 
 // Détecter les formats audio supportés
@@ -57,6 +61,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [error, setError] = useState<string | null>(null);
   const [isSupported] = useState(() => checkAudioSupport());
   const [permissionStatus, setPermissionStatus] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
+
+  // Analyse de niveau audio en temps réel
+  const { audioLevel, peakLevel, isClipping, startAnalysis, stopAnalysis } = useAudioLevel();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -130,6 +137,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       streamRef.current = stream;
       setPermissionStatus('granted');
       logger.info('Microphone access granted', { module: 'useAudioRecorder' });
+
+      // Démarrer l'analyse de niveau audio
+      startAnalysis(stream);
 
       // Trouver le format supporté
       const mimeType = getSupportedMimeType();
@@ -236,6 +246,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const stopRecording = useCallback(() => {
     logger.info('Stop recording requested', { module: 'useAudioRecorder' });
     
+    // Arrêter l'analyse de niveau audio
+    stopAnalysis();
+    
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -251,7 +264,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     }
     
     setIsRecording(false);
-  }, []);
+  }, [stopAnalysis]);
 
   const resetRecording = useCallback(() => {
     logger.debug('Resetting recording state', { module: 'useAudioRecorder' });
@@ -277,6 +290,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     resetRecording,
     error,
     isSupported,
-    permissionStatus
+    permissionStatus,
+    audioLevel,
+    peakLevel,
+    isClipping
   };
 }
