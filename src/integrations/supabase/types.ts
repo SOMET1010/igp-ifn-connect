@@ -925,6 +925,119 @@ export type Database = {
         }
         Relationships: []
       }
+      vivriers_cooperatives: {
+        Row: {
+          address: string | null
+          code: string | null
+          commune: string | null
+          created_at: string
+          effectif_cmu: number | null
+          effectif_cnps: number | null
+          effectif_total: number | null
+          email: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          region: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          code?: string | null
+          commune?: string | null
+          created_at?: string
+          effectif_cmu?: number | null
+          effectif_cnps?: number | null
+          effectif_total?: number | null
+          email?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          code?: string | null
+          commune?: string | null
+          created_at?: string
+          effectif_cmu?: number | null
+          effectif_cnps?: number | null
+          effectif_total?: number | null
+          email?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          phone?: string | null
+          region?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vivriers_members: {
+        Row: {
+          actor_key: string
+          cmu_status: string | null
+          cnps_status: string | null
+          cooperative_id: string | null
+          cooperative_name: string
+          created_at: string
+          full_name: string
+          id: string
+          identifier_code: string | null
+          notes: string | null
+          phone: string | null
+          phone2: string | null
+          row_number: number | null
+          updated_at: string
+        }
+        Insert: {
+          actor_key: string
+          cmu_status?: string | null
+          cnps_status?: string | null
+          cooperative_id?: string | null
+          cooperative_name: string
+          created_at?: string
+          full_name: string
+          id?: string
+          identifier_code?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone2?: string | null
+          row_number?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actor_key?: string
+          cmu_status?: string | null
+          cnps_status?: string | null
+          cooperative_id?: string | null
+          cooperative_name?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          identifier_code?: string | null
+          notes?: string | null
+          phone?: string | null
+          phone2?: string | null
+          row_number?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vivriers_members_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "vivriers_cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
