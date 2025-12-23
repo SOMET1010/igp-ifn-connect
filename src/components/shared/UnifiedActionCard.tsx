@@ -54,7 +54,7 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
                 'absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-xs font-bold px-1',
                 badgeVariant === 'destructive' && 'bg-destructive text-destructive-foreground animate-pulse shadow-glow-destructive',
                 badgeVariant === 'warning' && 'bg-orange-500 text-white animate-bounce-gentle shadow-glow-warning',
-                badgeVariant === 'default' && 'bg-primary text-primary-foreground shadow-glow-primary'
+                badgeVariant === 'default' && 'bg-primary text-primary-foreground shadow-glow-primary animate-fade-pulse'
               )}
             >
               {badge > 99 ? '99+' : badge}
