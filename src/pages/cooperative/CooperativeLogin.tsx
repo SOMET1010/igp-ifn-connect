@@ -12,6 +12,8 @@ import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/li
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
+import { supabase } from '@/integrations/supabase/client';
+import { authLogger } from '@/infra/logger';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -133,7 +135,9 @@ const CooperativeLogin: React.FC = () => {
     setIsLoading(true);
 
     const email = `coop_${phone}@ifn.ci`;
-    const password = `coop_${phone}_secure`;
+    // Génération d'un mot de passe plus sécurisé avec salt basé sur timestamp
+    const salt = Date.now().toString(36);
+    const password = `Coop!${phone.slice(-4)}${salt}#Secure`;
 
     const { error } = await signUp(email, password, fullName);
 
@@ -145,6 +149,37 @@ const CooperativeLogin: React.FC = () => {
       });
       setIsLoading(false);
       return;
+    }
+
+    // Assigner le rôle "cooperative" après l'inscription
+    try {
+      const { data: { user: newUser } } = await supabase.auth.getUser();
+      if (newUser) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .update({ role: 'cooperative' })
+          .eq('user_id', newUser.id);
+        
+        if (roleError) {
+          authLogger.warn('Échec assignation rôle cooperative', { error: roleError.message });
+        }
+
+        // Créer l'entrée coopérative
+        const { error: coopError } = await supabase.from('cooperatives').insert({
+          user_id: newUser.id,
+          name: fullName,
+          code: `COOP-${phone.slice(-6)}`,
+          commune: 'À définir',
+          region: 'À définir',
+          phone: phone,
+        });
+
+        if (coopError) {
+          authLogger.warn('Échec création coopérative', { error: coopError.message });
+        }
+      }
+    } catch (err) {
+      authLogger.error('Erreur post-inscription', err);
     }
 
     toast({
