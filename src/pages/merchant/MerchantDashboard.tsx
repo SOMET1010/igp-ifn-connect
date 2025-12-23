@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { Banknote, BarChart3, Home, User, Receipt, Package } from "lucide-react";
+import { Banknote, BarChart3, Home, User, Receipt, Package, History, CreditCard, ScanBarcode, Tag, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AudioButton } from "@/components/shared/AudioButton";
@@ -174,6 +174,51 @@ export default function MerchantDashboard() {
                 description={t("settings")}
                 icon={User}
                 onClick={() => navigate('/marchand/profil')}
+              />
+            </div>
+
+            {/* Tools & Services Section */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-foreground">
+                Outils & Services
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <UnifiedActionCard
+                  title={t("transactions") || "Historique"}
+                  description={t("your_sales")}
+                  icon={History}
+                  onClick={() => navigate('/marchand/historique')}
+                  compact
+                />
+                <UnifiedActionCard
+                  title={t("credits") || "Crédits"}
+                  description={t("customers")}
+                  icon={CreditCard}
+                  onClick={() => navigate('/marchand/credits')}
+                  compact
+                />
+                <UnifiedActionCard
+                  title={t("scanner") || "Scanner"}
+                  description={t("barcode")}
+                  icon={ScanBarcode}
+                  onClick={() => navigate('/marchand/scanner')}
+                  compact
+                />
+                <UnifiedActionCard
+                  title={t("promotions") || "Promos"}
+                  description={t("campaigns")}
+                  icon={Tag}
+                  onClick={() => navigate('/marchand/promotions')}
+                  compact
+                />
+              </div>
+              
+              <UnifiedActionCard
+                title={t("suppliers") || "Fournisseurs"}
+                description={t("ifn_cooperatives")}
+                icon={Truck}
+                onClick={() => navigate('/marchand/fournisseurs')}
               />
             </div>
 
