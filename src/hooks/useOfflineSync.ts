@@ -10,6 +10,7 @@ import {
   openDB,
 } from "@/lib/offlineDB";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { syncLogger } from "@/infra/logger";
 
 interface OfflineItem {
   id: string;
@@ -60,7 +61,7 @@ const uploadPhotoToStorage = async (
       });
 
     if (error) {
-      console.error("Photo upload error:", error);
+      syncLogger.error("Photo upload error", error);
       return null;
     }
 
@@ -70,7 +71,7 @@ const uploadPhotoToStorage = async (
 
     return urlData.publicUrl;
   } catch (err) {
-    console.error("Photo upload failed:", err);
+    syncLogger.error("Photo upload failed", err);
     return null;
   }
 };
@@ -92,7 +93,7 @@ export function useOfflineSync() {
       const queue = await getFromIndexedDB();
       setPendingCount(queue.length);
     } catch (error) {
-      console.error("Error getting queue:", error);
+      syncLogger.error("Error getting queue", error);
     }
   }, []);
   // Add an action to the queue
@@ -128,7 +129,7 @@ export function useOfflineSync() {
         }, 2000);
       }
     } catch (error) {
-      console.error("Error adding to queue:", error);
+      syncLogger.error("Error adding to queue", error);
       toast.error("Erreur de sauvegarde locale");
     }
     
@@ -158,7 +159,7 @@ export function useOfflineSync() {
       const { hasConflict, serverData } = await checkConflicts(item);
       
       if (hasConflict) {
-        console.warn(`Conflit détecté pour ${item.entity_type}:`, serverData);
+        syncLogger.warn(`Conflit détecté pour ${item.entity_type}`, { serverData });
         // Server wins strategy - consider synced
         return true;
       }
@@ -255,7 +256,7 @@ export function useOfflineSync() {
         return true;
       }
     } catch (error) {
-      console.error("Sync error:", error);
+      syncLogger.error("Sync item error", error);
       return false;
     }
   };
@@ -337,7 +338,7 @@ export function useOfflineSync() {
         }
       }
     } catch (error) {
-      console.error("Sync error:", error);
+      syncLogger.error("Sync with server failed", error);
       toast.error("Erreur de synchronisation");
     } finally {
       setIsSyncing(false);

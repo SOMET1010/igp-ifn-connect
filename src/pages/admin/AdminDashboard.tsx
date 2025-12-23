@@ -7,6 +7,7 @@ import { DashboardHeader } from '@/components/shared/DashboardHeader';
 import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
 import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
 import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
+import { adminLogger } from '@/infra/logger';
 import { 
   Users, 
   Store, 
@@ -122,7 +123,7 @@ const AdminDashboard: React.FC = () => {
 
         setChartData(chartDataArray);
       } catch (error) {
-        console.error('Error fetching admin dashboard data:', error);
+        adminLogger.error('Error fetching admin dashboard data', error);
       } finally {
         setIsLoading(false);
       }

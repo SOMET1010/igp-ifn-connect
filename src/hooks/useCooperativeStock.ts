@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
+import { coopLogger } from '@/infra/logger';
 export interface CooperativeStockItem {
   id: string;
   quantity: number;
@@ -120,7 +120,7 @@ export function useCooperativeStock(userId: string | undefined) {
       });
       
       if (error) {
-        console.error("Error checking stock:", error);
+        coopLogger.error("Error checking stock", error);
         toast.error("Erreur lors de la vérification du stock");
       } else {
         if (data?.cooperative?.lowStockCount > 0) {
@@ -130,7 +130,7 @@ export function useCooperativeStock(userId: string | undefined) {
         }
       }
     } catch (err) {
-      console.error("Error:", err);
+      coopLogger.error("Check low stock failed", err);
       toast.error("Erreur de connexion");
     }
     setIsCheckingStock(false);
