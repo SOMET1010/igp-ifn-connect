@@ -9,6 +9,7 @@ import { cooperativeNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import { useCooperativeOrders } from '@/hooks/useCooperativeOrders';
 import { OrderCard, CancelOrderDialog, Order } from '@/components/cooperative/orders';
+import { NotificationBadge } from '@/components/shared/NotificationBadge';
 
 const CooperativeOrders: React.FC = () => {
   const navigate = useNavigate();
@@ -55,21 +56,23 @@ const CooperativeOrders: React.FC = () => {
           <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="pending" className="relative">
               En attente
-              {pendingOrders.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white rounded-full text-xs flex items-center justify-center">
-                  {pendingOrders.length}
-                </span>
-              )}
+              <NotificationBadge 
+                count={pendingOrders.length} 
+                variant="warning" 
+                size="sm" 
+                absolute 
+              />
             </TabsTrigger>
             <TabsTrigger value="confirmed">En cours</TabsTrigger>
             <TabsTrigger value="delivered">Livré</TabsTrigger>
             <TabsTrigger value="cancelled" className="relative">
               Annulé
-              {cancelledOrders.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center">
-                  {cancelledOrders.length}
-                </span>
-              )}
+              <NotificationBadge 
+                count={cancelledOrders.length} 
+                variant="destructive" 
+                size="sm" 
+                absolute 
+              />
             </TabsTrigger>
           </TabsList>
 
