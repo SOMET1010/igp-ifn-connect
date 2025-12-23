@@ -70,9 +70,10 @@ interface UserCardProps {
   onCreateAgent: (user: AdminUserData) => void;
   onCreateMerchant: (user: AdminUserData) => void;
   onDeleteUser: (user: AdminUserData) => void;
+  onViewDetail: (user: AdminUserData) => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, onCreateAgent, onCreateMerchant, onDeleteUser }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, onCreateAgent, onCreateMerchant, onDeleteUser, onViewDetail }) => {
   const getLinkedEntityInfo = () => {
     if (user.linkedMerchant) {
       return {
@@ -110,7 +111,10 @@ const UserCard: React.FC<UserCardProps> = ({ user, onCreateAgent, onCreateMercha
   const linkedEntity = getLinkedEntityInfo();
 
   return (
-    <Card className="card-institutional">
+    <Card 
+      className="card-institutional cursor-pointer hover:shadow-md transition-shadow"
+      onClick={() => onViewDetail(user)}
+    >
       <CardContent className="p-4 space-y-3">
         {/* Header with name and date */}
         <div className="flex items-start justify-between">
@@ -162,7 +166,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, onCreateAgent, onCreateMercha
             <p className="text-xs text-muted-foreground">{linkedEntity.detail}</p>
           </div>
         ) : (
-          <div className="bg-destructive/5 rounded-lg p-3 space-y-3">
+          <div className="bg-destructive/5 rounded-lg p-3 space-y-3" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-destructive" />
               <span className="text-sm text-destructive">Aucune entité liée</span>
@@ -625,6 +629,7 @@ const AdminUsers: React.FC = () => {
                 onCreateAgent={handleCreateAgent}
                 onCreateMerchant={openMerchantDialog}
                 onDeleteUser={openDeleteDialog}
+                onViewDetail={(u) => navigate(`/admin/utilisateurs/${u.userId}`)}
               />
             ))
           )}
