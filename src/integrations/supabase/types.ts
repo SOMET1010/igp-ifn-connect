@@ -1070,6 +1070,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_agent_role: { Args: { p_user_id: string }; Returns: undefined }
+      assign_cooperative_role: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      assign_merchant_role: { Args: { p_user_id: string }; Returns: undefined }
       get_merchant_today_total: {
         Args: { _merchant_id: string }
         Returns: number

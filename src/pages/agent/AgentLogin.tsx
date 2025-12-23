@@ -14,6 +14,7 @@ import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
 import { useRetryOperation } from '@/hooks/useRetryOperation';
 import { authLogger } from '@/infra/logger';
+import { supabase } from '@/integrations/supabase/client';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -163,13 +164,47 @@ const AgentLogin: React.FC = () => {
     const password = `agent_${phone}_secure`;
 
     const result = await executeWithRetry(async () => {
-      const { error } = await signUp(email, password, fullName);
+      // Créer le compte utilisateur
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName }
+        }
+      });
 
-      if (error) {
-        throw error;
+      if (signUpError || !data.user) {
+        throw signUpError || new Error("Échec inscription");
       }
 
-      authLogger.info('Agent inscrit avec succès', { phone });
+      const userId = data.user.id;
+      const cleanPhone = phone.replace(/\s/g, "");
+
+      // Créer l'entrée agent
+      const { error: agentError } = await supabase.from("agents").insert({
+        user_id: userId,
+        employee_id: `AGT-${Date.now()}`,
+        organization: 'DGE',
+        zone: 'À définir',
+        is_active: true
+      });
+
+      if (agentError) {
+        authLogger.error("Agent creation error:", agentError);
+        throw agentError;
+      }
+
+      // Utiliser la fonction RPC sécurisée pour assigner le rôle
+      const { error: roleError } = await supabase.rpc('assign_agent_role', {
+        p_user_id: userId
+      });
+
+      if (roleError) {
+        authLogger.warn("Role assignment error:", { error: roleError.message });
+      }
+
+      authLogger.info('Agent inscrit avec succès', { phone: cleanPhone });
       return true;
     });
 

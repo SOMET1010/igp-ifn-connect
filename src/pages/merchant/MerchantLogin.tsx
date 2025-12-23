@@ -153,9 +153,9 @@ export default function MerchantLogin() {
         throw merchantError;
       }
 
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: userId,
-        role: "merchant"
+      // Utiliser la fonction RPC sécurisée pour assigner le rôle
+      const { error: roleError } = await supabase.rpc('assign_merchant_role', {
+        p_user_id: userId
       });
 
       if (roleError) {

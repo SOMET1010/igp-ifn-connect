@@ -161,42 +161,48 @@ const CooperativeLogin: React.FC = () => {
     setIsLoading(true);
 
     const email = `coop_${phone}@ifn.ci`;
-    // Génération d'un mot de passe plus sécurisé avec salt basé sur timestamp
-    const salt = Date.now().toString(36);
-    const password = `Coop!${phone.slice(-4)}${salt}#Secure`;
+    const password = `coop_${phone}_secure`;
 
     const result = await executeWithRetry(async () => {
-      const { error } = await signUp(email, password, fullName);
+      // Créer le compte utilisateur
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName }
+        }
+      });
 
-      if (error) {
-        throw error;
+      if (signUpError || !data.user) {
+        throw signUpError || new Error("Échec inscription");
       }
 
-      // Assigner le rôle "cooperative" après l'inscription
-      const { data: { user: newUser } } = await supabase.auth.getUser();
-      if (newUser) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .update({ role: 'cooperative' })
-          .eq('user_id', newUser.id);
-        
-        if (roleError) {
-          authLogger.warn('Échec assignation rôle cooperative', { error: roleError.message });
-        }
+      const userId = data.user.id;
+      const cleanPhone = phone.replace(/\s/g, "");
 
-        // Créer l'entrée coopérative
-        const { error: coopError } = await supabase.from('cooperatives').insert({
-          user_id: newUser.id,
-          name: fullName,
-          code: `COOP-${phone.slice(-6)}`,
-          commune: 'À définir',
-          region: 'À définir',
-          phone: phone,
-        });
+      // Créer l'entrée coopérative
+      const { error: coopError } = await supabase.from('cooperatives').insert({
+        user_id: userId,
+        name: fullName,
+        code: `COOP-${cleanPhone.slice(-6)}`,
+        commune: 'À définir',
+        region: 'À définir',
+        phone: cleanPhone,
+      });
 
-        if (coopError) {
-          authLogger.warn('Échec création coopérative', { error: coopError.message });
-        }
+      if (coopError) {
+        authLogger.error('Cooperative creation error:', coopError);
+        throw coopError;
+      }
+
+      // Utiliser la fonction RPC sécurisée pour assigner le rôle
+      const { error: roleError } = await supabase.rpc('assign_cooperative_role', {
+        p_user_id: userId
+      });
+
+      if (roleError) {
+        authLogger.warn('Role assignment error:', { error: roleError.message });
       }
 
       return true;
