@@ -15,6 +15,7 @@ import { Loader2 } from "lucide-react";
 
 // Lazy load heavy components
 const AdminMap = React.lazy(() => import("./pages/admin/AdminMap"));
+const AuthPage = React.lazy(() => import("./pages/auth/AuthPage"));
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DemoAccess from "./pages/DemoAccess";
@@ -116,6 +117,7 @@ const App = () => (
               <Suspense fallback={<LazyLoadingFallback />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<AuthPage />} />
                   <Route path="/demo" element={<DemoAccess />} />
                   <Route path="/accueil" element={<Navigate to="/" replace />} />
                   

@@ -13,6 +13,8 @@ interface AuthContextType {
   userRole: AppRole | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signInWithPhone: (phone: string) => Promise<{ error: Error | null }>;
+  verifyOtp: (phone: string, token: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   checkRole: (role: AppRole) => Promise<boolean>;
 }
@@ -115,6 +117,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const signInWithPhone = useCallback(async (phone: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phone.startsWith('+') ? phone : `+225${phone.replace(/\s/g, '')}`,
+      });
+      return { error: error ? new Error(error.message) : null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  }, []);
+
+  const verifyOtp = useCallback(async (phone: string, token: string) => {
+    try {
+      const formattedPhone = phone.startsWith('+') ? phone : `+225${phone.replace(/\s/g, '')}`;
+      const { error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token,
+        type: 'sms',
+      });
+      return { error: error ? new Error(error.message) : null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -151,9 +178,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     userRole,
     signIn,
     signUp,
+    signInWithPhone,
+    verifyOtp,
     signOut,
     checkRole
-  }), [user, session, isLoading, userRole, signIn, signUp, signOut, checkRole]);
+  }), [user, session, isLoading, userRole, signIn, signUp, signInWithPhone, verifyOtp, signOut, checkRole]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
