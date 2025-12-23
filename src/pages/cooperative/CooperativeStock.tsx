@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { Package, Loader2, Bell } from 'lucide-react';
+import { Package, Loader2, Bell, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
 import { NotificationBadge } from '@/components/shared/NotificationBadge';
 import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock, CooperativeStockItem } from '@/hooks/useCooperativeStock';
@@ -39,10 +39,10 @@ const CooperativeStock = () => {
 
   // Options de filtre (4 pour coopératives)
   const filterOptions: FilterOption[] = [
-    { value: 'all', label: 'Tous', count: stocks.length },
-    { value: 'out', label: 'Rupture', count: outOfStockCount },
-    { value: 'low', label: 'Stock bas', count: lowStockCount },
-    { value: 'expiring', label: 'Expire', count: expiringStockCount },
+    { value: 'all', label: 'Tous', count: stocks.length, icon: Package },
+    { value: 'out', label: 'Rupture', count: outOfStockCount, icon: AlertTriangle },
+    { value: 'low', label: 'Stock bas', count: lowStockCount, icon: TrendingDown },
+    { value: 'expiring', label: 'Expire', count: expiringStockCount, icon: Clock },
   ];
 
   const alertsText = totalAlerts > 0 ? ` • ${totalAlerts} alerte${totalAlerts > 1 ? 's' : ''}` : '';

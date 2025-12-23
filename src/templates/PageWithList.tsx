@@ -1,24 +1,14 @@
 import React from 'react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
 import { SearchInput } from '@/components/shared/SearchInput';
-import { FilterChips } from '@/components/shared/FilterChips';
+import { FilterChips, FilterOption } from '@/components/shared/FilterChips';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-// ============================================
-// TYPES
-// ============================================
-
-export interface FilterOption {
-  /** Valeur unique du filtre */
-  value: string;
-  /** Label affiché */
-  label: string;
-  /** Compteur optionnel */
-  count?: number;
-}
+// Re-export FilterOption pour compatibilité
+export type { FilterOption } from '@/components/shared/FilterChips';
 
 export interface PageWithListProps<T> extends Omit<PageLayoutProps, 'children'> {
   /** Valeur de recherche */

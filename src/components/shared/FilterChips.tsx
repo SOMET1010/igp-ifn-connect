@@ -1,10 +1,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
-interface FilterOption {
+export interface FilterOption {
   value: string;
   label: string;
   count?: number;
+  icon?: LucideIcon;
 }
 
 interface FilterChipsProps {
@@ -24,6 +26,7 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
     <div className={cn('flex gap-2 overflow-x-auto pb-1 scrollbar-hide', className)}>
       {options.map((option) => {
         const isActive = value === option.value;
+        const Icon = option.icon;
         return (
           <button
             key={option.value}
@@ -36,6 +39,12 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
                 : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
             )}
           >
+            {Icon && (
+              <Icon className={cn(
+                'w-4 h-4 shrink-0',
+                isActive ? 'text-primary-foreground' : 'text-muted-foreground'
+              )} />
+            )}
             {option.label}
             {typeof option.count === 'number' && (
               <span className={cn(
