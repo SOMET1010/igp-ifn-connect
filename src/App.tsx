@@ -56,6 +56,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminMerchants from "./pages/admin/AdminMerchants";
 import AdminAgents from "./pages/admin/AdminAgents";
+import AdminAgentRequests from "./pages/admin/AdminAgentRequests";
 import AdminCooperatives from "./pages/admin/AdminCooperatives";
 // AdminMap is lazy loaded above
 import AdminMonitoring from "./pages/admin/AdminMonitoring";
@@ -166,6 +167,7 @@ const App = () => (
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/admin/marchands" element={<AdminMerchants />} />
                     <Route path="/admin/agents" element={<AdminAgents />} />
+                    <Route path="/admin/demandes-agents" element={<AdminAgentRequests />} />
                     <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
                     <Route path="/admin/carte" element={<AdminMap />} />
                     <Route path="/admin/monitoring" element={<AdminMonitoring />} />
