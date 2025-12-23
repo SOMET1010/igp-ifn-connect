@@ -272,6 +272,8 @@ const CooperativeDashboard: React.FC = () => {
             description={t("manage_requests")}
             icon={ClipboardList}
             onClick={() => navigate('/cooperative/commandes')}
+            badge={stats.pendingOrders}
+            badgeVariant="warning"
           />
         </div>
 

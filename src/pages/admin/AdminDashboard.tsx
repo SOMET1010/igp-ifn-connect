@@ -158,6 +158,8 @@ const AdminDashboard: React.FC = () => {
             description={`${stats.merchants} inscrits`}
             icon={Store}
             onClick={() => navigate('/admin/marchands')}
+            badge={stats.pendingMerchants}
+            badgeVariant="warning"
           />
           <UnifiedActionCard
             title="Agents"
