@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface ConfettiProps {
   duration?: number;
@@ -30,17 +31,7 @@ const Confetti = ({
   className,
 }: ConfettiProps) => {
   const [visible, setVisible] = useState(true);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  // Check for reduced motion preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
+  const prefersReducedMotion = useReducedMotion();
 
   // Cleanup after animation
   useEffect(() => {
