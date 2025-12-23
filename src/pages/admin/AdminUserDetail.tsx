@@ -5,7 +5,7 @@ import { fr } from 'date-fns/locale';
 import { 
   ArrowLeft, User, Phone, Calendar, Shield, UserCog, 
   Store, Building2, MapPin, CheckCircle, Clock,
-  Banknote, FileText, Users, RefreshCw, Pencil, Save, Loader2
+  Banknote, FileText, Users, RefreshCw, Pencil, Save, Loader2, Plus, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,18 +14,39 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { ActivityTimeline } from '@/components/admin/ActivityTimeline';
 import { useAdminUserDetail } from '@/hooks/useAdminUserDetail';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
 
-const roleConfig: Record<string, { label: string; color: string }> = {
+type AppRole = Database['public']['Enums']['app_role'];
+
+const roleConfig: Record<AppRole, { label: string; color: string }> = {
   admin: { label: 'Admin', color: 'bg-red-500' },
   agent: { label: 'Agent', color: 'bg-blue-500' },
   merchant: { label: 'Marchand', color: 'bg-orange-500' },
   cooperative: { label: 'Coopérative', color: 'bg-green-500' },
   user: { label: 'Utilisateur', color: 'bg-gray-500' },
 };
+
+const allRoles: AppRole[] = ['admin', 'agent', 'merchant', 'cooperative', 'user'];
 
 const AdminUserDetail = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -37,6 +58,12 @@ const AdminUserDetail = () => {
   const [editFullName, setEditFullName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Role management state
+  const [isAddingRole, setIsAddingRole] = useState(false);
+  const [isRemovingRole, setIsRemovingRole] = useState(false);
+  const [roleToRemove, setRoleToRemove] = useState<AppRole | null>(null);
+  const [removeRoleDialogOpen, setRemoveRoleDialogOpen] = useState(false);
 
   const openEditDialog = () => {
     if (data.profile) {
@@ -75,6 +102,66 @@ const AdminUserDetail = () => {
     }
   };
 
+  const handleAddRole = async (role: AppRole) => {
+    if (!userId) return;
+
+    setIsAddingRole(true);
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: userId,
+          role: role,
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Ce rôle est déjà attribué');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success(`Rôle "${roleConfig[role]?.label || role}" ajouté`);
+        refetch();
+      }
+    } catch (err) {
+      toast.error("Erreur lors de l'ajout du rôle");
+      console.error(err);
+    } finally {
+      setIsAddingRole(false);
+    }
+  };
+
+  const confirmRemoveRole = (role: AppRole) => {
+    setRoleToRemove(role);
+    setRemoveRoleDialogOpen(true);
+  };
+
+  const handleRemoveRole = async () => {
+    if (!userId || !roleToRemove) return;
+
+    setIsRemovingRole(true);
+    try {
+      const { error } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', roleToRemove as AppRole);
+
+      if (error) throw error;
+
+      toast.success(`Rôle "${roleConfig[roleToRemove]?.label || roleToRemove}" supprimé`);
+      setRemoveRoleDialogOpen(false);
+      setRoleToRemove(null);
+      refetch();
+    } catch (err) {
+      toast.error('Erreur lors de la suppression du rôle');
+      console.error(err);
+    } finally {
+      setIsRemovingRole(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-4 space-y-4">
@@ -105,6 +192,7 @@ const AdminUserDetail = () => {
   }
 
   const { profile, roles, linkedAgent, linkedMerchant, linkedCooperative, activities, stats } = data;
+  const availableRoles = allRoles.filter(r => !roles.includes(r));
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,17 +246,59 @@ const AdminUserDetail = () => {
               </div>
             </div>
 
-            {/* Roles */}
+            {/* Roles with management */}
             <div className="flex items-center gap-2 flex-wrap">
               <Shield className="h-4 w-4 text-muted-foreground" />
               {roles.map(role => (
                 <Badge 
                   key={role} 
-                  className={`${roleConfig[role]?.color || 'bg-gray-500'} text-white`}
+                  className={`${roleConfig[role]?.color || 'bg-gray-500'} text-white group relative pr-6`}
                 >
                   {roleConfig[role]?.label || role}
+                  {roles.length > 1 && (
+                    <button
+                      onClick={() => confirmRemoveRole(role)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
+                      title="Supprimer ce rôle"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
                 </Badge>
               ))}
+              
+              {availableRoles.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-6 px-2 text-xs"
+                      disabled={isAddingRole}
+                    >
+                      {isAddingRole ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="h-3 w-3 mr-1" />
+                          Ajouter
+                        </>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-popover">
+                    {availableRoles.map(role => (
+                      <DropdownMenuItem 
+                        key={role}
+                        onClick={() => handleAddRole(role)}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${roleConfig[role]?.color} mr-2`} />
+                        {roleConfig[role]?.label || role}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -386,6 +516,36 @@ const AdminUserDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Role Confirmation Dialog */}
+      <AlertDialog open={removeRoleDialogOpen} onOpenChange={setRemoveRoleDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Voulez-vous vraiment supprimer le rôle "{roleToRemove && (roleConfig[roleToRemove]?.label || roleToRemove)}" 
+              de cet utilisateur ? Cette action peut affecter ses permissions d'accès.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingRole}>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemoveRole}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isRemovingRole}
+            >
+              {isRemovingRole ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Suppression...
+                </>
+              ) : (
+                'Supprimer'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
