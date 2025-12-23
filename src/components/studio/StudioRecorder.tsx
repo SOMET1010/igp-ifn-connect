@@ -44,7 +44,9 @@ export function StudioRecorder({
     startRecording,
     stopRecording,
     resetRecording,
-    error
+    error,
+    isSupported,
+    permissionStatus
   } = useAudioRecorder();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -177,8 +179,22 @@ export function StudioRecorder({
 
       {/* Error message */}
       {error && (
-        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
-          {error}
+        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm flex items-center gap-2">
+          <span className="font-medium">Erreur:</span> {error}
+        </div>
+      )}
+
+      {/* Support warning */}
+      {!isSupported && (
+        <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm">
+          L'enregistrement audio n'est pas supporté par ce navigateur.
+        </div>
+      )}
+
+      {/* Permission warning */}
+      {isSupported && permissionStatus === 'denied' && (
+        <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm">
+          L'accès au microphone est bloqué. Veuillez autoriser l'accès dans les paramètres du navigateur.
         </div>
       )}
 
