@@ -10,6 +10,7 @@ import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav'
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 
 interface Cooperative {
   id: string;
@@ -127,15 +128,11 @@ const AdminCooperatives: React.FC = () => {
 
       <div className="p-4 space-y-3">
         {/* Search */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Rechercher une coopérative..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Rechercher une coopérative..."
+        />
 
         {/* Cooperatives list */}
         {filteredCooperatives.length === 0 ? (

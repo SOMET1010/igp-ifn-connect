@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Search, MapPin, Phone, Calendar, ClipboardList, Users } from 'lucide-react';
+import { MapPin, Phone, Calendar, ClipboardList, Users } from 'lucide-react';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
@@ -10,6 +9,7 @@ import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { agentNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import type { Database } from '@/integrations/supabase/types';
@@ -136,17 +136,12 @@ const MerchantList: React.FC = () => {
       </PageHero>
 
       {/* Barre de recherche */}
-      <div className="p-4 sticky top-[73px] bg-background z-10 border-b border-border">
-        <div className="relative max-w-lg mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher par nom, CMU, téléphone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12"
-          />
-        </div>
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Rechercher par nom, CMU, téléphone..."
+        sticky
+      />
 
       {/* Liste */}
       <div className="p-4 max-w-lg mx-auto">
