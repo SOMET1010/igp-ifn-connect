@@ -9,6 +9,7 @@ interface UnifiedActionCardProps {
   icon: LucideIcon;
   onClick: () => void;
   variant?: 'default' | 'primary';
+  compact?: boolean;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   icon: Icon,
   onClick,
   variant = 'default',
+  compact = false,
   className,
 }) => {
   const isPrimary = variant === 'primary';
@@ -31,22 +33,23 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
       )}
       onClick={onClick}
     >
-      <CardContent className="p-4 flex items-center gap-4">
+      <CardContent className={cn('flex items-center gap-3', compact ? 'p-3' : 'p-4')}>
         <div
           className={cn(
-            'w-12 h-12 rounded-xl flex items-center justify-center shrink-0',
+            'rounded-xl flex items-center justify-center shrink-0',
+            compact ? 'w-10 h-10' : 'w-12 h-12',
             isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted'
           )}
         >
-          <Icon className="h-6 w-6" />
+          <Icon className={cn(compact ? 'h-5 w-5' : 'h-6 w-6')} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-foreground truncate">{title}</p>
+          <p className={cn('font-medium text-foreground truncate', compact && 'text-sm')}>{title}</p>
           {description && (
-            <p className="text-sm text-muted-foreground truncate">{description}</p>
+            <p className={cn('text-muted-foreground truncate', compact ? 'text-xs' : 'text-sm')}>{description}</p>
           )}
         </div>
-        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+        {!compact && <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />}
       </CardContent>
     </Card>
   );
