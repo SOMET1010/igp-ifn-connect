@@ -7,6 +7,7 @@ interface MerchantNotifications {
   outOfStockCount: number;
   overdueCreditsCount: number;
   pendingCreditsCount: number;
+  cancelledInvoicesCount: number;
   isLoading: boolean;
 }
 
@@ -27,8 +28,8 @@ export function useMerchantNotifications(): MerchantNotifications {
 
       if (!merchant) return null;
 
-      // Fetch stock alerts and credits in parallel
-      const [stockResult, creditsResult] = await Promise.all([
+      // Fetch stock alerts, credits, and invoices in parallel
+      const [stockResult, creditsResult, invoicesResult] = await Promise.all([
         supabase
           .from('merchant_stocks')
           .select('quantity, min_threshold')
@@ -37,11 +38,16 @@ export function useMerchantNotifications(): MerchantNotifications {
           .from('customer_credits')
           .select('status, due_date')
           .eq('merchant_id', merchant.id)
-          .neq('status', 'paid')
+          .neq('status', 'paid'),
+        supabase
+          .from('invoices')
+          .select('status, cancelled_at')
+          .eq('merchant_id', merchant.id)
       ]);
 
       const stocks = stockResult.data || [];
       const credits = creditsResult.data || [];
+      const invoices = invoicesResult.data || [];
 
       // Count stock alerts
       const lowStockCount = stocks.filter(
@@ -58,11 +64,17 @@ export function useMerchantNotifications(): MerchantNotifications {
       
       const pendingCreditsCount = credits.length;
 
+      // Count cancelled invoices
+      const cancelledInvoicesCount = invoices.filter(
+        i => i.status === 'cancelled' || i.cancelled_at !== null
+      ).length;
+
       return {
         lowStockCount,
         outOfStockCount,
         overdueCreditsCount,
-        pendingCreditsCount
+        pendingCreditsCount,
+        cancelledInvoicesCount
       };
     },
     enabled: !!user?.id,
@@ -75,6 +87,7 @@ export function useMerchantNotifications(): MerchantNotifications {
     outOfStockCount: data?.outOfStockCount ?? 0,
     overdueCreditsCount: data?.overdueCreditsCount ?? 0,
     pendingCreditsCount: data?.pendingCreditsCount ?? 0,
+    cancelledInvoicesCount: data?.cancelledInvoicesCount ?? 0,
     isLoading
   };
 }
