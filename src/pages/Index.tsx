@@ -5,6 +5,8 @@ import { LanguageSelector } from "@/components/shared/LanguageSelector";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { Pictogram, PictogramType } from "@/components/shared/Pictogram";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { User } from "lucide-react";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 import fcfaBills from "@/assets/fcfa-bills.png";
 import agentTerrain from "@/assets/agent-terrain.png";
@@ -31,7 +33,7 @@ const rolesData: RoleCard[] = [
     titleKey: "merchant",
     description: "Encaisser et vendre sans souci",
     descKey: "merchant_desc",
-    href: "/marchand",
+    href: "/marchand/login",
     variant: "primary",
     badge: "⭐ Accès principal",
     badgeKey: "main_access",
@@ -43,7 +45,7 @@ const rolesData: RoleCard[] = [
     titleKey: "agent",
     description: "Aider les marchands",
     descKey: "agent_desc",
-    href: "/agent",
+    href: "/agent/login",
     variant: "secondary",
     pictogram: "agent",
   },
@@ -53,7 +55,7 @@ const rolesData: RoleCard[] = [
     titleKey: "cooperative",
     description: "Gérer stock et livraisons",
     descKey: "cooperative_desc",
-    href: "/cooperative",
+    href: "/cooperative/login",
     variant: "tertiary",
     pictogram: "cooperative",
   },
@@ -63,7 +65,7 @@ const rolesData: RoleCard[] = [
     titleKey: "admin",
     description: "Statistiques",
     descKey: "admin_desc",
-    href: "/admin",
+    href: "/admin/login",
     variant: "muted",
     pictogram: "admin",
   },
@@ -199,6 +201,7 @@ const RoleCardVertical = ({ role, index, size, className }: RoleCardProps) => {
 
 const Index = () => {
   const { t } = useLanguage();
+  const { isAuthenticated, user } = useAuth();
   
   // Texte audio pour la page
   const audioText = `${t('welcome')}. ${t('platform_title')}. ${t('who_are_you')}`;
@@ -206,8 +209,17 @@ const Index = () => {
   return (
     <HeroOverlay backgroundImage={marcheIvoirien}>
       <div className="min-h-screen flex flex-col relative">
-        {/* Sélecteur de langue */}
-        <div className="fixed top-4 right-4 z-50">
+        {/* Header avec sélecteur de langue et lien Mon compte */}
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          {isAuthenticated && (
+            <Link 
+              to="/compte" 
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-full text-white text-sm transition-all"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">Mon compte</span>
+            </Link>
+          )}
           <LanguageSelector variant="icon" />
         </div>
 
