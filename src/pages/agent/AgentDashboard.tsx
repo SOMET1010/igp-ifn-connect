@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useDataFetching } from '@/hooks/useDataFetching';
+import { useAgentRequest } from '@/hooks/useAgentRequest';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState, EmptyState } from '@/components/shared/StateComponents';
@@ -14,6 +16,9 @@ import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
+import { AgentRegistrationForm } from '@/components/agent/AgentRegistrationForm';
+import { AgentRequestStatus } from '@/components/agent/AgentRequestStatus';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   UserPlus, 
   Users, 
@@ -34,6 +39,71 @@ interface AgentDashboardData {
   isAgentRegistered: boolean;
 }
 
+// Composant pour la section d'inscription agent
+function AgentRegistrationSection({ user, onSuccess }: { user: any; onSuccess: () => void }) {
+  const { request, isLoading, fetchMyRequest, cancelRequest } = useAgentRequest();
+  const [showForm, setShowForm] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchMyRequest();
+  }, [fetchMyRequest]);
+
+  const handleCancel = async () => {
+    const success = await cancelRequest();
+    if (success) {
+      toast({
+        title: 'Demande annulée',
+        description: 'Votre demande a été annulée avec succès.',
+      });
+      setShowForm(true);
+    }
+  };
+
+  const handleRetry = () => {
+    setShowForm(true);
+  };
+
+  const handleFormSuccess = () => {
+    setShowForm(false);
+    fetchMyRequest();
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardContent className="p-6 space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <Skeleton className="h-6 w-48 mx-auto" />
+          <Skeleton className="h-4 w-64 mx-auto" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Si l'utilisateur a une demande et ne veut pas afficher le formulaire
+  if (request && !showForm) {
+    return (
+      <AgentRequestStatus
+        request={request}
+        onCancel={request.status === 'pending' ? handleCancel : undefined}
+        onRetry={request.status === 'rejected' ? handleRetry : undefined}
+        isLoading={isLoading}
+      />
+    );
+  }
+
+  // Afficher le formulaire d'inscription
+  return (
+    <AgentRegistrationForm 
+      onSuccess={handleFormSuccess}
+      defaultValues={{
+        full_name: '',
+        phone: user?.phone || '',
+      }}
+    />
+  );
+}
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -172,31 +242,7 @@ const AgentDashboard: React.FC = () => {
           onSignOut={handleSignOut}
         />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
-          <EmptyState
-            Icon={UserX}
-            title="Profil Agent non trouvé"
-            message="Votre compte n'est pas encore associé à un profil Agent. Veuillez contacter un administrateur pour activer votre accès."
-            variant="card"
-          />
-          <Card className="card-institutional">
-            <CardContent className="p-4 space-y-3">
-              <h3 className="font-semibold text-foreground">Que faire ?</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-medium">1.</span>
-                  <span>Contactez votre superviseur ou l'administrateur système</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-medium">2.</span>
-                  <span>Fournissez votre identifiant : {user?.email || user?.phone || 'N/A'}</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary font-medium">3.</span>
-                  <span>Demandez l'activation de votre profil Agent</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          <AgentRegistrationSection user={user} onSuccess={refetch} />
         </div>
         <UnifiedBottomNav items={navItems} />
       </div>
