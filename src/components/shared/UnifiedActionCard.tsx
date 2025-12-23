@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationBadge, NotificationBadgeVariant } from './NotificationBadge';
 
 interface UnifiedActionCardProps {
   title: string;
@@ -11,7 +12,7 @@ interface UnifiedActionCardProps {
   variant?: 'default' | 'primary';
   compact?: boolean;
   badge?: number;
-  badgeVariant?: 'default' | 'warning' | 'destructive';
+  badgeVariant?: NotificationBadgeVariant;
   className?: string;
 }
 
@@ -48,17 +49,12 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
           >
             <Icon className={cn(compact ? 'h-5 w-5' : 'h-6 w-6')} />
           </div>
-          {badge !== undefined && badge > 0 && (
-            <span
-              className={cn(
-                'absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-xs font-bold px-1',
-                badgeVariant === 'destructive' && 'bg-destructive text-destructive-foreground animate-pulse shadow-glow-destructive',
-                badgeVariant === 'warning' && 'bg-orange-500 text-white animate-bounce-gentle shadow-glow-warning',
-                badgeVariant === 'default' && 'bg-primary text-primary-foreground shadow-glow-primary animate-fade-pulse'
-              )}
-            >
-              {badge > 99 ? '99+' : badge}
-            </span>
+          {badge !== undefined && (
+            <NotificationBadge
+              count={badge}
+              variant={badgeVariant}
+              absolute
+            />
           )}
         </div>
         <div className="flex-1 min-w-0">
