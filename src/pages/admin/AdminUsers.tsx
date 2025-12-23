@@ -11,6 +11,8 @@ import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { useAdminUsersData, AdminUserData, ExpectedEntityType } from '@/hooks/useAdminUsersData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -486,50 +488,51 @@ const AdminUsers: React.FC = () => {
         </div>
 
         {/* User cards */}
-        <div className="space-y-3">
-          {users.length === 0 ? (
-            <Card className="card-institutional">
-              <CardContent className="p-8 text-center">
-                <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground">Aucun utilisateur trouvé</p>
-              </CardContent>
-            </Card>
-          ) : (
-            users.map(user => {
+        {users.length === 0 ? (
+          <Card className="card-institutional">
+            <CardContent className="p-8 text-center">
+              <Users className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground">Aucun utilisateur trouvé</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <AnimatedList className="space-y-3">
+            {users.map(user => {
               const linkedInfo = getLinkedInfo(user);
               const entityType = getEntityType(user);
               
               return (
-                <UnifiedListCard
-                  key={user.userId}
-                  entityType={entityType}
-                  title={user.fullName}
-                  subtitle={`${linkedInfo.subtitle} • ${user.roles.map(r => roleConfig[r].label).join(', ')}`}
-                  avatar={user.fullName?.charAt(0).toUpperCase()}
-                  status={linkedInfo.status}
-                  description={format(new Date(user.createdAt), 'dd/MM/yyyy', { locale: fr })}
-                  onClick={() => navigate(`/admin/utilisateurs/${user.userId}`)}
-                  actions={!user.hasLinkedEntity ? (
-                    <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border" onClick={e => e.stopPropagation()}>
-                      <Button size="sm" variant="outline" onClick={() => handleCreateAgent(user)} disabled={isProcessing}>
-                        <UserCog className="h-3 w-3 mr-1" />
-                        Créer Agent
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => openMerchantDialog(user)} disabled={isProcessing}>
-                        <Store className="h-3 w-3 mr-1" />
-                        Créer Marchand
-                      </Button>
-                      <Button size="sm" variant="destructive" onClick={() => openDeleteDialog(user)} disabled={isProcessing}>
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Supprimer
-                      </Button>
-                    </div>
-                  ) : undefined}
-                />
+                <AnimatedListItem key={user.userId}>
+                  <UnifiedListCard
+                    entityType={entityType}
+                    title={user.fullName}
+                    subtitle={`${linkedInfo.subtitle} • ${user.roles.map(r => roleConfig[r].label).join(', ')}`}
+                    avatar={user.fullName?.charAt(0).toUpperCase()}
+                    status={linkedInfo.status}
+                    description={format(new Date(user.createdAt), 'dd/MM/yyyy', { locale: fr })}
+                    onClick={() => navigate(`/admin/utilisateurs/${user.userId}`)}
+                    actions={!user.hasLinkedEntity ? (
+                      <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border" onClick={e => e.stopPropagation()}>
+                        <Button size="sm" variant="outline" onClick={() => handleCreateAgent(user)} disabled={isProcessing}>
+                          <UserCog className="h-3 w-3 mr-1" />
+                          Créer Agent
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => openMerchantDialog(user)} disabled={isProcessing}>
+                          <Store className="h-3 w-3 mr-1" />
+                          Créer Marchand
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => openDeleteDialog(user)} disabled={isProcessing}>
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Supprimer
+                        </Button>
+                      </div>
+                    ) : undefined}
+                  />
+                </AnimatedListItem>
               );
-            })
-          )}
-        </div>
+            })}
+          </AnimatedList>
+        )}
       </div>
 
       <UnifiedBottomNav items={adminNavItems} />

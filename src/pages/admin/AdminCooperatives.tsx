@@ -8,6 +8,8 @@ import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
+import { AnimatedList } from '@/components/shared/AnimatedList';
+import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 
 interface Cooperative {
   id: string;
@@ -144,32 +146,33 @@ const AdminCooperatives: React.FC = () => {
             variant="card"
           />
         ) : (
-          <div className="space-y-3">
+          <AnimatedList className="space-y-3">
             {filteredCooperatives.map((coop) => (
-              <UnifiedListCard
-                key={coop.id}
-                entityType="cooperative"
-                title={coop.name}
-                subtitle={coop.code}
-                avatar="🌾"
-                status={coop.igp_certified ? 'validated' : undefined}
-                statusLabel={coop.igp_certified ? 'IFN' : undefined}
-                metadata={[
-                  { 
-                    icon: MapPin, 
-                    text: `${coop.commune}, ${coop.region}` 
-                  },
-                  { 
-                    icon: Users, 
-                    text: `${coop.total_members} membres` 
-                  },
-                ]}
-                description={coop.igp_certified ? (
-                  "Certification IFN"
-                ) : undefined}
-              />
+              <AnimatedListItem key={coop.id}>
+                <UnifiedListCard
+                  entityType="cooperative"
+                  title={coop.name}
+                  subtitle={coop.code}
+                  avatar="🌾"
+                  status={coop.igp_certified ? 'validated' : undefined}
+                  statusLabel={coop.igp_certified ? 'IFN' : undefined}
+                  metadata={[
+                    { 
+                      icon: MapPin, 
+                      text: `${coop.commune}, ${coop.region}` 
+                    },
+                    { 
+                      icon: Users, 
+                      text: `${coop.total_members} membres` 
+                    },
+                  ]}
+                  description={coop.igp_certified ? (
+                    "Certification IFN"
+                  ) : undefined}
+                />
+              </AnimatedListItem>
             ))}
-          </div>
+          </AnimatedList>
         )}
       </div>
 
