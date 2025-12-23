@@ -20,7 +20,8 @@ import {
   Activity,
   BarChart3,
   FileText,
-  Mic
+  Mic,
+  Leaf
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -284,6 +285,12 @@ const AdminDashboard: React.FC = () => {
             description="Enregistrer"
             icon={Mic}
             onClick={() => navigate('/admin/studio')}
+          />
+          <InstitutionalActionCard
+            title="Vivriers"
+            description="Import coopératives"
+            icon={Leaf}
+            onClick={() => navigate('/admin/vivriers')}
           />
         </div>
       </div>
