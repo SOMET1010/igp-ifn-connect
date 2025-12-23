@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
+import { useMerchantNotifications } from "@/hooks/useMerchantNotifications";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Banknote, BarChart3, Home, User, Receipt, Package, History, CreditCard, ScanBarcode, Tag, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,9 @@ export default function MerchantDashboard() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
+  const { lowStockCount, outOfStockCount, overdueCreditsCount, pendingCreditsCount } = useMerchantNotifications();
+  
+  const stockAlertCount = lowStockCount + outOfStockCount;
 
   const navItems = useMemo(() => [
     { icon: Home, label: t("home"), path: '/marchand' },
@@ -162,6 +166,8 @@ export default function MerchantDashboard() {
                 description={t("manage_products")}
                 icon={Package}
                 onClick={() => navigate('/marchand/stock')}
+                badge={stockAlertCount}
+                badgeVariant={outOfStockCount > 0 ? 'destructive' : 'warning'}
               />
               <UnifiedActionCard
                 title={t("invoices") || "Factures"}
@@ -197,6 +203,8 @@ export default function MerchantDashboard() {
                   icon={CreditCard}
                   onClick={() => navigate('/marchand/credits')}
                   compact
+                  badge={pendingCreditsCount}
+                  badgeVariant={overdueCreditsCount > 0 ? 'destructive' : 'warning'}
                 />
                 <UnifiedActionCard
                   title={t("scanner") || "Scanner"}

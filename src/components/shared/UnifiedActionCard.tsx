@@ -10,6 +10,8 @@ interface UnifiedActionCardProps {
   onClick: () => void;
   variant?: 'default' | 'primary';
   compact?: boolean;
+  badge?: number;
+  badgeVariant?: 'default' | 'warning' | 'destructive';
   className?: string;
 }
 
@@ -20,6 +22,8 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
   onClick,
   variant = 'default',
   compact = false,
+  badge,
+  badgeVariant = 'default',
   className,
 }) => {
   const isPrimary = variant === 'primary';
@@ -34,14 +38,28 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
       onClick={onClick}
     >
       <CardContent className={cn('flex items-center gap-3', compact ? 'p-3' : 'p-4')}>
-        <div
-          className={cn(
-            'rounded-xl flex items-center justify-center shrink-0',
-            compact ? 'w-10 h-10' : 'w-12 h-12',
-            isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted'
+        <div className="relative">
+          <div
+            className={cn(
+              'rounded-xl flex items-center justify-center shrink-0',
+              compact ? 'w-10 h-10' : 'w-12 h-12',
+              isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted'
+            )}
+          >
+            <Icon className={cn(compact ? 'h-5 w-5' : 'h-6 w-6')} />
+          </div>
+          {badge !== undefined && badge > 0 && (
+            <span
+              className={cn(
+                'absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-xs font-bold px-1',
+                badgeVariant === 'destructive' && 'bg-destructive text-destructive-foreground',
+                badgeVariant === 'warning' && 'bg-orange-500 text-white',
+                badgeVariant === 'default' && 'bg-primary text-primary-foreground'
+              )}
+            >
+              {badge > 99 ? '99+' : badge}
+            </span>
           )}
-        >
-          <Icon className={cn(compact ? 'h-5 w-5' : 'h-6 w-6')} />
         </div>
         <div className="flex-1 min-w-0">
           <p className={cn('font-medium text-foreground truncate', compact && 'text-sm')}>{title}</p>
