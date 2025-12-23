@@ -232,11 +232,9 @@ export const logger = {
 
 export const authLogger = logger.withContext({ module: 'Auth' });
 export const merchantLogger = logger.withContext({ module: 'Merchant' });
-export const agentLogger = logger.withContext({ module: 'Agent' });
 export const coopLogger = logger.withContext({ module: 'Cooperative' });
 export const adminLogger = logger.withContext({ module: 'Admin' });
 export const syncLogger = logger.withContext({ module: 'Sync' });
-export const offlineLogger = logger.withContext({ module: 'Offline' });
 export const networkLogger = logger.withContext({ module: 'Network' });
 
 // ============================================
