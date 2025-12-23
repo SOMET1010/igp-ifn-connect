@@ -42,7 +42,7 @@ export default function MerchantDashboard() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
-  const { lowStockCount, outOfStockCount, overdueCreditsCount, pendingCreditsCount } = useMerchantNotifications();
+  const { lowStockCount, outOfStockCount, overdueCreditsCount, pendingCreditsCount, cancelledInvoicesCount } = useMerchantNotifications();
   
   const stockAlertCount = lowStockCount + outOfStockCount;
 
@@ -174,6 +174,8 @@ export default function MerchantDashboard() {
                 description={t("view_history")}
                 icon={Receipt}
                 onClick={() => navigate('/marchand/factures')}
+                badge={cancelledInvoicesCount}
+                badgeVariant="warning"
               />
               <UnifiedActionCard
                 title={t("my_profile")}
