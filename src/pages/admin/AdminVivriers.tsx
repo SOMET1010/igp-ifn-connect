@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Users, Building2, RefreshCw, FileText } from 'lucide-react';
+import { Upload, Users, Building2, RefreshCw, FileText, Wheat, MapPin, Phone, HeartPulse, Shield, ChevronDown, LayoutDashboard, BarChart3, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { LoadingState } from '@/components/shared/StateComponents';
+import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
-import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { PageHero } from '@/components/shared/PageHero';
+import { FilterChips } from '@/components/shared/FilterChips';
+import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
+import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 interface Cooperative {
   id: string;
   name: string;
@@ -42,6 +46,15 @@ interface ImportResult {
   errors: Array<{ row: number; error: string }>;
 }
 
+// Navigation items pour admin
+const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
+  { icon: Wheat, label: 'Vivriers', path: '/admin/vivriers' },
+  { icon: BarChart3, label: 'Rapports', path: '/admin/reports' },
+  { icon: Settings, label: 'Paramètres', path: '/admin/monitoring' },
+];
+
 const AdminVivriers: React.FC = () => {
   const navigate = useNavigate();
   const [cooperatives, setCooperatives] = useState<Cooperative[]>([]);
@@ -50,7 +63,8 @@ const AdminVivriers: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [importResults, setImportResults] = useState<ImportResult[] | null>(null);
-  const [selectedTab, setSelectedTab] = useState('cooperatives');
+  const [selectedView, setSelectedView] = useState('cooperatives');
+  const [importOpen, setImportOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -137,7 +151,6 @@ const AdminVivriers: React.FC = () => {
       toast.error(`Erreur lors de l'import: ${error}`);
     } finally {
       setIsImporting(false);
-      // Reset input
       event.target.value = '';
     }
   };
@@ -145,7 +158,6 @@ const AdminVivriers: React.FC = () => {
   const handleLinkMembers = async () => {
     setIsImporting(true);
     try {
-      // Manual linking - iterate through cooperatives and update members
       console.log('Linking members manually...');
       
       const { data: coops } = await supabase
@@ -185,231 +197,253 @@ const AdminVivriers: React.FC = () => {
     member.identifier_code?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const totalMembers = members.length;
-  const totalCoops = cooperatives.length;
+  const viewOptions = [
+    { value: 'cooperatives', label: `Coopératives (${filteredCooperatives.length})` },
+    { value: 'members', label: `Membres (${filteredMembers.length})` },
+  ];
 
   if (isLoading) {
     return <LoadingState message="Chargement des données vivriers..." />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       <UnifiedHeader
         title="Données Vivriers"
-        subtitle="Import et gestion des coopératives"
         showBack
         backTo="/admin"
       />
 
-      {/* Stats */}
-      <div className="p-4 grid grid-cols-2 gap-4 max-w-4xl mx-auto">
-        <UnifiedStatCard
-          title="Coopératives"
-          value={totalCoops}
-          icon={Building2}
-        />
-        <UnifiedStatCard
-          title="Membres"
-          value={totalMembers}
-          icon={Users}
-        />
-      </div>
+      {/* PageHero avec double compteur */}
+      <PageHero
+        icon={Wheat}
+        title="Données Vivriers"
+        subtitle="Import et gestion des coopératives agricoles"
+        variant="accent"
+      >
+        {/* Double compteur */}
+        <div className="flex items-center justify-center gap-6 mb-4">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-muted-foreground" />
+            <span className="text-2xl font-bold text-foreground">{cooperatives.length}</span>
+            <span className="text-sm text-muted-foreground">coopératives</span>
+          </div>
+          <div className="w-px h-8 bg-border" />
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            <span className="text-2xl font-bold text-foreground">{members.length}</span>
+            <span className="text-sm text-muted-foreground">membres</span>
+          </div>
+        </div>
 
-      {/* Import Section */}
-      <div className="p-4 max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Import CSV
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Coopératives (markets.csv)</label>
-                <Input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => handleFileUpload(e, 'cooperatives')}
-                  disabled={isImporting}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Membres (actors.csv)</label>
-                <Input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => handleFileUpload(e, 'members')}
-                  disabled={isImporting}
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button onClick={handleLinkMembers} disabled={isImporting} variant="outline">
-                <RefreshCw className={`h-4 w-4 mr-2 ${isImporting ? 'animate-spin' : ''}`} />
-                Lier membres aux coopératives
-              </Button>
-              <Button onClick={fetchData} disabled={isImporting} variant="outline">
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualiser
-              </Button>
-            </div>
+        {/* Recherche */}
+        <div className="relative mb-4">
+          <Input
+            placeholder="Rechercher par nom, coopérative ou code..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-background/90 border-0 pl-10"
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
 
-            {/* Import Results */}
-            {importResults && (
-              <div className="space-y-2 p-4 bg-muted rounded-lg">
-                <h4 className="font-medium flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Résultats de l'import
-                </h4>
-                {importResults.map((result, idx) => (
-                  <div key={idx} className="text-sm">
-                    <p className="font-medium">{result.table}</p>
-                    <div className="flex gap-4 text-muted-foreground">
-                      <span className="text-green-600">✓ {result.inserted} insérés</span>
-                      <span className="text-blue-600">↻ {result.updated} mis à jour</span>
-                      {result.rejected > 0 && (
-                        <span className="text-red-600">✗ {result.rejected} rejetés</span>
-                      )}
-                    </div>
-                    {result.errors.length > 0 && result.errors.length <= 5 && (
-                      <div className="mt-1 text-xs text-red-600">
-                        {result.errors.map((err, i) => (
-                          <p key={i}>Ligne {err.row}: {err.error}</p>
-                        ))}
-                      </div>
-                    )}
-                    {result.errors.length > 5 && (
-                      <p className="mt-1 text-xs text-red-600">
-                        + {result.errors.length - 5} autres erreurs...
-                      </p>
-                    )}
+        {/* FilterChips pour basculer entre vues */}
+        <FilterChips
+          options={viewOptions}
+          value={selectedView}
+          onChange={setSelectedView}
+        />
+      </PageHero>
+
+      {/* Section Import Collapsible */}
+      <div className="px-4 py-4 max-w-4xl mx-auto">
+        <Collapsible open={importOpen} onOpenChange={setImportOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Import CSV
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${importOpen ? 'rotate-180' : ''}`} />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <Card>
+              <CardContent className="p-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Coopératives (markets.csv)</label>
+                    <Input
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => handleFileUpload(e, 'cooperatives')}
+                      disabled={isImporting}
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Membres (actors.csv)</label>
+                    <Input
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => handleFileUpload(e, 'members')}
+                      disabled={isImporting}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleLinkMembers} disabled={isImporting} variant="outline" size="sm">
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isImporting ? 'animate-spin' : ''}`} />
+                    Lier membres
+                  </Button>
+                  <Button onClick={fetchData} disabled={isImporting} variant="outline" size="sm">
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                    Actualiser
+                  </Button>
+                </div>
 
-      {/* Search */}
-      <div className="px-4 max-w-4xl mx-auto">
-        <Input
-          placeholder="Rechercher par nom, coopérative ou numéro (ex: PACA-001)..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-4"
-        />
-      </div>
-
-      {/* Tabs */}
-      <div className="px-4 pb-8 max-w-4xl mx-auto">
-        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cooperatives">
-              Coopératives ({filteredCooperatives.length})
-            </TabsTrigger>
-            <TabsTrigger value="members">
-              Membres ({filteredMembers.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="cooperatives" className="space-y-3 mt-4">
-            {filteredCooperatives.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold text-lg">Aucune coopérative</h3>
-                <p className="text-sm text-muted-foreground">Importez un fichier CSV pour commencer</p>
-              </div>
-            ) : (
-              filteredCooperatives.map((coop) => (
-                <Card key={coop.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">{coop.name}</h3>
-                        {coop.code && (
-                          <p className="text-sm text-muted-foreground">{coop.code}</p>
+                {/* Import Results */}
+                {importResults && (
+                  <div className="space-y-2 p-4 bg-muted rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Résultats de l'import
+                    </h4>
+                    {importResults.map((result, idx) => (
+                      <div key={idx} className="text-sm">
+                        <p className="font-medium">{result.table}</p>
+                        <div className="flex gap-4 text-muted-foreground">
+                          <span className="text-green-600">✓ {result.inserted} insérés</span>
+                          <span className="text-blue-600">↻ {result.updated} mis à jour</span>
+                          {result.rejected > 0 && (
+                            <span className="text-red-600">✗ {result.rejected} rejetés</span>
+                          )}
+                        </div>
+                        {result.errors.length > 0 && result.errors.length <= 5 && (
+                          <div className="mt-1 text-xs text-red-600">
+                            {result.errors.map((err, i) => (
+                              <p key={i}>Ligne {err.row}: {err.error}</p>
+                            ))}
+                          </div>
                         )}
-                        {(coop.region || coop.commune) && (
-                          <p className="text-sm text-muted-foreground">
-                            {[coop.commune, coop.region].filter(Boolean).join(', ')}
+                        {result.errors.length > 5 && (
+                          <p className="mt-1 text-xs text-red-600">
+                            + {result.errors.length - 5} autres erreurs...
                           </p>
                         )}
                       </div>
-                      <div className="text-right">
-                        <Badge variant="secondary">{coop.effectif_total} membres</Badge>
-                        <div className="flex gap-2 mt-1">
-                          {coop.effectif_cmu > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              CMU: {coop.effectif_cmu}
-                            </Badge>
-                          )}
-                          {coop.effectif_cnps > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              CNPS: {coop.effectif_cnps}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="members" className="space-y-3 mt-4">
-            {filteredMembers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold text-lg">Aucun membre</h3>
-                <p className="text-sm text-muted-foreground">Importez un fichier CSV pour commencer</p>
-              </div>
-            ) : (
-              filteredMembers.slice(0, 100).map((member) => (
-                <Card key={member.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="secondary" className="font-mono text-xs bg-primary/10 text-primary">
-                            {member.actor_key}
-                          </Badge>
-                        </div>
-                        <h3 className="font-semibold">{member.full_name}</h3>
-                        <p className="text-sm text-muted-foreground">{member.cooperative_name}</p>
-                        {member.phone && (
-                          <p className="text-xs text-muted-foreground mt-1">{member.phone}</p>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        {member.cmu_status && (
-                          <Badge variant={member.cmu_status === 'oui' ? 'default' : 'outline'} className="text-xs">
-                            CMU
-                          </Badge>
-                        )}
-                        {member.cnps_status && (
-                          <Badge variant={member.cnps_status === 'oui' ? 'default' : 'outline'} className="text-xs">
-                            CNPS
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-            {filteredMembers.length > 100 && (
-              <p className="text-center text-sm text-muted-foreground py-4">
-                Affichage limité à 100 membres. Utilisez la recherche pour filtrer.
-              </p>
-            )}
-          </TabsContent>
-        </Tabs>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
+
+      {/* Liste des données */}
+      <div className="px-4 max-w-4xl mx-auto space-y-3">
+        {selectedView === 'cooperatives' ? (
+          <>
+            {filteredCooperatives.length === 0 ? (
+              <EmptyState
+                Icon={Building2}
+                title="Aucune coopérative"
+                message="Importez un fichier CSV pour commencer"
+              />
+            ) : (
+              filteredCooperatives.map((coop) => (
+                <UnifiedListCard
+                  key={coop.id}
+                  entityType="cooperative"
+                  title={coop.name}
+                  subtitle={coop.code || undefined}
+                  avatarFallback="🌾"
+                  status="active"
+                  statusLabel={`${coop.effectif_total} membres`}
+                  metadata={[
+                    ...(coop.commune || coop.region ? [{
+                      icon: MapPin,
+                      text: [coop.commune, coop.region].filter(Boolean).join(', ')
+                    }] : []),
+                    ...(coop.effectif_cmu > 0 ? [{
+                      icon: HeartPulse,
+                      text: `CMU: ${coop.effectif_cmu}`,
+                      className: 'text-green-600'
+                    }] : []),
+                    ...(coop.effectif_cnps > 0 ? [{
+                      icon: Shield,
+                      text: `CNPS: ${coop.effectif_cnps}`,
+                      className: 'text-blue-600'
+                    }] : []),
+                  ]}
+                />
+              ))
+            )}
+          </>
+        ) : (
+          <>
+            {filteredMembers.length === 0 ? (
+              <EmptyState
+                Icon={Users}
+                title="Aucun membre"
+                message="Importez un fichier CSV pour commencer"
+              />
+            ) : (
+              <>
+                {filteredMembers.slice(0, 100).map((member) => (
+                  <UnifiedListCard
+                    key={member.id}
+                    entityType="user"
+                    title={member.full_name}
+                    subtitle={`${member.actor_key} • ${member.cooperative_name}`}
+                    avatarFallback={member.full_name.slice(0, 2).toUpperCase()}
+                    status={member.cmu_status === 'oui' ? 'active' : undefined}
+                    statusLabel={member.cmu_status === 'oui' ? 'CMU' : undefined}
+                    metadata={[
+                      ...(member.phone ? [{
+                        icon: Phone,
+                        text: member.phone
+                      }] : []),
+                      ...(member.cnps_status === 'oui' ? [{
+                        icon: Shield,
+                        text: 'CNPS',
+                        className: 'text-blue-600'
+                      }] : []),
+                    ]}
+                    actions={
+                      <div className="flex gap-1">
+                        {member.cmu_status === 'oui' && (
+                          <Badge variant="default" className="text-xs">CMU</Badge>
+                        )}
+                        {member.cnps_status === 'oui' && (
+                          <Badge variant="secondary" className="text-xs">CNPS</Badge>
+                        )}
+                      </div>
+                    }
+                    showChevron={false}
+                  />
+                ))}
+                {filteredMembers.length > 100 && (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    Affichage limité à 100 membres. Utilisez la recherche pour filtrer.
+                  </p>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      <UnifiedBottomNav items={adminNavItems} />
     </div>
   );
 };
