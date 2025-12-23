@@ -1,22 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
-  ArrowLeft,
   Search,
   Check,
   X,
   Pause,
   Loader2,
   Phone,
-  MapPin
+  MapPin,
+  Store,
+  Calendar
 } from 'lucide-react';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
+import { PageHero } from '@/components/shared/PageHero';
+import { FilterChips } from '@/components/shared/FilterChips';
+import { adminNavItems } from '@/config/navigation';
+import type { StatusType } from '@/components/shared/StatusBadge';
 
 interface Merchant {
   id: string;
@@ -29,11 +34,11 @@ interface Merchant {
   market_name?: string;
 }
 
-const statusLabels = {
-  pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
-  validated: { label: 'Validé', color: 'bg-green-100 text-green-800' },
-  rejected: { label: 'Rejeté', color: 'bg-red-100 text-red-800' },
-  suspended: { label: 'Suspendu', color: 'bg-gray-100 text-gray-800' },
+const statusToStatusType: Record<string, StatusType> = {
+  pending: 'pending',
+  validated: 'validated',
+  rejected: 'rejected',
+  suspended: 'suspended',
 };
 
 const AdminMerchants: React.FC = () => {
@@ -67,7 +72,6 @@ const AdminMerchants: React.FC = () => {
     const { data } = await query;
 
     if (data) {
-      // Fetch market names
       const marketIds = data.filter(m => m.market_id).map(m => m.market_id);
       const { data: markets } = await supabase
         .from('markets')
@@ -106,7 +110,7 @@ const AdminMerchants: React.FC = () => {
     if (error) {
       toast.error('Erreur lors de la mise à jour');
     } else {
-      toast.success(`Marchand ${statusLabels[newStatus].label.toLowerCase()}`);
+      toast.success(`Marchand ${newStatus === 'validated' ? 'validé' : newStatus === 'rejected' ? 'rejeté' : 'suspendu'}`);
       await fetchMerchants();
     }
 
@@ -119,96 +123,108 @@ const AdminMerchants: React.FC = () => {
     m.cmu_number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Compteurs par statut
+  const countByStatus = {
+    all: merchants.length,
+    pending: merchants.filter(m => m.status === 'pending').length,
+    validated: merchants.filter(m => m.status === 'validated').length,
+    rejected: merchants.filter(m => m.status === 'rejected').length,
+    suspended: merchants.filter(m => m.status === 'suspended').length,
+  };
+
+  const filterOptions = [
+    { value: 'all', label: 'Tous', count: countByStatus.all },
+    { value: 'pending', label: 'En attente', count: countByStatus.pending },
+    { value: 'validated', label: 'Validés', count: countByStatus.validated },
+    { value: 'rejected', label: 'Rejetés', count: countByStatus.rejected },
+    { value: 'suspended', label: 'Suspendus', count: countByStatus.suspended },
+  ];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-violet-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/admin')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Marchands</h1>
-            <p className="text-sm text-white/80">{merchants.length} marchand(s)</p>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background pb-20">
+      <UnifiedHeader
+        title="Marchands"
+        showBack
+        backTo="/admin"
+      />
 
-      <div className="p-4 space-y-4">
-        {/* Filters */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-              <SelectItem value="validated">Validés</SelectItem>
-              <SelectItem value="rejected">Rejetés</SelectItem>
-              <SelectItem value="suspended">Suspendus</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Hero avec compteur et filtres */}
+      <PageHero
+        title="Gestion des marchands"
+        subtitle="Validez et gérez les inscriptions"
+        count={filteredMerchants.length}
+        countLabel="marchand(s)"
+        icon={Store}
+        variant="secondary"
+      >
+        {/* Filtres en chips */}
+        <FilterChips
+          options={filterOptions}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
+      </PageHero>
 
-        {/* Merchants list */}
+      {/* Barre de recherche */}
+      <div className="p-4 sticky top-[73px] bg-background z-10 border-b border-border">
+        <div className="relative max-w-lg mx-auto">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher par nom, téléphone, CMU..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12"
+          />
+        </div>
+      </div>
+
+      {/* Liste des marchands */}
+      <div className="p-4 space-y-3 max-w-lg mx-auto">
         {filteredMerchants.length === 0 ? (
-          <Card className="p-8 text-center">
+          <div className="text-center py-12">
+            <Store className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">Aucun marchand trouvé</p>
-          </Card>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {filteredMerchants.map((merchant) => (
-              <Card key={merchant.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{merchant.full_name}</h3>
-                      <p className="text-sm text-muted-foreground">{merchant.activity_type}</p>
-                    </div>
-                    <Badge className={statusLabels[merchant.status].color}>
-                      {statusLabels[merchant.status].label}
-                    </Badge>
-                  </div>
-                  
-                  <div className="space-y-1 text-sm text-muted-foreground mb-3">
-                    <p className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      +225 {merchant.phone}
-                    </p>
-                    {merchant.market_name && (
-                      <p className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        {merchant.market_name}
-                      </p>
-                    )}
-                    <p className="text-xs">CMU: {merchant.cmu_number}</p>
-                  </div>
-
+          filteredMerchants.map((merchant) => (
+            <UnifiedListCard
+              key={merchant.id}
+              title={merchant.full_name}
+              subtitle={merchant.activity_type}
+              avatarFallback={merchant.full_name}
+              entityType="merchant"
+              status={statusToStatusType[merchant.status]}
+              showChevron={false}
+              metadata={[
+                { icon: Phone, text: `+225 ${merchant.phone}` },
+                ...(merchant.market_name ? [{ icon: MapPin, text: merchant.market_name }] : []),
+                { icon: Calendar, text: formatDate(merchant.enrolled_at) },
+              ]}
+              actions={
+                <>
                   {merchant.status === 'pending' && (
                     <div className="flex gap-2">
                       <Button
                         size="sm"
                         onClick={() => updateStatus(merchant.id, 'validated')}
                         disabled={updatingId === merchant.id}
-                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        className="flex-1 bg-secondary hover:bg-secondary/90"
                       >
                         {updatingId === merchant.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -224,7 +240,7 @@ const AdminMerchants: React.FC = () => {
                         variant="outline"
                         onClick={() => updateStatus(merchant.id, 'rejected')}
                         disabled={updatingId === merchant.id}
-                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        className="border-destructive/50 text-destructive hover:bg-destructive/10"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -237,7 +253,7 @@ const AdminMerchants: React.FC = () => {
                       variant="outline"
                       onClick={() => updateStatus(merchant.id, 'suspended')}
                       disabled={updatingId === merchant.id}
-                      className="w-full border-gray-300 text-gray-600 hover:bg-gray-50"
+                      className="w-full"
                     >
                       <Pause className="h-4 w-4 mr-1" />
                       Suspendre
@@ -245,14 +261,16 @@ const AdminMerchants: React.FC = () => {
                   )}
 
                   <p className="text-xs text-muted-foreground mt-2">
-                    Inscrit le {new Date(merchant.enrolled_at).toLocaleDateString('fr-FR')}
+                    CMU: {merchant.cmu_number}
                   </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </>
+              }
+            />
+          ))
         )}
       </div>
+
+      <UnifiedBottomNav items={adminNavItems} />
     </div>
   );
 };
