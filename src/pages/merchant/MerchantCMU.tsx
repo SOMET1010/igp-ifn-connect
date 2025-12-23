@@ -79,7 +79,7 @@ export default function MerchantCMU() {
     : false;
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-24">
       <UnifiedHeader
         title="Protection CMU"
         subtitle="Couverture Maladie Universelle"
