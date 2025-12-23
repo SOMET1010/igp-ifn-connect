@@ -7,6 +7,7 @@ export interface CooperativeStockItem {
   quantity: number;
   unit_price: number | null;
   harvest_date: string | null;
+  expiry_date: string | null;
   product: {
     id: string;
     name: string;
@@ -33,7 +34,7 @@ export function useCooperativeStock(userId: string | undefined) {
   const fetchStocks = useCallback(async (coopId: string) => {
     const { data: stocksData } = await supabase
       .from('stocks')
-      .select('id, quantity, unit_price, harvest_date, product_id')
+      .select('id, quantity, unit_price, harvest_date, expiry_date, product_id')
       .eq('cooperative_id', coopId);
 
     if (stocksData) {

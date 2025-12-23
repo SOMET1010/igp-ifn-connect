@@ -1,8 +1,10 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, AlertTriangle, XCircle, Clock } from 'lucide-react';
+import { Package, AlertTriangle, XCircle, Clock, Calendar } from 'lucide-react';
 import { CooperativeStockItem, getStockStatus, StockStatus } from './types';
+import { format, parseISO, isPast, differenceInDays } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface StockCardProps {
   stock: CooperativeStockItem;
@@ -29,6 +31,13 @@ const statusConfig: Record<StockStatus, { label: string; className: string; icon
     className: 'bg-secondary text-secondary-foreground',
     icon: null
   }
+};
+
+const getExpiryDateStyle = (expiryDate: string): string => {
+  const date = parseISO(expiryDate);
+  if (isPast(date)) return 'text-destructive';
+  if (differenceInDays(date, new Date()) <= 7) return 'text-amber-500';
+  return 'text-muted-foreground';
 };
 
 export const StockCard: React.FC<StockCardProps> = ({ stock }) => {
@@ -58,6 +67,12 @@ export const StockCard: React.FC<StockCardProps> = ({ stock }) => {
               {stock.quantity} {stock.product.unit}
               {stock.unit_price && ` • ${stock.unit_price.toLocaleString()} FCFA/${stock.product.unit}`}
             </p>
+            {stock.expiry_date && (
+              <p className={`text-xs flex items-center gap-1 mt-0.5 ${getExpiryDateStyle(stock.expiry_date)}`}>
+                <Calendar className="w-3 h-3" />
+                Expire le {format(parseISO(stock.expiry_date), 'd MMM yyyy', { locale: fr })}
+              </p>
+            )}
           </div>
         </div>
         <Badge className={`${config.className} flex items-center gap-1`}>
