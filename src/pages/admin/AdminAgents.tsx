@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  ArrowLeft,
-  Search,
-  Loader2,
-  MapPin,
-  Users
-} from 'lucide-react';
+import { UserCog, MapPin, Users, Building2 } from 'lucide-react';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { PageHero } from '@/components/shared/PageHero';
+import { FilterChips } from '@/components/shared/FilterChips';
+import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
+import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
+import { LayoutDashboard, Store, Wheat } from 'lucide-react';
 
 interface Agent {
   id: string;
@@ -23,12 +21,22 @@ interface Agent {
   full_name?: string;
 }
 
+const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Tableau', path: '/admin' },
+  { icon: Store, label: 'Marchands', path: '/admin/marchands' },
+  { icon: UserCog, label: 'Agents', path: '/admin/agents' },
+  { icon: Wheat, label: 'Coopératives', path: '/admin/cooperatives' },
+  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
+];
+
 const AdminAgents: React.FC = () => {
   const navigate = useNavigate();
   
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [orgFilter, setOrgFilter] = useState('all');
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -38,7 +46,6 @@ const AdminAgents: React.FC = () => {
         .order('total_enrollments', { ascending: false });
 
       if (agentsData) {
-        // Fetch profile names
         const userIds = agentsData.map(a => a.user_id);
         const { data: profiles } = await supabase
           .from('profiles')
@@ -59,97 +66,126 @@ const AdminAgents: React.FC = () => {
     fetchAgents();
   }, []);
 
-  const filteredAgents = agents.filter(a =>
-    a.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.zone?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Get unique organizations for filter
+  const organizations = [...new Set(agents.map(a => a.organization))];
+
+  const filteredAgents = agents.filter(a => {
+    const matchesSearch = 
+      a.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.zone?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'active' && a.is_active) || 
+      (statusFilter === 'inactive' && !a.is_active);
+    
+    const matchesOrg = orgFilter === 'all' || a.organization === orgFilter;
+    
+    return matchesSearch && matchesStatus && matchesOrg;
+  });
+
+  const statusFilterOptions = [
+    { value: 'all', label: 'Tous', count: agents.length },
+    { value: 'active', label: 'Actifs', count: agents.filter(a => a.is_active).length },
+    { value: 'inactive', label: 'Inactifs', count: agents.filter(a => !a.is_active).length },
+  ];
+
+  const orgFilterOptions = [
+    { value: 'all', label: 'Toutes orgs' },
+    ...organizations.map(org => ({ value: org, label: org }))
+  ];
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-violet-600" />
+        <LoadingState message="Chargement des agents..." />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/admin')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Agents</h1>
-            <p className="text-sm text-white/80">{agents.length} agent(s)</p>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background pb-20">
+      <UnifiedHeader
+        title="Agents"
+        showBack
+        backTo="/admin"
+      />
 
-      <div className="p-4 space-y-4">
-        {/* Search */}
+      <PageHero
+        title="Agents de terrain"
+        subtitle="Gérez vos agents d'enrôlement"
+        count={agents.length}
+        countLabel="agents"
+        icon={UserCog}
+        variant="primary"
+      >
+        <FilterChips
+          options={statusFilterOptions}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
+        {organizations.length > 1 && (
+          <div className="mt-2">
+            <FilterChips
+              options={orgFilterOptions}
+              value={orgFilter}
+              onChange={setOrgFilter}
+            />
+          </div>
+        )}
+      </PageHero>
+
+      <div className="p-4 space-y-3">
+        {/* Search integrated */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
+          <input
+            type="text"
             placeholder="Rechercher un agent..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
         {/* Agents list */}
         {filteredAgents.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Aucun agent trouvé</p>
-          </Card>
+          <EmptyState
+            Icon={UserCog}
+            title="Aucun agent trouvé"
+            message={searchQuery ? 'Essayez avec d\'autres termes de recherche' : undefined}
+            variant="card"
+          />
         ) : (
           <div className="space-y-3">
             {filteredAgents.map((agent) => (
-              <Card key={agent.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-xl">👤</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{agent.full_name}</h3>
-                        <p className="text-sm text-muted-foreground">{agent.organization}</p>
-                      </div>
-                    </div>
-                    <Badge className={agent.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                      {agent.is_active ? 'Actif' : 'Inactif'}
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                        {agent.employee_id}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground justify-end">
-                      <Users className="h-4 w-4" />
-                      <span className="font-semibold text-foreground">{agent.total_enrollments}</span>
-                      <span>enrôlements</span>
-                    </div>
-                  </div>
-
-                  {agent.zone && (
-                    <p className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                      <MapPin className="h-4 w-4" />
-                      Zone: {agent.zone}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              <UnifiedListCard
+                key={agent.id}
+                entityType="agent"
+                title={agent.full_name || 'Agent'}
+                subtitle={agent.organization}
+                avatar={agent.full_name?.charAt(0).toUpperCase()}
+                status={agent.is_active ? 'active' : 'inactive'}
+                metadata={[
+                  { 
+                    icon: Building2, 
+                    text: agent.employee_id 
+                  },
+                  { 
+                    icon: Users, 
+                    text: `${agent.total_enrollments} enrôlements` 
+                  },
+                  ...(agent.zone ? [{ 
+                    icon: MapPin, 
+                    text: agent.zone 
+                  }] : [])
+                ]}
+              />
             ))}
           </div>
         )}
       </div>
+
+      <UnifiedBottomNav items={adminNavItems} />
     </div>
   );
 };

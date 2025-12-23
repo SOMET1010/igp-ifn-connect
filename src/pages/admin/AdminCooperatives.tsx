@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  ArrowLeft,
-  Search,
-  MapPin,
-  Users,
-  Award,
-  Building2
-} from 'lucide-react';
-import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
+import { Wheat, MapPin, Users, Award, UserCog, Store, LayoutDashboard } from 'lucide-react';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { PageHero } from '@/components/shared/PageHero';
+import { FilterChips } from '@/components/shared/FilterChips';
+import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
+import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 
 interface Cooperative {
   id: string;
@@ -20,9 +15,17 @@ interface Cooperative {
   code: string;
   region: string;
   commune: string;
-  ifn_certified?: boolean;
+  igp_certified?: boolean;
   total_members: number;
 }
+
+const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Tableau', path: '/admin' },
+  { icon: Store, label: 'Marchands', path: '/admin/marchands' },
+  { icon: UserCog, label: 'Agents', path: '/admin/agents' },
+  { icon: Wheat, label: 'Coopératives', path: '/admin/cooperatives' },
+  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
+];
 
 const AdminCooperatives: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +33,8 @@ const AdminCooperatives: React.FC = () => {
   const [cooperatives, setCooperatives] = useState<Cooperative[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [certificationFilter, setCertificationFilter] = useState('all');
+  const [regionFilter, setRegionFilter] = useState('all');
 
   useEffect(() => {
     const fetchCooperatives = async () => {
@@ -48,12 +53,35 @@ const AdminCooperatives: React.FC = () => {
     fetchCooperatives();
   }, []);
 
-  const filteredCooperatives = cooperatives.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.commune.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Get unique regions for filter
+  const regions = [...new Set(cooperatives.map(c => c.region))];
+
+  const filteredCooperatives = cooperatives.filter(c => {
+    const matchesSearch = 
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.commune.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCertification = certificationFilter === 'all' || 
+      (certificationFilter === 'certified' && c.igp_certified) || 
+      (certificationFilter === 'not_certified' && !c.igp_certified);
+    
+    const matchesRegion = regionFilter === 'all' || c.region === regionFilter;
+    
+    return matchesSearch && matchesCertification && matchesRegion;
+  });
+
+  const certificationOptions = [
+    { value: 'all', label: 'Toutes', count: cooperatives.length },
+    { value: 'certified', label: 'Certifiées IFN', count: cooperatives.filter(c => c.igp_certified).length },
+    { value: 'not_certified', label: 'Non certifiées', count: cooperatives.filter(c => !c.igp_certified).length },
+  ];
+
+  const regionOptions = [
+    { value: 'all', label: 'Toutes régions' },
+    ...regions.map(region => ({ value: region, label: region }))
+  ];
 
   if (isLoading) {
     return (
@@ -64,36 +92,53 @@ const AdminCooperatives: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/admin')} className="p-2 -ml-2 rounded-full hover:bg-white/10">
-            <ArrowLeft className="h-6 w-6" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold">Coopératives</h1>
-            <p className="text-sm text-white/80">{cooperatives.length} coopérative(s)</p>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background pb-20">
+      <UnifiedHeader
+        title="Coopératives"
+        showBack
+        backTo="/admin"
+      />
 
-      <div className="p-4 space-y-4">
+      <PageHero
+        title="Coopératives agricoles"
+        subtitle="Réseau de coopératives partenaires"
+        count={cooperatives.length}
+        countLabel="coopératives"
+        icon={Wheat}
+        variant="accent"
+      >
+        <FilterChips
+          options={certificationOptions}
+          value={certificationFilter}
+          onChange={setCertificationFilter}
+        />
+        {regions.length > 1 && (
+          <div className="mt-2">
+            <FilterChips
+              options={regionOptions}
+              value={regionFilter}
+              onChange={setRegionFilter}
+            />
+          </div>
+        )}
+      </PageHero>
+
+      <div className="p-4 space-y-3">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
+          <input
+            type="text"
             placeholder="Rechercher une coopérative..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="w-full px-4 py-3 bg-card border border-border rounded-xl text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
 
         {/* Cooperatives list */}
         {filteredCooperatives.length === 0 ? (
           <EmptyState
-            Icon={Building2}
+            Icon={Wheat}
             title="Aucune coopérative trouvée"
             message={searchQuery ? 'Essayez avec d\'autres termes de recherche' : undefined}
             variant="card"
@@ -101,42 +146,34 @@ const AdminCooperatives: React.FC = () => {
         ) : (
           <div className="space-y-3">
             {filteredCooperatives.map((coop) => (
-              <Card key={coop.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                        <span className="text-xl">🌾</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{coop.name}</h3>
-                        <p className="text-sm text-muted-foreground font-mono">{coop.code}</p>
-                      </div>
-                    </div>
-                    {coop.ifn_certified && (
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        <Award className="w-3 h-3 mr-1" />
-                        IFN
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      {coop.commune}, {coop.region}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      {coop.total_members} membre(s)
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <UnifiedListCard
+                key={coop.id}
+                entityType="cooperative"
+                title={coop.name}
+                subtitle={coop.code}
+                avatar="🌾"
+                status={coop.igp_certified ? 'validated' : undefined}
+                statusLabel={coop.igp_certified ? 'IFN' : undefined}
+                metadata={[
+                  { 
+                    icon: MapPin, 
+                    text: `${coop.commune}, ${coop.region}` 
+                  },
+                  { 
+                    icon: Users, 
+                    text: `${coop.total_members} membres` 
+                  },
+                ]}
+                description={coop.igp_certified ? (
+                  "Certification IFN"
+                ) : undefined}
+              />
             ))}
           </div>
         )}
       </div>
+
+      <UnifiedBottomNav items={adminNavItems} />
     </div>
   );
 };
