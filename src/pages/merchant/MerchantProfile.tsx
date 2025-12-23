@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Volume2, VolumeX, Loader2, Bell, User, Home, Package, Wallet } from "lucide-react";
+import { LogOut, Volume2, VolumeX, Loader2, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -11,16 +11,10 @@ import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { merchantLogger } from "@/infra/logger";
-import { SecondaryPageHeader } from "@/components/shared/SecondaryPageHeader";
-import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import type { MerchantProfileViewData } from "@/shared/types";
-
-const merchantNavItems = [
-  { icon: Home, label: "Accueil", path: "/marchand" },
-  { icon: Package, label: "Stock", path: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", path: "/marchand/encaisser" },
-  { icon: User, label: "Profil", path: "/marchand/profil" },
-];
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
@@ -89,9 +83,10 @@ export default function MerchantProfile() {
         />
       )}
 
-      <SecondaryPageHeader
+      <UnifiedHeader
         title={t("my_profile")}
-        onBack={() => navigate("/marchand")}
+        showBack
+        backTo="/marchand"
       />
 
       <main className="p-4 space-y-6 max-w-lg mx-auto">
@@ -200,7 +195,7 @@ export default function MerchantProfile() {
         </p>
       </main>
 
-      <InstitutionalBottomNav items={merchantNavItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { LogOut, User, Phone, Briefcase, MapPin, Loader2, Home, Users } from 'lucide-react';
+import { LogOut, User, Phone, Briefcase, MapPin, Loader2 } from 'lucide-react';
 import { NotificationToggle } from '@/components/shared/NotificationToggle';
-import { SecondaryPageHeader } from '@/components/shared/SecondaryPageHeader';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { ProfileInfoCard } from '@/components/shared/ProfileInfoCard';
-import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
 import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
+import { agentNavItems } from '@/config/navigation';
 
 interface AgentProfileData {
   full_name: string;
@@ -19,12 +20,6 @@ interface AgentProfileData {
   zone: string | null;
   total_enrollments: number | null;
 }
-
-const agentNavItems = [
-  { icon: Home, label: 'Accueil', path: '/agent' },
-  { icon: Users, label: 'Marchands', path: '/agent/marchands' },
-  { icon: User, label: 'Profil', path: '/agent/profil' },
-];
 
 const AgentProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -80,9 +75,10 @@ const AgentProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SecondaryPageHeader
+      <UnifiedHeader
         title="Mon Profil"
-        onBack={() => navigate('/agent')}
+        showBack
+        backTo="/agent"
       />
 
       <div className="p-4 space-y-6 max-w-lg mx-auto">
@@ -145,7 +141,7 @@ const AgentProfile: React.FC = () => {
         </Button>
       </div>
 
-      <InstitutionalBottomNav items={agentNavItems} />
+      <UnifiedBottomNav items={agentNavItems} />
     </div>
   );
 };

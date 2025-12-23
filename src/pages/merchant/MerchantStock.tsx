@@ -7,15 +7,13 @@ import {
   Search,
   RefreshCw,
   Bell,
-  Home,
-  Wallet,
-  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { SecondaryPageHeader } from "@/components/shared/SecondaryPageHeader";
-import { InstitutionalBottomNav } from "@/components/shared/InstitutionalBottomNav";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import { useMerchantStock } from "@/hooks/useMerchantStock";
 import {
   StockCard,
@@ -26,13 +24,6 @@ import {
   getStockStatus,
 } from "@/components/merchant/stock";
 import type { StockItem } from "@/components/merchant/stock";
-
-const merchantNavItems = [
-  { icon: Home, label: "Accueil", path: "/marchand" },
-  { icon: Package, label: "Stock", path: "/marchand/stock" },
-  { icon: Wallet, label: "Encaisser", path: "/marchand/encaisser" },
-  { icon: User, label: "Profil", path: "/marchand/profil" },
-];
 
 export default function MerchantStock() {
   const navigate = useNavigate();
@@ -104,10 +95,11 @@ export default function MerchantStock() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <SecondaryPageHeader
+      <UnifiedHeader
         title="Mon Stock"
         subtitle={`${stocks.length} produit${stocks.length !== 1 ? "s" : ""}${alertCount > 0 ? ` • ${alertCount} alerte${alertCount !== 1 ? "s" : ""}` : ""}`}
-        onBack={() => navigate("/marchand")}
+        showBack
+        backTo="/marchand"
         rightContent={
           <Button
             variant="ghost"
@@ -216,7 +208,7 @@ export default function MerchantStock() {
         onUpdate={handleUpdate}
       />
 
-      <InstitutionalBottomNav items={merchantNavItems} />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }
