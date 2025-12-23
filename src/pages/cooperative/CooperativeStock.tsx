@@ -8,6 +8,9 @@ import {
   Loader2,
   Search,
   Bell,
+  AlertTriangle,
+  XCircle,
+  Clock,
 } from 'lucide-react';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
@@ -16,10 +19,12 @@ import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock } from '@/hooks/useCooperativeStock';
 import { useCooperativeNotifications } from '@/hooks/useCooperativeNotifications';
 import { StockCard, LowStockAlert, AddStockDialog } from '@/components/cooperative/stock';
+import { getStockStatus, StockStatus } from '@/components/cooperative/stock/types';
 
 const CooperativeStock: React.FC = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StockStatus | 'all'>('all');
 
   const {
     stocks,
@@ -39,9 +44,12 @@ const CooperativeStock: React.FC = () => {
     totalAlerts 
   } = useCooperativeNotifications();
 
-  const filteredStocks = stocks.filter(stock =>
-    stock.product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredStocks = stocks.filter(stock => {
+    const matchesSearch = stock.product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (statusFilter === 'all') return matchesSearch;
+    const status = getStockStatus(stock.quantity, stock.expiry_date);
+    return matchesSearch && status === statusFilter;
+  });
 
   // Build subtitle with alerts info
   const alertsText = totalAlerts > 0 ? ` • ${totalAlerts} alerte${totalAlerts > 1 ? 's' : ''}` : '';
@@ -84,6 +92,45 @@ const CooperativeStock: React.FC = () => {
           />
         </div>
 
+        {/* Status Filter Buttons */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+          <Button
+            variant={statusFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('all')}
+            className="shrink-0"
+          >
+            Tous ({stocks.length})
+          </Button>
+          <Button
+            variant={statusFilter === 'out' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('out')}
+            className={`shrink-0 ${outOfStockCount > 0 ? 'border-destructive text-destructive hover:text-destructive' : ''}`}
+          >
+            <XCircle className="w-4 h-4 mr-1" />
+            Rupture ({outOfStockCount})
+          </Button>
+          <Button
+            variant={statusFilter === 'low' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('low')}
+            className={`shrink-0 ${lowStockCount > 0 ? 'border-amber-500 text-amber-500 hover:text-amber-500' : ''}`}
+          >
+            <AlertTriangle className="w-4 h-4 mr-1" />
+            Stock bas ({lowStockCount})
+          </Button>
+          <Button
+            variant={statusFilter === 'expiring' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setStatusFilter('expiring')}
+            className={`shrink-0 ${expiringStockCount > 0 ? 'border-orange-500 text-orange-500 hover:text-orange-500' : ''}`}
+          >
+            <Clock className="w-4 h-4 mr-1" />
+            Expire ({expiringStockCount})
+          </Button>
+        </div>
+
         {/* Low Stock Alert */}
         <LowStockAlert items={lowStockItems} />
 
@@ -113,9 +160,15 @@ const CooperativeStock: React.FC = () => {
           <Card className="bg-muted/30">
             <CardContent className="p-8 text-center">
               <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Aucun stock</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                {statusFilter === 'all' ? 'Aucun stock' : 'Aucun produit'}
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Ajoutez vos premiers produits en stock
+                {statusFilter === 'out' && 'Aucun produit en rupture de stock'}
+                {statusFilter === 'low' && 'Aucun produit en stock bas'}
+                {statusFilter === 'expiring' && 'Aucun produit expirant bientôt'}
+                {statusFilter === 'ok' && 'Aucun produit avec un stock normal'}
+                {statusFilter === 'all' && 'Ajoutez vos premiers produits en stock'}
               </p>
             </CardContent>
           </Card>
