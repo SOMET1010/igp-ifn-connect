@@ -1,17 +1,23 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
   ArrowLeft, User, Phone, Calendar, Shield, UserCog, 
-  Store, Building2, MapPin, Briefcase, CheckCircle, Clock,
-  Banknote, FileText, Users, RefreshCw
+  Store, Building2, MapPin, CheckCircle, Clock,
+  Banknote, FileText, Users, RefreshCw, Pencil, Save, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ActivityTimeline } from '@/components/admin/ActivityTimeline';
 import { useAdminUserDetail } from '@/hooks/useAdminUserDetail';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const roleConfig: Record<string, { label: string; color: string }> = {
   admin: { label: 'Admin', color: 'bg-red-500' },
@@ -25,6 +31,49 @@ const AdminUserDetail = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { data, isLoading, error, refetch } = useAdminUserDetail(userId);
+  
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const openEditDialog = () => {
+    if (data.profile) {
+      setEditFullName(data.profile.fullName);
+      setEditPhone(data.profile.phone || '');
+      setEditDialogOpen(true);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editFullName.trim()) {
+      toast.error('Le nom est obligatoire');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editFullName.trim(),
+          phone: editPhone.trim() || null,
+        })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast.success('Profil mis à jour');
+      setEditDialogOpen(false);
+      refetch();
+    } catch (err) {
+      toast.error('Erreur lors de la mise à jour');
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -71,10 +120,16 @@ const AdminUserDetail = () => {
               <p className="text-xs text-muted-foreground">Détails utilisateur</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={refetch}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={openEditDialog}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Modifier
+            </Button>
+            <Button variant="outline" size="sm" onClick={refetch}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualiser
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -281,6 +336,56 @@ const AdminUserDetail = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Modifier le profil</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Nom complet *</Label>
+              <Input
+                id="fullName"
+                value={editFullName}
+                onChange={(e) => setEditFullName(e.target.value)}
+                placeholder="Entrez le nom complet"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phone">Téléphone</Label>
+              <Input
+                id="phone"
+                value={editPhone}
+                onChange={(e) => setEditPhone(e.target.value)}
+                placeholder="Ex: 0701234567"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Enregistrer
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
