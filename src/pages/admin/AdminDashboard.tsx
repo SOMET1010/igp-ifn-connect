@@ -15,6 +15,7 @@ import {
   Wheat, 
   Map as MapIcon, 
   Home,
+  UserCog,
   TrendingUp,
   DollarSign,
   Activity,
@@ -186,6 +187,12 @@ const AdminDashboard: React.FC = () => {
           Outils avancés
         </h3>
         <div className="grid grid-cols-2 gap-3">
+          <UnifiedActionCard
+            title="Utilisateurs"
+            description="Rôles et liaisons"
+            icon={UserCog}
+            onClick={() => navigate('/admin/utilisateurs')}
+          />
           <UnifiedActionCard
             title="Monitoring"
             description="Surveillance"
