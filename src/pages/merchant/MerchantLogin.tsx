@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/li
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
+import { useRetryOperation } from "@/hooks/useRetryOperation";
+import { authLogger } from "@/infra/logger";
 
 type Step = "phone" | "otp" | "register";
 
@@ -32,6 +34,18 @@ export default function MerchantLogin() {
   const [fullName, setFullName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+
+  // Hook de retry pour les opérations réseau
+  const { execute: executeWithRetry, state: retryState } = useRetryOperation({
+    maxRetries: 3,
+    baseDelay: 1500,
+    onRetry: (attempt) => {
+      toast.info(`Nouvelle tentative de connexion (${attempt}/3)...`);
+    },
+    onExhausted: () => {
+      toast.error("Échec après plusieurs tentatives. Vérifiez votre connexion.");
+    },
+  });
 
   const email = `${phone.replace(/\s/g, "")}@marchand.igp.ci`;
 
@@ -79,20 +93,24 @@ export default function MerchantLogin() {
       return;
     }
 
-    const { error: signInError } = await signIn(email, "marchand123");
-    
-    if (signInError) {
-      const { error: signUpError } = await signUp(email, "marchand123", fullName);
-      if (signUpError) {
-        toast.error("Erreur de connexion");
-        setIsLoading(false);
-        return;
+    const result = await executeWithRetry(async () => {
+      const { error: signInError } = await signIn(email, "marchand123");
+      
+      if (signInError) {
+        const { error: signUpError } = await signUp(email, "marchand123", fullName);
+        if (signUpError) {
+          throw signUpError;
+        }
       }
-    }
+      return true;
+    });
 
-    toast.success("Connexion réussie");
     setIsLoading(false);
-    navigate("/marchand");
+
+    if (result) {
+      toast.success("Connexion réussie");
+      navigate("/marchand");
+    }
   };
 
   const handleRegisterSubmit = async () => {
@@ -104,52 +122,55 @@ export default function MerchantLogin() {
 
     setIsLoading(true);
 
-    const { error: signUpError, data } = await supabase.auth.signUp({
-      email,
-      password: "marchand123",
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: { full_name: fullName }
+    const result = await executeWithRetry(async () => {
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password: "marchand123",
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName }
+        }
+      });
+      
+      if (signUpError || !data.user) {
+        throw signUpError || new Error("Échec inscription");
       }
-    });
-    
-    if (signUpError || !data.user) {
-      toast.error("Erreur lors de l'inscription");
-      setIsLoading(false);
-      return;
-    }
 
-    const userId = data.user.id;
-    const cleanPhone = phone.replace(/\s/g, "");
+      const userId = data.user.id;
+      const cleanPhone = phone.replace(/\s/g, "");
 
-    const { error: merchantError } = await supabase.from("merchants").insert({
-      user_id: userId,
-      full_name: fullName,
-      phone: cleanPhone,
-      cmu_number: `CMU-${Date.now()}`,
-      activity_type: "Détaillant",
-      status: "validated"
-    });
+      const { error: merchantError } = await supabase.from("merchants").insert({
+        user_id: userId,
+        full_name: fullName,
+        phone: cleanPhone,
+        cmu_number: `CMU-${Date.now()}`,
+        activity_type: "Détaillant",
+        status: "validated"
+      });
 
-    if (merchantError) {
-      console.error("Merchant creation error:", merchantError);
-      toast.error("Erreur lors de la création du profil marchand");
-      setIsLoading(false);
-      return;
-    }
+      if (merchantError) {
+        authLogger.error("Merchant creation error:", merchantError);
+        throw merchantError;
+      }
 
-    const { error: roleError } = await supabase.from("user_roles").insert({
-      user_id: userId,
-      role: "merchant"
+      const { error: roleError } = await supabase.from("user_roles").insert({
+        user_id: userId,
+        role: "merchant"
+      });
+
+      if (roleError) {
+        authLogger.warn("Role assignment error:", { error: roleError.message });
+      }
+
+      return true;
     });
 
-    if (roleError) {
-      console.error("Role assignment error:", roleError);
-    }
-
-    toast.success("Compte marchand créé avec succès");
     setIsLoading(false);
-    navigate("/marchand");
+
+    if (result) {
+      toast.success("Compte marchand créé avec succès");
+      navigate("/marchand");
+    }
   };
 
   const handleBack = () => {
@@ -188,10 +209,17 @@ export default function MerchantLogin() {
                 className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Envoi...
-                  </>
+                  retryState.isRetrying ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                      Nouvelle tentative...
+                    </>
+                  ) : (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Envoi...
+                    </>
+                  )
                 ) : (
                   'Continuer'
                 )}

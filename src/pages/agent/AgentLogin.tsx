@@ -6,12 +6,14 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
 import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
+import { useRetryOperation } from '@/hooks/useRetryOperation';
+import { authLogger } from '@/infra/logger';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -32,6 +34,25 @@ const AgentLogin: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState('');
+
+  // Hook de retry pour les opérations réseau
+  const { execute: executeWithRetry, state: retryState } = useRetryOperation({
+    maxRetries: 3,
+    baseDelay: 1500,
+    onRetry: (attempt) => {
+      toast({
+        title: 'Nouvelle tentative',
+        description: `Tentative ${attempt}/3 en cours...`,
+      });
+    },
+    onExhausted: () => {
+      toast({
+        title: 'Échec de connexion',
+        description: 'Vérifiez votre connexion internet.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -102,21 +123,27 @@ const AgentLogin: React.FC = () => {
     const email = `agent_${phone}@igp-ifn.ci`;
     const password = `agent_${phone}_secure`;
     
-    const { error: signInError } = await signIn(email, password);
-    
-    if (signInError) {
-      setStep('register');
-      setIsLoading(false);
-      return;
-    }
-
-    toast({
-      title: 'Connexion réussie',
-      description: 'Bienvenue sur l\'application Agent',
+    const result = await executeWithRetry(async () => {
+      const { error: signInError } = await signIn(email, password);
+      
+      if (signInError) {
+        throw signInError;
+      }
+      return true;
     });
-    
-    navigate('/agent');
+
     setIsLoading(false);
+
+    if (result) {
+      toast({
+        title: 'Connexion réussie',
+        description: 'Bienvenue sur l\'application Agent',
+      });
+      navigate('/agent');
+    } else if (!retryState.error) {
+      // Pas d'erreur = utilisateur non trouvé, passer à l'inscription
+      setStep('register');
+    }
   };
 
   const handleRegister = async () => {
@@ -135,25 +162,26 @@ const AgentLogin: React.FC = () => {
     const email = `agent_${phone}@igp-ifn.ci`;
     const password = `agent_${phone}_secure`;
 
-    const { error } = await signUp(email, password, fullName);
+    const result = await executeWithRetry(async () => {
+      const { error } = await signUp(email, password, fullName);
 
-    if (error) {
-      toast({
-        title: 'Erreur d\'inscription',
-        description: error.message,
-        variant: 'destructive',
-      });
-      setIsLoading(false);
-      return;
-    }
+      if (error) {
+        throw error;
+      }
 
-    toast({
-      title: 'Compte créé',
-      description: 'Votre compte agent a été créé avec succès',
+      authLogger.info('Agent inscrit avec succès', { phone });
+      return true;
     });
 
-    navigate('/agent');
     setIsLoading(false);
+
+    if (result) {
+      toast({
+        title: 'Compte créé',
+        description: 'Votre compte agent a été créé avec succès',
+      });
+      navigate('/agent');
+    }
   };
 
   const handleBack = () => {
@@ -192,10 +220,17 @@ const AgentLogin: React.FC = () => {
                 className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Envoi...
-                  </>
+                  retryState.isRetrying ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                      Nouvelle tentative...
+                    </>
+                  ) : (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Envoi...
+                    </>
+                  )
                 ) : (
                   'Recevoir le code OTP'
                 )}
