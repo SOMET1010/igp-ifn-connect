@@ -41,6 +41,8 @@ interface LinkedCooperative {
   region: string;
 }
 
+export type ExpectedEntityType = 'merchant' | 'agent' | 'cooperative' | 'unknown';
+
 export interface AdminUserData {
   userId: string;
   fullName: string;
@@ -51,7 +53,21 @@ export interface AdminUserData {
   linkedAgent: LinkedAgent | null;
   linkedCooperative: LinkedCooperative | null;
   hasLinkedEntity: boolean;
+  expectedEntityType: ExpectedEntityType;
 }
+
+// Detect expected entity type based on phone pattern in profile
+const getExpectedEntityType = (phone: string | null, roles: AppRole[]): ExpectedEntityType => {
+  // If user has agent role but no linked agent, they should be an agent
+  if (roles.includes('agent')) return 'agent';
+  // If user has merchant role but no linked merchant, they should be a merchant
+  if (roles.includes('merchant')) return 'merchant';
+  // If user has cooperative role but no linked cooperative
+  if (roles.includes('cooperative')) return 'cooperative';
+  // Check phone pattern - starts with 07 often indicates agent
+  if (phone && phone.startsWith('07')) return 'agent';
+  return 'unknown';
+};
 
 export interface UserFilters {
   search: string;
@@ -119,16 +135,20 @@ export const useAdminUsersData = () => {
       const linkedAgent = agents.find(a => a.user_id === profile.user_id) || null;
       const linkedCooperative = cooperatives.find(c => c.user_id === profile.user_id) || null;
       
+      const hasLinkedEntity = !!(linkedMerchant || linkedAgent || linkedCooperative);
+      const rolesArray = userRoles.length > 0 ? userRoles : ['user' as AppRole];
+      
       return {
         userId: profile.user_id,
         fullName: profile.full_name,
         phone: profile.phone,
         createdAt: profile.created_at,
-        roles: userRoles.length > 0 ? userRoles : ['user' as AppRole],
+        roles: rolesArray,
         linkedMerchant,
         linkedAgent,
         linkedCooperative,
-        hasLinkedEntity: !!(linkedMerchant || linkedAgent || linkedCooperative),
+        hasLinkedEntity,
+        expectedEntityType: hasLinkedEntity ? 'unknown' : getExpectedEntityType(profile.phone, rolesArray),
       };
     });
   }, [profiles, roles, merchants, agents, cooperatives]);
