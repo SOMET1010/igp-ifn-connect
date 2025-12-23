@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageCode } from "@/lib/translations";
 import logger from "@/infra/logger";
+import { useAudioLevel } from "@/hooks/useAudioLevel";
+import { AudioLevelMeter } from "@/components/shared/AudioLevelMeter";
 
 interface VoiceInputProps {
   onResult: (text: string) => void;
@@ -87,6 +89,8 @@ export function VoiceInput({
   const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const { audioLevel, peakLevel, isClipping, startAnalysis, stopAnalysis } = useAudioLevel();
+
   const useLafricamobile = LAFRICAMOBILE_STT_LANGUAGES.includes(language);
   
   // Vérifier le support au montage
@@ -140,9 +144,10 @@ export function VoiceInput({
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    stopAnalysis();
     setIsRecording(false);
     setRecordingDuration(0);
-  }, []);
+  }, [stopAnalysis]);
 
   const processAudioWithLafricamobile = useCallback(async (audioBlob: Blob) => {
     setIsProcessing(true);
@@ -231,6 +236,9 @@ export function VoiceInput({
       
       streamRef.current = stream;
       audioChunksRef.current = [];
+      
+      // Démarrer l'analyse de niveau audio
+      startAnalysis(stream);
 
       const mimeType = getSupportedMimeType();
       logger.debug('Using mimeType', { module: 'VoiceInput', mimeType });
@@ -342,9 +350,10 @@ export function VoiceInput({
       streamRef.current = null;
     }
     
+    stopAnalysis();
     setIsRecording(false);
     setRecordingDuration(0);
-  }, []);
+  }, [stopAnalysis]);
 
   const startWebSpeechRecognition = useCallback(() => {
     if (!support.webSpeech) {
@@ -491,12 +500,29 @@ export function VoiceInput({
         )}
       </Button>
       
-      {/* Afficher la durée d'enregistrement */}
+      {/* Afficher l'indicateur de niveau audio et la durée */}
       {isRecording && (
-        <span className="text-sm font-mono text-destructive animate-pulse">
-          {String(Math.floor(recordingDuration / 60)).padStart(2, '0')}:
-          {String(recordingDuration % 60).padStart(2, '0')}
-        </span>
+        <div className="flex flex-col items-center gap-2">
+          <AudioLevelMeter 
+            level={audioLevel} 
+            peakLevel={peakLevel}
+            isClipping={isClipping}
+            variant="bar"
+            size="md"
+            showPeak={true}
+          />
+          
+          {isClipping && (
+            <span className="text-xs text-destructive animate-pulse">
+              ⚠️ Signal trop fort
+            </span>
+          )}
+          
+          <span className="text-sm font-mono text-destructive animate-pulse">
+            {String(Math.floor(recordingDuration / 60)).padStart(2, '0')}:
+            {String(recordingDuration % 60).padStart(2, '0')}
+          </span>
+        </div>
       )}
       
       {/* Afficher le statut */}
