@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { AlertCircle, RefreshCw, WifiOff, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,20 +12,23 @@ interface ErrorStateProps {
   className?: string;
 }
 
-export function ErrorState({
+export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(({
   title = "Erreur de chargement",
   message = "Impossible de charger les données. Veuillez réessayer.",
   onRetry,
   isNetworkError = false,
   className
-}: ErrorStateProps) {
+}, ref) => {
   const IconComponent = isNetworkError ? WifiOff : AlertCircle;
 
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center p-8 text-center space-y-4",
-      className
-    )}>
+    <div 
+      ref={ref}
+      className={cn(
+        "flex flex-col items-center justify-center p-8 text-center space-y-4",
+        className
+      )}
+    >
       <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
         <IconComponent className="h-6 w-6 text-destructive" />
       </div>
@@ -43,7 +46,9 @@ export function ErrorState({
       )}
     </div>
   );
-}
+});
+
+ErrorState.displayName = 'ErrorState';
 
 interface EmptyStateProps {
   Icon?: LucideIcon;

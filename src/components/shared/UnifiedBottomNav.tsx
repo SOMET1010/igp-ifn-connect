@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,11 +14,11 @@ interface UnifiedBottomNavProps {
   items: NavItem[];
 }
 
-export const UnifiedBottomNav: React.FC<UnifiedBottomNavProps> = ({ items }) => {
+export const UnifiedBottomNav = forwardRef<HTMLElement, UnifiedBottomNavProps>(({ items }, ref) => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset-bottom">
+    <nav ref={ref} className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset-bottom">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-2">
         {items.map((item) => {
           const isActive = location.pathname === item.path;
@@ -48,4 +48,6 @@ export const UnifiedBottomNav: React.FC<UnifiedBottomNavProps> = ({ items }) => 
       </div>
     </nav>
   );
-};
+});
+
+UnifiedBottomNav.displayName = 'UnifiedBottomNav';

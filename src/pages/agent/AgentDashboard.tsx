@@ -8,7 +8,7 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useDataFetching } from '@/hooks/useDataFetching';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioButton } from '@/components/shared/AudioButton';
-import { ErrorState } from '@/components/shared/StateComponents';
+import { ErrorState, EmptyState } from '@/components/shared/StateComponents';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
@@ -24,12 +24,14 @@ import {
   Loader2,
   Home,
   User,
-  AlertCircle
+  AlertCircle,
+  UserX
 } from 'lucide-react';
 
 interface AgentDashboardData {
   profile: { full_name: string } | null;
   stats: { today: number; week: number; total: number };
+  isAgentRegistered: boolean;
 }
 
 const AgentDashboard: React.FC = () => {
@@ -51,9 +53,9 @@ const AgentDashboard: React.FC = () => {
       .from('profiles')
       .select('full_name')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
-    if (profileError && profileError.code !== 'PGRST116') {
+    if (profileError) {
       throw profileError;
     }
 
@@ -61,40 +63,47 @@ const AgentDashboard: React.FC = () => {
       .from('agents')
       .select('id, total_enrollments')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (agentError) throw agentError;
 
-    let stats = { today: 0, week: 0, total: 0 };
-
-    if (agentData) {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      
-      const dayOfWeek = now.getDay();
-      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
-
-      const { count: todayCount } = await supabase
-        .from('merchants')
-        .select('id', { count: 'exact', head: true })
-        .eq('enrolled_by', agentData.id)
-        .gte('enrolled_at', todayStart);
-
-      const { count: weekCount } = await supabase
-        .from('merchants')
-        .select('id', { count: 'exact', head: true })
-        .eq('enrolled_by', agentData.id)
-        .gte('enrolled_at', weekStart);
-
-      stats = {
-        today: todayCount ?? 0,
-        week: weekCount ?? 0,
-        total: agentData.total_enrollments ?? 0
+    // Si l'agent n'existe pas, retourner un état indiquant qu'il n'est pas enregistré
+    if (!agentData) {
+      return { 
+        profile: profileData, 
+        stats: { today: 0, week: 0, total: 0 },
+        isAgentRegistered: false 
       };
     }
 
-    return { profile: profileData, stats };
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    
+    const dayOfWeek = now.getDay();
+    const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
+
+    const { count: todayCount } = await supabase
+      .from('merchants')
+      .select('id', { count: 'exact', head: true })
+      .eq('enrolled_by', agentData.id)
+      .gte('enrolled_at', todayStart);
+
+    const { count: weekCount } = await supabase
+      .from('merchants')
+      .select('id', { count: 'exact', head: true })
+      .eq('enrolled_by', agentData.id)
+      .gte('enrolled_at', weekStart);
+
+    return { 
+      profile: profileData, 
+      stats: {
+        today: todayCount ?? 0,
+        week: weekCount ?? 0,
+        total: agentData.total_enrollments ?? 0
+      },
+      isAgentRegistered: true
+    };
   }, [user]);
 
   const { 
@@ -115,6 +124,7 @@ const AgentDashboard: React.FC = () => {
 
   const profile = data?.profile ?? null;
   const stats = data?.stats ?? { today: 0, week: 0, total: 0 };
+  const isAgentRegistered = data?.isAgentRegistered ?? false;
 
   const handleSignOut = async () => {
     await signOut();
@@ -145,6 +155,48 @@ const AgentDashboard: React.FC = () => {
               maxRetries={3}
             />
           )}
+        </div>
+        <UnifiedBottomNav items={navItems} />
+      </div>
+    );
+  }
+
+  // État: utilisateur connecté mais pas enregistré comme agent
+  if (!isLoading && !isAgentRegistered) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <UnifiedHeader
+          title={t("agent")}
+          subtitle="Plateforme IFN – Espace Agent"
+          showSignOut
+          onSignOut={handleSignOut}
+        />
+        <div className="p-4 space-y-4 max-w-2xl mx-auto">
+          <EmptyState
+            Icon={UserX}
+            title="Profil Agent non trouvé"
+            message="Votre compte n'est pas encore associé à un profil Agent. Veuillez contacter un administrateur pour activer votre accès."
+            variant="card"
+          />
+          <Card className="card-institutional">
+            <CardContent className="p-4 space-y-3">
+              <h3 className="font-semibold text-foreground">Que faire ?</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary font-medium">1.</span>
+                  <span>Contactez votre superviseur ou l'administrateur système</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary font-medium">2.</span>
+                  <span>Fournissez votre identifiant : {user?.email || user?.phone || 'N/A'}</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary font-medium">3.</span>
+                  <span>Demandez l'activation de votre profil Agent</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
         <UnifiedBottomNav items={navItems} />
       </div>
