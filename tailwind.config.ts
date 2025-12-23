@@ -191,6 +191,7 @@ export default {
         "glow-orange": "0 0 25px hsl(var(--orange) / 0.5), 0 0 50px hsl(var(--orange) / 0.3), 0 10px 30px -10px hsl(var(--orange) / 0.4)",
         "glow-gold": "0 0 25px hsl(var(--gold) / 0.5), 0 0 50px hsl(var(--gold) / 0.3), 0 10px 30px -10px hsl(var(--gold) / 0.4)",
         "glow-muted": "0 0 20px hsl(var(--muted-foreground) / 0.25), 0 0 40px hsl(var(--muted-foreground) / 0.15)",
+        "glow-destructive": "0 0 15px hsl(var(--destructive) / 0.6), 0 0 30px hsl(var(--destructive) / 0.4), 0 0 45px hsl(var(--destructive) / 0.2)",
       },
     },
   },
