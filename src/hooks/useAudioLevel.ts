@@ -32,14 +32,15 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
   const analyserRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
-  const dataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
   const peakHoldRef = useRef<number>(0);
   const peakDecayRef = useRef<number>(0);
 
   const analyze = useCallback(() => {
     if (!analyserRef.current || !dataArrayRef.current) return;
 
-    analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+    // Utiliser any pour contourner le problème de compatibilité ArrayBufferLike
+    (analyserRef.current as any).getByteFrequencyData(dataArrayRef.current);
 
     // Calculer le niveau moyen
     let sum = 0;
