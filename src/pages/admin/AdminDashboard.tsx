@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useAdminDashboardData } from '@/hooks/useAdminDashboardData';
 import { DashboardHeader } from '@/components/shared/DashboardHeader';
 import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
 import { InstitutionalBottomNav } from '@/components/shared/InstitutionalBottomNav';
 import { InstitutionalActionCard } from '@/components/shared/InstitutionalActionCard';
-import { adminLogger } from '@/infra/logger';
+import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { 
   Users, 
   Store, 
@@ -15,133 +16,52 @@ import {
   Map as MapIcon, 
   Home,
   TrendingUp,
-  Loader2,
   DollarSign,
   Activity,
   BarChart3,
   FileText,
   Mic,
-  Leaf
+  Leaf,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-
-interface Stats {
-  merchants: number;
-  pendingMerchants: number;
-  agents: number;
-  cooperatives: number;
-  totalTransactions: number;
-}
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  
-  const [stats, setStats] = useState<Stats>({
-    merchants: 0,
-    pendingMerchants: 0,
-    agents: 0,
-    cooperatives: 0,
-    totalTransactions: 0
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [chartData, setChartData] = useState<{ date: string; enrollments: number }[]>([]);
+  const { stats, chartData, isLoading, error, refetch } = useAdminDashboardData();
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { icon: Home, label: 'Dashboard', path: '/admin' },
     { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
     { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
     { icon: MapIcon, label: 'Carte', path: '/admin/carte' },
-  ];
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { count: merchantsCount } = await supabase
-          .from('merchants')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: pendingCount } = await supabase
-          .from('merchants')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
-
-        const { count: agentsCount } = await supabase
-          .from('agents')
-          .select('*', { count: 'exact', head: true });
-
-        const { count: cooperativesCount } = await supabase
-          .from('cooperatives')
-          .select('*', { count: 'exact', head: true });
-
-        const { data: transactionsData } = await supabase
-          .from('transactions')
-          .select('amount');
-
-        const totalAmount = transactionsData?.reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-
-        setStats({
-          merchants: merchantsCount ?? 0,
-          pendingMerchants: pendingCount ?? 0,
-          agents: agentsCount ?? 0,
-          cooperatives: cooperativesCount ?? 0,
-          totalTransactions: totalAmount
-        });
-
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-        sevenDaysAgo.setHours(0, 0, 0, 0);
-
-        const { data: enrollmentData } = await supabase
-          .from('merchants')
-          .select('enrolled_at')
-          .gte('enrolled_at', sevenDaysAgo.toISOString())
-          .order('enrolled_at', { ascending: true });
-
-        const enrollmentsByDate = new Map<string, number>();
-        
-        for (let i = 0; i < 7; i++) {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          const dateKey = date.toISOString().split('T')[0];
-          enrollmentsByDate.set(dateKey, 0);
-        }
-
-        enrollmentData?.forEach((merchant) => {
-          const dateKey = merchant.enrolled_at.split('T')[0];
-          if (enrollmentsByDate.has(dateKey)) {
-            enrollmentsByDate.set(dateKey, (enrollmentsByDate.get(dateKey) ?? 0) + 1);
-          }
-        });
-
-        const chartDataArray = Array.from(enrollmentsByDate.entries()).map(([dateStr, count]) => {
-          const date = new Date(dateStr);
-          return {
-            date: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-            enrollments: count
-          };
-        });
-
-        setChartData(chartDataArray);
-      } catch (error) {
-        adminLogger.error('Error fetching admin dashboard data', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  ], []);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/admin/login');
   };
 
+  // Loading state with skeleton
   if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <h2 className="text-lg font-semibold text-foreground mb-2">Erreur de chargement</h2>
+        <p className="text-muted-foreground text-center mb-4">
+          Impossible de charger les données du tableau de bord.
+        </p>
+        <Button onClick={() => refetch()} variant="outline" className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Réessayer
+        </Button>
       </div>
     );
   }
@@ -162,6 +82,7 @@ const AdminDashboard: React.FC = () => {
             value={stats.merchants}
             icon={Store}
             subtitle={stats.pendingMerchants > 0 ? `${stats.pendingMerchants} en attente` : undefined}
+            variant={stats.pendingMerchants > 0 ? 'warning' : 'default'}
           />
           <InstitutionalStatCard
             title="Agents"
