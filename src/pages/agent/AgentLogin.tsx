@@ -130,6 +130,26 @@ const AgentLogin: React.FC = () => {
       if (signInError) {
         throw signInError;
       }
+      
+      // Récupérer l'utilisateur connecté
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Lier l'agent existant (sans user_id) à cet utilisateur si nécessaire
+        await supabase
+          .from("agents")
+          .update({ user_id: user.id })
+          .is("user_id", null);
+        
+        // Assigner le rôle agent
+        const { error: roleError } = await supabase.rpc('assign_agent_role', {
+          p_user_id: user.id
+        });
+        
+        if (roleError) {
+          authLogger.warn("Role assignment error:", { error: roleError.message });
+        }
+      }
+      
       return true;
     });
 
