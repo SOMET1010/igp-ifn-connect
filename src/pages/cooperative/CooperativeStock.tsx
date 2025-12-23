@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,12 +11,13 @@ import {
 } from 'lucide-react';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { NotificationBadge } from '@/components/shared/NotificationBadge';
 import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock } from '@/hooks/useCooperativeStock';
+import { useCooperativeNotifications } from '@/hooks/useCooperativeNotifications';
 import { StockCard, LowStockAlert, AddStockDialog } from '@/components/cooperative/stock';
 
 const CooperativeStock: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,9 +32,20 @@ const CooperativeStock: React.FC = () => {
     lowStockItems,
   } = useCooperativeStock(user?.id);
 
+  const { 
+    lowStockCount, 
+    outOfStockCount, 
+    expiringStockCount,
+    totalAlerts 
+  } = useCooperativeNotifications();
+
   const filteredStocks = stocks.filter(stock =>
     stock.product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Build subtitle with alerts info
+  const alertsText = totalAlerts > 0 ? ` • ${totalAlerts} alerte${totalAlerts > 1 ? 's' : ''}` : '';
+  const subtitle = `${stocks.length} produit${stocks.length !== 1 ? 's' : ''}${alertsText}`;
 
   if (isLoading) {
     return (
@@ -48,9 +59,17 @@ const CooperativeStock: React.FC = () => {
     <div className="min-h-screen bg-background pb-20">
       <UnifiedHeader
         title="Mon Stock"
-        subtitle={`${stocks.length} produit${stocks.length !== 1 ? 's' : ''} en stock`}
+        subtitle={subtitle}
         showBack
         backTo="/cooperative"
+        rightContent={
+          totalAlerts > 0 ? (
+            <NotificationBadge 
+              count={totalAlerts} 
+              variant={outOfStockCount > 0 ? "destructive" : "warning"} 
+            />
+          ) : undefined
+        }
       />
 
       <div className="p-4 space-y-4 max-w-lg mx-auto">
