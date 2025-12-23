@@ -221,6 +221,47 @@ export type Database = {
         }
         Relationships: []
       }
+      directions: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "directions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount_ht: number
@@ -692,6 +733,74 @@ export type Database = {
           },
         ]
       }
+      profile_permissions: {
+        Row: {
+          action_id: string
+          created_at: string | null
+          field_restrictions: Json | null
+          id: string
+          is_enabled: boolean | null
+          profile_id: string
+          resource_id: string
+          scope_id: string | null
+          status_restrictions: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_id: string
+          created_at?: string | null
+          field_restrictions?: Json | null
+          id?: string
+          is_enabled?: boolean | null
+          profile_id: string
+          resource_id: string
+          scope_id?: string | null
+          status_restrictions?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_id?: string
+          created_at?: string | null
+          field_restrictions?: Json | null
+          id?: string
+          is_enabled?: boolean | null
+          profile_id?: string
+          resource_id?: string
+          scope_id?: string | null
+          status_restrictions?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_permissions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_permissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_permissions_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_permissions_scope_id_fkey"
+            columns: ["scope_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_scopes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -800,6 +909,197 @@ export type Database = {
           p256dh?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      rbac_actions: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          label: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          label: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      rbac_audit_log: {
+        Row: {
+          action: string
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          performed_at: string | null
+          performed_by: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          performed_at?: string | null
+          performed_by?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_audit_log_performed_by_fkey"
+            columns: ["performed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      rbac_profiles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          default_scope_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          default_scope_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          default_scope_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_profiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "rbac_profiles_default_scope_id_fkey"
+            columns: ["default_scope_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_scopes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rbac_resources: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          label: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          label?: string
+        }
+        Relationships: []
+      }
+      rbac_scopes: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          label: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          label: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          label?: string
         }
         Relationships: []
       }
@@ -928,6 +1228,65 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "merchants"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_rbac_profiles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          direction_id: string | null
+          id: string
+          is_active: boolean | null
+          profile_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          direction_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          profile_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          direction_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          profile_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_rbac_profiles_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_rbac_profiles_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_rbac_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "rbac_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_rbac_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1076,11 +1435,39 @@ export type Database = {
         Returns: undefined
       }
       assign_merchant_role: { Args: { p_user_id: string }; Returns: undefined }
+      check_rbac_permission: {
+        Args: { _action_code: string; _resource_code: string; _user_id: string }
+        Returns: boolean
+      }
       get_merchant_today_total: {
         Args: { _merchant_id: string }
         Returns: number
       }
       get_total_transactions_amount: { Args: never; Returns: number }
+      get_user_rbac_permissions: {
+        Args: { _user_id: string }
+        Returns: {
+          action_code: string
+          action_label: string
+          field_restrictions: Json
+          resource_code: string
+          resource_label: string
+          scope_code: string
+          scope_label: string
+          status_restrictions: Json
+        }[]
+      }
+      get_user_rbac_profiles: {
+        Args: { _user_id: string }
+        Returns: {
+          assigned_at: string
+          direction_id: string
+          direction_name: string
+          profile_description: string
+          profile_id: string
+          profile_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1088,6 +1475,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_rbac_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "agent" | "merchant" | "cooperative" | "user"
