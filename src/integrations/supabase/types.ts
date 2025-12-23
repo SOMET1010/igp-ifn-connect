@@ -1043,6 +1043,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_merchant_today_total: {
+        Args: { _merchant_id: string }
+        Returns: number
+      }
       get_total_transactions_amount: { Args: never; Returns: number }
       has_role: {
         Args: {
