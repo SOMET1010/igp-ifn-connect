@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Shield, Calendar, CreditCard, FileText, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Shield, Calendar, FileText, Check } from "lucide-react";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
@@ -80,24 +80,13 @@ export default function MerchantCMU() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-gradient-to-br from-red-500 to-red-600 text-white p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-white hover:bg-white/10"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">Protection CMU</h1>
-            <p className="text-sm text-white/80">Couverture Maladie Universelle</p>
-          </div>
-          <Shield className="w-8 h-8 text-white/80" />
-        </div>
-      </header>
+      <UnifiedHeader
+        title="Protection CMU"
+        subtitle="Couverture Maladie Universelle"
+        showBack
+        backTo="/marchand"
+        rightContent={<Shield className="h-6 w-6 text-muted-foreground" />}
+      />
 
       <main className="p-4 space-y-5">
         {/* Carte CMU */}

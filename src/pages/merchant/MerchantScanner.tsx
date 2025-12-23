@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ArrowLeft,
   Camera,
   QrCode,
   Search,
@@ -22,6 +21,7 @@ import {
   Wallet
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 
 
 interface ScannedProduct {
@@ -254,26 +254,17 @@ export default function MerchantScanner() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className="bg-gradient-forest text-primary-foreground p-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/20"
-            onClick={() => navigate("/marchand")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">Scanner</h1>
-            <p className="text-sm text-primary-foreground/80">Scan rapide des produits</p>
-          </div>
-          <Badge variant="outline" className="text-primary-foreground border-primary-foreground/50">
+      <UnifiedHeader
+        title="Scanner"
+        subtitle="Scan rapide des produits"
+        showBack
+        backTo="/marchand"
+        rightContent={
+          <Badge variant="secondary">
             {mode === "sale" ? "Vente" : "Stock"}
           </Badge>
-        </div>
-      </header>
+        }
+      />
 
       <main className="p-4 space-y-4">
         {/* Mode Toggle */}

@@ -18,9 +18,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { calculateDistance } from "@/lib/geoUtils";
 import { 
-  ArrowLeft, Search, ShoppingCart, Package, Truck, 
+  Search, ShoppingCart, Package, Truck, 
   CheckCircle, XCircle, Clock, Plus, Minus, Trash2, Leaf
 } from "lucide-react";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 
 interface CartItem {
   cooperativeId: string;
@@ -368,26 +369,13 @@ export default function MerchantSuppliers() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-white hover:bg-white/20"
-            onClick={() => navigate('/marchand')}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <Leaf className="h-5 w-5" />
-              Marché Virtuel IFN
-            </h1>
-            <p className="text-sm text-white/80">Commandez en 3 clics</p>
-          </div>
-        </div>
-      </div>
+      <UnifiedHeader
+        title="Marché Virtuel IFN"
+        subtitle="Commandez en 3 clics"
+        showBack
+        backTo="/marchand"
+        rightContent={<Leaf className="h-5 w-5 text-secondary" />}
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="p-4">

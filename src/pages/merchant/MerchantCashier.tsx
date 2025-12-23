@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Banknote, Smartphone, Wifi, RefreshCw } from "lucide-react";
+import { Banknote, Smartphone, Wifi, RefreshCw, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
@@ -238,20 +239,12 @@ export default function MerchantCashier() {
           size="lg"
         />
 
-        {/* Simplified Header - Just title */}
-        <header className="bg-secondary text-secondary-foreground p-4 sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => step === "input" ? navigate("/marchand") : resetForm()}
-              className="text-secondary-foreground hover:bg-secondary-foreground/10"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </Button>
-            <h1 className="text-2xl font-bold">{t("collect_title")}</h1>
-          </div>
-        </header>
+        <UnifiedHeader
+          title={t("collect_title")}
+          showBack
+          backTo={step === "input" ? "/marchand" : undefined}
+          onSignOut={step !== "input" ? resetForm : undefined}
+        />
 
         <main className="p-4 space-y-4">
           {step === "input" && (

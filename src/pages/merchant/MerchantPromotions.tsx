@@ -10,7 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ArrowLeft,
   Plus,
   Percent,
   Gift,
@@ -21,6 +20,7 @@ import {
   Trash2,
   TrendingUp
 } from "lucide-react";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import {
   Dialog,
@@ -203,23 +203,12 @@ export default function MerchantPromotions() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <header className="bg-gradient-africa text-primary-foreground p-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-primary-foreground hover:bg-primary-foreground/20"
-            onClick={() => navigate("/marchand")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">Promotions</h1>
-            <p className="text-sm text-primary-foreground/80">Gérez vos offres</p>
-          </div>
-        </div>
-      </header>
+      <UnifiedHeader
+        title="Promotions"
+        subtitle="Gérez vos offres"
+        showBack
+        backTo="/marchand"
+      />
 
       <main className="p-4 space-y-4">
         {/* Summary Cards */}
