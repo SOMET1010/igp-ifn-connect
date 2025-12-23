@@ -64,6 +64,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminStudio from "./pages/admin/AdminStudio";
 import AdminVivriers from "./pages/admin/AdminVivriers";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUserDetail from "./pages/admin/AdminUserDetail";
 
 // Loading fallback for lazy components
 const LazyLoadingFallback = () => (
@@ -173,6 +174,7 @@ const App = () => (
                     <Route path="/admin/studio" element={<AdminStudio />} />
                     <Route path="/admin/vivriers" element={<AdminVivriers />} />
                     <Route path="/admin/utilisateurs" element={<AdminUsers />} />
+                    <Route path="/admin/utilisateurs/:userId" element={<AdminUserDetail />} />
                   </Route>
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
