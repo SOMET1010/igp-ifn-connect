@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { merchantLogger } from "@/infra/logger";
+import { withRetry } from "@/hooks/useRetryOperation";
 import type { StockItem, Product, ProductCategory } from "@/components/merchant/stock/types";
 
 interface UseMerchantStockResult {
@@ -93,26 +94,30 @@ export function useMerchantStock(): UseMerchantStockResult {
 
     setIsSaving(true);
 
-    const { error } = await supabase.from("merchant_stocks").insert({
-      merchant_id: merchantId,
-      product_id: data.productId,
-      quantity: data.quantity,
-      min_threshold: data.minThreshold,
-      unit_price: data.unitPrice,
-      last_restocked_at: new Date().toISOString(),
-    });
+    try {
+      await withRetry(async () => {
+        const { error } = await supabase.from("merchant_stocks").insert({
+          merchant_id: merchantId,
+          product_id: data.productId,
+          quantity: data.quantity,
+          min_threshold: data.minThreshold,
+          unit_price: data.unitPrice,
+          last_restocked_at: new Date().toISOString(),
+        });
 
-    setIsSaving(false);
+        if (error) throw error;
+      }, { maxRetries: 3, baseDelay: 1000 });
 
-    if (error) {
+      setIsSaving(false);
+      toast.success("Produit ajouté au stock");
+      fetchData();
+      return true;
+    } catch (error) {
+      setIsSaving(false);
       merchantLogger.error("Error adding stock", error);
-      toast.error("Erreur lors de l'ajout");
+      toast.error("Erreur lors de l'ajout. Réessayez.");
       return false;
     }
-
-    toast.success("Produit ajouté au stock");
-    fetchData();
-    return true;
   }, [merchantId, fetchData]);
 
   const updateStock = useCallback(async (
@@ -121,26 +126,30 @@ export function useMerchantStock(): UseMerchantStockResult {
   ): Promise<boolean> => {
     setIsSaving(true);
 
-    const { error } = await supabase
-      .from("merchant_stocks")
-      .update({
-        quantity: data.quantity,
-        min_threshold: data.minThreshold,
-        unit_price: data.unitPrice,
-      })
-      .eq("id", stockId);
+    try {
+      await withRetry(async () => {
+        const { error } = await supabase
+          .from("merchant_stocks")
+          .update({
+            quantity: data.quantity,
+            min_threshold: data.minThreshold,
+            unit_price: data.unitPrice,
+          })
+          .eq("id", stockId);
 
-    setIsSaving(false);
+        if (error) throw error;
+      }, { maxRetries: 3, baseDelay: 1000 });
 
-    if (error) {
+      setIsSaving(false);
+      toast.success("Stock modifié");
+      fetchData();
+      return true;
+    } catch (error) {
+      setIsSaving(false);
       merchantLogger.error("Error updating stock", error);
-      toast.error("Erreur lors de la modification");
+      toast.error("Erreur lors de la modification. Réessayez.");
       return false;
     }
-
-    toast.success("Stock modifié");
-    fetchData();
-    return true;
   }, [fetchData]);
 
   const restockItem = useCallback(async (
@@ -150,25 +159,29 @@ export function useMerchantStock(): UseMerchantStockResult {
   ): Promise<boolean> => {
     setIsSaving(true);
 
-    const { error } = await supabase
-      .from("merchant_stocks")
-      .update({
-        quantity: currentQuantity + addQuantity,
-        last_restocked_at: new Date().toISOString(),
-      })
-      .eq("id", stockId);
+    try {
+      await withRetry(async () => {
+        const { error } = await supabase
+          .from("merchant_stocks")
+          .update({
+            quantity: currentQuantity + addQuantity,
+            last_restocked_at: new Date().toISOString(),
+          })
+          .eq("id", stockId);
 
-    setIsSaving(false);
+        if (error) throw error;
+      }, { maxRetries: 3, baseDelay: 1000 });
 
-    if (error) {
+      setIsSaving(false);
+      toast.success("Stock mis à jour");
+      fetchData();
+      return true;
+    } catch (error) {
+      setIsSaving(false);
       merchantLogger.error("Error restocking", error);
-      toast.error("Erreur lors du réapprovisionnement");
+      toast.error("Erreur lors du réapprovisionnement. Réessayez.");
       return false;
     }
-
-    toast.success("Stock mis à jour");
-    fetchData();
-    return true;
   }, [fetchData]);
 
   const deleteStock = useCallback(async (stockId: string): Promise<boolean> => {
