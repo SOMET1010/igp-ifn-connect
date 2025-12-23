@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import OTPInput from '@/components/auth/OTPInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from '@/lib/validationSchemas';
 import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
@@ -14,6 +14,7 @@ import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
 import { supabase } from '@/integrations/supabase/client';
 import { authLogger } from '@/infra/logger';
+import { useRetryOperation } from '@/hooks/useRetryOperation';
 
 type Step = 'phone' | 'otp' | 'register';
 
@@ -34,6 +35,25 @@ const CooperativeLogin: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedOtp, setGeneratedOtp] = useState('');
+
+  // Hook de retry pour les opérations réseau
+  const { execute: executeWithRetry, state: retryState } = useRetryOperation({
+    maxRetries: 3,
+    baseDelay: 1500,
+    onRetry: (attempt) => {
+      toast({
+        title: 'Nouvelle tentative',
+        description: `Tentative ${attempt}/3 en cours...`,
+      });
+    },
+    onExhausted: () => {
+      toast({
+        title: 'Échec de connexion',
+        description: 'Vérifiez votre connexion internet.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -104,21 +124,27 @@ const CooperativeLogin: React.FC = () => {
     const email = `coop_${phone}@ifn.ci`;
     const password = `coop_${phone}_secure`;
     
-    const { error: signInError } = await signIn(email, password);
-    
-    if (signInError) {
-      setStep('register');
-      setIsLoading(false);
-      return;
-    }
-
-    toast({
-      title: 'Connexion réussie',
-      description: 'Bienvenue sur l\'espace Coopérative',
+    const result = await executeWithRetry(async () => {
+      const { error: signInError } = await signIn(email, password);
+      
+      if (signInError) {
+        throw signInError;
+      }
+      return true;
     });
-    
-    navigate('/cooperative');
+
     setIsLoading(false);
+
+    if (result) {
+      toast({
+        title: 'Connexion réussie',
+        description: 'Bienvenue sur l\'espace Coopérative',
+      });
+      navigate('/cooperative');
+    } else if (!retryState.error) {
+      // Pas d'erreur = utilisateur non trouvé, passer à l'inscription
+      setStep('register');
+    }
   };
 
   const handleRegister = async () => {
@@ -139,20 +165,14 @@ const CooperativeLogin: React.FC = () => {
     const salt = Date.now().toString(36);
     const password = `Coop!${phone.slice(-4)}${salt}#Secure`;
 
-    const { error } = await signUp(email, password, fullName);
+    const result = await executeWithRetry(async () => {
+      const { error } = await signUp(email, password, fullName);
 
-    if (error) {
-      toast({
-        title: 'Erreur d\'inscription',
-        description: error.message,
-        variant: 'destructive',
-      });
-      setIsLoading(false);
-      return;
-    }
+      if (error) {
+        throw error;
+      }
 
-    // Assigner le rôle "cooperative" après l'inscription
-    try {
+      // Assigner le rôle "cooperative" après l'inscription
       const { data: { user: newUser } } = await supabase.auth.getUser();
       if (newUser) {
         const { error: roleError } = await supabase
@@ -178,17 +198,19 @@ const CooperativeLogin: React.FC = () => {
           authLogger.warn('Échec création coopérative', { error: coopError.message });
         }
       }
-    } catch (err) {
-      authLogger.error('Erreur post-inscription', err);
-    }
 
-    toast({
-      title: 'Compte créé',
-      description: 'Votre espace coopérative a été créé avec succès',
+      return true;
     });
 
-    navigate('/cooperative');
     setIsLoading(false);
+
+    if (result) {
+      toast({
+        title: 'Compte créé',
+        description: 'Votre espace coopérative a été créé avec succès',
+      });
+      navigate('/cooperative');
+    }
   };
 
   const handleBack = () => {
@@ -227,10 +249,17 @@ const CooperativeLogin: React.FC = () => {
                 className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Envoi...
-                  </>
+                  retryState.isRetrying ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                      Nouvelle tentative...
+                    </>
+                  ) : (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Envoi...
+                    </>
+                  )
                 ) : (
                   'Recevoir le code OTP'
                 )}
