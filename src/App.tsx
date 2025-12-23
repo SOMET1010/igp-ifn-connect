@@ -18,6 +18,7 @@ const AdminMap = React.lazy(() => import("./pages/admin/AdminMap"));
 const AuthPage = React.lazy(() => import("./pages/auth/AuthPage"));
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import MyAccount from "./pages/account/MyAccount";
 import DemoAccess from "./pages/DemoAccess";
 
 // Agent pages
@@ -119,9 +120,10 @@ const App = () => (
               <OfflineIndicator />
               <Suspense fallback={<LazyLoadingFallback />}>
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/demo" element={<DemoAccess />} />
+                  <Route path="/compte" element={<MyAccount />} />
                   <Route path="/accueil" element={<Navigate to="/" replace />} />
                   
                   {/* Agent Routes */}
