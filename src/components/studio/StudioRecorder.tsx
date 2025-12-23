@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { Mic, Square, Play, Pause, RotateCcw, Check, Loader2, Upload, Trash2, RefreshCw } from 'lucide-react';
+import { AudioLevelMeter } from '@/components/shared/AudioLevelMeter';
+import { Mic, Square, Play, Pause, RotateCcw, Check, Loader2, Upload, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -46,7 +47,10 @@ export function StudioRecorder({
     resetRecording,
     error,
     isSupported,
-    permissionStatus
+    permissionStatus,
+    audioLevel,
+    peakLevel,
+    isClipping
   } = useAudioRecorder();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -233,22 +237,26 @@ export function StudioRecorder({
       {/* Recording visualization */}
       {!showExistingRecording && (
         <div className="flex items-center justify-center py-8">
-          {isRecording ? (
+        {isRecording ? (
             <div className="flex flex-col items-center gap-4">
-              {/* Animated wave */}
-              <div className="flex items-center gap-1 h-16">
-                {[...Array(7)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-2 bg-primary rounded-full animate-pulse"
-                    style={{
-                      height: `${20 + Math.random() * 40}px`,
-                      animationDelay: `${i * 0.1}s`,
-                      animationDuration: '0.5s'
-                    }}
-                  />
-                ))}
-              </div>
+              {/* Audio Level Meter */}
+              <AudioLevelMeter 
+                level={audioLevel}
+                peakLevel={peakLevel}
+                isClipping={isClipping}
+                variant="wave"
+                size="lg"
+                showPeak={true}
+              />
+              
+              {/* Clipping warning */}
+              {isClipping && (
+                <div className="flex items-center gap-2 text-destructive animate-pulse">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Signal trop fort</span>
+                </div>
+              )}
+              
               <span className="text-2xl font-mono text-primary">
                 {formatDuration(duration)}
               </span>
