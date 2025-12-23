@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
+import { Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,9 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, isToday, isYesterday, startOfWeek, startOfMonth, subDays, subMonths } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { CardLarge, ButtonSecondary, StatusBanner, BottomNavIFN } from "@/components/ifn";
+import { CardLarge, ButtonSecondary, StatusBanner } from "@/components/ifn";
 import { exportSalesReportToPDF } from "@/lib/pdfExport";
 import { toast } from "sonner";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 import {
   Select,
   SelectContent,
@@ -205,25 +208,12 @@ export default function MerchantTransactions() {
         size="lg"
       />
 
-      {/* Header */}
-      <header className="bg-secondary text-secondary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-secondary-foreground hover:bg-secondary-foreground/10 h-12 w-12"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold">{t("your_sales")}</h1>
-            <p className="text-sm opacity-80">
-              {transactions.length} vente{transactions.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-      </header>
+      <UnifiedHeader
+        title={t("your_sales")}
+        subtitle={`${transactions.length} vente${transactions.length !== 1 ? "s" : ""}`}
+        showBack
+        backTo="/marchand"
+      />
 
       <main className="p-4 space-y-6">
         {/* Export PDF Section */}
@@ -337,7 +327,7 @@ export default function MerchantTransactions() {
         <StatusBanner isOnline={isOnline} />
       </main>
 
-      <BottomNavIFN />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Volume2, Phone, BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Play, Volume2, Phone, BookOpen } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { CardLarge, BottomNavIFN } from "@/components/ifn";
+import { CardLarge } from "@/components/ifn";
 import { toast } from "sonner";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 
 export default function MerchantHelp() {
   const navigate = useNavigate();
@@ -26,20 +28,11 @@ export default function MerchantHelp() {
         size="lg"
       />
 
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-12 w-12"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-bold">{t("my_help")}</h1>
-        </div>
-      </header>
+      <UnifiedHeader
+        title={t("my_help")}
+        showBack
+        backTo="/marchand"
+      />
 
       <main className="p-4 space-y-5">
         {/* Vidéo Comment encaisser */}
@@ -131,7 +124,7 @@ export default function MerchantHelp() {
         </div>
       </main>
 
-      <BottomNavIFN />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, PiggyBank, HelpCircle } from "lucide-react";
+import { Heart, PiggyBank } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { CardLarge, BottomNavIFN } from "@/components/ifn";
+import { CardLarge } from "@/components/ifn";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 
 export default function MerchantUnderstand() {
   const navigate = useNavigate();
@@ -20,20 +23,10 @@ export default function MerchantUnderstand() {
         size="lg"
       />
 
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-12 w-12"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-bold">{t("understand_title")}</h1>
-        </div>
-      </header>
+      <UnifiedHeader
+        title={t("understand_title")}
+        showBack
+      />
 
       <main className="p-4 space-y-6">
         {/* Introduction */}
@@ -190,7 +183,7 @@ export default function MerchantUnderstand() {
         </div>
       </main>
 
-      <BottomNavIFN />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }

@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, Shield, Loader2, HelpCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, HelpCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { BigNumber, CardLarge, StatusBanner, BottomNavIFN } from "@/components/ifn";
+import { BigNumber, CardLarge, StatusBanner } from "@/components/ifn";
+import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { merchantNavItems } from "@/config/navigation";
 
 interface MoneyData {
   totalSales: number;
@@ -89,20 +91,11 @@ export default function MerchantMoney() {
         size="lg"
       />
 
-      {/* Header */}
-      <header className="bg-secondary text-secondary-foreground p-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/marchand")}
-            className="text-secondary-foreground hover:bg-secondary-foreground/10 h-12 w-12"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-bold">{t("your_money")}</h1>
-        </div>
-      </header>
+      <UnifiedHeader
+        title={t("your_money")}
+        showBack
+        backTo="/marchand"
+      />
 
       <main className="p-4 space-y-6">
         {/* BigNumber - Net du mois */}
@@ -188,7 +181,7 @@ export default function MerchantMoney() {
         <StatusBanner isOnline={isOnline} />
       </main>
 
-      <BottomNavIFN />
+      <UnifiedBottomNav items={merchantNavItems} />
     </div>
   );
 }
