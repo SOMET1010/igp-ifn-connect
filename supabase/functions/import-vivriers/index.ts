@@ -5,22 +5,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface CooperativeRow {
-  name: string;
+// CSV columns from markets.csv
+interface CooperativeCSVRow {
+  market_name?: string;
+  name?: string;
   code?: string;
   region?: string;
   commune?: string;
+  declared_effectif?: string;
   effectif_total?: number;
+  declared_cmu?: string;
   effectif_cmu?: number;
+  declared_cnps?: string;
   effectif_cnps?: number;
+  rows_in_file?: string;
   phone?: string;
   email?: string;
   address?: string;
 }
 
-interface MemberRow {
+// CSV columns from actors.csv
+interface MemberCSVRow {
   actor_key: string;
-  cooperative_name: string;
+  market_name?: string;
+  cooperative_name?: string;
+  row_no?: string;
   row_number?: number;
   full_name: string;
   identifier_code?: string;
@@ -70,15 +79,23 @@ Deno.serve(async (req) => {
         const batch = cooperatives.slice(i, i + BATCH_SIZE);
         
         for (let j = 0; j < batch.length; j++) {
-          const coop: CooperativeRow = batch[j];
+          const coop: CooperativeCSVRow = batch[j];
           const rowIndex = i + j + 1;
           
           try {
-            if (!coop.name) {
+            // Map CSV columns: market_name → name
+            const coopName = coop.market_name || coop.name;
+            
+            if (!coopName) {
               coopResult.rejected++;
-              coopResult.errors.push({ row: rowIndex, error: 'Missing name' });
+              coopResult.errors.push({ row: rowIndex, error: 'Missing name/market_name' });
               continue;
             }
+
+            // Map CSV columns: declared_effectif → effectif_total, etc.
+            const effectifTotal = parseInt(String(coop.declared_effectif || coop.effectif_total || coop.rows_in_file || 0)) || 0;
+            const effectifCmu = parseInt(String(coop.declared_cmu || coop.effectif_cmu || 0)) || 0;
+            const effectifCnps = parseInt(String(coop.declared_cnps || coop.effectif_cnps || 0)) || 0;
 
             // Normalize phone
             const normalizedPhone = coop.phone?.replace(/\D/g, '') || null;
@@ -86,7 +103,7 @@ Deno.serve(async (req) => {
             const { data: existing } = await supabase
               .from('vivriers_cooperatives')
               .select('id')
-              .eq('name', coop.name)
+              .eq('name', coopName)
               .maybeSingle();
 
             if (existing) {
@@ -97,9 +114,9 @@ Deno.serve(async (req) => {
                   code: coop.code || null,
                   region: coop.region || null,
                   commune: coop.commune || null,
-                  effectif_total: coop.effectif_total || 0,
-                  effectif_cmu: coop.effectif_cmu || 0,
-                  effectif_cnps: coop.effectif_cnps || 0,
+                  effectif_total: effectifTotal,
+                  effectif_cmu: effectifCmu,
+                  effectif_cnps: effectifCnps,
                   phone: normalizedPhone,
                   email: coop.email || null,
                   address: coop.address || null,
@@ -117,13 +134,13 @@ Deno.serve(async (req) => {
               const { error } = await supabase
                 .from('vivriers_cooperatives')
                 .insert({
-                  name: coop.name,
+                  name: coopName,
                   code: coop.code || null,
                   region: coop.region || null,
                   commune: coop.commune || null,
-                  effectif_total: coop.effectif_total || 0,
-                  effectif_cmu: coop.effectif_cmu || 0,
-                  effectif_cnps: coop.effectif_cnps || 0,
+                  effectif_total: effectifTotal,
+                  effectif_cmu: effectifCmu,
+                  effectif_cnps: effectifCnps,
                   phone: normalizedPhone,
                   email: coop.email || null,
                   address: coop.address || null,
@@ -163,15 +180,19 @@ Deno.serve(async (req) => {
         const batch = members.slice(i, i + BATCH_SIZE);
         
         for (let j = 0; j < batch.length; j++) {
-          const member: MemberRow = batch[j];
+          const member: MemberCSVRow = batch[j];
           const rowIndex = i + j + 1;
           
           try {
-            if (!member.actor_key || !member.full_name || !member.cooperative_name) {
+            // Map CSV columns: market_name → cooperative_name, row_no → row_number
+            const cooperativeName = member.market_name || member.cooperative_name;
+            const rowNumber = parseInt(String(member.row_no || member.row_number || 0)) || null;
+            
+            if (!member.actor_key || !member.full_name || !cooperativeName) {
               memberResult.rejected++;
               memberResult.errors.push({ 
                 row: rowIndex, 
-                error: 'Missing required fields (actor_key, full_name, or cooperative_name)' 
+                error: 'Missing required fields (actor_key, full_name, or market_name/cooperative_name)' 
               });
               continue;
             }
@@ -192,8 +213,8 @@ Deno.serve(async (req) => {
               const { error } = await supabase
                 .from('vivriers_members')
                 .update({
-                  cooperative_name: member.cooperative_name,
-                  row_number: member.row_number || null,
+                  cooperative_name: cooperativeName,
+                  row_number: rowNumber,
                   full_name: member.full_name,
                   identifier_code: normalizedIdentifier,
                   phone: normalizedPhone,
@@ -216,8 +237,8 @@ Deno.serve(async (req) => {
                 .from('vivriers_members')
                 .insert({
                   actor_key: member.actor_key,
-                  cooperative_name: member.cooperative_name,
-                  row_number: member.row_number || null,
+                  cooperative_name: cooperativeName,
+                  row_number: rowNumber,
                   full_name: member.full_name,
                   identifier_code: normalizedIdentifier,
                   phone: normalizedPhone,
