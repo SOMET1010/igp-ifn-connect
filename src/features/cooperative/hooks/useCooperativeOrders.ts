@@ -7,6 +7,7 @@ import { orderService } from '../services/orderService';
 import { stockService } from '../services/stockService';
 import type { Order, OrderStatus } from '../types/order.types';
 import { statusLabels } from '../types/order.types';
+import { useOrdersRealtime } from './useOrdersRealtime';
 
 export function useCooperativeOrders(userId: string | undefined) {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -18,6 +19,16 @@ export function useCooperativeOrders(userId: string | undefined) {
     const ordersData = await orderService.getOrders(coopId);
     setOrders(ordersData);
   }, []);
+
+  // Realtime subscription for new orders
+  useOrdersRealtime({
+    cooperativeId,
+    onNewOrder: () => {
+      if (cooperativeId) {
+        refreshOrders(cooperativeId);
+      }
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +82,8 @@ export function useCooperativeOrders(userId: string | undefined) {
   }, [cooperativeId, refreshOrders]);
 
   const pendingOrders = orders.filter(o => o.status === 'pending');
-  const confirmedOrders = orders.filter(o => o.status === 'confirmed' || o.status === 'in_transit');
+  const confirmedOrders = orders.filter(o => o.status === 'confirmed');
+  const inTransitOrders = orders.filter(o => o.status === 'in_transit');
   const deliveredOrders = orders.filter(o => o.status === 'delivered');
   const cancelledOrders = orders.filter(o => o.status === 'cancelled');
 
@@ -83,6 +95,7 @@ export function useCooperativeOrders(userId: string | undefined) {
     cancelOrder,
     pendingOrders,
     confirmedOrders,
+    inTransitOrders,
     deliveredOrders,
     cancelledOrders,
   };

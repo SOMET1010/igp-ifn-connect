@@ -19,7 +19,7 @@
 
 | ID | Tâche | État | Effort |
 |----|-------|------|--------|
-| P1-1 | Flux commande Marchand → Coopérative | ⬜ TODO | L |
+| P1-1 | Flux commande Marchand → Coopérative | ✅ TERMINÉ | L |
 | P1-2 | Dashboard Cooperative avec vraies stats | ⬜ TODO | M |
 | P1-3 | Audit + fix MerchantPromotions | ⬜ TODO | M |
 | P1-4 | Audit + fix MerchantInvoices | ⬜ TODO | M |

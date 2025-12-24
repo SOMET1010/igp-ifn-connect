@@ -26,6 +26,7 @@ const CooperativeOrders: React.FC = () => {
     cancelOrder,
     pendingOrders,
     confirmedOrders,
+    inTransitOrders,
     deliveredOrders,
     cancelledOrders,
   } = useCooperativeOrders(user?.id);
@@ -54,8 +55,8 @@ const CooperativeOrders: React.FC = () => {
 
       <div className="p-4">
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="pending" className="relative">
+          <TabsList className="grid w-full grid-cols-5 mb-4">
+            <TabsTrigger value="pending" className="relative text-xs">
               En attente
               <NotificationBadge 
                 count={pendingOrders.length} 
@@ -64,9 +65,10 @@ const CooperativeOrders: React.FC = () => {
                 absolute 
               />
             </TabsTrigger>
-            <TabsTrigger value="confirmed">En cours</TabsTrigger>
-            <TabsTrigger value="delivered">Livré</TabsTrigger>
-            <TabsTrigger value="cancelled" className="relative">
+            <TabsTrigger value="confirmed" className="text-xs">Confirmé</TabsTrigger>
+            <TabsTrigger value="in_transit" className="text-xs">En transit</TabsTrigger>
+            <TabsTrigger value="delivered" className="text-xs">Livré</TabsTrigger>
+            <TabsTrigger value="cancelled" className="relative text-xs">
               Annulé
               <NotificationBadge 
                 count={cancelledOrders.length} 
@@ -98,6 +100,22 @@ const CooperativeOrders: React.FC = () => {
               <EmptyState Icon={ClipboardList} title="Aucune commande confirmée" variant="card" />
             ) : (
               confirmedOrders.map(order => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  updatingOrderId={updatingOrderId}
+                  onUpdateStatus={updateOrderStatus}
+                  onCancelClick={openCancelDialog}
+                />
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="in_transit" className="space-y-3">
+            {inTransitOrders.length === 0 ? (
+              <EmptyState Icon={ClipboardList} title="Aucune commande en transit" variant="card" />
+            ) : (
+              inTransitOrders.map(order => (
                 <OrderCard
                   key={order.id}
                   order={order}

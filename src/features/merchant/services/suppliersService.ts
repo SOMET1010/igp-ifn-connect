@@ -135,34 +135,50 @@ export const suppliersService = {
   async submitOrders(input: SubmitOrderInput): Promise<void> {
     const { merchantId, cart, deliveryDate, notes } = input;
 
-    // Group cart items by cooperative
-    const ordersByCooperative: Record<string, typeof cart> = {};
-    cart.forEach((item) => {
-      if (!ordersByCooperative[item.cooperativeId]) {
-        ordersByCooperative[item.cooperativeId] = [];
-      }
-      ordersByCooperative[item.cooperativeId].push(item);
-    });
-
-    // Create orders for each cooperative
-    const orderPromises = Object.entries(ordersByCooperative).flatMap(
-      ([coopId, items]) =>
-        items.map((item) =>
-          supabase.from("orders").insert({
-            merchant_id: merchantId,
-            cooperative_id: coopId,
-            product_id: item.productId,
-            quantity: item.quantity,
-            unit_price: item.unitPrice,
-            total_amount: item.quantity * item.unitPrice,
-            status: "pending",
-            delivery_date: deliveryDate || null,
-            notes: notes || null,
-          })
-        )
+    // Group by cooperative
+    const byCooperative = cart.reduce(
+      (acc, item) => {
+        if (!acc[item.cooperativeId]) {
+          acc[item.cooperativeId] = [];
+        }
+        acc[item.cooperativeId].push(item);
+        return acc;
+      },
+      {} as Record<string, typeof cart>
     );
 
-    await Promise.all(orderPromises);
+    // Create orders for each cooperative
+    for (const [cooperativeId, items] of Object.entries(byCooperative)) {
+      for (const item of items) {
+        const totalAmount = item.quantity * item.unitPrice;
+
+        // Insert order
+        const { error: orderError } = await supabase.from("orders").insert({
+          merchant_id: merchantId,
+          cooperative_id: cooperativeId,
+          product_id: item.productId,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total_amount: totalAmount,
+          delivery_date: deliveryDate || null,
+          notes: notes || null,
+        });
+
+        if (orderError) throw orderError;
+
+        // Decrement stock using the SQL function
+        const { error: stockError } = await supabase.rpc("decrement_stock", {
+          p_stock_id: item.stockId,
+          p_quantity: item.quantity,
+        });
+
+        if (stockError) {
+          console.error("Error decrementing stock:", stockError);
+          // Don't throw - order was created, stock update failed
+          // This prevents orphan orders while still logging the issue
+        }
+      }
+    }
   },
 
   /**

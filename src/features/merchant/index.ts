@@ -66,6 +66,7 @@ export {
   SuppliersOrdersList,
   SuppliersCart,
   OrderConfirmDialog,
+  OrderSuccessScreen,
 } from "./components/suppliers";
 
 // Composants Credits
