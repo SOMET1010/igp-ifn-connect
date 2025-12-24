@@ -77,11 +77,22 @@ export const agentService = {
 
     if (agentError) throw agentError;
 
+    const defaultStats = {
+      today: 0,
+      week: 0,
+      total: 0,
+      validated: 0,
+      pending: 0,
+      rejected: 0,
+      validationRate: 0,
+      weeklyEnrollments: [],
+    };
+
     // If agent doesn't exist, return unregistered state
     if (!agentData) {
       return {
         profile: profileData,
-        stats: { today: 0, week: 0, total: 0 },
+        stats: defaultStats,
         isAgentRegistered: false,
       };
     }
@@ -92,9 +103,17 @@ export const agentService = {
     const dayOfWeek = now.getDay();
     const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString();
+    const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString();
 
-    // Get enrollment counts
-    const [todayResult, weekResult] = await Promise.all([
+    // Get all stats in parallel
+    const [
+      todayResult,
+      weekResult,
+      validatedResult,
+      pendingResult,
+      rejectedResult,
+      weeklyMerchants,
+    ] = await Promise.all([
       supabase
         .from("merchants")
         .select("id", { count: "exact", head: true })
@@ -105,14 +124,56 @@ export const agentService = {
         .select("id", { count: "exact", head: true })
         .eq("enrolled_by", agentData.id)
         .gte("enrolled_at", weekStart),
+      supabase
+        .from("merchants")
+        .select("id", { count: "exact", head: true })
+        .eq("enrolled_by", agentData.id)
+        .eq("status", "validated"),
+      supabase
+        .from("merchants")
+        .select("id", { count: "exact", head: true })
+        .eq("enrolled_by", agentData.id)
+        .eq("status", "pending"),
+      supabase
+        .from("merchants")
+        .select("id", { count: "exact", head: true })
+        .eq("enrolled_by", agentData.id)
+        .eq("status", "rejected"),
+      supabase
+        .from("merchants")
+        .select("enrolled_at")
+        .eq("enrolled_by", agentData.id)
+        .gte("enrolled_at", sevenDaysAgo)
+        .order("enrolled_at", { ascending: true }),
     ]);
+
+    // Build weekly enrollments array
+    const weeklyEnrollments: { date: string; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const dateStr = date.toISOString().split("T")[0];
+      const count = (weeklyMerchants.data || []).filter((m) => {
+        const enrollDate = m.enrolled_at?.split("T")[0];
+        return enrollDate === dateStr;
+      }).length;
+      weeklyEnrollments.push({ date: dateStr, count });
+    }
+
+    const validated = validatedResult.count ?? 0;
+    const total = agentData.total_enrollments ?? 0;
+    const validationRate = total > 0 ? Math.round((validated / total) * 100) : 0;
 
     return {
       profile: profileData,
       stats: {
         today: todayResult.count ?? 0,
         week: weekResult.count ?? 0,
-        total: agentData.total_enrollments ?? 0,
+        total,
+        validated,
+        pending: pendingResult.count ?? 0,
+        rejected: rejectedResult.count ?? 0,
+        validationRate,
+        weeklyEnrollments,
       },
       isAgentRegistered: true,
     };

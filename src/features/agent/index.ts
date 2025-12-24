@@ -16,6 +16,7 @@ export type {
   AgentProfile,
   AgentDashboardStats,
   AgentDashboardData,
+  DailyEnrollment,
 } from "./types/agent.types";
 
 export type {

@@ -28,9 +28,20 @@ export function useAgentDashboard() {
     maxRetries: 3,
   });
 
+  const defaultStats = {
+    today: 0,
+    week: 0,
+    total: 0,
+    validated: 0,
+    pending: 0,
+    rejected: 0,
+    validationRate: 0,
+    weeklyEnrollments: [],
+  };
+
   return {
     profile: data?.profile ?? null,
-    stats: data?.stats ?? { today: 0, week: 0, total: 0 },
+    stats: data?.stats ?? defaultStats,
     isAgentRegistered: data?.isAgentRegistered ?? false,
     isLoading,
     error,

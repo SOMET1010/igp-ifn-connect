@@ -13,6 +13,8 @@ import { RetryIndicator } from '@/components/shared/RetryIndicator';
 import { 
   useAgentDashboard,
   AgentStats,
+  AgentAlerts,
+  AgentEnrollmentsChart,
   PendingSyncAlert,
   AgentQuickGuide,
   AgentRegistrationSection,
@@ -53,7 +55,7 @@ const AgentDashboard: React.FC = () => {
     navigate('/agent/login');
   };
 
-  const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}.`;
+  const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}. ${t("validated")}: ${stats.validated}.`;
 
   if (error) {
     return (
@@ -133,7 +135,17 @@ const AgentDashboard: React.FC = () => {
           onSync={syncWithServer}
         />
 
+        <AgentAlerts 
+          pendingMerchants={stats.pending} 
+          todayEnrollments={stats.today} 
+        />
+
         <AgentStats stats={stats} isLoading={isLoading} />
+
+        <AgentEnrollmentsChart 
+          data={stats.weeklyEnrollments} 
+          isLoading={isLoading} 
+        />
 
         <Button
           onClick={() => navigate('/agent/enrolement')}
