@@ -11,7 +11,8 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId = "JBFqnCBsd6RMkjVDRZzb", modelId = "eleven_multilingual_v2" } = await req.json();
+    // Voice ID ivoirienne par défaut
+    const { text, voiceId = "VHZedUiIypNleY1ItL1s", modelId = "eleven_multilingual_v2" } = await req.json();
     
     if (!text) {
       throw new Error('Text is required');
@@ -36,10 +37,11 @@ serve(async (req) => {
           text,
           model_id: modelId,
           output_format: 'mp3_44100_128',
+          // Voice settings optimisées pour accent ivoirien
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.5,
+            stability: 0.45,
+            similarity_boost: 0.85,
+            style: 0.4,
             use_speaker_boost: true,
           },
         }),
