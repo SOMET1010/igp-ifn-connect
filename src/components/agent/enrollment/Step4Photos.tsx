@@ -1,5 +1,5 @@
 import { PhotoCapture } from "@/components/shared/PhotoCapture";
-import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import type { EnrollmentData } from "@/features/agent";
 
 interface Step4PhotosProps {
   data: EnrollmentData;

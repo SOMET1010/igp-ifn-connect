@@ -1,57 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
-
-export interface EnrollmentData {
-  // Step 1 - Identity
-  cmu_number: string;
-  full_name: string;
-  phone: string;
-  
-  // Step 2 - Activity
-  activity_type: string;
-  activity_description: string;
-  
-  // Step 3 - Location
-  market_id: string;
-  latitude: number | null;
-  longitude: number | null;
-  
-  // Step 4 - Photos (base64 for offline)
-  cmu_photo_file: File | null;
-  cmu_photo_base64: string;
-  location_photo_file: File | null;
-  location_photo_base64: string;
-}
-
-const DRAFT_KEY = "igp_enrollment_draft";
-
-const initialData: EnrollmentData = {
-  cmu_number: "",
-  full_name: "",
-  phone: "",
-  activity_type: "",
-  activity_description: "",
-  market_id: "",
-  latitude: null,
-  longitude: null,
-  cmu_photo_file: null,
-  cmu_photo_base64: "",
-  location_photo_file: null,
-  location_photo_base64: "",
-};
+import { 
+  EnrollmentData, 
+  initialEnrollmentData, 
+  ENROLLMENT_DRAFT_KEY 
+} from "../types/enrollment.types";
 
 export function useEnrollmentForm() {
-  const [data, setData] = useState<EnrollmentData>(initialData);
+  const [data, setData] = useState<EnrollmentData>(initialEnrollmentData);
   const [currentStep, setCurrentStep] = useState(0);
 
   // Load draft on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(DRAFT_KEY);
+      const saved = localStorage.getItem(ENROLLMENT_DRAFT_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         // Restore all except File objects
         setData({
-          ...initialData,
+          ...initialEnrollmentData,
           ...parsed,
           cmu_photo_file: null,
           location_photo_file: null,
@@ -72,7 +38,7 @@ export function useEnrollmentForm() {
         location_photo_file: null,
         currentStep,
       };
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(toSave));
+      localStorage.setItem(ENROLLMENT_DRAFT_KEY, JSON.stringify(toSave));
     } catch {
       // Ignore storage errors
     }
@@ -102,8 +68,8 @@ export function useEnrollmentForm() {
   }, []);
 
   const clearDraft = useCallback(() => {
-    localStorage.removeItem(DRAFT_KEY);
-    setData(initialData);
+    localStorage.removeItem(ENROLLMENT_DRAFT_KEY);
+    setData(initialEnrollmentData);
     setCurrentStep(0);
   }, []);
 

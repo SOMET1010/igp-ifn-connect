@@ -8,7 +8,7 @@ import { Step2Activity } from "@/components/agent/enrollment/Step2Activity";
 import { Step3Location } from "@/components/agent/enrollment/Step3Location";
 import { Step4Photos } from "@/components/agent/enrollment/Step4Photos";
 import { Step5Confirm } from "@/components/agent/enrollment/Step5Confirm";
-import { useEnrollmentForm } from "@/hooks/useEnrollmentForm";
+import { useEnrollmentForm } from "@/features/agent";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { useAuth } from "@/contexts/AuthContext";

@@ -3,7 +3,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import type { EnrollmentData } from "@/features/agent";
 import { VoiceInput } from "@/components/shared/VoiceInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 

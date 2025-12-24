@@ -3,7 +3,7 @@ import { Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AgentRequest } from '@/hooks/useAgentRequest';
+import type { AgentRequest } from '@/features/agent';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 

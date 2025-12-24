@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import type { EnrollmentData } from "@/features/agent";
 import { VoiceInput } from "@/components/shared/VoiceInput";
 import { useLanguage } from "@/contexts/LanguageContext";
 
