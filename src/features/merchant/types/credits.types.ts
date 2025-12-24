@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { phoneLocalSchema } from '@/lib/validationSchemas';
 
 // Database entity
 export interface CustomerCredit {
@@ -19,7 +20,7 @@ export type CreditFilter = 'all' | 'pending' | 'overdue' | 'paid';
 // Zod schemas for validation
 export const newCreditSchema = z.object({
   customer_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
-  customer_phone: z.string().optional(),
+  customer_phone: phoneLocalSchema.optional().or(z.literal('')),
   amount_owed: z.number().positive('Le montant doit être supérieur à 0'),
   due_date: z.string().optional(),
   notes: z.string().optional()

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneLocalSchema } from "@/lib/validationSchemas";
 
 // === Enrollment Form Data ===
 
@@ -44,7 +45,7 @@ export const initialEnrollmentData: EnrollmentData = {
 export const EnrollmentStep1Schema = z.object({
   cmu_number: z.string().min(5, "Le numéro CMU doit contenir au moins 5 caractères"),
   full_name: z.string().min(3, "Le nom doit contenir au moins 3 caractères"),
-  phone: z.string().min(8, "Le téléphone doit contenir au moins 8 chiffres"),
+  phone: phoneLocalSchema,
 });
 
 export const EnrollmentStep2Schema = z.object({

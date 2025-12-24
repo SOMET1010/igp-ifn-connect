@@ -1,11 +1,64 @@
 import { z } from 'zod';
 
-// Phone validation for Côte d'Ivoire (10 digits)
-export const phoneSchema = z
+// === Phone validation for Côte d'Ivoire ===
+
+// Valid prefixes for Ivorian operators: 01, 05, 07
+const CI_PHONE_REGEX = /^(01|05|07)[0-9]{8}$/;
+const CI_FULL_PHONE_REGEX = /^225(01|05|07)[0-9]{8}$/;
+
+// Local format: 10 digits starting with 01, 05, or 07
+export const phoneLocalSchema = z
   .string()
   .min(1, 'Le numéro de téléphone est requis')
-  .regex(/^[0-9]{10}$/, 'Numéro de téléphone invalide (10 chiffres requis)')
+  .regex(CI_PHONE_REGEX, 'Numéro invalide. Doit commencer par 01, 05 ou 07 (10 chiffres)')
   .transform(val => val.replace(/\s/g, ''));
+
+// Full format with country code: 225 + 10 digits
+export const phoneFullSchema = z
+  .string()
+  .min(1, 'Le numéro de téléphone est requis')
+  .regex(CI_FULL_PHONE_REGEX, 'Format invalide (225 + 10 chiffres, commence par 01, 05 ou 07)')
+  .transform(val => val.replace(/\s/g, ''));
+
+// Optional local phone schema
+export const phoneLocalOptionalSchema = z
+  .string()
+  .regex(CI_PHONE_REGEX, 'Numéro invalide. Doit commencer par 01, 05 ou 07 (10 chiffres)')
+  .optional()
+  .nullable()
+  .or(z.literal(''));
+
+// Legacy schema for backward compatibility
+export const phoneSchema = phoneLocalSchema;
+
+// === Phone helpers ===
+
+// Normalize phone to full format (add 225 prefix if needed)
+export function normalizePhoneCI(phone: string): string {
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 10 && CI_PHONE_REGEX.test(cleaned)) {
+    return `225${cleaned}`;
+  }
+  if (cleaned.startsWith('225') && cleaned.length === 13) {
+    return cleaned;
+  }
+  return cleaned;
+}
+
+// Format phone for display (with spaces)
+export function formatPhoneCI(phone: string): string {
+  const cleaned = phone.replace(/\D/g, '');
+  const local = cleaned.length === 13 ? cleaned.slice(3) : cleaned;
+  if (local.length !== 10) return phone;
+  return local.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+}
+
+// Check if phone has valid Ivorian prefix
+export function isValidCIPhonePrefix(phone: string): boolean {
+  const cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 0) return true;
+  return cleaned.startsWith('01') || cleaned.startsWith('05') || cleaned.startsWith('07');
+}
 
 // Email validation
 export const emailSchema = z
