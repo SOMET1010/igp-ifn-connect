@@ -9,6 +9,7 @@ export { useScannedProducts } from "./hooks/useScannedProducts";
 export { useMerchantSuppliers } from "./hooks/useMerchantSuppliers";
 export { useSupplierCart } from "./hooks/useSupplierCart";
 export { useMerchantCredits } from "./hooks/useMerchantCredits";
+export { useTransactions } from "./hooks/useTransactions";
 
 // Services
 export { transactionService } from "./services/transactionService";
@@ -96,7 +97,7 @@ export type {
   TransactionDetails,
 } from "./types/transaction.types";
 
-// Utilitaires
+// Utilitaires Cashier
 export {
   calculateCmuDeduction,
   calculateRstiDeduction,
@@ -105,3 +106,19 @@ export {
   generateTransactionReference,
   parseManualAmount,
 } from "./utils/cashierCalculations";
+
+// Utilitaires Transactions
+export {
+  groupTransactionsByDate,
+  getDateRangeForPeriod,
+  filterTransactionsByPeriod,
+  calculateTransactionsSummary,
+  formatTransactionForExport,
+} from "./utils/transactionUtils";
+export type {
+  TransactionListItem,
+  GroupedTransactions,
+  ExportPeriod,
+  TransactionsSummary,
+  DateRange,
+} from "./utils/transactionUtils";
