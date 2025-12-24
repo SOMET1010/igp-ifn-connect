@@ -123,3 +123,25 @@ export type {
   TransactionsSummary,
   DateRange,
 } from "./utils/transactionUtils";
+
+// Promotions
+export { usePromotions } from "./hooks/usePromotions";
+export { promotionsService } from "./services/promotionsService";
+export type {
+  Promotion,
+  PromotionFilter,
+  NewPromotionInput,
+} from "./types/promotions.types";
+export {
+  newPromotionSchema,
+  isPromotionExpired,
+  isPromotionUpcoming,
+  getPromotionStatus,
+} from "./types/promotions.types";
+export {
+  PromotionCard,
+  AddPromotionDialog,
+  DeletePromotionDialog,
+  PromotionsSummary,
+  PromotionsFilters,
+} from "./components/promotions";
