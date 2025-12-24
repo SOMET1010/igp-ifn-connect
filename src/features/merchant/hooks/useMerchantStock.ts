@@ -1,10 +1,15 @@
+/**
+ * Hook de gestion du stock marchand
+ * Refactoré pour utiliser stockService
+ */
+
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { merchantLogger } from "@/infra/logger";
 import { withRetry } from "@/hooks/useRetryOperation";
-import type { StockItem, Product, ProductCategory } from "@/components/merchant/stock/types";
+import { stockService } from "../services/stockService";
+import type { StockItem, Product, ProductCategory } from "../types/stock.types";
 
 interface UseMerchantStockResult {
   stocks: StockItem[];
@@ -40,35 +45,29 @@ export function useMerchantStock(): UseMerchantStockResult {
     setIsLoading(true);
 
     try {
-      const { data: merchantData } = await supabase
-        .from("merchants")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!merchantData) {
+      const mId = await stockService.getMerchantId(user.id);
+      if (!mId) {
         setIsLoading(false);
         return;
       }
 
-      setMerchantId(merchantData.id);
+      setMerchantId(mId);
 
-      const [stocksRes, productsRes, categoriesRes] = await Promise.all([
-        supabase.from("merchant_stocks").select("*").eq("merchant_id", merchantData.id),
-        supabase.from("products").select("*"),
-        supabase.from("product_categories").select("*"),
+      const [stocksData, productsData, categoriesData] = await Promise.all([
+        stockService.getStocks(mId),
+        stockService.getProducts(),
+        stockService.getCategories(),
       ]);
 
-      if (productsRes.data) setProducts(productsRes.data);
-      if (categoriesRes.data) setCategories(categoriesRes.data);
+      setProducts(productsData);
+      setCategories(categoriesData);
 
-      if (stocksRes.data && productsRes.data) {
-        const mergedStocks = stocksRes.data.map(stock => ({
-          ...stock,
-          product: productsRes.data.find(p => p.id === stock.product_id)
-        }));
-        setStocks(mergedStocks);
-      }
+      // Merge stocks avec les produits
+      const mergedStocks = stocksData.map(stock => ({
+        ...stock,
+        product: productsData.find(p => p.id === stock.product_id)
+      }));
+      setStocks(mergedStocks);
     } catch (error) {
       merchantLogger.error("Error fetching stock data", error);
     } finally {
@@ -96,27 +95,24 @@ export function useMerchantStock(): UseMerchantStockResult {
 
     try {
       await withRetry(async () => {
-        const { error } = await supabase.from("merchant_stocks").insert({
-          merchant_id: merchantId,
-          product_id: data.productId,
+        await stockService.addStock({
+          merchantId,
+          productId: data.productId,
           quantity: data.quantity,
-          min_threshold: data.minThreshold,
-          unit_price: data.unitPrice,
-          last_restocked_at: new Date().toISOString(),
+          minThreshold: data.minThreshold,
+          unitPrice: data.unitPrice,
         });
-
-        if (error) throw error;
       }, { maxRetries: 3, baseDelay: 1000 });
 
-      setIsSaving(false);
       toast.success("Produit ajouté au stock");
       fetchData();
       return true;
     } catch (error) {
-      setIsSaving(false);
       merchantLogger.error("Error adding stock", error);
       toast.error("Erreur lors de l'ajout. Réessayez.");
       return false;
+    } finally {
+      setIsSaving(false);
     }
   }, [merchantId, fetchData]);
 
@@ -128,27 +124,22 @@ export function useMerchantStock(): UseMerchantStockResult {
 
     try {
       await withRetry(async () => {
-        const { error } = await supabase
-          .from("merchant_stocks")
-          .update({
-            quantity: data.quantity,
-            min_threshold: data.minThreshold,
-            unit_price: data.unitPrice,
-          })
-          .eq("id", stockId);
-
-        if (error) throw error;
+        await stockService.updateStock(stockId, {
+          quantity: data.quantity,
+          minThreshold: data.minThreshold,
+          unitPrice: data.unitPrice,
+        });
       }, { maxRetries: 3, baseDelay: 1000 });
 
-      setIsSaving(false);
       toast.success("Stock modifié");
       fetchData();
       return true;
     } catch (error) {
-      setIsSaving(false);
       merchantLogger.error("Error updating stock", error);
       toast.error("Erreur lors de la modification. Réessayez.");
       return false;
+    } finally {
+      setIsSaving(false);
     }
   }, [fetchData]);
 
@@ -161,55 +152,39 @@ export function useMerchantStock(): UseMerchantStockResult {
 
     try {
       await withRetry(async () => {
-        const { error } = await supabase
-          .from("merchant_stocks")
-          .update({
-            quantity: currentQuantity + addQuantity,
-            last_restocked_at: new Date().toISOString(),
-          })
-          .eq("id", stockId);
-
-        if (error) throw error;
+        await stockService.restockItem(stockId, currentQuantity + addQuantity);
       }, { maxRetries: 3, baseDelay: 1000 });
 
-      setIsSaving(false);
       toast.success("Stock mis à jour");
       fetchData();
       return true;
     } catch (error) {
-      setIsSaving(false);
       merchantLogger.error("Error restocking", error);
       toast.error("Erreur lors du réapprovisionnement. Réessayez.");
       return false;
+    } finally {
+      setIsSaving(false);
     }
   }, [fetchData]);
 
   const deleteStock = useCallback(async (stockId: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from("merchant_stocks")
-      .delete()
-      .eq("id", stockId);
-
-    if (error) {
+    try {
+      await stockService.deleteStock(stockId);
+      toast.success("Produit retiré du stock");
+      fetchData();
+      return true;
+    } catch (error) {
       merchantLogger.error("Error deleting stock", error);
       toast.error("Erreur lors de la suppression");
       return false;
     }
-
-    toast.success("Produit retiré du stock");
-    fetchData();
-    return true;
   }, [fetchData]);
 
   const checkLowStock = useCallback(async () => {
     setIsCheckingStock(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-low-stock');
-      
-      if (error) {
-        merchantLogger.error("Error checking stock", error);
-        toast.error("Erreur lors de la vérification du stock");
-      } else if (data?.lowStockCount > 0) {
+      const data = await stockService.checkLowStock();
+      if (data?.lowStockCount > 0) {
         toast.info(`${data.lowStockCount} produit(s) en stock bas détecté(s)`);
       } else {
         toast.success("Tous les stocks sont OK !");
@@ -217,8 +192,9 @@ export function useMerchantStock(): UseMerchantStockResult {
     } catch (err) {
       merchantLogger.error("Error checking low stock", err);
       toast.error("Erreur de connexion");
+    } finally {
+      setIsCheckingStock(false);
     }
-    setIsCheckingStock(false);
   }, []);
 
   return {
