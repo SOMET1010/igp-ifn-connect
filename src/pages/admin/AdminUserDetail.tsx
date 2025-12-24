@@ -31,12 +31,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ActivityTimeline } from '@/components/admin/ActivityTimeline';
-import { useAdminUserDetail } from '@/hooks/useAdminUserDetail';
+import { useAdminUserDetail, type AppRole } from '@/features/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { Database } from '@/integrations/supabase/types';
-
-type AppRole = Database['public']['Enums']['app_role'];
 
 const roleConfig: Record<AppRole, { label: string; color: string }> = {
   admin: { label: 'Admin', color: 'bg-red-500' },

@@ -35,7 +35,7 @@ import { FilterChips, FilterOption } from '@/components/shared/FilterChips';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 
-import { useAdminAgentRequests, AgentRequest } from '@/hooks/useAdminAgentRequests';
+import { useAdminAgentRequests, type AgentRequest } from '@/features/admin';
 
 const statusFilters: FilterOption[] = [
   { value: 'pending', label: 'En attente', icon: Clock },

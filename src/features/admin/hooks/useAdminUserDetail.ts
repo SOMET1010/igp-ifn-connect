@@ -1,83 +1,26 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { usersService } from '../services/usersService';
+import type {
+  UserDetailData,
+  UserDetailProfile,
+  UserDetailAgent,
+  UserDetailMerchant,
+  UserDetailCooperative,
+  UserActivity,
+  AppRole
+} from '../types/users.types';
 
-type AppRole = Database['public']['Enums']['app_role'];
-
-export interface UserActivity {
-  id: string;
-  type: 'account_created' | 'role_assigned' | 'entity_created' | 
-        'entity_validated' | 'transaction' | 'invoice' | 'profile_updated' | 'enrollment';
-  description: string;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-  icon: string;
-  color: string;
-}
-
-interface ProfileData {
-  id: string;
-  userId: string;
-  fullName: string;
-  phone: string | null;
-  avatarUrl: string | null;
+interface RoleWithDate {
+  role: AppRole;
   createdAt: string;
-  updatedAt: string;
-}
-
-interface LinkedAgent {
-  id: string;
-  employeeId: string;
-  organization: string;
-  zone: string | null;
-  isActive: boolean;
-  totalEnrollments: number;
-  createdAt: string;
-}
-
-interface LinkedMerchant {
-  id: string;
-  fullName: string;
-  phone: string;
-  cmuNumber: string;
-  activityType: string;
-  status: string;
-  enrolledAt: string;
-  validatedAt: string | null;
-  marketName?: string;
-}
-
-interface LinkedCooperative {
-  id: string;
-  name: string;
-  code: string;
-  region: string;
-  commune: string;
-  totalMembers: number;
-  createdAt: string;
-}
-
-export interface UserDetailData {
-  profile: ProfileData | null;
-  roles: AppRole[];
-  linkedAgent: LinkedAgent | null;
-  linkedMerchant: LinkedMerchant | null;
-  linkedCooperative: LinkedCooperative | null;
-  activities: UserActivity[];
-  stats: {
-    totalTransactions: number;
-    totalAmount: number;
-    enrollmentsCount: number;
-    invoicesCount: number;
-  };
 }
 
 export const useAdminUserDetail = (userId: string | undefined) => {
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [roles, setRoles] = useState<{ role: AppRole; createdAt: string }[]>([]);
-  const [linkedAgent, setLinkedAgent] = useState<LinkedAgent | null>(null);
-  const [linkedMerchant, setLinkedMerchant] = useState<LinkedMerchant | null>(null);
-  const [linkedCooperative, setLinkedCooperative] = useState<LinkedCooperative | null>(null);
+  const [profile, setProfile] = useState<UserDetailProfile | null>(null);
+  const [roles, setRoles] = useState<RoleWithDate[]>([]);
+  const [linkedAgent, setLinkedAgent] = useState<UserDetailAgent | null>(null);
+  const [linkedMerchant, setLinkedMerchant] = useState<UserDetailMerchant | null>(null);
+  const [linkedCooperative, setLinkedCooperative] = useState<UserDetailCooperative | null>(null);
   const [transactions, setTransactions] = useState<{ id: string; amount: number; createdAt: string; reference: string | null; type: string }[]>([]);
   const [invoices, setInvoices] = useState<{ id: string; invoiceNumber: string; amountTtc: number; createdAt: string }[]>([]);
   const [enrolledMerchants, setEnrolledMerchants] = useState<{ id: string; fullName: string; enrolledAt: string }[]>([]);
@@ -92,14 +35,7 @@ export const useAdminUserDetail = (userId: string | undefined) => {
 
     try {
       // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-
+      const profileData = await usersService.getUserProfile(userId);
       if (profileData) {
         setProfile({
           id: profileData.id,
@@ -113,22 +49,11 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       }
 
       // Fetch roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role, created_at')
-        .eq('user_id', userId);
-
-      if (rolesError) throw rolesError;
-      setRoles(rolesData?.map(r => ({ role: r.role, createdAt: r.created_at })) || []);
+      const rolesData = await usersService.getUserRoles(userId);
+      setRoles(rolesData);
 
       // Fetch linked agent
-      const { data: agentData, error: agentError } = await supabase
-        .from('agents')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (agentError) throw agentError;
+      const agentData = await usersService.getLinkedAgent(userId);
       if (agentData) {
         setLinkedAgent({
           id: agentData.id,
@@ -140,29 +65,12 @@ export const useAdminUserDetail = (userId: string | undefined) => {
           createdAt: agentData.created_at,
         });
 
-        // Fetch merchants enrolled by this agent
-        const { data: enrolledData } = await supabase
-          .from('merchants')
-          .select('id, full_name, enrolled_at')
-          .eq('enrolled_by', agentData.id)
-          .order('enrolled_at', { ascending: false })
-          .limit(50);
-
-        setEnrolledMerchants(enrolledData?.map(m => ({
-          id: m.id,
-          fullName: m.full_name,
-          enrolledAt: m.enrolled_at,
-        })) || []);
+        const enrolled = await usersService.getEnrolledMerchants(agentData.id);
+        setEnrolledMerchants(enrolled);
       }
 
       // Fetch linked merchant
-      const { data: merchantData, error: merchantError } = await supabase
-        .from('merchants')
-        .select('*, markets(name)')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (merchantError) throw merchantError;
+      const merchantData = await usersService.getLinkedMerchant(userId);
       if (merchantData) {
         setLinkedMerchant({
           id: merchantData.id,
@@ -176,46 +84,15 @@ export const useAdminUserDetail = (userId: string | undefined) => {
           marketName: (merchantData.markets as { name: string } | null)?.name,
         });
 
-        // Fetch transactions for this merchant
-        const { data: txData } = await supabase
-          .from('transactions')
-          .select('id, amount, created_at, reference, transaction_type')
-          .eq('merchant_id', merchantData.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
+        const txData = await usersService.getMerchantTransactions(merchantData.id);
+        setTransactions(txData);
 
-        setTransactions(txData?.map(t => ({
-          id: t.id,
-          amount: Number(t.amount),
-          createdAt: t.created_at,
-          reference: t.reference,
-          type: t.transaction_type,
-        })) || []);
-
-        // Fetch invoices for this merchant
-        const { data: invData } = await supabase
-          .from('invoices')
-          .select('id, invoice_number, amount_ttc, created_at')
-          .eq('merchant_id', merchantData.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-
-        setInvoices(invData?.map(i => ({
-          id: i.id,
-          invoiceNumber: i.invoice_number,
-          amountTtc: Number(i.amount_ttc),
-          createdAt: i.created_at,
-        })) || []);
+        const invData = await usersService.getMerchantInvoices(merchantData.id);
+        setInvoices(invData);
       }
 
       // Fetch linked cooperative
-      const { data: coopData, error: coopError } = await supabase
-        .from('cooperatives')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (coopError) throw coopError;
+      const coopData = await usersService.getLinkedCooperative(userId);
       if (coopData) {
         setLinkedCooperative({
           id: coopData.id,
@@ -239,11 +116,9 @@ export const useAdminUserDetail = (userId: string | undefined) => {
     fetchData();
   }, [userId]);
 
-  // Build activities timeline
   const activities = useMemo<UserActivity[]>(() => {
     const items: UserActivity[] = [];
 
-    // Account created
     if (profile) {
       items.push({
         id: `account-${profile.id}`,
@@ -254,7 +129,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
         color: 'bg-blue-500',
       });
 
-      // Profile updated
       if (profile.updatedAt !== profile.createdAt) {
         items.push({
           id: `profile-update-${profile.id}`,
@@ -267,7 +141,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       }
     }
 
-    // Roles assigned
     roles.forEach(r => {
       items.push({
         id: `role-${r.role}-${r.createdAt}`,
@@ -279,7 +152,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     });
 
-    // Agent created
     if (linkedAgent) {
       items.push({
         id: `agent-${linkedAgent.id}`,
@@ -292,7 +164,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     }
 
-    // Merchant created/validated
     if (linkedMerchant) {
       items.push({
         id: `merchant-${linkedMerchant.id}`,
@@ -316,7 +187,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       }
     }
 
-    // Cooperative created
     if (linkedCooperative) {
       items.push({
         id: `coop-${linkedCooperative.id}`,
@@ -329,7 +199,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     }
 
-    // Enrollments by agent
     enrolledMerchants.forEach(m => {
       items.push({
         id: `enrollment-${m.id}`,
@@ -341,7 +210,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     });
 
-    // Transactions
     transactions.forEach(t => {
       items.push({
         id: `tx-${t.id}`,
@@ -354,7 +222,6 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     });
 
-    // Invoices
     invoices.forEach(i => {
       items.push({
         id: `invoice-${i.id}`,
@@ -367,11 +234,9 @@ export const useAdminUserDetail = (userId: string | undefined) => {
       });
     });
 
-    // Sort by date descending
     return items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [profile, roles, linkedAgent, linkedMerchant, linkedCooperative, transactions, invoices, enrolledMerchants]);
 
-  // Stats
   const stats = useMemo(() => ({
     totalTransactions: transactions.length,
     totalAmount: transactions.reduce((sum, t) => sum + t.amount, 0),

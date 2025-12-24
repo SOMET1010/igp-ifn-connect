@@ -4,7 +4,7 @@ import {
   UserPlus, Edit, Shield, UserCog, Store, CheckCircle, 
   Building2, UserCheck, Banknote, FileText, Circle
 } from 'lucide-react';
-import { UserActivity } from '@/hooks/useAdminUserDetail';
+import { type UserActivity } from '@/features/admin';
 import { cn } from '@/lib/utils';
 
 interface ActivityTimelineProps {

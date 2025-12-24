@@ -14,7 +14,7 @@ import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { SearchInput } from '@/components/shared/SearchInput';
-import { useAdminUsersData, AdminUserData, ExpectedEntityType } from '@/hooks/useAdminUsersData';
+import { useAdminUsersData, type AdminUserData, type ExpectedEntityType, type AppRole } from '@/features/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -58,9 +58,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import type { Database } from '@/integrations/supabase/types';
-
-type AppRole = Database['public']['Enums']['app_role'];
 
 const roleConfig: Record<AppRole, { label: string; color: string; icon: React.ElementType }> = {
   admin: { label: 'Admin', color: 'bg-violet-500/10 text-violet-700 border-violet-500/30', icon: Shield },
