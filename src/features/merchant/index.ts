@@ -145,3 +145,28 @@ export {
   PromotionsSummary,
   PromotionsFilters,
 } from "./components/promotions";
+
+// Invoices
+export { useInvoices } from "./hooks/useInvoices";
+export { invoicesService } from "./services/invoicesService";
+export type {
+  Invoice,
+  InvoiceFilter,
+  MerchantInvoiceData,
+  NewInvoiceInput,
+  CancelInvoiceInput,
+} from "./types/invoices.types";
+export {
+  newInvoiceSchema,
+  cancelInvoiceSchema,
+  isInvoiceCancelled,
+  formatInvoiceAmount,
+  parseInvoiceAmount,
+} from "./types/invoices.types";
+export {
+  InvoiceCard,
+  CreateInvoiceDialog,
+  CancelInvoiceDialog,
+  InvoicesSummary,
+  InvoicesFilters,
+} from "./components/invoices";
