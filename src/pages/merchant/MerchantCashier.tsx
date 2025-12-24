@@ -9,6 +9,7 @@ import { merchantNavItems } from "@/config/navigation";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CalculatorKeypad, useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
 import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
+import { ProductSelector, SelectedProduct } from "@/components/merchant/ProductSelector";
 import { SuccessScreen, ButtonPrimary, ButtonSecondary } from "@/components/ifn";
 import { QRReceipt } from "@/components/merchant/QRReceipt";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { merchantLogger } from "@/infra/logger";
 import { useRetryOperation } from "@/hooks/useRetryOperation";
+import { useMerchantStock } from "@/hooks/useMerchantStock";
 
 type PaymentMethod = "cash" | "mobile_money";
 type Step = "input" | "confirm" | "success";
@@ -27,6 +29,9 @@ export default function MerchantCashier() {
   const { t } = useLanguage();
   const triggerSuccessFeedback = useSuccessFeedback();
   
+  // Stock data for product selection
+  const { stocks, isLoading: stocksLoading } = useMerchantStock();
+  
   const [step, setStep] = useState<Step>("input");
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState<PaymentMethod | null>(null);
@@ -34,8 +39,15 @@ export default function MerchantCashier() {
   const [transactionRef, setTransactionRef] = useState("");
   const [merchantName, setMerchantName] = useState("");
   const [showReceipt, setShowReceipt] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
 
-  const numericAmount = parseInt(amount.replace(/\D/g, "")) || 0;
+  // Calculate amount from selected products or manual input
+  const productsTotal = selectedProducts.reduce(
+    (sum, p) => sum + (p.quantity * p.unitPrice), 
+    0
+  );
+  const manualAmount = parseInt(amount.replace(/\D/g, "")) || 0;
+  const numericAmount = productsTotal > 0 ? productsTotal : manualAmount;
   const cmuDeduction = Math.round(numericAmount * 0.01);
   const rstiDeduction = Math.round(numericAmount * 0.005);
   const formattedAmount = numericAmount.toLocaleString("fr-FR");
@@ -139,6 +151,27 @@ export default function MerchantCashier() {
         throw error;
       }
 
+      // Enregistrer les produits vendus si sélectionnés
+      if (selectedProducts.length > 0) {
+        const transactionItems = selectedProducts.map(p => ({
+          transaction_id: txData.id,
+          product_id: p.productId,
+          product_name: p.productName,
+          quantity: p.quantity,
+          unit_price: p.unitPrice,
+          total_price: p.quantity * p.unitPrice
+        }));
+
+        const { error: itemsError } = await supabase
+          .from("transaction_items")
+          .insert(transactionItems);
+
+        if (itemsError) {
+          merchantLogger.warn('Échec enregistrement articles', { error: itemsError.message });
+          // Continue anyway, transaction is already recorded
+        }
+      }
+
       // Mettre à jour le solde RSTI
       const currentBalance = Number(merchantData.rsti_balance || 0);
       await supabase
@@ -187,6 +220,7 @@ export default function MerchantCashier() {
     setStep("input");
     setTransactionRef("");
     setShowReceipt(false);
+    setSelectedProducts([]);
   };
 
   return (
@@ -248,10 +282,28 @@ export default function MerchantCashier() {
 
         <main className="p-4 space-y-4">
           {step === "input" && (
-            <div className="flex flex-col min-h-[calc(100vh-180px)] justify-between">
+            <div className="flex flex-col min-h-[calc(100vh-180px)] justify-between gap-3">
+              {/* Product Selector - Optional */}
+              <ProductSelector
+                stocks={stocks.map(s => ({
+                  id: s.id,
+                  product_id: s.product_id,
+                  product_name: s.product?.name || '',
+                  quantity: Number(s.quantity),
+                  unit_price: s.unit_price,
+                  image_url: null,
+                  unit: s.product?.unit
+                }))}
+                selectedProducts={selectedProducts}
+                onProductsChange={setSelectedProducts}
+                isLoading={stocksLoading}
+              />
+
               {/* Amount display - GIANT */}
-              <div className="text-center py-6">
-                <p className="text-lg text-muted-foreground font-medium mb-3">{t("how_much")}</p>
+              <div className="text-center py-4">
+                <p className="text-lg text-muted-foreground font-medium mb-2">
+                  {selectedProducts.length > 0 ? (t("total") || "Total") : t("how_much")}
+                </p>
                 <div className="flex items-baseline justify-center gap-2">
                   <span className={`text-6xl sm:text-7xl font-black tracking-tight transition-all duration-200 ${
                     numericAmount > 0 ? "text-foreground" : "text-muted-foreground/50"
@@ -262,15 +314,19 @@ export default function MerchantCashier() {
                 </div>
               </div>
 
-              {/* CFA Bills Quick Input - Inclusive UX */}
-              <CashDenominationPad onAddAmount={handleAddAmount} />
+              {/* CFA Bills Quick Input - Only show if no products selected */}
+              {selectedProducts.length === 0 && (
+                <>
+                  <CashDenominationPad onAddAmount={handleAddAmount} />
 
-              {/* Calculator Keypad XXL */}
-              <CalculatorKeypad
-                value={amount}
-                onChange={setAmount}
-                maxLength={10}
-              />
+                  {/* Calculator Keypad XXL */}
+                  <CalculatorKeypad
+                    value={amount}
+                    onChange={setAmount}
+                    maxLength={10}
+                  />
+                </>
+              )}
 
               {/* Payment buttons XXL */}
               <div className="space-y-4 pt-2">

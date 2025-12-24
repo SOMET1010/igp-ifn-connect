@@ -4,17 +4,24 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { playPrerecordedAudio, stopAudio } from "@/lib/audioService";
 
+// Import bill images
+import bill500 from "@/assets/bills/500-fcfa.png";
+import bill1000 from "@/assets/bills/1000-fcfa.png";
+import bill2000 from "@/assets/bills/2000-fcfa.png";
+import bill5000 from "@/assets/bills/5000-fcfa.png";
+import bill10000 from "@/assets/bills/10000-fcfa.png";
+
 interface CashDenominationPadProps {
   onAddAmount: (value: number) => void;
 }
 
-// CFA Bill colors matching real bills + audio keys
+// CFA Bills with realistic images
 const BILLS = [
-  { value: 500, bgColor: "bg-amber-100", textColor: "text-amber-900", borderColor: "border-amber-300", label: "500", audioKey: "bill_500" },
-  { value: 1000, bgColor: "bg-blue-100", textColor: "text-blue-900", borderColor: "border-blue-300", label: "1 000", audioKey: "bill_1000" },
-  { value: 2000, bgColor: "bg-pink-100", textColor: "text-pink-900", borderColor: "border-pink-300", label: "2 000", audioKey: "bill_2000" },
-  { value: 5000, bgColor: "bg-green-100", textColor: "text-green-900", borderColor: "border-green-300", label: "5 000", audioKey: "bill_5000" },
-  { value: 10000, bgColor: "bg-purple-100", textColor: "text-purple-900", borderColor: "border-purple-300", label: "10 000", audioKey: "bill_10000" },
+  { value: 500, image: bill500, label: "500", audioKey: "bill_500" },
+  { value: 1000, image: bill1000, label: "1 000", audioKey: "bill_1000" },
+  { value: 2000, image: bill2000, label: "2 000", audioKey: "bill_2000" },
+  { value: 5000, image: bill5000, label: "5 000", audioKey: "bill_5000" },
+  { value: 10000, image: bill10000, label: "10 000", audioKey: "bill_10000" },
 ];
 
 const COINS = [
@@ -138,7 +145,7 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
         }
       `}</style>
 
-      {/* Quick Bills Section */}
+      {/* Quick Bills Section with realistic images */}
       <div className="bg-muted/30 rounded-2xl p-3">
         <p className="text-xs text-muted-foreground font-medium mb-2 text-center">
           {t("quick_bills") || "Billets rapides"}
@@ -149,14 +156,14 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
             <Button
               key={bill.value}
               type="button"
-              variant="outline"
-              className={`
-                relative h-16 sm:h-20 flex flex-col items-center justify-center gap-0.5
-                ${bill.bgColor} ${bill.textColor} ${bill.borderColor}
-                border-2 rounded-xl font-bold
+              variant="ghost"
+              className="
+                relative h-20 sm:h-24 p-1 flex flex-col items-center justify-center gap-1
+                rounded-xl
                 transition-all duration-150 active:scale-90 hover:brightness-95
-                shadow-sm hover:shadow-md
-              `}
+                shadow-sm hover:shadow-lg
+                bg-transparent hover:bg-muted/50
+              "
               onClick={() => handleDenominationClick(bill.value, bill.audioKey)}
             >
               {/* Floating amounts for this bill */}
@@ -167,13 +174,19 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
                 ))
               }
               
-              {/* Bill representation - stylized rectangle */}
-              <div className={`w-10 h-5 sm:w-12 sm:h-6 rounded border ${bill.borderColor} ${bill.bgColor} flex items-center justify-center mb-0.5`}>
-                <span className="text-[8px] sm:text-[10px] font-bold opacity-60">BCEAO</span>
+              {/* Realistic bill image */}
+              <div className="w-full h-12 sm:h-14 overflow-hidden rounded-lg shadow-md border border-border/50">
+                <img 
+                  src={bill.image} 
+                  alt={`${bill.value} FCFA`}
+                  className="w-full h-full object-cover"
+                />
               </div>
               
-              {/* Value */}
-              <span className="text-base sm:text-lg font-black leading-none">{bill.label}</span>
+              {/* Value label */}
+              <span className="text-xs sm:text-sm font-black text-foreground leading-none mt-0.5">
+                {bill.label}
+              </span>
             </Button>
           ))}
         </div>
