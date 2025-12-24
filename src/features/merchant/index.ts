@@ -5,6 +5,7 @@
 // Hooks publics
 export { useCashierPayment } from "./hooks/useCashierPayment";
 export { useMerchantStock } from "./hooks/useMerchantStock";
+export { useScannedProducts } from "./hooks/useScannedProducts";
 
 // Services
 export { transactionService } from "./services/transactionService";
