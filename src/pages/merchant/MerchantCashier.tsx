@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
@@ -8,6 +8,7 @@ import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
 import {
   useMerchantStock,
   useCashierPayment,
+  useScannedProducts,
   CashierInputStep,
   CashierConfirmStep,
   CashierSuccessStep,
@@ -23,6 +24,18 @@ export default function MerchantCashier() {
   // State local pour l'entrée manuelle et les produits
   const [amount, setAmount] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+  
+  // Récupérer les produits scannés depuis le Scanner
+  const { scannedProducts, hasScannedProducts, clearScannedProducts } = useScannedProducts();
+  
+  // Pré-charger les produits scannés au montage
+  useEffect(() => {
+    if (hasScannedProducts && selectedProducts.length === 0) {
+      setSelectedProducts(scannedProducts);
+      // Nettoyer sessionStorage après chargement
+      clearScannedProducts();
+    }
+  }, [hasScannedProducts, scannedProducts, clearScannedProducts, selectedProducts.length]);
   
   // Stock data
   const { stocks, isLoading: stocksLoading } = useMerchantStock();
