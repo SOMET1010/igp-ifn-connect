@@ -7,8 +7,9 @@ import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { cooperativeNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
-import { useCooperativeOrders } from '@/hooks/useCooperativeOrders';
-import { OrderCard, CancelOrderDialog, Order } from '@/components/cooperative/orders';
+import { useCooperativeOrders } from '@/features/cooperative';
+import type { Order } from '@/features/cooperative';
+import { OrderCard, CancelOrderDialog } from '@/components/cooperative/orders';
 import { NotificationBadge } from '@/components/shared/NotificationBadge';
 
 const CooperativeOrders: React.FC = () => {
