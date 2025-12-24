@@ -29,7 +29,16 @@ export function useCooperativeDashboard() {
   });
 
   const cooperative = data?.cooperative ?? null;
-  const stats = data?.stats ?? { products: 0, pendingOrders: 0 };
+  const stats = data?.stats ?? { 
+    products: 0, 
+    pendingOrders: 0,
+    confirmedOrders: 0,
+    inTransitOrders: 0,
+    deliveredOrders: 0,
+    totalStockQuantity: 0,
+    stockValue: 0,
+    totalRevenue: 0,
+  };
 
   return {
     cooperative,

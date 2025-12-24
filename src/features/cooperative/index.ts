@@ -43,7 +43,13 @@ export {
 } from "./utils/cooperativeCalculations";
 
 // Composants Dashboard
-export { CooperativeStats, PendingOrdersAlert, QuickGuide } from "./components/dashboard";
+export { 
+  CooperativeStats, 
+  CooperativeOrdersChart, 
+  CooperativeAlerts, 
+  PendingOrdersAlert, 
+  QuickGuide 
+} from "./components/dashboard";
 
 // Composants Profile
 export { 

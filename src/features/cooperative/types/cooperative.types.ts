@@ -28,6 +28,12 @@ export interface CooperativeData {
 export interface DashboardStats {
   products: number;
   pendingOrders: number;
+  confirmedOrders: number;
+  inTransitOrders: number;
+  deliveredOrders: number;
+  totalStockQuantity: number;
+  stockValue: number;
+  totalRevenue: number;
 }
 
 export interface DashboardData {
