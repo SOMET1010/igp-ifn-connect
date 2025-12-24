@@ -1,11 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { generateSpeech } from '@/shared/services/tts/openaiTts';
 import logger from '@/infra/logger';
 
 const VOICE_ENABLED_KEY = 'ifn_voice_enabled';
 
 interface UseTtsReturn {
-  /** Lire un texte avec ElevenLabs TTS */
+  /** Lire un texte avec OpenAI TTS */
   speak: (text: string) => Promise<void>;
   /** Arrêter la lecture en cours */
   stop: () => void;
@@ -22,10 +22,10 @@ interface UseTtsReturn {
 }
 
 /**
- * Hook React pour gérer le TTS ElevenLabs
+ * Hook React pour gérer le TTS OpenAI via Lovable AI Gateway
  * - Gère l'état de lecture (loading, playing, error)
  * - Persiste le toggle voix en localStorage
- * - Pas de fallback vers d'autres TTS (erreur propre)
+ * - Gratuit avec Lovable Cloud (pas de clé API)
  */
 export function useTts(): UseTtsReturn {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -68,7 +68,7 @@ export function useTts(): UseTtsReturn {
     setError(null);
   }, []);
 
-  // Lire un texte avec ElevenLabs
+  // Lire un texte avec OpenAI TTS
   const speak = useCallback(async (text: string) => {
     // Arrêter si déjà en lecture
     if (isPlaying) {
@@ -86,7 +86,7 @@ export function useTts(): UseTtsReturn {
     setError(null);
 
     try {
-      logger.debug('Appel ElevenLabs TTS', { module: 'useTts', text: text.substring(0, 50) });
+      logger.debug('Appel OpenAI TTS', { module: 'useTts', text: text.substring(0, 50) });
 
       const audioBlob = await generateSpeech(text);
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -125,7 +125,7 @@ export function useTts(): UseTtsReturn {
       await audio.play();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur TTS inconnue';
-      logger.error('Erreur ElevenLabs TTS', err, { module: 'useTts' });
+      logger.error('Erreur OpenAI TTS', err, { module: 'useTts' });
       setIsLoading(false);
       setIsPlaying(false);
       setError(errorMessage);

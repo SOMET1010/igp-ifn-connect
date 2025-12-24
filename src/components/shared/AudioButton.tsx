@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
-import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { generateSpeech } from '@/shared/services/tts/openaiTts';
 import logger from '@/infra/logger';
 
 interface AudioButtonProps {
@@ -50,12 +50,12 @@ export function AudioButton({
     setIsPlaying(false);
   }, []);
 
-  // TTS via ElevenLabs (voix ivoirienne)
-  const speakWithElevenLabs = useCallback(async () => {
+  // TTS via OpenAI (Lovable AI Gateway - gratuit)
+  const speakWithOpenAI = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      logger.debug('Appel ElevenLabs TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
+      logger.debug('Appel OpenAI TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
 
       const audioBlob = await generateSpeech(textToRead);
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -80,7 +80,7 @@ export function AudioButton({
       };
 
       audio.onerror = (e) => {
-        logger.error('Erreur lecture audio ElevenLabs', e, { module: 'AudioButton' });
+        logger.error('Erreur lecture audio OpenAI', e, { module: 'AudioButton' });
         setIsLoading(false);
         setIsPlaying(false);
         if (audioUrlRef.current) {
@@ -92,10 +92,9 @@ export function AudioButton({
 
       await audio.play();
     } catch (error) {
-      logger.error('Erreur ElevenLabs TTS', error, { module: 'AudioButton' });
+      logger.error('Erreur OpenAI TTS', error, { module: 'AudioButton' });
       setIsLoading(false);
       setIsPlaying(false);
-      // Pas de fallback - erreur propre affichée
     }
   }, [textToRead]);
 
@@ -126,9 +125,9 @@ export function AudioButton({
       setIsLoading(false);
     }
 
-    // Priorité 2: ElevenLabs TTS (voix ivoirienne)
-    speakWithElevenLabs();
-  }, [isPlaying, language, audioKey, stopAudio, speakWithElevenLabs]);
+    // Priorité 2: OpenAI TTS (Lovable AI Gateway)
+    speakWithOpenAI();
+  }, [isPlaying, language, audioKey, stopAudio, speakWithOpenAI]);
 
   return (
     <button
