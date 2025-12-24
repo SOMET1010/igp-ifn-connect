@@ -1,11 +1,12 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Save, Loader2, Briefcase, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { PhoneInput } from '@/components/shared/PhoneInput';
 import {
   agentProfileEditSchema,
   type AgentProfileData,
@@ -28,6 +29,7 @@ export const AgentProfileEditForm: React.FC<AgentProfileEditFormProps> = ({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<AgentProfileEditInput>({
     resolver: zodResolver(agentProfileEditSchema),
@@ -75,18 +77,19 @@ export const AgentProfileEditForm: React.FC<AgentProfileEditFormProps> = ({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Téléphone</Label>
-          <Input
-            id="phone"
-            {...register('phone')}
-            placeholder="0700000000"
-            disabled={isSaving}
-          />
-          {errors.phone && (
-            <p className="text-sm text-destructive">{errors.phone.message}</p>
+        <Controller
+          control={control}
+          name="phone"
+          render={({ field, fieldState }) => (
+            <PhoneInput
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              label="Téléphone"
+              disabled={isSaving}
+              error={fieldState.error?.message}
+            />
           )}
-        </div>
+        />
 
         <div className="space-y-2">
           <Label htmlFor="zone">Zone d'affectation</Label>

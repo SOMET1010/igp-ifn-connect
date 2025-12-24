@@ -13,6 +13,7 @@ import {
 import { Plus } from 'lucide-react';
 import { newCreditSchema, type NewCreditInput } from '../../types/credits.types';
 import { useToast } from '@/hooks/use-toast';
+import { PhoneInput } from '@/components/shared/PhoneInput';
 
 interface AddCreditDialogProps {
   onSubmit: (input: NewCreditInput) => Promise<boolean>;
@@ -87,15 +88,11 @@ export function AddCreditDialog({ onSubmit }: AddCreditDialogProps) {
               className="mt-1"
             />
           </div>
-          <div>
-            <Label className="text-sm font-medium">Téléphone</Label>
-            <Input
-              placeholder="07 XX XX XX XX"
-              value={formData.customer_phone}
-              onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
-              className="mt-1"
-            />
-          </div>
+          <PhoneInput
+            value={formData.customer_phone}
+            onChange={(value) => setFormData({ ...formData, customer_phone: value })}
+            label="Téléphone"
+          />
           <div>
             <Label className="text-sm font-medium">Montant *</Label>
             <Input
