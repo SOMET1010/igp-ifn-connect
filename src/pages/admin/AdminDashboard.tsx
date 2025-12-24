@@ -1,32 +1,18 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdminDashboard } from '@/features/admin';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
-import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
-import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { 
-  Users, 
-  Store, 
-  Wheat, 
-  Map as MapIcon, 
-  Home,
-  UserCog,
-  TrendingUp,
-  DollarSign,
-  Activity,
-  BarChart3,
-  FileText,
-  Mic,
-  Leaf,
-  AlertCircle,
-  RefreshCw
-} from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+  useAdminDashboard, 
+  AdminStats, 
+  EnrollmentChart, 
+  NavigationCards, 
+  AdvancedToolsGrid 
+} from '@/features/admin';
+import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
+import { Home, Activity, BarChart3, Map as MapIcon, AlertCircle, RefreshCw } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -45,12 +31,10 @@ const AdminDashboard: React.FC = () => {
     navigate('/admin/login');
   };
 
-  // Loading state with skeleton
   if (isLoading) {
     return <DashboardSkeleton />;
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -77,153 +61,10 @@ const AdminDashboard: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-4xl mx-auto">
-        {/* Stats grid */}
-        <div className="grid grid-cols-2 gap-3">
-          <UnifiedStatCard
-            title="Marchands"
-            value={stats.merchants}
-            icon={Store}
-            subtitle={stats.pendingMerchants > 0 ? `${stats.pendingMerchants} en attente` : undefined}
-            variant={stats.pendingMerchants > 0 ? 'warning' : 'default'}
-          />
-          <UnifiedStatCard
-            title="Agents"
-            value={stats.agents}
-            icon={Users}
-          />
-          <UnifiedStatCard
-            title="Coopératives"
-            value={stats.cooperatives}
-            icon={Wheat}
-          />
-          <UnifiedStatCard
-            title="Transactions"
-            value={`${(stats.totalTransactions / 1000000).toFixed(1)}M`}
-            icon={DollarSign}
-            subtitle="FCFA"
-          />
-        </div>
-
-        {/* Chart */}
-        <Card className="card-institutional">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Enrôlements (7 derniers jours)
-              </h3>
-            </div>
-            {chartData.reduce((sum, d) => sum + d.enrollments, 0) === 0 ? (
-              <div className="h-40 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-3">
-                  <TrendingUp className="h-8 w-8 text-muted-foreground/50" />
-                </div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Aucun enrôlement sur les 7 derniers jours
-                </p>
-                <p className="text-xs text-muted-foreground/70 mt-1">
-                  Les nouveaux marchands apparaîtront ici
-                </p>
-              </div>
-            ) : (
-              <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="enrollmentGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis hide />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="enrollments" 
-                      stroke="hsl(var(--primary))" 
-                      fill="url(#enrollmentGradient)" 
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Navigation cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <UnifiedActionCard
-            title="Marchands"
-            description={`${stats.merchants} inscrits`}
-            icon={Store}
-            onClick={() => navigate('/admin/marchands')}
-            badge={stats.pendingMerchants}
-            badgeVariant="warning"
-          />
-          <UnifiedActionCard
-            title="Agents"
-            description={`${stats.agents} actifs`}
-            icon={Users}
-            onClick={() => navigate('/admin/agents')}
-          />
-          <UnifiedActionCard
-            title="Coopératives"
-            description={`${stats.cooperatives} enregistrées`}
-            icon={Wheat}
-            onClick={() => navigate('/admin/cooperatives')}
-          />
-          <UnifiedActionCard
-            title="Cartographie"
-            description="Voir la carte"
-            icon={MapIcon}
-            onClick={() => navigate('/admin/carte')}
-          />
-        </div>
-
-        {/* Outils avancés */}
-        <h3 className="font-semibold text-foreground mt-2">
-          Outils avancés
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <UnifiedActionCard
-            title="Utilisateurs"
-            description="Rôles et liaisons"
-            icon={UserCog}
-            onClick={() => navigate('/admin/utilisateurs')}
-          />
-          <UnifiedActionCard
-            title="Monitoring"
-            description="Surveillance"
-            icon={Activity}
-            onClick={() => navigate('/admin/monitoring')}
-          />
-          <UnifiedActionCard
-            title="Analytics"
-            description="Statistiques"
-            icon={BarChart3}
-            onClick={() => navigate('/admin/analytics')}
-          />
-          <UnifiedActionCard
-            title="Rapports"
-            description="Export"
-            icon={FileText}
-            onClick={() => navigate('/admin/rapports')}
-          />
-          <UnifiedActionCard
-            title="Studio Audio"
-            description="Enregistrer"
-            icon={Mic}
-            onClick={() => navigate('/admin/studio')}
-          />
-          <UnifiedActionCard
-            title="Vivriers"
-            description="Import coopératives"
-            icon={Leaf}
-            onClick={() => navigate('/admin/vivriers')}
-          />
-        </div>
+        <AdminStats stats={stats} />
+        <EnrollmentChart chartData={chartData} />
+        <NavigationCards stats={stats} onNavigate={navigate} />
+        <AdvancedToolsGrid onNavigate={navigate} />
       </div>
 
       <UnifiedBottomNav items={navItems} />

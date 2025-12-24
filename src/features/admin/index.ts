@@ -11,6 +11,9 @@ export { agentRequestsService } from './services/agentRequestsService';
 export { usersService } from './services/usersService';
 export { mapService } from './services/mapService';
 
+// Components
+export * from './components/dashboard';
+
 // Types - Dashboard
 export type { AdminDashboardStats, ChartDataPoint, AdminDashboardData } from './types/dashboard.types';
 
