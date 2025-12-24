@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneLocalSchema } from "@/lib/validationSchemas";
 
 // Types de données du profil marchand
 export interface MerchantProfileData {
@@ -20,9 +21,7 @@ export const profileEditSchema = z.object({
     .string()
     .min(3, "Le nom doit contenir au moins 3 caractères")
     .max(100, "Le nom est trop long"),
-  phone: z
-    .string()
-    .regex(/^[0-9]{10}$/, "Numéro invalide (10 chiffres)"),
+  phone: phoneLocalSchema,
   activity_type: z
     .string()
     .min(2, "Le type d'activité est requis"),

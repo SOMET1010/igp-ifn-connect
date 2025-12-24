@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { phoneLocalOptionalSchema } from '@/lib/validationSchemas';
 
 // Données complètes du profil agent
 export interface AgentProfileData {
@@ -21,11 +22,7 @@ export const agentProfileEditSchema = z.object({
     .string()
     .min(3, "Le nom doit contenir au moins 3 caractères")
     .max(100, "Le nom est trop long"),
-  phone: z
-    .string()
-    .regex(/^[0-9]{10}$/, "Numéro invalide (10 chiffres)")
-    .optional()
-    .nullable(),
+  phone: phoneLocalOptionalSchema,
   zone: z
     .string()
     .max(100, "Zone trop longue")

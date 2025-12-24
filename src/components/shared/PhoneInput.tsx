@@ -1,8 +1,9 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Phone } from 'lucide-react';
+import { Phone, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isValidCIPhonePrefix } from '@/lib/validationSchemas';
 
 interface PhoneInputProps {
   value: string;
@@ -14,6 +15,7 @@ interface PhoneInputProps {
   countryCode?: string;
   maxLength?: number;
   className?: string;
+  error?: string;
 }
 
 export const PhoneInput: React.FC<PhoneInputProps> = ({
@@ -26,11 +28,15 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   countryCode = '+225',
   maxLength = 10,
   className,
+  error,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = e.target.value.replace(/\D/g, '').slice(0, maxLength);
     onChange(sanitized);
   };
+
+  const hasValidPrefix = isValidCIPhonePrefix(value);
+  const showPrefixWarning = value.length >= 2 && !hasValidPrefix;
 
   return (
     <div className={cn('space-y-1.5', className)}>
@@ -52,12 +58,30 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             value={value}
             onChange={handleChange}
             disabled={disabled}
-            className="input-institutional pr-10"
+            className={cn(
+              "input-institutional pr-10",
+              (error || showPrefixWarning) && "border-destructive focus-visible:ring-destructive"
+            )}
             maxLength={maxLength}
           />
-          <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Phone className={cn(
+            "absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none",
+            (error || showPrefixWarning) ? "text-destructive" : "text-muted-foreground"
+          )} />
         </div>
       </div>
+      {showPrefixWarning && !error && (
+        <p className="text-sm text-destructive flex items-center gap-1">
+          <AlertCircle className="h-3.5 w-3.5" />
+          Le numéro doit commencer par 01, 05 ou 07
+        </p>
+      )}
+      {error && (
+        <p className="text-sm text-destructive flex items-center gap-1">
+          <AlertCircle className="h-3.5 w-3.5" />
+          {error}
+        </p>
+      )}
     </div>
   );
 };
