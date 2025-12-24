@@ -8,11 +8,13 @@ export { useMerchantStock } from "./hooks/useMerchantStock";
 export { useScannedProducts } from "./hooks/useScannedProducts";
 export { useMerchantSuppliers } from "./hooks/useMerchantSuppliers";
 export { useSupplierCart } from "./hooks/useSupplierCart";
+export { useMerchantCredits } from "./hooks/useMerchantCredits";
 
 // Services
 export { transactionService } from "./services/transactionService";
 export { stockService } from "./services/stockService";
 export { suppliersService } from "./services/suppliersService";
+export { creditsService } from "./services/creditsService";
 
 // Types Stock
 export type {
@@ -53,6 +55,25 @@ export {
   SuppliersCart,
   OrderConfirmDialog,
 } from "./components/suppliers";
+
+// Composants Credits
+export {
+  CreditsSummary,
+  CreditsFilters,
+  CreditCard,
+  CreditsList,
+  AddCreditDialog,
+  PaymentDialog,
+} from "./components/credits";
+
+// Types Credits
+export type {
+  CustomerCredit,
+  CreditFilter,
+  NewCreditInput,
+  PaymentInput,
+} from "./types/credits.types";
+export { newCreditSchema, paymentSchema, isCreditOverdue } from "./types/credits.types";
 
 // Types publics
 export type {
