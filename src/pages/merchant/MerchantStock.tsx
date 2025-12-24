@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { merchantNavItems } from "@/config/navigation";
-import { useMerchantStock } from "@/hooks/useMerchantStock";
 import { PageWithList, FilterOption } from "@/templates";
 import {
   StockCard,
@@ -20,9 +19,8 @@ import {
   AddStockDialog,
   EditStockDialog,
   RestockDialog,
-  getStockStatus,
 } from "@/components/merchant/stock";
-import type { StockItem } from "@/components/merchant/stock";
+import { useMerchantStock, getStockStatus, type StockItem } from "@/features/merchant";
 
 export default function MerchantStock() {
   const {

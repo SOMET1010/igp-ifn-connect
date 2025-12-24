@@ -5,8 +5,8 @@ import { AudioButton } from "@/components/shared/AudioButton";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
-import { useMerchantStock } from "@/hooks/useMerchantStock";
 import {
+  useMerchantStock,
   useCashierPayment,
   CashierInputStep,
   CashierConfirmStep,
