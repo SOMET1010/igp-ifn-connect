@@ -1,61 +1,35 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Volume2, VolumeX, Loader2, Bell, User } from "lucide-react";
+import { LogOut, Volume2, VolumeX, Loader2, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { supabase } from "@/integrations/supabase/client";
 import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { merchantLogger } from "@/infra/logger";
 import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
-import type { MerchantProfileViewData } from "@/shared/types";
+import { useMerchantProfile } from "@/features/merchant/hooks/useMerchantProfile";
+import { ProfileHeader, ProfileEditForm } from "@/features/merchant/components/profile";
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const [profile, setProfile] = useState<MerchantProfileViewData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const { isSupported, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-
-      merchantLogger.debug('Chargement profil marchand', { userId: user.id });
-
-      try {
-        const { data: merchantData, error } = await supabase
-          .from("merchants")
-          .select("full_name, activity_type")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          merchantLogger.warn('Erreur chargement profil', { error: error.message });
-          return;
-        }
-
-        if (merchantData) {
-          setProfile(merchantData);
-          merchantLogger.info('Profil marchand chargé', { name: merchantData.full_name });
-        }
-      } catch (err) {
-        merchantLogger.error('Échec chargement profil', err, { userId: user.id });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
+  
+  const {
+    profile,
+    isLoading,
+    isEditing,
+    isSaving,
+    toggleEditing,
+    saveProfile,
+  } = useMerchantProfile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -74,7 +48,6 @@ export default function MerchantProfile() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Floating Audio Button */}
       {audioEnabled && (
         <AudioButton 
           textToRead={pageAudioText}
@@ -90,18 +63,24 @@ export default function MerchantProfile() {
       />
 
       <main className="p-4 space-y-6 max-w-lg mx-auto">
-        {/* Avatar et nom */}
-        <div className="text-center py-6">
-          <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center mb-3">
-            <User className="w-10 h-10 text-muted-foreground" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground">
-            {profile?.full_name || t("merchant")}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {profile?.activity_type}
-          </p>
-        </div>
+        {/* Section Profil - Mode lecture ou édition */}
+        <Card className="card-institutional">
+          <CardContent className="p-4">
+            {isEditing ? (
+              <ProfileEditForm
+                profile={profile}
+                onSave={saveProfile}
+                onCancel={toggleEditing}
+                isSaving={isSaving}
+              />
+            ) : (
+              <ProfileHeader
+                profile={profile}
+                onEditClick={toggleEditing}
+              />
+            )}
+          </CardContent>
+        </Card>
 
         {/* Sélecteur de langue */}
         <Card className="card-institutional">
