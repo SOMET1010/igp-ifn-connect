@@ -130,6 +130,11 @@ export {
   useAdminUserDetail,
   useAdminMapData,
   dashboardService,
+  // Components
+  AdminStats,
+  EnrollmentChart,
+  NavigationCards,
+  AdvancedToolsGrid,
   agentRequestsService,
   usersService,
   mapService,
