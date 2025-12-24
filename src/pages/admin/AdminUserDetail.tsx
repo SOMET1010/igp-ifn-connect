@@ -8,6 +8,7 @@ import {
   Banknote, FileText, Users, RefreshCw, Pencil, Save, Loader2, Plus, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ErrorState } from '@/components/shared/StateComponents';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -177,13 +178,12 @@ const AdminUserDetail = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
-        <Card className="mt-4">
-          <CardContent className="p-8 text-center">
-            <p className="text-destructive">
-              {error?.message || 'Utilisateur non trouvé'}
-            </p>
-          </CardContent>
-        </Card>
+        <ErrorState
+          title="Utilisateur non trouvé"
+          message={error?.message || "L'utilisateur demandé n'existe pas."}
+          onRetry={refetch}
+          className="mt-8"
+        />
       </div>
     );
   }

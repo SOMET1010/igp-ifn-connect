@@ -10,6 +10,7 @@ interface ErrorStateProps {
   onRetry?: () => void;
   isNetworkError?: boolean;
   className?: string;
+  fullScreen?: boolean;
 }
 
 export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(({
@@ -17,7 +18,8 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(({
   message = "Impossible de charger les données. Veuillez réessayer.",
   onRetry,
   isNetworkError = false,
-  className
+  className,
+  fullScreen = false
 }, ref) => {
   const IconComponent = isNetworkError ? WifiOff : AlertCircle;
 
@@ -26,6 +28,7 @@ export const ErrorState = forwardRef<HTMLDivElement, ErrorStateProps>(({
       ref={ref}
       className={cn(
         "flex flex-col items-center justify-center p-8 text-center space-y-4",
+        fullScreen && "min-h-screen bg-background",
         className
       )}
     >
