@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Check, Truck, X } from 'lucide-react';
+import { Loader2, Check, Truck, X, Package } from 'lucide-react';
 import { Order, statusLabels } from './types';
 
 interface OrderCardProps {
@@ -47,6 +47,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </div>
       )}
 
+      {/* Pending: Confirm or Cancel */}
       {order.status === 'pending' && (
         <div className="flex gap-2">
           <Button
@@ -76,20 +77,21 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </div>
       )}
 
+      {/* Confirmed: Ship or Cancel */}
       {order.status === 'confirmed' && (
         <div className="flex gap-2">
           <Button
             size="sm"
-            onClick={() => onUpdateStatus(order.id, 'delivered')}
+            onClick={() => onUpdateStatus(order.id, 'in_transit')}
             disabled={updatingOrderId === order.id}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="flex-1 bg-orange-500 hover:bg-orange-600"
           >
             {updatingOrderId === order.id ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
                 <Truck className="h-4 w-4 mr-1" />
-                Marquer livré
+                Expédier
               </>
             )}
           </Button>
@@ -101,6 +103,27 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             className="border-red-300 text-red-600 hover:bg-red-50"
           >
             <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* In Transit: Mark as Delivered */}
+      {order.status === 'in_transit' && (
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => onUpdateStatus(order.id, 'delivered')}
+            disabled={updatingOrderId === order.id}
+            className="flex-1 bg-green-600 hover:bg-green-700"
+          >
+            {updatingOrderId === order.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Package className="h-4 w-4 mr-1" />
+                Marquer livrée
+              </>
+            )}
           </Button>
         </div>
       )}

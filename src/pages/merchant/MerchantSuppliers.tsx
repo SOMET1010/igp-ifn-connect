@@ -2,7 +2,7 @@
 // Page - Merchant Suppliers (Refactored)
 // ============================================
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
@@ -18,11 +18,17 @@ import {
   SuppliersOrdersList,
   SuppliersCart,
   OrderConfirmDialog,
+  OrderSuccessScreen,
 } from "@/features/merchant";
+import { useOrdersRealtime } from "@/features/merchant/hooks/useOrdersRealtime";
+import type { CartItem } from "@/features/merchant/types/suppliers.types";
 
 export default function MerchantSuppliers() {
   const [activeTab, setActiveTab] = useState<string>("catalogue");
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [lastOrderItems, setLastOrderItems] = useState<CartItem[]>([]);
+  const [lastDeliveryDate, setLastDeliveryDate] = useState<string | undefined>();
 
   // Data & state from hooks
   const {
@@ -52,15 +58,33 @@ export default function MerchantSuppliers() {
     submitting,
   } = useSupplierCart();
 
+  // Realtime subscription for order status changes
+  useOrdersRealtime({
+    merchantId,
+    onStatusChange: refetchOrders,
+  });
+
   // Handle order confirmation
   const handleConfirmOrder = async (deliveryDate: string, notes: string) => {
     if (!merchantId) return;
+    
+    // Save cart items for success screen
+    setLastOrderItems([...cart]);
+    setLastDeliveryDate(deliveryDate || undefined);
+    
     const success = await submitOrders(merchantId, deliveryDate, notes);
     if (success) {
       setShowOrderModal(false);
+      setShowSuccess(true);
       refetchOrders();
     }
   };
+
+  // Handle viewing orders from success screen
+  const handleViewOrders = useCallback(() => {
+    setShowSuccess(false);
+    setActiveTab("commandes");
+  }, []);
 
   // Handle add to cart from PriceCompareSheet
   const handleAddToCart = (offer: any, quantity: number) => {
@@ -155,6 +179,15 @@ export default function MerchantSuppliers() {
         onConfirm={handleConfirmOrder}
         submitting={submitting}
       />
+
+      {/* Order Success Screen */}
+      {showSuccess && (
+        <OrderSuccessScreen
+          orderItems={lastOrderItems}
+          deliveryDate={lastDeliveryDate}
+          onViewOrders={handleViewOrders}
+        />
+      )}
 
       {/* Product Detail Sheet */}
       <PriceCompareSheet

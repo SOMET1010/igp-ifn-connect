@@ -1535,6 +1535,10 @@ export type Database = {
         Args: { _action_code: string; _resource_code: string; _user_id: string }
         Returns: boolean
       }
+      decrement_stock: {
+        Args: { p_quantity: number; p_stock_id: string }
+        Returns: undefined
+      }
       get_merchant_today_total: {
         Args: { _merchant_id: string }
         Returns: number
