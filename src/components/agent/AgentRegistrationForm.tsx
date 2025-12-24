@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { UserPlus, Loader2, Send } from 'lucide-react';
@@ -12,10 +12,12 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentRequest, type AgentRequestInput } from '@/features/agent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PhoneInput } from '@/components/shared/PhoneInput';
+import { phoneLocalSchema } from '@/lib/validationSchemas';
 
 const formSchema = z.object({
   full_name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères').max(100),
-  phone: z.string().min(8, 'Le téléphone doit contenir au moins 8 chiffres').max(20),
+  phone: phoneLocalSchema,
   organization: z.string().min(1, 'Veuillez sélectionner une organisation'),
   preferred_zone: z.string().max(100).optional(),
   motivation: z.string().max(500).optional(),
@@ -110,17 +112,16 @@ export function AgentRegistrationForm({ onSuccess, defaultValues }: AgentRegistr
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Téléphone *</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="07 XX XX XX XX" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <PhoneInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  label="Téléphone *"
+                  error={fieldState.error?.message}
+                />
               )}
             />
 

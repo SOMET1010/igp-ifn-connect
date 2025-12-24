@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import type { EnrollmentData } from "@/features/agent";
 import { VoiceInput } from "@/components/shared/VoiceInput";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PhoneInput } from "@/components/shared/PhoneInput";
 
 interface Step1IdentityProps {
   data: EnrollmentData;
@@ -56,22 +57,12 @@ export function Step1Identity({ data, updateField }: Step1IdentityProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone" className="text-base font-semibold flex items-center gap-2">
-          📱 Téléphone
-        </Label>
-        <div className="flex gap-2">
-          <div className="flex items-center justify-center h-14 px-4 bg-muted rounded-xl text-lg font-medium">
-            +225
-          </div>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="07 12 34 56 78"
-            value={data.phone}
-            onChange={(e) => updateField("phone", e.target.value)}
-            className="h-14 text-lg rounded-xl border-2 focus:border-primary flex-1"
-          />
-        </div>
+        <PhoneInput
+          value={data.phone}
+          onChange={(value) => updateField("phone", value)}
+          label="📱 Téléphone"
+          placeholder="07 01 02 03 04"
+        />
         <p className="text-sm text-muted-foreground">
           Numéro Mobile Money du marchand
         </p>

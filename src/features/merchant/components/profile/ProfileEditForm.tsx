@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { PhoneInput } from "@/components/shared/PhoneInput";
 import { profileEditSchema, type ProfileEditInput, type MerchantProfileData } from "../../types/profile.types";
 
 interface ProfileEditFormProps {
@@ -71,22 +72,17 @@ export function ProfileEditForm({ profile, onSave, onCancel, isSaving }: Profile
             )}
           />
 
-          <FormField
+          <Controller
             control={form.control}
             name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Téléphone</FormLabel>
-                <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder="0701234567"
-                    {...field}
-                    disabled={isSaving}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <PhoneInput
+                value={field.value}
+                onChange={field.onChange}
+                label="Téléphone"
+                disabled={isSaving}
+                error={fieldState.error?.message}
+              />
             )}
           />
 
