@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { generateSpeech } from '@/shared/services/tts/openaiTts';
 import logger from '@/infra/logger';
+import { toast } from '@/hooks/use-toast';
 
 const VOICE_ENABLED_KEY = 'ifn_voice_enabled';
 
@@ -129,7 +130,13 @@ export function useTts(): UseTtsReturn {
       setIsLoading(false);
       setIsPlaying(false);
       setError(errorMessage);
-      // Pas de fallback - erreur propre
+      
+      // Toast d'erreur visible pour l'utilisateur
+      toast({
+        title: "Lecture vocale indisponible",
+        description: "Impossible de lire le texte à voix haute. Réessayez plus tard.",
+        variant: "destructive",
+      });
     }
   }, [isPlaying, isVoiceEnabled, stop]);
 
