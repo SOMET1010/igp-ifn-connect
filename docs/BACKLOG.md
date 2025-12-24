@@ -10,7 +10,7 @@
 | ID | Tâche | État | Effort |
 |----|-------|------|--------|
 | P0-1 | Refactoriser CooperativeProfile (519→107 lignes) | ✅ TERMINÉ | M |
-| P0-2 | Extraire service MerchantTransactions | ⬜ TODO | S |
+| P0-2 | Extraire service MerchantTransactions | ✅ TERMINÉ | S |
 | P0-3 | Intégrer validation téléphone dans formulaires | ⬜ TODO | S |
 
 ---

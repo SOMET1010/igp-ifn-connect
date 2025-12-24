@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { merchantLogger } from "@/infra/logger";
 import type { CreateTransactionInput, SelectedProduct } from "../types/transaction.types";
+import type { TransactionListItem } from "../utils/transactionUtils";
 
 // ============================================
 // Interface des données marchand
@@ -140,5 +141,29 @@ export const transactionService = {
     if (error) {
       merchantLogger.warn("Échec enregistrement CMU", { error: error.message });
     }
+  },
+
+  /**
+   * Récupère les transactions d'un marchand avec limite
+   */
+  async fetchMerchantTransactions(
+    merchantId: string,
+    limit: number = 100
+  ): Promise<TransactionListItem[]> {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select(
+        "id, amount, transaction_type, created_at, reference, cmu_deduction, rsti_deduction"
+      )
+      .eq("merchant_id", merchantId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      merchantLogger.error("Échec récupération transactions", error);
+      throw error;
+    }
+
+    return (data as TransactionListItem[]) || [];
   },
 };
