@@ -5,10 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Package, Loader2, Bell, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
 import { NotificationBadge } from '@/components/shared/NotificationBadge';
 import { cooperativeNavItems } from '@/config/navigation';
-import { useCooperativeStock, CooperativeStockItem } from '@/hooks/useCooperativeStock';
-import { useCooperativeNotifications } from '@/hooks/useCooperativeNotifications';
+import { useCooperativeStock, useCooperativeNotifications, getStockStatus } from '@/features/cooperative';
+import type { CooperativeStockItem, StockStatus } from '@/features/cooperative';
 import { StockCard, LowStockAlert, AddStockDialog } from '@/components/cooperative/stock';
-import { getStockStatus, StockStatus } from '@/components/cooperative/stock/types';
 import { PageWithList, FilterOption } from '@/templates';
 
 const CooperativeStock = () => {

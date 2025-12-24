@@ -1,26 +1,20 @@
+/**
+ * Hook pour les notifications coopérative
+ */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { LOW_STOCK_THRESHOLD, EXPIRY_WARNING_DAYS } from "../types/stock.types";
 
-interface CooperativeNotifications {
-  // Orders
+export interface CooperativeNotifications {
   pendingOrdersCount: number;
   cancelledOrdersCount: number;
-  
-  // Stock
   lowStockCount: number;
   outOfStockCount: number;
   expiringStockCount: number;
-  
-  // Totals
   totalAlerts: number;
-  
-  // State
   isLoading: boolean;
 }
-
-const LOW_STOCK_THRESHOLD = 10;
-const EXPIRY_WARNING_DAYS = 7;
 
 export function useCooperativeNotifications(): CooperativeNotifications {
   const { user } = useAuth();
@@ -30,7 +24,6 @@ export function useCooperativeNotifications(): CooperativeNotifications {
     queryFn: async () => {
       if (!user?.id) return null;
 
-      // Get cooperative ID
       const { data: cooperative } = await supabase
         .from('cooperatives')
         .select('id')
@@ -39,7 +32,6 @@ export function useCooperativeNotifications(): CooperativeNotifications {
 
       if (!cooperative) return null;
 
-      // Fetch orders and stocks in parallel
       const [ordersResult, stocksResult] = await Promise.all([
         supabase
           .from('orders')
@@ -54,25 +46,12 @@ export function useCooperativeNotifications(): CooperativeNotifications {
       const orders = ordersResult.data || [];
       const stocks = stocksResult.data || [];
 
-      // Count order alerts
-      const pendingOrdersCount = orders.filter(
-        o => o.status === 'pending'
-      ).length;
-      
-      const cancelledOrdersCount = orders.filter(
-        o => o.status === 'cancelled'
-      ).length;
+      const pendingOrdersCount = orders.filter(o => o.status === 'pending').length;
+      const cancelledOrdersCount = orders.filter(o => o.status === 'cancelled').length;
 
-      // Count stock alerts
-      const lowStockCount = stocks.filter(
-        s => s.quantity > 0 && s.quantity <= LOW_STOCK_THRESHOLD
-      ).length;
-      
-      const outOfStockCount = stocks.filter(
-        s => s.quantity === 0
-      ).length;
+      const lowStockCount = stocks.filter(s => s.quantity > 0 && s.quantity <= LOW_STOCK_THRESHOLD).length;
+      const outOfStockCount = stocks.filter(s => s.quantity === 0).length;
 
-      // Products expiring soon (within 7 days)
       const warningDate = new Date();
       warningDate.setDate(warningDate.getDate() + EXPIRY_WARNING_DAYS);
       const warningDateStr = warningDate.toISOString().split('T')[0];
@@ -90,7 +69,7 @@ export function useCooperativeNotifications(): CooperativeNotifications {
       };
     },
     enabled: !!user?.id,
-    staleTime: 60000, // 1 minute
+    staleTime: 60000,
     refetchOnWindowFocus: true
   });
 
