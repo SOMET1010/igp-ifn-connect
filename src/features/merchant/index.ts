@@ -15,6 +15,17 @@ export { transactionService } from "./services/transactionService";
 export { stockService } from "./services/stockService";
 export { suppliersService } from "./services/suppliersService";
 export { creditsService } from "./services/creditsService";
+export { profileService } from "./services/profileService";
+
+// Hooks
+export { useMerchantProfile } from "./hooks/useMerchantProfile";
+
+// Types Profile
+export type { MerchantProfileData, ProfileEditInput } from "./types/profile.types";
+export { profileEditSchema } from "./types/profile.types";
+
+// Composants Profile
+export { ProfileHeader, ProfileEditForm } from "./components/profile";
 
 // Types Stock
 export type {
