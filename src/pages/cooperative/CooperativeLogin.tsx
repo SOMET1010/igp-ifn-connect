@@ -109,29 +109,43 @@ const CooperativeLogin: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
-
     if (otp !== generatedOtp) {
       toast({
         title: 'Code incorrect',
         description: 'Le code saisi ne correspond pas',
         variant: 'destructive',
       });
-      setIsLoading(false);
       return;
     }
+
+    setIsLoading(true);
 
     const email = `coop_${phone}@ifn.ci`;
     const password = `coop_${phone}_secure`;
     
-    const result = await executeWithRetry(async () => {
-      const { error: signInError } = await signIn(email, password);
-      
-      if (signInError) {
-        throw signInError;
+    // Tenter la connexion directement (sans retry pour user non trouvé)
+    const { error: signInError } = await signIn(email, password);
+    
+    if (signInError) {
+      // Vérifier si c'est "Invalid login credentials" = utilisateur non trouvé
+      if (signInError.message.includes('Invalid login credentials')) {
+        setIsLoading(false);
+        setStep('register');
+        return;
       }
       
-      // Récupérer l'utilisateur connecté
+      // Autre erreur (réseau, etc.) - afficher message
+      toast({
+        title: 'Erreur de connexion',
+        description: signInError.message,
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Utilisateur existant - lier coopérative et assigner rôle
+    try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const cleanPhone = phone.replace(/\s/g, "");
@@ -153,20 +167,15 @@ const CooperativeLogin: React.FC = () => {
         }
       }
       
-      return true;
-    });
-
-    setIsLoading(false);
-
-    if (result) {
       toast({
         title: 'Connexion réussie',
         description: 'Bienvenue sur l\'espace Coopérative',
       });
       navigate('/cooperative');
-    } else if (!retryState.error) {
-      // Pas d'erreur = utilisateur non trouvé, passer à l'inscription
-      setStep('register');
+    } catch (err) {
+      authLogger.error('Post-login error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -186,7 +195,7 @@ const CooperativeLogin: React.FC = () => {
     const email = `coop_${phone}@ifn.ci`;
     const password = `coop_${phone}_secure`;
 
-    const result = await executeWithRetry(async () => {
+    try {
       // Créer le compte utilisateur
       const { error: signUpError, data } = await supabase.auth.signUp({
         email,
@@ -197,8 +206,22 @@ const CooperativeLogin: React.FC = () => {
         }
       });
 
-      if (signUpError || !data.user) {
-        throw signUpError || new Error("Échec inscription");
+      if (signUpError) {
+        // Gérer "User already registered"
+        if (signUpError.message.includes('already registered')) {
+          toast({
+            title: 'Compte existant',
+            description: 'Ce numéro est déjà enregistré. Essayez de vous connecter.',
+            variant: 'destructive',
+          });
+          setStep('otp');
+          return;
+        }
+        throw signUpError;
+      }
+
+      if (!data.user) {
+        throw new Error("Échec inscription");
       }
 
       const userId = data.user.id;
@@ -228,17 +251,19 @@ const CooperativeLogin: React.FC = () => {
         authLogger.warn('Role assignment error:', { error: roleError.message });
       }
 
-      return true;
-    });
-
-    setIsLoading(false);
-
-    if (result) {
       toast({
         title: 'Compte créé',
         description: 'Votre espace coopérative a été créé avec succès',
       });
       navigate('/cooperative');
+    } catch (err: any) {
+      toast({
+        title: 'Erreur',
+        description: err.message || 'Une erreur est survenue',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
