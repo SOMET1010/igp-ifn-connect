@@ -43,8 +43,6 @@ import {
 } from '@/components/ui/select';
 import { 
   Users, 
-  AlertCircle, 
-  RefreshCw,
   Store,
   UserCog,
   Wheat,
@@ -56,6 +54,7 @@ import {
   Download,
   LayoutDashboard
 } from 'lucide-react';
+import { ErrorState } from '@/components/shared/StateComponents';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -386,17 +385,12 @@ const AdminUsers: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-        <h2 className="text-lg font-semibold text-foreground mb-2">Erreur de chargement</h2>
-        <p className="text-muted-foreground text-center mb-4">
-          Impossible de charger les données utilisateurs.
-        </p>
-        <Button onClick={refetch} variant="outline" className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Réessayer
-        </Button>
-      </div>
+      <ErrorState
+        fullScreen
+        title="Erreur de chargement"
+        message="Impossible de charger les données utilisateurs."
+        onRetry={refetch}
+      />
     );
   }
 
