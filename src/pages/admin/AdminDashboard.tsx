@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdminDashboardData } from '@/hooks/useAdminDashboardData';
+import { useAdminDashboard } from '@/features/admin';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
@@ -31,7 +31,7 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'rec
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { stats, chartData, isLoading, error, refetch } = useAdminDashboardData();
+  const { stats, chartData, isLoading, error, refetch } = useAdminDashboard();
 
   const navItems = useMemo(() => [
     { icon: Home, label: 'Dashboard', path: '/admin' },

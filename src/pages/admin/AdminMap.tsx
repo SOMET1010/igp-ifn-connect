@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useAdminMapData } from '@/hooks/useAdminMapData';
+import { useAdminMapData } from '@/features/admin';
 import { MapFilters, MapLegend, getIcon, TYPE_LABELS } from '@/components/admin/map';
 
 // Component to set map view
