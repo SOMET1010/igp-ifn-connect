@@ -41,21 +41,49 @@ export const cooperativeService = {
    * Récupère les statistiques du dashboard
    */
   async getDashboardStats(cooperativeId: string): Promise<DashboardStats> {
-    const [stockResult, ordersResult] = await Promise.all([
+    const [stocksResult, ordersResult] = await Promise.all([
       supabase
         .from('stocks')
-        .select('*', { count: 'exact', head: true })
+        .select('quantity, unit_price')
         .eq('cooperative_id', cooperativeId),
       supabase
         .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('cooperative_id', cooperativeId)
-        .eq('status', 'pending'),
+        .select('status, total_amount')
+        .eq('cooperative_id', cooperativeId),
     ]);
 
+    const stocks = stocksResult.data ?? [];
+    const orders = ordersResult.data ?? [];
+
+    // Calculs stocks
+    const products = stocks.length;
+    const totalStockQuantity = stocks.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
+    const stockValue = stocks.reduce((sum, s) => {
+      const qty = Number(s.quantity) || 0;
+      const price = Number(s.unit_price) || 0;
+      return sum + (qty * price);
+    }, 0);
+
+    // Calculs commandes par statut
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+    const confirmedOrders = orders.filter(o => o.status === 'confirmed').length;
+    const inTransitOrders = orders.filter(o => o.status === 'in_transit').length;
+    const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+
+    // Chiffre d'affaires (commandes livrées uniquement)
+    const totalRevenue = orders
+      .filter(o => o.status === 'delivered')
+      .reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+
     return {
-      products: stockResult.count ?? 0,
-      pendingOrders: ordersResult.count ?? 0,
+      products,
+      pendingOrders,
+      confirmedOrders,
+      inTransitOrders,
+      deliveredOrders,
+      totalStockQuantity,
+      stockValue,
+      totalRevenue,
     };
   },
 

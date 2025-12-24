@@ -12,8 +12,10 @@ import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
 import { 
   useCooperativeDashboard,
+  useCooperativeNotifications,
   CooperativeStats,
-  PendingOrdersAlert,
+  CooperativeOrdersChart,
+  CooperativeAlerts,
   QuickGuide,
 } from '@/features/cooperative';
 import { 
@@ -46,6 +48,8 @@ const CooperativeDashboard: React.FC = () => {
     nextRetryIn,
     retryCount,
   } = useCooperativeDashboard();
+
+  const notifications = useCooperativeNotifications();
 
   const handleSignOut = async () => {
     await signOut();
@@ -93,18 +97,26 @@ const CooperativeDashboard: React.FC = () => {
         )}
       />
 
-      <div className="p-4 space-y-6 max-w-2xl mx-auto">
+      <div className="p-4 space-y-5 max-w-2xl mx-auto">
         <div className="text-center">
           <p className="text-sm text-muted-foreground">{cooperative?.commune}, {cooperative?.region}</p>
         </div>
 
-        <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
-        <PendingOrdersAlert count={stats.pendingOrders} />
+        {/* Alertes stock */}
+        <CooperativeAlerts notifications={notifications} />
 
+        {/* Statistiques enrichies */}
+        <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
+
+        {/* Graphique des commandes */}
+        <CooperativeOrdersChart stats={stats} />
+
+        {/* Action principale */}
         <Button onClick={() => navigate('/cooperative/stock')} className="btn-institutional w-full h-14 text-lg">
           <Package className="h-5 w-5 mr-2" />{t("manage_my_stock")}
         </Button>
 
+        {/* Actions rapides */}
         <div className="space-y-3">
           <UnifiedActionCard title={t("my_stock")} description={`${stats.products} ${t("products")}`} icon={Package} onClick={() => navigate('/cooperative/stock')} />
           <UnifiedActionCard title={t("orders")} description={t("manage_requests")} icon={ClipboardList} onClick={() => navigate('/cooperative/commandes')} badge={stats.pendingOrders} badgeVariant="warning" />
