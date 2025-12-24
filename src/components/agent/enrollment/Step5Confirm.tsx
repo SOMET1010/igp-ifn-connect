@@ -3,7 +3,7 @@ import { Check, MapPin, Camera, Store, User } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import type { EnrollmentData } from "@/features/agent";
 
 interface Step5ConfirmProps {
   data: EnrollmentData;

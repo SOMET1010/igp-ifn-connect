@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GPSCapture } from "@/components/shared/GPSCapture";
 import { MiniMap } from "@/components/agent/MiniMap";
 import { supabase } from "@/integrations/supabase/client";
-import { EnrollmentData } from "@/hooks/useEnrollmentForm";
+import type { EnrollmentData } from "@/features/agent";
 
 interface Market {
   id: string;

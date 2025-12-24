@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useAgentRequest, AgentRequestInput } from '@/hooks/useAgentRequest';
+import { useAgentRequest, type AgentRequestInput } from '@/features/agent';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const formSchema = z.object({
