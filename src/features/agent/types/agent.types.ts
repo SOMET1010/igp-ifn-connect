@@ -45,10 +45,20 @@ export interface AgentProfile {
 
 // === Dashboard Types ===
 
+export interface DailyEnrollment {
+  date: string;
+  count: number;
+}
+
 export interface AgentDashboardStats {
   today: number;
   week: number;
   total: number;
+  validated: number;
+  pending: number;
+  rejected: number;
+  validationRate: number;
+  weeklyEnrollments: DailyEnrollment[];
 }
 
 export interface AgentDashboardData {

@@ -1,4 +1,4 @@
-import { Calendar, TrendingUp, Users } from "lucide-react";
+import { Calendar, TrendingUp, Users, CheckCircle, Clock, Percent } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { UnifiedStatCard } from "@/components/shared/UnifiedStatCard";
 import type { AgentDashboardStats } from "../../types/agent.types";
@@ -11,17 +11,42 @@ interface AgentStatsProps {
 export function AgentStats({ stats, isLoading }: AgentStatsProps) {
   const { t } = useLanguage();
 
+  const getValidationRateVariant = (rate: number) => {
+    if (rate >= 80) return "success";
+    if (rate >= 50) return "warning";
+    return "default";
+  };
+
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 gap-3">
       <UnifiedStatCard
         title={t("today")}
         value={isLoading ? "-" : stats.today.toString()}
         icon={Calendar}
+        variant="primary"
       />
       <UnifiedStatCard
         title={t("this_week")}
         value={isLoading ? "-" : stats.week.toString()}
         icon={TrendingUp}
+      />
+      <UnifiedStatCard
+        title={t("validated")}
+        value={isLoading ? "-" : stats.validated.toString()}
+        icon={CheckCircle}
+        variant="success"
+      />
+      <UnifiedStatCard
+        title={t("pending")}
+        value={isLoading ? "-" : stats.pending.toString()}
+        icon={Clock}
+        variant={stats.pending > 0 ? "warning" : "default"}
+      />
+      <UnifiedStatCard
+        title={t("validation_rate")}
+        value={isLoading ? "-" : `${stats.validationRate}%`}
+        icon={Percent}
+        variant={getValidationRateVariant(stats.validationRate)}
       />
       <UnifiedStatCard
         title={t("total")}
