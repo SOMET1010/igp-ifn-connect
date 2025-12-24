@@ -2,8 +2,8 @@ import { useState, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
 import logger from '@/infra/logger';
 
 interface AudioButtonProps {
@@ -13,18 +13,6 @@ interface AudioButtonProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'floating' | 'inline';
 }
-
-// Langues supportées par LAFRICAMOBILE
-const LAFRICAMOBILE_LANGUAGES = ['dioula'];
-
-// Mapping des langues vers les codes de synthèse vocale Web Speech API
-const VOICE_LANG_MAP: Record<string, string> = {
-  'fr': 'fr-FR',
-  'baoule': 'fr-FR',
-  'bete': 'fr-FR',
-  'senoufo': 'fr-FR',
-  'malinke': 'fr-FR',
-};
 
 export function AudioButton({ 
   textToRead, 
@@ -37,6 +25,7 @@ export function AudioButton({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
   const sizeStyles = {
     sm: 'w-10 h-10 text-lg',
@@ -54,39 +43,25 @@ export function AudioButton({
   const stopAudio = useCallback(() => {
     stopPrerecordedAudio(audioRef.current);
     audioRef.current = null;
-    speechSynthesis.cancel();
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
     setIsPlaying(false);
   }, []);
 
-  // TTS via LAFRICAMOBILE pour Dioula
-  const speakWithLafricamobile = useCallback(async () => {
+  // TTS via ElevenLabs (voix ivoirienne)
+  const speakWithElevenLabs = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      logger.debug('Calling LAFRICAMOBILE TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
+      logger.debug('Appel ElevenLabs TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
 
-      const { data, error } = await supabase.functions.invoke('lafricamobile-tts', {
-        body: {
-          text: textToRead,
-          language: 'dioula',
-          translateFromFrench: true,
-        },
-      });
+      const audioBlob = await generateSpeech(textToRead);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioUrlRef.current = audioUrl;
 
-      if (error) {
-        logger.error('LAFRICAMOBILE error', error, { module: 'AudioButton' });
-        throw error;
-      }
-
-      if (!data?.success || !data?.audioUrl) {
-        logger.error('LAFRICAMOBILE response invalid', null, { module: 'AudioButton', data });
-        throw new Error(data?.error || 'No audio URL returned');
-      }
-
-      logger.debug('Playing audio', { module: 'AudioButton', url: data.audioUrl });
-
-      // Créer et jouer l'audio
-      const audio = new Audio(data.audioUrl);
+      const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
       audio.onplay = () => {
@@ -97,65 +72,32 @@ export function AudioButton({
 
       audio.onended = () => {
         setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
         audioRef.current = null;
       };
 
       audio.onerror = (e) => {
-        logger.error('Audio playback error', e, { module: 'AudioButton' });
+        logger.error('Erreur lecture audio ElevenLabs', e, { module: 'AudioButton' });
         setIsLoading(false);
         setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
         audioRef.current = null;
       };
 
       await audio.play();
     } catch (error) {
-      logger.error('LAFRICAMOBILE TTS error', error, { module: 'AudioButton' });
+      logger.error('Erreur ElevenLabs TTS', error, { module: 'AudioButton' });
       setIsLoading(false);
       setIsPlaying(false);
-      // Fallback vers Web Speech API en français
-      speakWithWebSpeech('fr');
+      // Pas de fallback - erreur propre affichée
     }
   }, [textToRead]);
-
-  // TTS via Web Speech API (français et fallback)
-  const speakWithWebSpeech = useCallback((langOverride?: string) => {
-    if (!('speechSynthesis' in window)) {
-      logger.warn('Web Speech API not supported', { module: 'AudioButton' });
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    const targetLang = langOverride || VOICE_LANG_MAP[language] || 'fr-FR';
-    utterance.lang = targetLang;
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-
-    // Trouver une voix adaptée
-    const voices = speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => 
-      v.lang.startsWith(targetLang.split('-')[0])
-    );
-    if (preferredVoice) utterance.voice = preferredVoice;
-
-    utterance.onstart = () => {
-      setIsLoading(false);
-      setIsPlaying(true);
-      if (navigator.vibrate) navigator.vibrate(30);
-    };
-
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => {
-      setIsLoading(false);
-      setIsPlaying(false);
-    };
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
-  }, [textToRead, language]);
 
   // Fonction principale de lecture avec priorité audio pré-enregistré
   const speak = useCallback(async () => {
@@ -184,19 +126,9 @@ export function AudioButton({
       setIsLoading(false);
     }
 
-    // Priorité 2: LAFRICAMOBILE pour Dioula (fallback TTS)
-    if (LAFRICAMOBILE_LANGUAGES.includes(language)) {
-      speakWithLafricamobile();
-    } else {
-      // Priorité 3: Web Speech API pour français et autres
-      speakWithWebSpeech();
-    }
-  }, [isPlaying, language, audioKey, stopAudio, speakWithLafricamobile, speakWithWebSpeech]);
-
-  // Charger les voix
-  if ('speechSynthesis' in window && speechSynthesis.getVoices().length === 0) {
-    speechSynthesis.onvoiceschanged = () => {};
-  }
+    // Priorité 2: ElevenLabs TTS (voix ivoirienne)
+    speakWithElevenLabs();
+  }, [isPlaying, language, audioKey, stopAudio, speakWithElevenLabs]);
 
   return (
     <button
@@ -238,7 +170,7 @@ export function PageAudioButton({ pageKey, className }: PageAudioButtonProps) {
   return (
     <AudioButton 
       textToRead={textToRead}
-      audioKey={pageKey} // Utiliser la clé de traduction comme clé audio
+      audioKey={pageKey}
       variant="floating"
       size="lg"
       className={cn("bottom-24 right-4", className)}
