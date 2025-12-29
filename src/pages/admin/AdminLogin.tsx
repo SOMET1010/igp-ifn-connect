@@ -8,6 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
 import { emailSchema, passwordSchema, getValidationError } from '@/lib/validationSchemas';
+import { AudioButton } from '@/components/shared/AudioButton';
+import { BackgroundDecor } from '@/components/shared/BackgroundDecor';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -90,8 +92,21 @@ const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col">
-      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-primary-foreground py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col relative overflow-hidden">
+      {/* Icône décorative arrière-plan */}
+      <BackgroundDecor
+        icons={[{ Icon: ShieldCheck, position: 'bottom-right', size: 'xl', rotate: 10 }]}
+        opacity={5}
+      />
+
+      {/* Bouton audio flottant */}
+      <AudioButton
+        textToRead="Portail d'administration PNAVIM-CI. Entrez votre email et mot de passe pour vous connecter."
+        className="fixed bottom-6 right-4 z-50"
+        size="lg"
+      />
+
+      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-primary-foreground py-6 px-4 relative z-10">
         <div className="flex items-center gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -105,7 +120,7 @@ const AdminLogin: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center p-6">
+      <div className="flex-1 flex items-center justify-center p-6 relative z-10">
         <Card className="w-full max-w-md shadow-xl border-2">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 w-20 h-20 bg-violet-100 rounded-full flex items-center justify-center">

@@ -83,7 +83,7 @@ export const UnifiedListCard: React.FC<UnifiedListCardProps> = ({
   return (
     <Card
       className={cn(
-        'overflow-hidden border-l-4 transition-all duration-200',
+        'group overflow-hidden border-l-4 transition-all duration-200',
         entityColors[entityType],
         isClickable && 'cursor-pointer hover:shadow-md hover:border-l-primary active:scale-[0.99]',
         highlighted && 'ring-2 ring-primary/20 shadow-md',
@@ -169,9 +169,9 @@ export const UnifiedListCard: React.FC<UnifiedListCardProps> = ({
             )}
           </div>
 
-          {/* Chevron */}
+          {/* Chevron avec animation glissante */}
           {isClickable && showChevron && !actions && (
-            <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 self-center" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 self-center transition-transform duration-200 group-hover:translate-x-1" />
           )}
         </div>
       </CardContent>
