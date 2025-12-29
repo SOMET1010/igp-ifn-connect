@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { merchantNavItems } from '@/config/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,11 +52,12 @@ export default function MerchantInvoices() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Mes Factures"
         subtitle="Factures Normalisées Électroniques"
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <div className="p-4 space-y-4 max-w-lg mx-auto">

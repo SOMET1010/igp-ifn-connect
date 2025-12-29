@@ -1,5 +1,5 @@
 import React from 'react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +23,7 @@ export interface PageLayoutProps {
   /** Contenu à droite du header (badges, indicateurs, etc.) */
   headerRightContent?: React.ReactNode;
   /** Variante de style du header */
-  headerVariant?: 'default' | 'primary';
+  headerVariant?: 'default' | 'primary' | 'institutional';
   /** Items de navigation bottom (si vide, pas de nav) */
   navItems?: NavItem[];
   /** Contenu principal */
@@ -36,6 +36,12 @@ export interface PageLayoutProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '5xl' | 'full';
   /** Afficher un fond de couleur sur le main */
   withBackground?: boolean;
+  /** Afficher les logos institutionnels */
+  showLogos?: boolean;
+  /** Afficher les notifications */
+  showNotifications?: boolean;
+  /** Afficher le toggle de langue */
+  showLanguageToggle?: boolean;
 }
 
 // ============================================
@@ -74,6 +80,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   withPadding = true,
   maxWidth = '5xl',
   withBackground = false,
+  showLogos = false,
+  showNotifications = true,
+  showLanguageToggle = true,
 }) => {
   const hasBottomNav = navItems && navItems.length > 0;
 
@@ -89,8 +98,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <UnifiedHeader
+      {/* Enhanced Header */}
+      <EnhancedHeader
         title={title}
         subtitle={subtitle}
         showBack={showBack}
@@ -99,6 +108,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         onSignOut={onSignOut}
         rightContent={headerRightContent}
         variant={headerVariant}
+        showLogos={showLogos}
+        showNotifications={showNotifications}
+        showLanguageToggle={showLanguageToggle}
       />
 
       {/* Main Content */}

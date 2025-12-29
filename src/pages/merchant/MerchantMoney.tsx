@@ -7,7 +7,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { BigNumber, CardLarge, StatusBanner } from "@/components/ifn";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 
@@ -91,10 +91,11 @@ export default function MerchantMoney() {
         size="lg"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("your_money")}
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-6">

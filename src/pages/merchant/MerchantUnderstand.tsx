@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge } from "@/components/ifn";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 
@@ -23,9 +23,10 @@ export default function MerchantUnderstand() {
         size="lg"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("understand_title")}
         showBack
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-6">

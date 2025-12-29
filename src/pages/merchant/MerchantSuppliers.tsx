@@ -6,7 +6,7 @@ import { useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { PriceCompareSheet } from "@/components/market/PriceCompareSheet";
 import { merchantNavItems } from "@/config/navigation";
 import { Leaf } from "lucide-react";
@@ -103,12 +103,13 @@ export default function MerchantSuppliers() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Marché Virtuel IFN"
         subtitle="Commandez en 3 clics"
         showBack
         backTo="/marchand"
         rightContent={<Leaf className="h-5 w-5 text-secondary" />}
+        showNotifications={false}
       />
 
       {/* Tabs */}

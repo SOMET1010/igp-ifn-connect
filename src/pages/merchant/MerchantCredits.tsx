@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { merchantNavItems } from '@/config/navigation';
 import { useMerchantCredits } from '@/features/merchant/hooks/useMerchantCredits';
 import {
@@ -51,11 +51,12 @@ export default function MerchantCredits() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Crédits Clients"
         subtitle="Gérez vos créances"
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-4">

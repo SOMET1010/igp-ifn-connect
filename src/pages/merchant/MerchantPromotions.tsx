@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Gift } from "lucide-react";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { EmptyState, LoadingState } from "@/components/shared/StateComponents";
 import { usePromotions } from "@/features/merchant/hooks/usePromotions";
 import {
@@ -44,7 +44,7 @@ export default function MerchantPromotions() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <UnifiedHeader title="Promotions" subtitle="Gérez vos offres" showBack backTo="/marchand" />
+      <EnhancedHeader title="Promotions" subtitle="Gérez vos offres" showBack backTo="/marchand" showNotifications={false} />
 
       <main className="p-4 space-y-4">
         <PromotionsSummary activeCount={activeCount} totalUsage={totalUsage} />
