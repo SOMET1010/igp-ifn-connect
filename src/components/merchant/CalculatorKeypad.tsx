@@ -1,10 +1,13 @@
-import { Delete, Volume2 } from "lucide-react";
+import { Delete } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { digitToScriptKey, getCashierScript } from "@/features/voice-auth/config/cashierScripts";
 
 interface CalculatorKeypadProps {
   value: string;
   onChange: (value: string) => void;
   maxLength?: number;
+  speakDigits?: boolean;
+  language?: string;
 }
 
 const keys = [
@@ -62,11 +65,34 @@ const triggerFeedback = (type: "key" | "delete" | "error") => {
   }
 };
 
-export function CalculatorKeypad({ value, onChange, maxLength = 12 }: CalculatorKeypadProps) {
+// TTS Helper - Speak digit or action
+const speakText = (text: string) => {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-FR';
+    utterance.rate = 1.0;
+    utterance.volume = 0.8;
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
+export function CalculatorKeypad({ 
+  value, 
+  onChange, 
+  maxLength = 12,
+  speakDigits = false,
+  language = 'fr'
+}: CalculatorKeypadProps) {
   const handleKeyPress = (key: string) => {
     if (key === "DEL") {
       triggerFeedback("delete");
       onChange(value.slice(0, -1));
+      
+      // Speak "Effacé" if speakDigits enabled
+      if (speakDigits) {
+        speakText(getCashierScript("cashier_cleared", language));
+      }
     } else {
       // Check max length
       const currentDigits = value.replace(/\D/g, "");
@@ -76,6 +102,14 @@ export function CalculatorKeypad({ value, onChange, maxLength = 12 }: Calculator
       }
       triggerFeedback("key");
       onChange(value + key);
+      
+      // Speak the digit if speakDigits enabled
+      if (speakDigits) {
+        const scriptKey = digitToScriptKey[key];
+        if (scriptKey) {
+          speakText(getCashierScript(scriptKey, language));
+        }
+      }
     }
   };
 
@@ -96,6 +130,7 @@ export function CalculatorKeypad({ value, onChange, maxLength = 12 }: Calculator
               }
             `}
             onClick={() => handleKeyPress(key)}
+            aria-label={key === "DEL" ? "Effacer" : key}
           >
             {key === "DEL" ? (
               <Delete className="w-8 h-8 sm:w-10 sm:h-10" />

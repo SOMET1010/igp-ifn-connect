@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
+import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
 import {
   useMerchantStock,
   useCashierPayment,
@@ -18,12 +19,13 @@ import {
 } from "@/features/merchant";
 
 export default function MerchantCashier() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const triggerSuccessFeedback = useSuccessFeedback();
   
   // State local pour l'entrée manuelle et les produits
   const [amount, setAmount] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+  const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
   
   // Récupérer les produits scannés depuis le Scanner
   const { scannedProducts, hasScannedProducts, clearScannedProducts } = useScannedProducts();
@@ -58,22 +60,47 @@ export default function MerchantCashier() {
     setShowReceipt,
   } = useCashierPayment(parseManualAmount(amount), selectedProducts);
 
+  // Auto-play welcome audio on first load (SUTA inclusif)
+  const playWelcomeAudio = useCallback(() => {
+    if (!hasPlayedWelcome && step === "input" && 'speechSynthesis' in window) {
+      const text = getCashierScript("cashier_welcome", language);
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      utterance.rate = 0.9;
+      utterance.volume = 0.8;
+      window.speechSynthesis.speak(utterance);
+      setHasPlayedWelcome(true);
+    }
+  }, [hasPlayedWelcome, step, language]);
+
+  // Play welcome on mount
+  useEffect(() => {
+    const timer = setTimeout(playWelcomeAudio, 500);
+    return () => clearTimeout(timer);
+  }, [playWelcomeAudio]);
+
   // Reset complet du formulaire
   const handleReset = () => {
     resetForm();
     setAmount("");
     setSelectedProducts([]);
+    setHasPlayedWelcome(false);
   };
 
   // Texte audio contextuel
   const getStepAudioText = () => {
     if (step === "input") {
-      return numericAmount > 0 ? `${formatCurrency(numericAmount)} FCFA` : t("how_much");
+      return numericAmount > 0 
+        ? `${formatCurrency(numericAmount)} francs CFA` 
+        : getCashierScript("cashier_welcome", language);
     }
     if (step === "confirm") {
-      return `${t("audio_cashier_confirm")} ${formatCurrency(numericAmount)} FCFA ${method === "cash" ? t("cash") : t("mobile_money")}`;
+      const methodText = method === "cash" 
+        ? getCashierScript("cashier_cash", language)
+        : getCashierScript("cashier_mobile", language);
+      return `${formatCurrency(numericAmount)} francs CFA. ${methodText}`;
     }
-    return `${t("audio_cashier_success")}: ${formatCurrency(numericAmount)} FCFA`;
+    return `${t("audio_cashier_success")}: ${formatCurrency(numericAmount)} francs CFA`;
   };
 
   // Mapping stocks pour le sélecteur de produits

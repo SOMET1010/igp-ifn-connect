@@ -676,7 +676,83 @@
 }
 
 /* ============================================
-   Accessibilité : Support prefers-reduced-motion
+   ÉCRAN ENCAISSEMENT INCLUSIF
+   ============================================ */
+
+/* Zone montant en écoute (pulsante quand vide) */
+.amount-zone-listening {
+  animation: pulse-listen 2s infinite;
+  border: 2px dashed hsl(var(--primary) / 0.4);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  background: hsl(var(--primary) / 0.05);
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse-listen {
+  0%, 100% { 
+    border-color: hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary) / 0.03);
+  }
+  50% { 
+    border-color: hsl(var(--primary) / 0.6);
+    background: hsl(var(--primary) / 0.08);
+  }
+}
+
+/* Zone montant active (avec valeur) */
+.amount-zone-active {
+  animation: none;
+  border: 2px solid hsl(var(--success) / 0.6);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  background: hsl(var(--success) / 0.08);
+}
+
+/* En-tête parlant avec micro */
+.speaking-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.speaking-header .micro-icon {
+  color: hsl(var(--primary));
+  animation: pulse-micro 1.5s infinite;
+}
+
+@keyframes pulse-micro {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Billets agrandis */
+.bill-button-xl {
+  height: 6rem !important;
+}
+
+.bill-button-xl img {
+  height: 3.5rem !important;
+}
+
+/* Icône oreille (écoute) */
+.ear-icon {
+  color: hsl(var(--muted-foreground));
+  animation: fade-ear 2s infinite;
+}
+
+@keyframes fade-ear {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ============================================
+   ACCESSIBILITÉ - REDUCED MOTION
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -690,7 +766,10 @@
 
   .mic-button-xl,
   .btn-cashier-hero,
-  .status-badge-validated {
+  .status-badge-validated,
+  .amount-zone-listening,
+  .speaking-header .micro-icon,
+  .ear-icon {
     animation: none !important;
   }
 }
