@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, RefreshCw, Store } from "lucide-react";
-import { PhoneInput } from '@/components/shared/PhoneInput';
+import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,34 +9,33 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
-import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
-import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
-import { LoginCard } from '@/components/shared/LoginCard';
 import { useRetryOperation } from "@/hooks/useRetryOperation";
 import { authLogger } from "@/infra/logger";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { BackgroundDecor } from "@/components/shared/BackgroundDecor";
+import { VoiceModeCard } from "@/components/merchant/VoiceModeCard";
+import { ClassicModeCard } from "@/components/merchant/ClassicModeCard";
+import { VoiceAuthLang } from "@/features/voice-auth/config/audioScripts";
+import { cn } from "@/lib/utils";
+import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
+import logoDge from "@/assets/logo-dge.png";
+import logoAnsut from "@/assets/logo-ansut.png";
 
 type Step = "phone" | "otp" | "register";
-
-const STEPS_CONFIG: Record<Step, { title: string; subtitle: string }> = {
-  phone: { title: 'Connexion Marchand', subtitle: 'Étape 1 · Numéro de téléphone' },
-  otp: { title: 'Vérification', subtitle: 'Étape 2 · Code de sécurité' },
-  register: { title: 'Création de compte', subtitle: 'Étape 3 · Informations marchand' },
-};
+type ViewMode = "voice" | "classic";
 
 export default function MerchantLogin() {
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
   
   const [step, setStep] = useState<Step>("phone");
+  const [viewMode, setViewMode] = useState<ViewMode>("voice"); // VOCAL par défaut !
+  const [voiceLang, setVoiceLang] = useState<VoiceAuthLang>("nouchi"); // Nouchi par défaut !
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [fullName, setFullName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Hook de retry pour les opérations réseau
   const { execute: executeWithRetry, state: retryState } = useRetryOperation({
     maxRetries: 3,
     baseDelay: 1500,
@@ -80,6 +78,11 @@ export default function MerchantLogin() {
     setStep("otp");
   };
 
+  const handleVoicePhoneDetected = (detectedPhone: string) => {
+    setPhone(detectedPhone);
+    handlePhoneSubmit();
+  };
+
   const handleOtpSubmit = async () => {
     const validationError = getValidationError(otpSchema, otp);
     if (validationError) {
@@ -105,19 +108,16 @@ export default function MerchantLogin() {
         }
       }
       
-      // Récupérer l'utilisateur connecté
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const cleanPhone = phone.replace(/\s/g, "");
         
-        // Lier le merchant existant (sans user_id) à cet utilisateur
         await supabase
           .from("merchants")
           .update({ user_id: user.id })
           .eq("phone", cleanPhone)
           .is("user_id", null);
         
-        // Assigner le rôle marchand
         const { error: roleError } = await supabase.rpc('assign_merchant_role', {
           p_user_id: user.id
         });
@@ -178,7 +178,6 @@ export default function MerchantLogin() {
         throw merchantError;
       }
 
-      // Utiliser la fonction RPC sécurisée pour assigner le rôle
       const { error: roleError } = await supabase.rpc('assign_merchant_role', {
         p_user_id: userId
       });
@@ -207,33 +206,46 @@ export default function MerchantLogin() {
     }
   };
 
-  // Texte audio contextuel selon l'étape
   const getAudioText = () => {
     switch (step) {
       case 'phone':
-        return "Bienvenue espace marchand. Entrez votre numéro de téléphone pour vous connecter.";
+        return voiceLang === 'nouchi'
+          ? "Salut la famille ! Pour rentrer dans ton coin, appuie sur le bouton orange là."
+          : "Bienvenue espace marchand. Entrez votre numéro de téléphone.";
       case 'otp':
-        return "Entrez le code de vérification à 6 chiffres reçu par SMS.";
+        return voiceLang === 'nouchi'
+          ? "Rentre le code à 6 chiffres qu'on t'a envoyé."
+          : "Entrez le code de vérification à 6 chiffres.";
       case 'register':
-        return "Créez votre compte en entrant votre nom complet.";
+        return voiceLang === 'nouchi'
+          ? "Donne ton nom complet pour créer ton compte."
+          : "Créez votre compte en entrant votre nom complet.";
       default:
         return "Connexion marchand";
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Icône décorative arrière-plan */}
-      <BackgroundDecor
-        icons={[{ Icon: Store, position: 'bottom-right', size: 'xl', rotate: -15 }]}
-        opacity={5}
-      />
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Background Image avec overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${marcheIvoirien})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+      </div>
 
-      <InstitutionalHeader
-        subtitle="Espace Marchand"
-        showBackButton={step !== 'phone'}
-        onBack={handleBack}
-      />
+      {/* Header Institutionnel agrandi */}
+      <header className="relative z-10 flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <img src={logoDge} alt="DGE" className="h-10 md:h-12 object-contain" />
+          <div className="flex flex-col">
+            <span className="text-sm md:text-base font-bold text-foreground">PNAVIM-CI</span>
+            <span className="text-[10px] md:text-xs text-muted-foreground">République de Côte d'Ivoire</span>
+          </div>
+        </div>
+        <img src={logoAnsut} alt="ANSUT" className="h-9 md:h-11 object-contain" />
+      </header>
 
       {/* Bouton audio flottant */}
       <AudioButton
@@ -243,124 +255,165 @@ export default function MerchantLogin() {
       />
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
-        <LoginCard
-          title={STEPS_CONFIG[step].title}
-          subtitle={STEPS_CONFIG[step].subtitle}
-        >
-          {step === "phone" && (
-            <>
-              <PhoneInput
-                value={phone}
-                onChange={setPhone}
-                disabled={isLoading}
-              />
+        {/* Carte principale flottante */}
+        <div className="w-full max-w-md bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Bandeau orange */}
+          <div className="bg-primary px-4 py-3">
+            <h1 className="text-white font-bold text-center text-lg">
+              Espace Marchand Copilote
+            </h1>
+          </div>
 
-              <Button
-                onClick={handlePhoneSubmit}
-                disabled={isLoading || phone.length < 8}
-                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {isLoading ? (
-                  retryState.isRetrying ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin mr-2" />
-                      Nouvelle tentative...
-                    </>
-                  ) : (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                      Envoi...
-                    </>
-                  )
-                ) : (
-                  'Continuer'
-                )}
-              </Button>
-            </>
-          )}
-
-          {step === "otp" && (
-            <>
-              <div className="space-y-3">
-                <p className="text-center text-xs text-muted-foreground">
-                  Code envoyé au +225 {phone}
-                </p>
-                <div className="flex justify-center">
-                  <OTPInput value={otp} onChange={setOtp} />
-                </div>
+          {/* Contenu carte */}
+          <div className="p-5">
+            {/* Sélecteur de langue (discret) */}
+            {step === 'phone' && (
+              <div className="flex justify-center gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setVoiceLang('fr')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    voiceLang === 'fr' 
+                      ? "bg-primary text-white" 
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  🇫🇷 Français
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVoiceLang('nouchi')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    voiceLang === 'nouchi' 
+                      ? "bg-primary text-white" 
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  🔥 Nouchi
+                </button>
               </div>
+            )}
 
-              <Button
-                onClick={handleOtpSubmit}
-                disabled={isLoading || otp.length !== 6}
-                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Valider"
-                )}
-              </Button>
-
+            {/* Bouton retour pour OTP et Register */}
+            {step !== 'phone' && (
               <button
-                onClick={() => setStep("phone")}
-                className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Modifier le numéro
-              </button>
-            </>
-          )}
-
-          {step === "register" && (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="fullName" className="form-label-lg">
-                  Nom complet
-                </Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Ex: Kouamé Adjoua"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="input-institutional"
-                />
-              </div>
-
-              <Button
-                onClick={handleRegisterSubmit}
-                disabled={isLoading || fullName.length < 3}
-                className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    Création...
-                  </>
-                ) : (
-                  'Créer mon compte'
-                )}
-              </Button>
-              
-              <button
-                onClick={() => setStep("otp")}
-                className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+                onClick={handleBack}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Retour
               </button>
-            </>
-          )}
-        </LoginCard>
+            )}
+
+            {/* Étape Phone */}
+            {step === "phone" && viewMode === "voice" && (
+              <VoiceModeCard
+                lang={voiceLang}
+                onPhoneDetected={handleVoicePhoneDetected}
+                onFallbackClick={() => setViewMode("classic")}
+                disabled={isLoading}
+              />
+            )}
+
+            {step === "phone" && viewMode === "classic" && (
+              <ClassicModeCard
+                lang={voiceLang}
+                phone={phone}
+                onPhoneChange={setPhone}
+                onSubmit={handlePhoneSubmit}
+                onVoiceModeClick={() => setViewMode("voice")}
+                isLoading={isLoading}
+                isRetrying={retryState.isRetrying}
+              />
+            )}
+
+            {/* Étape OTP */}
+            {step === "otp" && (
+              <div className="space-y-5">
+                <div className="space-y-3">
+                  <p className="text-center text-sm text-muted-foreground">
+                    {voiceLang === 'nouchi' 
+                      ? `Code envoyé au +225 ${phone}` 
+                      : `Code envoyé au +225 ${phone}`
+                    }
+                  </p>
+                  <div className="flex justify-center">
+                    <OTPInput value={otp} onChange={setOtp} />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleOtpSubmit}
+                  disabled={isLoading || otp.length !== 6}
+                  className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90 h-14 text-base font-semibold"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    voiceLang === 'nouchi' ? "Valider" : "Valider"
+                  )}
+                </Button>
+
+                <button
+                  onClick={() => setStep("phone")}
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  {voiceLang === 'nouchi' ? "Changer le numéro" : "Modifier le numéro"}
+                </button>
+              </div>
+            )}
+
+            {/* Étape Register */}
+            {step === "register" && (
+              <div className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullName" className="form-label-lg">
+                    {voiceLang === 'nouchi' ? "Ton nom complet" : "Nom complet"}
+                  </Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Ex: Kouamé Adjoua"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="input-institutional h-14 text-base"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleRegisterSubmit}
+                  disabled={isLoading || fullName.length < 3}
+                  className="btn-institutional w-full bg-primary text-primary-foreground hover:bg-primary/90 h-14 text-base font-semibold"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      {voiceLang === 'nouchi' ? "Ça crée..." : "Création..."}
+                    </>
+                  ) : (
+                    voiceLang === 'nouchi' ? "Créer mon compte" : "Créer mon compte"
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Note institutionnelle */}
-        <p className="text-xs text-muted-foreground text-center mt-6 max-w-sm">
-          Plateforme opérée par l'ANSUT pour le compte de la DGE
+        <p className="text-xs text-white/80 text-center mt-6 max-w-sm drop-shadow-lg">
+          Sécurisé par l'ANSUT · Service Public
         </p>
       </main>
 
-      <InstitutionalFooter />
+      {/* Footer discret */}
+      <footer className="relative z-10 py-3 text-center">
+        <p className="text-[10px] text-white/60">
+          Plateforme opérée par l'ANSUT pour le compte de la DGE
+        </p>
+      </footer>
     </div>
   );
 }
