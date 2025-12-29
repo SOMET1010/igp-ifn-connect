@@ -1,7 +1,7 @@
 {
-  "name": "IGP-IFN Côte d'Ivoire",
-  "short_name": "IGP-IFN",
-  "description": "Plateforme de formalisation des commerçants informels",
+  "name": "PNAVIM-CI - Plateforme Nationale des Acteurs du Vivrier Marchand",
+  "short_name": "PNAVIM-CI",
+  "description": "Formalisation et inclusion financière des commerçants vivriers en Côte d'Ivoire",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f97316",

@@ -82,7 +82,7 @@ const AdminLogin: React.FC = () => {
 
     toast({
       title: '✅ Connexion réussie',
-      description: 'Bienvenue sur l\'administration IFN',
+      description: 'Bienvenue sur l\'administration PNAVIM-CI',
     });
     
     navigate('/admin');
@@ -96,10 +96,10 @@ const AdminLogin: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🏛️</span>
-              <span className="font-bold">Administration IFN</span>
+              <span className="font-bold">Administration PNAVIM-CI</span>
             </div>
             <p className="text-sm text-primary-foreground/80 mt-1">
-              Direction Générale des Entreprises
+              Plateforme Nationale des Acteurs du Vivrier Marchand
             </p>
           </div>
         </div>
@@ -175,7 +175,7 @@ const AdminLogin: React.FC = () => {
       </div>
 
       <footer className="p-4 text-center text-sm text-muted-foreground">
-        <p>Plateforme IFN - © 2024</p>
+        <p>PNAVIM-CI - © 2024</p>
       </footer>
     </div>
   );

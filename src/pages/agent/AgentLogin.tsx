@@ -121,7 +121,7 @@ const AgentLogin: React.FC = () => {
       return;
     }
 
-    const email = `agent_${phone}@igp-ifn.ci`;
+    const email = `agent_${phone}@pnavim.ci`;
     const password = `agent_${phone}_secure`;
     
     const result = await executeWithRetry(async () => {
@@ -180,7 +180,7 @@ const AgentLogin: React.FC = () => {
 
     setIsLoading(true);
 
-    const email = `agent_${phone}@igp-ifn.ci`;
+    const email = `agent_${phone}@pnavim.ci`;
     const password = `agent_${phone}_secure`;
 
     const result = await executeWithRetry(async () => {
