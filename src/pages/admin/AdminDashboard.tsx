@@ -12,6 +12,7 @@ import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { ErrorState } from '@/components/shared/StateComponents';
+import { TestNotificationButton } from '@/components/admin/TestNotificationButton';
 import { Home, Activity, BarChart3, Map as MapIcon } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
@@ -56,6 +57,11 @@ const AdminDashboard: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-4xl mx-auto">
+        {/* Bouton de test pour les notifications Realtime */}
+        <div className="flex justify-end">
+          <TestNotificationButton />
+        </div>
+        
         <AdminStats stats={stats} />
         <EnrollmentChart chartData={chartData} />
         <NavigationCards stats={stats} onNavigate={navigate} />
