@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Banknote, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -7,6 +8,7 @@ import { useMerchantNotifications } from "@/hooks/useMerchantNotifications";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
+import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/templates";
 import { merchantNavItems } from "@/config/navigation";
@@ -22,6 +24,11 @@ import {
   MerchantQuickGuide,
   OnlineStatusIndicator,
 } from "@/components/merchant/dashboard";
+import {
+  OpenDayDialog,
+  CloseDayDialog,
+  DaySessionBanner,
+} from "@/features/merchant/components/daily-session";
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
@@ -30,8 +37,23 @@ export default function MerchantDashboard() {
   const { isOnline } = useOnlineStatus();
   const { triggerTap, triggerMoney } = useSensoryFeedback();
 
+  const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
+  const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
+
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const notifications = useMerchantNotifications();
+  const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
+  
+  const {
+    todaySession,
+    sessionStatus,
+    isSessionOpen,
+    openSession,
+    closeSession,
+    isOpening,
+    isClosing,
+    getSummary,
+  } = useDailySession();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
 
   const merchant = data?.merchant;
@@ -88,6 +110,14 @@ export default function MerchantDashboard() {
           <MerchantDashboardSkeleton />
         ) : (
           <>
+            {/* Bannière session journée */}
+            <DaySessionBanner
+              sessionStatus={sessionStatus}
+              session={todaySession}
+              onOpenDay={() => setOpenDayDialogOpen(true)}
+              onCloseDay={() => setCloseDayDialogOpen(true)}
+            />
+
             {/* Merchant info */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
@@ -102,6 +132,7 @@ export default function MerchantDashboard() {
             <Button 
               onClick={() => { triggerMoney(); navigate("/marchand/encaisser"); }} 
               className="btn-kpata-primary w-full"
+              disabled={!isSessionOpen}
             >
               <Banknote className="w-6 h-6 mr-2" />
               {t("collect_payment")}
@@ -134,6 +165,28 @@ export default function MerchantDashboard() {
           </>
         )}
       </div>
+
+      {/* Dialogs */}
+      <OpenDayDialog
+        open={openDayDialogOpen}
+        onOpenChange={setOpenDayDialogOpen}
+        onConfirm={(data) => {
+          openSession(data);
+          setOpenDayDialogOpen(false);
+        }}
+        isLoading={isOpening}
+      />
+
+      <CloseDayDialog
+        open={closeDayDialogOpen}
+        onOpenChange={setCloseDayDialogOpen}
+        onConfirm={(data) => {
+          closeSession(data);
+          setCloseDayDialogOpen(false);
+        }}
+        getSummary={getSummary}
+        isLoading={isClosing}
+      />
     </PageLayout>
   );
 }
