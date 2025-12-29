@@ -29,7 +29,7 @@ export default function MerchantLogin() {
   
   const [step, setStep] = useState<Step>("phone");
   const [viewMode, setViewMode] = useState<ViewMode>("voice"); // VOCAL par défaut !
-  const [voiceLang, setVoiceLang] = useState<VoiceAuthLang>("nouchi"); // Nouchi par défaut !
+  const [voiceLang, setVoiceLang] = useState<VoiceAuthLang>("suta"); // SUTA par défaut !
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [fullName, setFullName] = useState("");
@@ -209,17 +209,29 @@ export default function MerchantLogin() {
   const getAudioText = () => {
     switch (step) {
       case 'phone':
-        return voiceLang === 'nouchi'
-          ? "Salut la famille ! Pour rentrer dans ton coin, appuie sur le bouton orange là."
-          : "Bienvenue espace marchand. Entrez votre numéro de téléphone.";
+        if (voiceLang === 'nouchi') {
+          return "Salut la famille ! Pour rentrer dans ton coin, appuie sur le bouton orange là.";
+        }
+        if (voiceLang === 'suta') {
+          return "Bonjour ! Bienvenue sur l'espace des marchands. Pour te connecter, appuie sur le micro et parle tranquillement.";
+        }
+        return "Bienvenue espace marchand. Entrez votre numéro de téléphone.";
       case 'otp':
-        return voiceLang === 'nouchi'
-          ? "Rentre le code à 6 chiffres qu'on t'a envoyé."
-          : "Entrez le code de vérification à 6 chiffres.";
+        if (voiceLang === 'nouchi') {
+          return "Rentre le code à 6 chiffres qu'on t'a envoyé.";
+        }
+        if (voiceLang === 'suta') {
+          return "Entre le code à 6 chiffres. Parle doucement si tu veux de l'aide.";
+        }
+        return "Entrez le code de vérification à 6 chiffres.";
       case 'register':
-        return voiceLang === 'nouchi'
-          ? "Donne ton nom complet pour créer ton compte."
-          : "Créez votre compte en entrant votre nom complet.";
+        if (voiceLang === 'nouchi') {
+          return "Donne ton nom complet pour créer ton compte.";
+        }
+        if (voiceLang === 'suta') {
+          return "Entre ton nom complet pour créer ton compte. Je suis là pour t'aider.";
+        }
+        return "Créez votre compte en entrant votre nom complet.";
       default:
         return "Connexion marchand";
     }
@@ -242,6 +254,7 @@ export default function MerchantLogin() {
           <div className="flex flex-col">
             <span className="text-sm md:text-base font-bold text-foreground">PNAVIM-CI</span>
             <span className="text-[10px] md:text-xs text-muted-foreground">République de Côte d'Ivoire</span>
+            <span className="text-[9px] text-muted-foreground/70 italic">Espace des Marchands</span>
           </div>
         </div>
         <img src={logoAnsut} alt="ANSUT" className="h-9 md:h-11 object-contain" />
@@ -271,15 +284,15 @@ export default function MerchantLogin() {
               <div className="flex justify-center gap-2 mb-4">
                 <button
                   type="button"
-                  onClick={() => setVoiceLang('fr')}
+                  onClick={() => setVoiceLang('suta')}
                   className={cn(
                     "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
-                    voiceLang === 'fr' 
+                    voiceLang === 'suta' 
                       ? "bg-primary text-white" 
                       : "bg-muted text-muted-foreground hover:bg-muted/80"
                   )}
                 >
-                  🇫🇷 Français
+                  🎙️ SUTA
                 </button>
                 <button
                   type="button"
@@ -292,6 +305,18 @@ export default function MerchantLogin() {
                   )}
                 >
                   🔥 Nouchi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVoiceLang('fr')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    voiceLang === 'fr' 
+                      ? "bg-primary text-white" 
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  )}
+                >
+                  🇫🇷 FR
                 </button>
               </div>
             )}
