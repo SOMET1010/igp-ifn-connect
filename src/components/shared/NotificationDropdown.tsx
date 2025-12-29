@@ -1,4 +1,4 @@
-import { Bell, Check, Trash2 } from 'lucide-react';
+import { Bell, Check, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,23 +8,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useNotifications, Notification } from '@/hooks/useNotifications';
+import { useNotificationsRealtime } from '@/features/notifications/hooks/useNotificationsRealtime';
+import type { Notification } from '@/features/notifications/types/notification.types';
 import { cn } from '@/lib/utils';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationItemProps {
   notification: Notification;
   onRead: (id: string) => void;
   onDelete: (id: string) => void;
-  formatTimeAgo: (date: Date) => string;
+  formatTimeAgo: (date: string) => string;
+  onNavigate?: (url: string) => void;
 }
 
-function NotificationItem({ notification, onRead, onDelete, formatTimeAgo }: NotificationItemProps) {
+function NotificationItem({ notification, onRead, onDelete, formatTimeAgo, onNavigate }: NotificationItemProps) {
   const typeColors = {
     info: 'bg-blue-500',
     success: 'bg-green-500',
     warning: 'bg-amber-500',
     error: 'bg-red-500'
+  };
+
+  const handleClick = () => {
+    onRead(notification.id);
+    if (notification.action_url && onNavigate) {
+      onNavigate(notification.action_url);
+    }
   };
 
   return (
@@ -33,7 +43,7 @@ function NotificationItem({ notification, onRead, onDelete, formatTimeAgo }: Not
         "flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer hover:bg-muted/50",
         !notification.read && "bg-primary/5"
       )}
-      onClick={() => onRead(notification.id)}
+      onClick={handleClick}
     >
       {/* Icon + Unread indicator */}
       <div className="relative flex-shrink-0">
@@ -58,7 +68,7 @@ function NotificationItem({ notification, onRead, onDelete, formatTimeAgo }: Not
           {notification.message}
         </p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          {formatTimeAgo(notification.createdAt)}
+          {formatTimeAgo(notification.created_at)}
         </p>
       </div>
 
@@ -85,12 +95,18 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const { 
     notifications, 
     unreadCount, 
+    isLoading,
     markAsRead, 
     markAllAsRead, 
     deleteNotification,
     formatTimeAgo 
-  } = useNotifications();
+  } = useNotificationsRealtime();
   const { triggerTap } = useSensoryFeedback();
+  const navigate = useNavigate();
+
+  const handleNavigate = (url: string) => {
+    navigate(url);
+  };
 
   return (
     <DropdownMenu>
@@ -131,7 +147,11 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         
         <DropdownMenuSeparator />
 
-        {notifications.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground text-sm">
             Aucune notification
           </div>
@@ -144,6 +164,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 onRead={markAsRead}
                 onDelete={deleteNotification}
                 formatTimeAgo={formatTimeAgo}
+                onNavigate={handleNavigate}
               />
             ))}
           </div>
@@ -153,7 +174,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="justify-center text-primary cursor-pointer">
-              Voir toutes les notifications
+              Voir toutes les notifications ({notifications.length})
             </DropdownMenuItem>
           </>
         )}
