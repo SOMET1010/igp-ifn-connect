@@ -61,7 +61,7 @@ export function CashierInputStep({
   };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-180px)] justify-between gap-3">
+    <div className="flex flex-col min-h-[calc(100vh-180px)] gap-3">
       {/* Product Selector - Optional */}
       <ProductSelector
         stocks={stocks.map((s) => ({
@@ -103,16 +103,32 @@ export function CashierInputStep({
         </>
       )}
 
-      {/* Payment buttons XXL - Design KPATA */}
-      <div className="space-y-4 pt-2">
+      {/* Spacer pour le sticky */}
+      <div className="flex-1" />
+
+      {/* Sticky Cart Summary + Payment Buttons - Design KPATA */}
+      <div className="sticky bottom-0 -mx-4 px-4 py-4 bg-card/95 backdrop-blur-sm border-t border-border shadow-lg space-y-4">
+        {/* Résumé produits (si présents) */}
+        {selectedProducts.length > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              {selectedProducts.length} produit{selectedProducts.length > 1 ? 's' : ''} sélectionné{selectedProducts.length > 1 ? 's' : ''}
+            </span>
+            <span className="font-bold text-foreground">
+              {formattedAmount} FCFA
+            </span>
+          </div>
+        )}
+
+        {/* Payment buttons XXL */}
         <div className="grid grid-cols-2 gap-4">
           <Button
             onClick={() => handleSelectMethod("cash")}
             disabled={numericAmount < 100}
-            className="btn-kpata-success h-24 sm:h-28 flex-col gap-2 disabled:opacity-30"
+            className="btn-kpata-success h-20 sm:h-24 flex-col gap-2 disabled:opacity-30"
           >
-            <Banknote className="w-10 h-10 sm:w-12 sm:h-12" />
-            <span className="text-xl sm:text-2xl font-black">
+            <Banknote className="w-8 h-8 sm:w-10 sm:h-10" />
+            <span className="text-lg sm:text-xl font-black">
               {t("cash").toUpperCase()}
             </span>
           </Button>
@@ -120,10 +136,10 @@ export function CashierInputStep({
           <Button
             onClick={() => handleSelectMethod("mobile_money")}
             disabled={numericAmount < 100}
-            className="btn-kpata-primary h-24 sm:h-28 flex-col gap-2 disabled:opacity-30"
+            className="btn-kpata-primary h-20 sm:h-24 flex-col gap-2 disabled:opacity-30"
           >
-            <Smartphone className="w-10 h-10 sm:w-12 sm:h-12" />
-            <span className="text-xl sm:text-2xl font-black">MOBILE</span>
+            <Smartphone className="w-8 h-8 sm:w-10 sm:h-10" />
+            <span className="text-lg sm:text-xl font-black">MOBILE</span>
           </Button>
         </div>
 
@@ -134,8 +150,8 @@ export function CashierInputStep({
             Nouvelle tentative en cours...
           </p>
         ) : (
-          <p className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2 opacity-70">
-            <Wifi className="w-4 h-4" />
+          <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-2 opacity-70">
+            <Wifi className="w-3 h-3" />
             {t("offline_message")}
           </p>
         )}

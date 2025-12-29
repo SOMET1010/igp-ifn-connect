@@ -44,6 +44,7 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
       whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
       whileHover={prefersReducedMotion ? undefined : { y: -2 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="group"
     >
       <Card
         className={cn(
@@ -78,7 +79,9 @@ export const UnifiedActionCard: React.FC<UnifiedActionCardProps> = ({
               <p className={cn('text-muted-foreground truncate', compact ? 'text-xs' : 'text-sm')}>{description}</p>
             )}
           </div>
-          {!compact && <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />}
+          {!compact && (
+            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+          )}
         </CardContent>
       </Card>
     </motion.div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import { Loader2, ArrowLeft, RefreshCw, Store } from "lucide-react";
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
 import { LoginCard } from '@/components/shared/LoginCard';
 import { useRetryOperation } from "@/hooks/useRetryOperation";
 import { authLogger } from "@/infra/logger";
+import { AudioButton } from "@/components/shared/AudioButton";
+import { BackgroundDecor } from "@/components/shared/BackgroundDecor";
 
 type Step = "phone" | "otp" | "register";
 
@@ -205,15 +207,42 @@ export default function MerchantLogin() {
     }
   };
 
+  // Texte audio contextuel selon l'étape
+  const getAudioText = () => {
+    switch (step) {
+      case 'phone':
+        return "Bienvenue espace marchand. Entrez votre numéro de téléphone pour vous connecter.";
+      case 'otp':
+        return "Entrez le code de vérification à 6 chiffres reçu par SMS.";
+      case 'register':
+        return "Créez votre compte en entrant votre nom complet.";
+      default:
+        return "Connexion marchand";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Icône décorative arrière-plan */}
+      <BackgroundDecor
+        icons={[{ Icon: Store, position: 'bottom-right', size: 'xl', rotate: -15 }]}
+        opacity={5}
+      />
+
       <InstitutionalHeader
         subtitle="Espace Marchand"
         showBackButton={step !== 'phone'}
         onBack={handleBack}
       />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
+      {/* Bouton audio flottant */}
+      <AudioButton
+        textToRead={getAudioText()}
+        className="fixed bottom-24 right-4 z-50"
+        size="lg"
+      />
+
+      <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
         <LoginCard
           title={STEPS_CONFIG[step].title}
           subtitle={STEPS_CONFIG[step].subtitle}
