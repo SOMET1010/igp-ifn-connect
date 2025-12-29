@@ -6,9 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AudioProvider } from "@/contexts/AudioContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { DemoBanner } from "@/components/shared/DemoBanner";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
+import { AudioPlayingIndicator } from "@/components/shared/AudioPlayingIndicator";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
@@ -112,12 +114,14 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
           <AuthProvider>
-            <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <DemoBanner />
-              <OfflineIndicator />
+            <AudioProvider>
+              <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <DemoBanner />
+                <OfflineIndicator />
+                <AudioPlayingIndicator />
               <Suspense fallback={<LazyLoadingFallback />}>
                 <Routes>
                 <Route path="/" element={<Index />} />
@@ -185,8 +189,9 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
-              </BrowserRouter>
-            </TooltipProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+            </AudioProvider>
           </AuthProvider>
         </LanguageProvider>
       </QueryClientProvider>
