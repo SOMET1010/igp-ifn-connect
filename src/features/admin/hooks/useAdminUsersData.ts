@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { usersService } from '../services/usersService';
+import { usersService, UsersRawData } from '../services/usersService';
 import type {
   AdminUserData,
   UserFilters,
@@ -16,13 +16,7 @@ const getExpectedEntityType = (phone: string | null, roles: AppRole[]): Expected
 };
 
 export const useAdminUsersData = () => {
-  const [rawData, setRawData] = useState<{
-    profiles: any[];
-    roles: any[];
-    merchants: any[];
-    agents: any[];
-    cooperatives: any[];
-  }>({
+  const [rawData, setRawData] = useState<UsersRawData>({
     profiles: [],
     roles: [],
     merchants: [],

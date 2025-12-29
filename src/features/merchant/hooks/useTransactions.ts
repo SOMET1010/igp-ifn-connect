@@ -1,6 +1,13 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+/**
+ * Hook pour la gestion des transactions marchand
+ * Migré vers TanStack Query pour standardisation et cache automatique
+ */
+
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { transactionService } from "../services/transactionService";
 import { exportSalesReportToPDF } from "@/lib/pdfExport";
 import {
@@ -14,47 +21,67 @@ import {
   formatTransactionForExport,
 } from "../utils/transactionUtils";
 
-// ============================================
-// Hook useTransactions
-// ============================================
 export function useTransactions() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  // États
-  const [transactions, setTransactions] = useState<TransactionListItem[]>([]);
-  const [merchantName, setMerchantName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  // États locaux UI
   const [visibleCount, setVisibleCount] = useState(10);
   const [exportPeriod, setExportPeriod] = useState<ExportPeriod>("week");
   const [isExporting, setIsExporting] = useState(false);
 
-  // Fetch initial des transactions
+  // Query pour les données du marchand
+  const { data: merchantData } = useQuery({
+    queryKey: ['merchant-data', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      return transactionService.getMerchantByUserId(user.id);
+    },
+    enabled: !!user,
+    staleTime: Infinity,
+  });
+
+  const merchantId = merchantData?.id ?? null;
+  const merchantName = merchantData?.full_name ?? "";
+
+  // Query pour les transactions
+  const { 
+    data: transactions = [], 
+    isLoading,
+  } = useQuery<TransactionListItem[]>({
+    queryKey: ['merchant-transactions', merchantId],
+    queryFn: () => {
+      if (!merchantId) return [];
+      return transactionService.fetchMerchantTransactions(merchantId, 100);
+    },
+    enabled: !!merchantId,
+    staleTime: 30_000,
+  });
+
+  // Realtime subscription
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
+    if (!merchantId) return;
 
-      try {
-        const merchantData = await transactionService.getMerchantByUserId(user.id);
-        setMerchantName(merchantData.full_name);
+    const channel = supabase
+      .channel('transactions-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'transactions',
+          filter: `merchant_id=eq.${merchantId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['merchant-transactions', merchantId] });
+        }
+      )
+      .subscribe();
 
-        const txList = await transactionService.fetchMerchantTransactions(
-          merchantData.id,
-          100
-        );
-        setTransactions(txList);
-      } catch {
-        // Merchant non trouvé ou erreur - transactions vides
-        setTransactions([]);
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      supabase.removeChannel(channel);
     };
-
-    fetchData();
-  }, [user]);
+  }, [merchantId, queryClient]);
 
   // Transactions groupées par date (mémoïsées)
   const groupedTransactions: GroupedTransactions[] = useMemo(

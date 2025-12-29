@@ -1,17 +1,11 @@
 // IndexedDB wrapper for offline data persistence
+import type { OfflineItem } from "@/shared/types/offline.types";
+
 const DB_NAME = 'ifn_offline';
 const DB_VERSION = 1;
 
-interface OfflineItem {
-  id: string;
-  entity_type: string;
-  entity_id: string;
-  action: string;
-  data: any;
-  created_at: string;
-  retryCount: number;
-  lastRetry?: string;
-}
+// Re-export types for backward compatibility
+export type { OfflineItem };
 
 let dbInstance: IDBDatabase | null = null;
 
@@ -118,6 +112,7 @@ export async function clearQueue(): Promise<void> {
 }
 
 // Cached data functions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function setCachedData(key: string, data: any, ttlMinutes: number = 60): Promise<void> {
   const db = await openDB();
   

@@ -78,8 +78,7 @@ const CooperativeDashboard: React.FC = () => {
       <div className="min-h-screen bg-background pb-20">
         <UnifiedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
-          <ErrorState message={error.userMessage} onRetry={refetch} isNetworkError={isNetworkError} />
-          {nextRetryIn !== null && <RetryIndicator nextRetryIn={nextRetryIn} retryCount={retryCount} maxRetries={3} />}
+          <ErrorState message={error.message || "Erreur de chargement"} onRetry={refetch} isNetworkError={isNetworkError} />
         </div>
         <UnifiedBottomNav items={navItems} />
       </div>

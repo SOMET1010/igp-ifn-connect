@@ -1,12 +1,12 @@
 /**
  * Hook pour les données du dashboard coopérative avec filtre temporel et realtime
+ * Migré vers TanStack Query pour standardisation et cache automatique
  */
 import { useState, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDataFetching } from "@/hooks/useDataFetching";
 import { supabase } from "@/integrations/supabase/client";
 import { cooperativeService } from "../services/cooperativeService";
-import type { DashboardData } from "../types/cooperative.types";
 import type { DateFilterValue } from "../types/dateFilter.types";
 
 interface RevenueDataPoint {
@@ -17,26 +17,25 @@ interface RevenueDataPoint {
 
 export function useCooperativeDashboard() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [dateFilter, setDateFilter] = useState<DateFilterValue>('all');
-  const [weeklyRevenue, setWeeklyRevenue] = useState<RevenueDataPoint[]>([]);
 
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    isNetworkError, 
+  // Query principale pour les données du dashboard
+  const {
+    data,
+    isLoading,
+    error,
     refetch,
-    nextRetryIn,
-    retryCount,
-  } = useDataFetching<DashboardData>({
-    fetchFn: () => {
+  } = useQuery({
+    queryKey: ['cooperative-dashboard', user?.id, dateFilter],
+    queryFn: () => {
       if (!user) throw new Error('Utilisateur non connecté');
       return cooperativeService.fetchDashboardData(user.id, dateFilter);
     },
-    deps: [user?.id, dateFilter],
     enabled: !!user,
-    retryDelay: 2000,
-    maxRetries: 3,
+    staleTime: 30_000, // 30 secondes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   const cooperative = data?.cooperative ?? null;
@@ -51,20 +50,16 @@ export function useCooperativeDashboard() {
     totalRevenue: 0,
   };
 
-  // Charger les données de revenu hebdomadaire
-  const loadWeeklyRevenue = useCallback(async () => {
-    if (!cooperative?.id) return;
-    try {
-      const revenue = await cooperativeService.getWeeklyRevenue(cooperative.id);
-      setWeeklyRevenue(revenue);
-    } catch (err) {
-      console.error('Failed to load weekly revenue:', err);
-    }
-  }, [cooperative?.id]);
-
-  useEffect(() => {
-    loadWeeklyRevenue();
-  }, [loadWeeklyRevenue]);
+  // Query pour les revenus hebdomadaires
+  const { data: weeklyRevenue = [] } = useQuery<RevenueDataPoint[]>({
+    queryKey: ['cooperative-weekly-revenue', cooperative?.id],
+    queryFn: () => {
+      if (!cooperative?.id) return [];
+      return cooperativeService.getWeeklyRevenue(cooperative.id);
+    },
+    enabled: !!cooperative?.id,
+    staleTime: 60_000, // 1 minute
+  });
 
   // Subscription Realtime pour les commandes
   useEffect(() => {
@@ -81,9 +76,9 @@ export function useCooperativeDashboard() {
           filter: `cooperative_id=eq.${cooperative.id}`,
         },
         () => {
-          // Rafraîchir les données quand une commande change
-          refetch();
-          loadWeeklyRevenue();
+          // Invalider les queries pour forcer le refetch
+          queryClient.invalidateQueries({ queryKey: ['cooperative-dashboard'] });
+          queryClient.invalidateQueries({ queryKey: ['cooperative-weekly-revenue'] });
         }
       )
       .subscribe();
@@ -91,7 +86,11 @@ export function useCooperativeDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [cooperative?.id, refetch, loadWeeklyRevenue]);
+  }, [cooperative?.id, queryClient]);
+
+  // Déterminer si c'est une erreur réseau
+  const isNetworkError = error instanceof Error && 
+    (error.message.includes('fetch') || error.message.includes('network'));
 
   return {
     cooperative,
@@ -100,10 +99,11 @@ export function useCooperativeDashboard() {
     setDateFilter,
     weeklyRevenue,
     isLoading,
-    error,
+    error: error instanceof Error ? error : null,
     isNetworkError,
     refetch,
-    nextRetryIn,
-    retryCount,
+    // Pour compatibilité avec l'ancien hook
+    nextRetryIn: null,
+    retryCount: 0,
   };
 }
