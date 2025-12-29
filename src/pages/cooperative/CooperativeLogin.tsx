@@ -258,10 +258,11 @@ const CooperativeLogin: React.FC = () => {
         description: 'Votre espace coopérative a été créé avec succès',
       });
       navigate('/cooperative');
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Une erreur est survenue';
       toast({
         title: 'Erreur',
-        description: err.message || 'Une erreur est survenue',
+        description: message,
         variant: 'destructive',
       });
     } finally {

@@ -68,17 +68,10 @@ const AgentDashboard: React.FC = () => {
         />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
           <ErrorState
-            message={error.userMessage}
+            message={error.message || "Erreur de chargement"}
             onRetry={refetch}
             isNetworkError={isNetworkError}
           />
-          {nextRetryIn !== null && (
-            <RetryIndicator
-              nextRetryIn={nextRetryIn}
-              retryCount={retryCount}
-              maxRetries={3}
-            />
-          )}
         </div>
         <UnifiedBottomNav items={navItems} />
       </div>

@@ -8,20 +8,10 @@ import {
   removeFromQueue,
   updateQueueItem,
   openDB,
+  type OfflineItem,
 } from "@/lib/offlineDB";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { syncLogger } from "@/infra/logger";
-
-interface OfflineItem {
-  id: string;
-  entity_type: string;
-  entity_id: string;
-  action: string;
-  data: any;
-  created_at: string;
-  retryCount: number;
-  lastRetry?: string;
-}
 
 const PHOTO_BUCKET = "merchant-photos";
 const MAX_RETRY_COUNT = 5;
@@ -97,6 +87,7 @@ export function useOfflineSync() {
     }
   }, []);
   // Add an action to the queue
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const addToQueue = useCallback(async (
     entityType: string, 
     action: string, 
@@ -137,6 +128,7 @@ export function useOfflineSync() {
   }, []);
 
   // Check for conflicts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const checkConflicts = async (item: OfflineItem): Promise<{ hasConflict: boolean; serverData?: any }> => {
     if (item.entity_type === "merchants" && item.action === "insert") {
       const { data: existing } = await supabase
