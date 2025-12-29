@@ -3,6 +3,7 @@ import { Mic, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VoiceAuthLang } from '@/features/voice-auth/config/audioScripts';
 import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { AudioBars } from './AudioBars';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 type MicState = 'idle' | 'listening' | 'processing';
@@ -92,11 +93,33 @@ export function VoiceModeCard({
     );
   };
 
+  // Labels selon la langue
+  const getLabel = () => {
+    if (micState === 'idle') {
+      return lang === 'nouchi' ? 'Appuie et parle' : 'Appuie et parle';
+    }
+    if (micState === 'listening') {
+      return lang === 'nouchi' ? "On t'écoute..." : 'Je vous écoute...';
+    }
+    return lang === 'nouchi' ? 'Attends un peu...' : 'Un instant...';
+  };
+
+  const getFallbackText = () => {
+    if (lang === 'nouchi') return '📝 Je préfère écrire mon numéro';
+    if (lang === 'suta') return '📝 Écrire mon numéro';
+    return '📝 Je préfère saisir mon numéro';
+  };
+
+  const getSpeakingText = () => {
+    if (lang === 'nouchi') return 'La machine parle...';
+    return 'Audio en cours...';
+  };
+
   return (
-    <div className="flex flex-col items-center gap-6 py-4">
-      {/* Illustration marchande circulaire */}
+    <div className="flex flex-col items-center gap-5 py-4">
+      {/* Illustration marchande circulaire - AGRANDIE */}
       <div className="relative">
-        <div className="merchant-avatar">
+        <div className="merchant-avatar-lg">
           <img 
             src={marcheIvoirien} 
             alt="Marché ivoirien"
@@ -107,7 +130,7 @@ export function VoiceModeCard({
         <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-secondary rounded-full border-2 border-white animate-pulse" />
       </div>
 
-      {/* GROS Bouton Micro */}
+      {/* GROS Bouton Micro - AGRANDI */}
       <button
         type="button"
         onClick={handleMicClick}
@@ -116,27 +139,28 @@ export function VoiceModeCard({
         aria-label={micState === 'listening' ? 'Écoute en cours' : 'Appuyer pour parler'}
       >
         {micState === 'processing' ? (
-          <Loader2 className="w-10 h-10 text-white animate-spin" />
+          <Loader2 className="w-12 h-12 text-white animate-spin" />
         ) : (
           <Mic className={cn(
-            "w-10 h-10 text-white transition-transform",
+            "w-12 h-12 text-white transition-transform",
             micState === 'listening' && 'scale-110'
           )} />
         )}
       </button>
 
-      {/* Label sous le micro */}
-      <p className="text-center text-muted-foreground text-sm font-medium">
-        {micState === 'idle' && (lang === 'nouchi' ? 'Appuie et parle' : 'Appuyez et parlez')}
-        {micState === 'listening' && (lang === 'nouchi' ? "On t'écoute..." : 'Je vous écoute...')}
-        {micState === 'processing' && (lang === 'nouchi' ? 'Attends un peu...' : 'Un instant...')}
+      {/* Barres audio pendant l'écoute */}
+      <AudioBars isActive={micState === 'listening'} />
+
+      {/* Label sous le micro - AGRANDI */}
+      <p className="text-center text-muted-foreground text-base font-medium">
+        {getLabel()}
       </p>
 
       {/* Indicateur audio actif */}
       {isSpeaking && (
         <div className="flex items-center gap-1.5 text-primary text-xs">
           <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-          {lang === 'nouchi' ? 'La machine parle...' : 'Audio en cours...'}
+          {getSpeakingText()}
         </div>
       )}
 
@@ -153,10 +177,7 @@ export function VoiceModeCard({
         onClick={onFallbackClick}
         className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
       >
-        {lang === 'nouchi' 
-          ? '📝 Je préfère écrire mon numéro' 
-          : '📝 Je préfère saisir mon numéro'
-        }
+        {getFallbackText()}
       </button>
     </div>
   );
