@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { transactionService } from "../services/transactionService";
-import { exportSalesReportToPDF } from "@/lib/pdfExport";
+import { exportSalesReportToPDF } from "../utils/pdfExport";
 import {
   type TransactionListItem,
   type GroupedTransactions,

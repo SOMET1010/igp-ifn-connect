@@ -170,3 +170,11 @@ export {
   InvoicesSummary,
   InvoicesFilters,
 } from "./components/invoices";
+
+// Utilitaires PDF & Factures
+export { exportInvoiceToPDF, exportSalesReportToPDF } from "./utils/pdfExport";
+export {
+  generateSecurityHash,
+  generateVerificationUrl,
+  FISCAL_REGIME_LABELS,
+} from "./utils/invoiceUtils";

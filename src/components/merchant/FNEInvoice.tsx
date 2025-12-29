@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, Shield, CheckCircle2, FileDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { FISCAL_REGIME_LABELS } from "@/lib/invoiceUtils";
-import { exportInvoiceToPDF } from "@/lib/pdfExport";
+import { FISCAL_REGIME_LABELS } from "@/features/merchant/utils/invoiceUtils";
+import { exportInvoiceToPDF } from "@/features/merchant/utils/pdfExport";
 
 export interface InvoiceData {
   invoiceNumber: string;
