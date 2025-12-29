@@ -415,6 +415,68 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_daily_sessions: {
+        Row: {
+          cash_difference: number | null
+          closed_at: string | null
+          closing_cash: number | null
+          created_at: string
+          expected_cash: number | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          opened_at: string
+          opening_cash: number
+          session_date: string
+          status: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+        }
+        Insert: {
+          cash_difference?: number | null
+          closed_at?: string | null
+          closing_cash?: number | null
+          created_at?: string
+          expected_cash?: number | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          opened_at?: string
+          opening_cash?: number
+          session_date?: string
+          status?: string
+          total_sales?: number | null
+          total_transactions?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cash_difference?: number | null
+          closed_at?: string | null
+          closing_cash?: number | null
+          created_at?: string
+          expected_cash?: number | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_cash?: number
+          session_date?: string
+          status?: string
+          total_sales?: number | null
+          total_transactions?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_daily_sessions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_stocks: {
         Row: {
           created_at: string
