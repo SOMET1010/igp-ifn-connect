@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Volume2, VolumeX, Loader2, Bell } from "lucide-react";
+import { LogOut, Volume2, VolumeX, Loader2, Bell, Mic, DoorOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -13,13 +13,26 @@ import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { useMerchantProfile } from "@/features/merchant/hooks/useMerchantProfile";
-import { ProfileHeader, ProfileEditForm } from "@/features/merchant/components/profile";
+import { ProfileEditForm } from "@/features/merchant/components/profile";
+import { InclusiveProfileHeader } from "@/features/merchant/components/profile/InclusiveProfileHeader";
+import { getProfileScript, type ProfileScriptKey } from "@/features/voice-auth/config/profileScripts";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { isSupported, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
   
   const {
@@ -31,12 +44,27 @@ export default function MerchantProfile() {
     saveProfile,
   } = useMerchantProfile();
 
+  // Auto-play audio d'accueil au chargement
+  const [welcomePlayed, setWelcomePlayed] = useState(false);
+  
+  useEffect(() => {
+    if (profile && !welcomePlayed && audioEnabled) {
+      // Marquer comme joué pour éviter répétition
+      setWelcomePlayed(true);
+    }
+  }, [profile, welcomePlayed, audioEnabled]);
+
+  const handleAudioPlay = (key: string) => {
+    // Placeholder pour lecture audio - sera connecté au TTS
+    console.log('Audio:', getProfileScript(key as ProfileScriptKey));
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/marchand/login");
   };
 
-  const pageAudioText = `${t("my_profile")}. ${profile?.full_name || ""}`;
+  const pageAudioText = getProfileScript('profile_welcome');
 
   if (isLoading) {
     return (
@@ -63,9 +91,9 @@ export default function MerchantProfile() {
         showNotifications={false}
       />
 
-      <main className="p-4 space-y-6 max-w-lg mx-auto">
+      <main className="p-4 space-y-5 max-w-lg mx-auto">
         {/* Section Profil - Mode lecture ou édition */}
-        <Card className="card-institutional">
+        <Card className="card-institutional overflow-hidden">
           <CardContent className="p-4">
             {isEditing ? (
               <ProfileEditForm
@@ -75,32 +103,39 @@ export default function MerchantProfile() {
                 isSaving={isSaving}
               />
             ) : (
-              <ProfileHeader
+              <InclusiveProfileHeader
                 profile={profile}
                 onEditClick={toggleEditing}
+                onAudioPlay={handleAudioPlay}
               />
             )}
           </CardContent>
         </Card>
 
-        {/* Sélecteur de langue */}
+        {/* Sélecteur de langue - Cartes visuelles */}
         <Card className="card-institutional">
           <CardContent className="p-4">
-            <h3 className="font-medium text-foreground mb-4">
-              {t("choose_language")}
-            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🌍</span>
+              <h3 className="font-semibold text-foreground">
+                {t("choose_language")}
+              </h3>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
-                  onClick={() => setLanguage(lang.code)}
-                  className={`p-3 rounded-lg text-left transition-all touch-manipulation border ${
+                  onClick={() => {
+                    setLanguage(lang.code);
+                    handleAudioPlay('profile_language');
+                  }}
+                  className={`p-4 rounded-xl text-center transition-all touch-manipulation border-2 ${
                     language === lang.code
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted hover:bg-muted/80 border-transparent"
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg"
+                      : "bg-card hover:bg-muted/50 border-border/50"
                   }`}
                 >
-                  <span className="text-xl mr-2">{lang.symbol}</span>
+                  <span className="text-2xl block mb-1">{lang.symbol}</span>
                   <span className="font-medium text-sm">{lang.nativeName}</span>
                 </button>
               ))}
@@ -108,72 +143,108 @@ export default function MerchantProfile() {
           </CardContent>
         </Card>
 
-        {/* Toggle Audio */}
+        {/* Toggles Son & Notifications - Pictogrammes XXL */}
         <Card className="card-institutional">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {audioEnabled ? (
-                <Volume2 className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <VolumeX className="w-5 h-5 text-muted-foreground" />
-              )}
-              <div>
-                <p className="font-medium text-foreground">Son et audio</p>
-                <p className="text-sm text-muted-foreground">
-                  {audioEnabled ? "Activé" : "Désactivé"}
-                </p>
-              </div>
-            </div>
-            <Switch
-              checked={audioEnabled}
-              onCheckedChange={setAudioEnabled}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Toggle Notifications Push */}
-        {isSupported && (
-          <Card className="card-institutional">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bell className={`w-5 h-5 ${isSubscribed ? 'text-primary' : 'text-muted-foreground'}`} />
+          <CardContent className="p-0">
+            {/* Toggle Son */}
+            <div className="toggle-row-inclusive border-b border-border/30">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  {audioEnabled ? (
+                    <Volume2 className="w-6 h-6 text-blue-600" />
+                  ) : (
+                    <VolumeX className="w-6 h-6 text-muted-foreground" />
+                  )}
+                </div>
                 <div>
-                  <p className="font-medium text-foreground">Notifications</p>
+                  <p className="font-semibold text-foreground">Son</p>
                   <p className="text-sm text-muted-foreground">
-                    {isSubscribed ? "Activées" : "Désactivées"}
+                    {audioEnabled ? "Activé" : "Désactivé"}
                   </p>
                 </div>
               </div>
               <Switch
-                checked={isSubscribed}
-                onCheckedChange={async (checked) => {
-                  if (checked) {
-                    await subscribe();
-                  } else {
-                    await unsubscribe();
-                  }
+                checked={audioEnabled}
+                onCheckedChange={(checked) => {
+                  setAudioEnabled(checked);
+                  handleAudioPlay(checked ? 'profile_sound_on' : 'profile_sound_off');
                 }}
-                disabled={notifLoading}
               />
-            </CardContent>
-          </Card>
-        )}
+            </div>
 
-        {/* Logout Button */}
+            {/* Toggle Notifications */}
+            {isSupported && (
+              <div className="toggle-row-inclusive">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    isSubscribed ? 'bg-amber-100' : 'bg-muted'
+                  }`}>
+                    <Bell className={`w-6 h-6 ${isSubscribed ? 'text-amber-600' : 'text-muted-foreground'}`} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">Notifications</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isSubscribed ? "Activées" : "Désactivées"}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={isSubscribed}
+                  onCheckedChange={async (checked) => {
+                    if (checked) {
+                      await subscribe();
+                      handleAudioPlay('profile_notif_on');
+                    } else {
+                      await unsubscribe();
+                      handleAudioPlay('profile_notif_off');
+                    }
+                  }}
+                  disabled={notifLoading}
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Bouton Déconnexion - Neutre avec confirmation */}
         <Button
-          onClick={handleSignOut}
+          onClick={() => setShowLogoutDialog(true)}
           variant="outline"
-          className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          className="btn-logout-inclusive w-full h-14"
         >
-          <LogOut className="w-4 h-4 mr-2" />
-          Se déconnecter
+          <DoorOpen className="w-5 h-5 mr-3" />
+          Quitter
         </Button>
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground pt-4">
+        <p className="text-center text-xs text-muted-foreground pt-2">
           Plateforme IFN • ANSUT × DGE
         </p>
       </main>
+
+      {/* Dialog de confirmation déconnexion */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3">
+              <DoorOpen className="w-6 h-6 text-muted-foreground" />
+              Te déconnecter ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tu devras te reconnecter avec ton numéro de téléphone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleSignOut}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Oui, quitter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <UnifiedBottomNav items={merchantNavItems} />
     </div>

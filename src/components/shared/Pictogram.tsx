@@ -7,7 +7,8 @@ export type PictogramType =
   | 'merchant' | 'agent' | 'cooperative' | 'admin'
   | 'cash' | 'mobile' | 'transfer' | 'credit'
   | 'scan' | 'promo' | 'supplier' | 'history'
-  | 'play' | 'language' | 'help' | 'settings';
+  | 'play' | 'language' | 'help' | 'settings'
+  | 'calendar' | 'id' | 'logout' | 'edit' | 'validated' | 'pending_status' | 'sound' | 'notification';
 
 interface PictogramConfig {
   emoji: string;
@@ -60,6 +61,16 @@ const PICTOGRAMS: Record<PictogramType, PictogramConfig> = {
   // Media
   play: { emoji: '🔊', color: 'text-primary', bgColor: 'bg-primary/10' },
   language: { emoji: '🌍', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  
+  // Profil inclusif
+  calendar: { emoji: '📅', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  id: { emoji: '🆔', color: 'text-purple-600', bgColor: 'bg-purple-100' },
+  logout: { emoji: '🚪', color: 'text-slate-600', bgColor: 'bg-slate-100' },
+  edit: { emoji: '✏️', color: 'text-primary', bgColor: 'bg-primary/10' },
+  validated: { emoji: '✅', color: 'text-green-600', bgColor: 'bg-green-100' },
+  pending_status: { emoji: '⏳', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  sound: { emoji: '🔊', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  notification: { emoji: '🔔', color: 'text-amber-600', bgColor: 'bg-amber-100' },
 };
 
 interface PictogramProps {

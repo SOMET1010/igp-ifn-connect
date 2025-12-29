@@ -593,6 +593,89 @@
 }
 
 /* ============================================
+   Profil Inclusif - Pictogramme First
+   ============================================ */
+
+/* Badge statut validé avec animation */
+.status-badge-validated {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(145, 50%, 45%), hsl(145, 50%, 35%));
+  animation: pulse-status 2s infinite;
+}
+
+.status-badge-pending {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsl(45, 90%, 55%), hsl(35, 90%, 50%));
+}
+
+@keyframes pulse-status {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(145, 50%, 45% / 0.4); }
+  50% { box-shadow: 0 0 0 8px hsl(145, 50%, 45% / 0); }
+}
+
+/* Ligne d'info inclusive */
+.info-row-inclusive {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  transition: background 0.15s;
+}
+
+.info-row-inclusive:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+.info-row-inclusive:active {
+  background: hsl(var(--primary) / 0.05);
+}
+
+.info-row-inclusive:last-child {
+  border-bottom: none;
+}
+
+/* Bouton modifier inclusif */
+.btn-modify-inclusive {
+  height: 56px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 1rem;
+}
+
+/* Bouton déconnexion neutre */
+.btn-logout-inclusive {
+  border-color: hsl(var(--muted-foreground) / 0.3);
+  color: hsl(var(--muted-foreground));
+  transition: all 0.15s;
+}
+
+.btn-logout-inclusive:hover {
+  border-color: hsl(var(--destructive) / 0.5);
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.05);
+}
+
+/* Toggle inclusif avec gros pictogrammes */
+.toggle-row-inclusive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.toggle-row-inclusive .pictogram {
+  font-size: 2rem;
+  min-width: 48px;
+}
+
+/* ============================================
    Accessibilité : Support prefers-reduced-motion
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
@@ -606,7 +689,8 @@
   }
 
   .mic-button-xl,
-  .btn-cashier-hero {
+  .btn-cashier-hero,
+  .status-badge-validated {
     animation: none !important;
   }
 }
