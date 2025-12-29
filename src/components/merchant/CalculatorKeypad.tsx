@@ -1,13 +1,14 @@
 import { Delete } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { digitToScriptKey, getCashierScript } from "@/features/voice-auth/config/cashierScripts";
+import type { LanguageCode } from "@/lib/translations";
 
 interface CalculatorKeypadProps {
   value: string;
   onChange: (value: string) => void;
   maxLength?: number;
   speakDigits?: boolean;
-  language?: string;
+  language?: LanguageCode;
 }
 
 const keys = [
