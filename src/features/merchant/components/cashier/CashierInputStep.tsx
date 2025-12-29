@@ -1,6 +1,7 @@
 import { Banknote, Smartphone, Wifi, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
 import { CalculatorKeypad } from "@/components/merchant/CalculatorKeypad";
 import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/components/merchant/ProductSelector";
@@ -37,8 +38,15 @@ export function CashierInputStep({
   isRetrying,
 }: CashierInputStepProps) {
   const { t } = useLanguage();
+  const { triggerMoney } = useSensoryFeedback();
 
   const formattedAmount = formatCurrency(numericAmount);
+
+  // Handle method selection with sensory feedback
+  const handleSelectMethod = (method: PaymentMethod) => {
+    triggerMoney();
+    onSelectMethod(method);
+  };
 
   // Handle adding amount from bill/coin denomination
   const handleAddAmount = (value: number) => {
@@ -95,13 +103,13 @@ export function CashierInputStep({
         </>
       )}
 
-      {/* Payment buttons XXL */}
+      {/* Payment buttons XXL - Design KPATA */}
       <div className="space-y-4 pt-2">
         <div className="grid grid-cols-2 gap-4">
           <Button
-            onClick={() => onSelectMethod("cash")}
+            onClick={() => handleSelectMethod("cash")}
             disabled={numericAmount < 100}
-            className="h-24 sm:h-28 flex-col gap-2 bg-green-500 hover:bg-green-600 disabled:bg-green-500/30 text-white rounded-2xl shadow-lg transition-all duration-200 active:scale-95"
+            className="btn-kpata-success h-24 sm:h-28 flex-col gap-2 disabled:opacity-30"
           >
             <Banknote className="w-10 h-10 sm:w-12 sm:h-12" />
             <span className="text-xl sm:text-2xl font-black">
@@ -110,9 +118,9 @@ export function CashierInputStep({
           </Button>
 
           <Button
-            onClick={() => onSelectMethod("mobile_money")}
+            onClick={() => handleSelectMethod("mobile_money")}
             disabled={numericAmount < 100}
-            className="h-24 sm:h-28 flex-col gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/30 text-white rounded-2xl shadow-lg transition-all duration-200 active:scale-95"
+            className="btn-kpata-primary h-24 sm:h-28 flex-col gap-2 disabled:opacity-30"
           >
             <Smartphone className="w-10 h-10 sm:w-12 sm:h-12" />
             <span className="text-xl sm:text-2xl font-black">MOBILE</span>

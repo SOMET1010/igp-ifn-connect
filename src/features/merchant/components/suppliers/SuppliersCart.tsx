@@ -1,9 +1,10 @@
 // ============================================
-// Component - Suppliers Floating Cart
+// Component - Suppliers Floating Cart (KPATA Design)
 // ============================================
 
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from "lucide-react";
+import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import type { CartItem } from "../../types/suppliers.types";
 
 interface SuppliersCartProps {
@@ -21,10 +22,27 @@ export function SuppliersCart({
   onRemoveItem,
   onValidate,
 }: SuppliersCartProps) {
+  const { triggerTap, triggerMoney, triggerLight } = useSensoryFeedback();
+
   if (cart.length === 0) return null;
 
+  const handleUpdateQuantity = (stockId: string, delta: number) => {
+    triggerLight();
+    onUpdateQuantity(stockId, delta);
+  };
+
+  const handleRemoveItem = (stockId: string) => {
+    triggerTap();
+    onRemoveItem(stockId);
+  };
+
+  const handleValidate = () => {
+    triggerMoney();
+    onValidate();
+  };
+
   return (
-    <div className="fixed bottom-20 left-4 right-4 bg-card border-2 border-primary rounded-2xl shadow-2xl p-4 z-40">
+    <div className="fixed bottom-20 left-4 right-4 bg-card border-2 border-primary rounded-2xl shadow-2xl p-4 z-40 card-kpata">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -59,8 +77,8 @@ export function SuppliersCart({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
-                onClick={() => onUpdateQuantity(item.stockId, -1)}
+                className="btn-kpata-icon"
+                onClick={() => handleUpdateQuantity(item.stockId, -1)}
               >
                 <Minus className="h-3 w-3" />
               </Button>
@@ -70,16 +88,16 @@ export function SuppliersCart({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
-                onClick={() => onUpdateQuantity(item.stockId, 1)}
+                className="btn-kpata-icon"
+                onClick={() => handleUpdateQuantity(item.stockId, 1)}
               >
                 <Plus className="h-3 w-3" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-destructive"
-                onClick={() => onRemoveItem(item.stockId)}
+                className="btn-kpata-icon text-destructive"
+                onClick={() => handleRemoveItem(item.stockId)}
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -88,10 +106,10 @@ export function SuppliersCart({
         ))}
       </div>
 
-      {/* Validate Button */}
+      {/* Validate Button - KPATA Design */}
       <Button
-        className="w-full h-14 text-lg font-bold bg-green-600 hover:bg-green-700 rounded-xl"
-        onClick={onValidate}
+        className="btn-kpata-success w-full"
+        onClick={handleValidate}
       >
         <CheckCircle className="h-5 w-5 mr-2" />
         Valider la commande
