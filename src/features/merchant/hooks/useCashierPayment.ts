@@ -148,8 +148,11 @@ export function useCashierPayment(
           rstiDeduction
         );
 
-        // 5. Enregistrer CMU
-        await transactionService.recordCmuPayment(merchant.id, txId, cmuDeduction);
+        // 5. Enregistrer CMU et mettre à jour la validité si seuil atteint
+        const cmuRecorded = await transactionService.recordCmuPayment(merchant.id, txId, cmuDeduction);
+        if (cmuRecorded) {
+          await transactionService.updateCmuValidity(merchant.id);
+        }
 
         return ref;
       });

@@ -125,21 +125,91 @@ export const transactionService = {
     merchantId: string,
     transactionId: string,
     amount: number
-  ): Promise<void> {
+  ): Promise<boolean> {
+    if (amount <= 0) {
+      merchantLogger.debug("Aucune cotisation CMU à enregistrer (montant = 0)");
+      return false;
+    }
+
     const now = new Date();
     const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const { error } = await supabase.from("cmu_payments").insert({
+    merchantLogger.debug("Tentative enregistrement CMU", {
+      merchantId,
+      transactionId,
+      amount,
+      periodStart: periodStart.toISOString().split("T")[0],
+      periodEnd: periodEnd.toISOString().split("T")[0],
+    });
+
+    const { data, error } = await supabase.from("cmu_payments").insert({
       merchant_id: merchantId,
       amount,
       period_start: periodStart.toISOString().split("T")[0],
       period_end: periodEnd.toISOString().split("T")[0],
       transaction_id: transactionId,
-    });
+    }).select("id").single();
 
     if (error) {
-      merchantLogger.warn("Échec enregistrement CMU", { error: error.message });
+      merchantLogger.error("Échec enregistrement CMU", error, {
+        merchantId,
+        transactionId,
+        amount,
+      });
+      return false;
+    }
+
+    merchantLogger.info("Cotisation CMU enregistrée", {
+      cmuPaymentId: data.id,
+      merchantId,
+      amount,
+    });
+    return true;
+  },
+
+  /**
+   * Met à jour la validité CMU si le seuil mensuel est atteint
+   * Seuil : 2000 FCFA/mois = couverture santé active
+   */
+  async updateCmuValidity(merchantId: string): Promise<void> {
+    const CMU_MONTHLY_THRESHOLD = 2000;
+    
+    const now = new Date();
+    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    // Calculer le total des cotisations CMU du mois en cours
+    const { data, error } = await supabase
+      .from("cmu_payments")
+      .select("amount")
+      .eq("merchant_id", merchantId)
+      .gte("period_start", periodStart.toISOString().split("T")[0])
+      .lte("period_end", periodEnd.toISOString().split("T")[0]);
+
+    if (error) {
+      merchantLogger.warn("Échec récupération total CMU mensuel", { error: error.message });
+      return;
+    }
+
+    const monthlyTotal = (data || []).reduce((sum, row) => sum + Number(row.amount), 0);
+    merchantLogger.debug("Total CMU mensuel", { merchantId, monthlyTotal, threshold: CMU_MONTHLY_THRESHOLD });
+
+    if (monthlyTotal >= CMU_MONTHLY_THRESHOLD) {
+      // Validité = fin du mois suivant
+      const nextMonthEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      const validUntil = nextMonthEnd.toISOString().split("T")[0];
+
+      const { error: updateError } = await supabase
+        .from("merchants")
+        .update({ cmu_valid_until: validUntil })
+        .eq("id", merchantId);
+
+      if (updateError) {
+        merchantLogger.warn("Échec mise à jour cmu_valid_until", { error: updateError.message });
+      } else {
+        merchantLogger.info("CMU validité mise à jour", { merchantId, validUntil, monthlyTotal });
+      }
     }
   },
 
