@@ -502,6 +502,97 @@
 }
 
 /* ============================================
+   INCLUSIVE DASHBOARD - KPATA v2
+   ============================================ */
+
+/* Bouton ENCAISSER héros - action principale */
+.btn-cashier-hero {
+  height: 80px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ansut-orange)));
+  color: white;
+  box-shadow: 0 4px 20px hsl(var(--primary) / 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-cashier-hero:not(:disabled) {
+  animation: pulse-hero 3s infinite;
+}
+
+.btn-cashier-hero:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  animation: none;
+}
+
+.btn-cashier-hero:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+@keyframes pulse-hero {
+  0%, 100% { box-shadow: 0 4px 20px hsl(var(--primary) / 0.3); }
+  50% { box-shadow: 0 4px 30px hsl(var(--primary) / 0.5), 0 0 0 8px hsl(var(--primary) / 0.1); }
+}
+
+/* Tuiles outils inclusives */
+.inclusive-tool-tile {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 8px hsl(var(--foreground) / 0.05);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.inclusive-tool-tile:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.1);
+}
+
+.inclusive-tool-tile:active {
+  transform: scale(0.96);
+  background: hsl(var(--primary) / 0.05);
+}
+
+/* Montant XXL pour lisibilité terrain */
+.amount-xxl {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 640px) {
+  .amount-xxl {
+    font-size: 3.5rem;
+  }
+}
+
+/* Bouton session journée inclusif */
+.btn-session-open {
+  height: 64px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, hsl(45, 93%, 47%), hsl(var(--ansut-orange)));
+  color: white;
+  box-shadow: 0 4px 16px hsl(45, 93%, 47% / 0.3);
+}
+
+.btn-session-open:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
    Accessibilité : Support prefers-reduced-motion
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
@@ -514,7 +605,8 @@
     scroll-behavior: auto !important;
   }
 
-  .mic-button-xl {
+  .mic-button-xl,
+  .btn-cashier-hero {
     animation: none !important;
   }
 }

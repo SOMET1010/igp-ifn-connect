@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Banknote, BarChart3 } from "lucide-react";
+import { Banknote, Mic } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
-import { useMerchantNotifications } from "@/hooks/useMerchantNotifications";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
@@ -14,21 +13,20 @@ import { PageLayout } from "@/templates";
 import { merchantNavItems } from "@/config/navigation";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { UnifiedBigNumber } from "@/components/shared/UnifiedBigNumber";
-import { SalesChart } from "@/components/merchant/SalesChart";
 import { MerchantDashboardSkeleton } from "@/components/merchant/MerchantDashboardSkeleton";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { Confetti } from "@/components/shared/Confetti";
-import {
-  MerchantQuickActions,
-  MerchantToolsGrid,
-  MerchantQuickGuide,
-  OnlineStatusIndicator,
-} from "@/components/merchant/dashboard";
+import { OnlineStatusIndicator } from "@/components/merchant/dashboard";
+import { InclusiveToolsGrid } from "@/components/merchant/dashboard/InclusiveToolsGrid";
 import {
   OpenDayDialog,
   CloseDayDialog,
   DaySessionBanner,
 } from "@/features/merchant/components/daily-session";
+import { 
+  getDashboardScript, 
+  formatAmountForSpeech 
+} from "@/features/voice-auth/config/dashboardScripts";
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
@@ -36,12 +34,12 @@ export default function MerchantDashboard() {
   const { t } = useLanguage();
   const { isOnline } = useOnlineStatus();
   const { triggerTap, triggerMoney } = useSensoryFeedback();
+  const hasPlayedWelcome = useRef(false);
 
   const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
-  const notifications = useMerchantNotifications();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
   
   const {
@@ -57,20 +55,42 @@ export default function MerchantDashboard() {
 
   const merchant = data?.merchant;
   const todayTotal = data?.todayTotal || 0;
-  const stockAlertCount = notifications.lowStockCount + notifications.outOfStockCount;
+
+  // Script audio contextuel pour le bouton flottant
+  const getAssistantAudioText = (): string => {
+    if (sessionStatus === "none") {
+      return getDashboardScript("day_closed");
+    }
+    return getDashboardScript("assistant_prompt");
+  };
+
+  // Script audio pour le montant
+  const getAmountAudioText = (): string => {
+    return getDashboardScript("today_amount", { 
+      amount: formatAmountForSpeech(todayTotal) 
+    });
+  };
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/marchand/login');
   };
 
-  const pageAudioText = `${t("welcome")} ${merchant?.full_name || ""}. ${t("your_sales_today")}: ${todayTotal.toLocaleString()} FCFA.`;
+  const handleEncaisser = () => {
+    triggerMoney();
+    navigate("/marchand/encaisser");
+  };
+
+  const handleAmountTap = () => {
+    // L'audio sera joué via le composant AudioButton ou TTS externe
+    console.log("Amount tapped, audio text:", getAmountAudioText());
+  };
 
   if (error) {
     return (
       <PageLayout
         title={t("merchant")}
-        subtitle="Plateforme IFN – Espace Marchand"
+        subtitle="Espace Marchand"
         showSignOut
         onSignOut={handleSignOut}
         navItems={merchantNavItems}
@@ -90,7 +110,7 @@ export default function MerchantDashboard() {
   return (
     <PageLayout
       title={merchant?.full_name || t("merchant")}
-      subtitle="Plateforme IFN – Espace Marchand"
+      subtitle="Espace Marchand"
       showSignOut
       onSignOut={handleSignOut}
       navItems={merchantNavItems}
@@ -98,8 +118,9 @@ export default function MerchantDashboard() {
     >
       {showConfetti && <Confetti duration={3000} particleCount={60} />}
       
+      {/* Assistant vocal flottant */}
       <AudioButton 
-        textToRead={pageAudioText}
+        textToRead={getAssistantAudioText()}
         className="fixed bottom-24 right-4 z-50"
         size="lg"
       />
@@ -109,57 +130,38 @@ export default function MerchantDashboard() {
           <MerchantDashboardSkeleton />
         ) : (
           <>
-            {/* Bannière session journée */}
+            {/* 1. CARTE SESSION - État de la journée */}
             <DaySessionBanner
               sessionStatus={sessionStatus}
               session={todaySession}
               onOpenDay={() => setOpenDayDialogOpen(true)}
               onCloseDay={() => setCloseDayDialogOpen(true)}
+              inclusive
             />
 
-            {/* Merchant info */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                {merchant?.activity_type}
-                {merchant?.market_name && ` • ${merchant.market_name}`}
-              </p>
-            </div>
+            {/* 2. MONTANT DU JOUR - XXL, interactif */}
+            <UnifiedBigNumber 
+              label={t("your_sales_today") || "Aujourd'hui"} 
+              value={todayTotal} 
+              unit="FCFA"
+              sizeXXL
+              onTap={handleAmountTap}
+            />
 
-            <UnifiedBigNumber label={t("your_sales_today")} value={todayTotal} unit="FCFA" />
-
-            {/* CTA principaux - Design KPATA */}
+            {/* 3. BOUTON HÉROS - ENCAISSER */}
             <Button 
-              onClick={() => { triggerMoney(); navigate("/marchand/encaisser"); }} 
-              className="btn-kpata-primary w-full"
+              onClick={handleEncaisser} 
+              className="btn-cashier-hero w-full flex items-center justify-center gap-3"
               disabled={!isSessionOpen}
             >
-              <Banknote className="w-6 h-6 mr-2" />
-              {t("collect_payment")}
+              <Banknote className="w-8 h-8" />
+              <span className="text-xl">ENCAISSER</span>
             </Button>
 
-            <Button 
-              onClick={() => { triggerTap(); navigate("/marchand/argent"); }} 
-              className="btn-kpata-secondary w-full"
-            >
-              <BarChart3 className="w-5 h-5 mr-2" />
-              {t("your_money")}
-            </Button>
+            {/* 4. TUILES OUTILS INCLUSIVES - 2x2 grid */}
+            <InclusiveToolsGrid />
 
-            <SalesChart data={data?.chartData} weeklyTotal={data?.weeklyTotal} trend={data?.trend} />
-
-            <MerchantQuickActions
-              stockAlertCount={stockAlertCount}
-              outOfStockCount={notifications.outOfStockCount}
-              cancelledInvoicesCount={notifications.cancelledInvoicesCount}
-            />
-
-            <MerchantToolsGrid
-              pendingCreditsCount={notifications.pendingCreditsCount}
-              overdueCreditsCount={notifications.overdueCreditsCount}
-            />
-
-            <MerchantQuickGuide />
-
+            {/* 5. Indicateur de connexion discret */}
             <OnlineStatusIndicator isOnline={isOnline} />
           </>
         )}
