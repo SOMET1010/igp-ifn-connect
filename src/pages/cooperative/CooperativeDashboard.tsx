@@ -15,8 +15,10 @@ import {
   useCooperativeNotifications,
   CooperativeStats,
   CooperativeOrdersChart,
+  CooperativeRevenueChart,
   CooperativeAlerts,
   QuickGuide,
+  DateFilterTabs,
 } from '@/features/cooperative';
 import { 
   Package, 
@@ -41,6 +43,9 @@ const CooperativeDashboard: React.FC = () => {
   const {
     cooperative,
     stats,
+    dateFilter,
+    setDateFilter,
+    weeklyRevenue,
     isLoading,
     error,
     isNetworkError,
@@ -81,6 +86,9 @@ const CooperativeDashboard: React.FC = () => {
     );
   }
 
+  // Calcul du CA hebdomadaire total
+  const weeklyRevenueTotal = weeklyRevenue.reduce((sum, d) => sum + d.revenue, 0);
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <AudioButton textToRead={audioText} variant="floating" size="lg" className="bottom-24 right-4 z-50" />
@@ -102,11 +110,17 @@ const CooperativeDashboard: React.FC = () => {
           <p className="text-sm text-muted-foreground">{cooperative?.commune}, {cooperative?.region}</p>
         </div>
 
+        {/* Filtre temporel */}
+        <DateFilterTabs value={dateFilter} onChange={setDateFilter} />
+
         {/* Alertes stock */}
         <CooperativeAlerts notifications={notifications} />
 
         {/* Statistiques enrichies */}
         <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
+
+        {/* Graphique CA hebdomadaire */}
+        <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
 
         {/* Graphique des commandes */}
         <CooperativeOrdersChart stats={stats} />
