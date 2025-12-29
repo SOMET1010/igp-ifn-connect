@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Package, 
-  Plus, 
-  Loader2,
-  RefreshCw,
-  Bell,
-  AlertTriangle,
-  TrendingDown,
+  AlertTriangle, 
+  TrendingDown, 
   CheckCircle,
+  RefreshCw, 
+  Volume2, 
+  VolumeX 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { merchantNavItems } from "@/config/navigation";
 import { PageWithList, FilterOption } from "@/templates";
+import { Pictogram } from "@/components/shared/Pictogram";
+import { useTts } from "@/shared/hooks/useTts";
+import { getStockScript } from "@/features/voice-auth/config/stockScripts";
 import {
   StockCard,
   StockAlerts,
@@ -37,6 +39,9 @@ export default function MerchantStock() {
     checkLowStock,
   } = useMerchantStock();
 
+  const { speak, isVoiceEnabled, toggleVoice, isPlaying } = useTts();
+  const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -55,6 +60,26 @@ export default function MerchantStock() {
     return qty > Number(s.min_threshold);
   });
 
+  // Audio de bienvenue au chargement
+  useEffect(() => {
+    if (!isLoading && stocks.length > 0 && isVoiceEnabled && !hasPlayedWelcome) {
+      const welcomeText = getStockScript('stock_welcome');
+      speak(welcomeText);
+      setHasPlayedWelcome(true);
+    } else if (!isLoading && stocks.length === 0 && isVoiceEnabled && !hasPlayedWelcome) {
+      const emptyText = getStockScript('stock_empty');
+      speak(emptyText);
+      setHasPlayedWelcome(true);
+    }
+  }, [isLoading, stocks.length, isVoiceEnabled, hasPlayedWelcome, speak]);
+
+  // Callback pour audio contextuel
+  const handleSpeak = useCallback((text: string) => {
+    if (isVoiceEnabled) {
+      speak(text);
+    }
+  }, [isVoiceEnabled, speak]);
+
   // Filtrage combiné (recherche + statut)
   const filteredStocks = stocks.filter(s => {
     const matchesSearch = s.product?.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -63,11 +88,12 @@ export default function MerchantStock() {
     return matchesSearch && matchesStatus;
   });
 
+  // Options de filtres avec pictogrammes
   const filterOptions: FilterOption[] = [
     { value: "all", label: "Tous", count: stocks.length, icon: Package },
     { value: "out", label: "Rupture", count: outOfStockItems.length, icon: AlertTriangle },
-    { value: "low", label: "Stock bas", count: lowStockItems.length, icon: TrendingDown },
-    { value: "ok", label: "En stock", count: okStockItems.length, icon: CheckCircle },
+    { value: "low", label: "Bas", count: lowStockItems.length, icon: TrendingDown },
+    { value: "ok", label: "OK", count: okStockItems.length, icon: CheckCircle },
   ];
 
   const alertCount = outOfStockItems.length + lowStockItems.length;
@@ -75,23 +101,54 @@ export default function MerchantStock() {
   const handleOpenRestock = (stock: StockItem) => {
     setSelectedStock(stock);
     setShowRestockDialog(true);
+    if (isVoiceEnabled) {
+      speak(getStockScript('stock_restock'));
+    }
   };
 
   const handleOpenEdit = (stock: StockItem) => {
     setSelectedStock(stock);
     setShowEditDialog(true);
+    if (isVoiceEnabled) {
+      speak(getStockScript('stock_edit'));
+    }
+  };
+
+  const handleOpenAdd = () => {
+    setShowAddDialog(true);
+    if (isVoiceEnabled) {
+      speak(getStockScript('stock_add'));
+    }
   };
 
   const handleRestock = async (stockId: string, currentQty: number, addQty: number) => {
     const success = await restockItem(stockId, currentQty, addQty);
-    if (success) setSelectedStock(null);
+    if (success) {
+      setSelectedStock(null);
+      if (isVoiceEnabled) {
+        speak(getStockScript('stock_saved'));
+      }
+    }
     return success;
   };
 
   const handleUpdate = async (stockId: string, data: { quantity: number; minThreshold: number; unitPrice: number | null }) => {
     const success = await updateStock(stockId, data);
-    if (success) setSelectedStock(null);
+    if (success) {
+      setSelectedStock(null);
+      if (isVoiceEnabled) {
+        speak(getStockScript('stock_saved'));
+      }
+    }
     return success;
+  };
+
+  const handleFilterChange = (value: string) => {
+    setStatusFilter(value);
+    if (isVoiceEnabled) {
+      const scriptKey = `stock_filter_${value === 'all' ? 'all' : value === 'out' ? 'out' : value === 'low' ? 'low' : 'ok'}`;
+      speak(getStockScript(scriptKey));
+    }
   };
 
   return (
@@ -103,25 +160,41 @@ export default function MerchantStock() {
         backTo="/marchand"
         navItems={merchantNavItems}
         headerRightContent={
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => fetchData()}
-            className="h-10 w-10"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Bouton son */}
+            <Button
+              variant={isVoiceEnabled ? "default" : "ghost"}
+              size="icon"
+              onClick={toggleVoice}
+              className={`h-12 w-12 rounded-full ${isVoiceEnabled ? "bg-primary text-primary-foreground" : ""}`}
+            >
+              {isVoiceEnabled ? (
+                <Volume2 className={`w-6 h-6 ${isPlaying ? "animate-pulse" : ""}`} />
+              ) : (
+                <VolumeX className="w-6 h-6" />
+              )}
+            </Button>
+            {/* Bouton actualiser */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchData()}
+              className="h-12 w-12"
+            >
+              <RefreshCw className="w-6 h-6" />
+            </Button>
+          </div>
         }
         
         // Recherche
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Rechercher un produit..."
+        searchPlaceholder="Rechercher..."
         
         // Filtres par statut
         filterOptions={filterOptions}
         filterValue={statusFilter}
-        onFilterChange={setStatusFilter}
+        onFilterChange={handleFilterChange}
         
         // Liste
         items={filteredStocks}
@@ -132,6 +205,7 @@ export default function MerchantStock() {
             onRestock={handleOpenRestock}
             onEdit={handleOpenEdit}
             onDelete={deleteStock}
+            onSpeak={handleSpeak}
           />
         )}
         
@@ -140,33 +214,23 @@ export default function MerchantStock() {
         // Contenu avant la liste
         headerContent={
           <div className="space-y-4 py-2">
+            {/* Alertes avec audio */}
             <StockAlerts
               outOfStockItems={outOfStockItems}
               lowStockItems={lowStockItems}
               onRestock={handleOpenRestock}
+              onSpeakAlert={isVoiceEnabled ? handleSpeak : undefined}
             />
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setShowAddDialog(true)}
-                className="flex-1"
-                disabled={availableProducts.length === 0}
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Ajouter un produit
-              </Button>
-              <Button
-                onClick={checkLowStock}
-                variant="outline"
-                disabled={isCheckingStock}
-                className="shrink-0"
-              >
-                {isCheckingStock ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Bell className="w-5 h-5" />
-                )}
-              </Button>
-            </div>
+            
+            {/* Bouton Ajouter XXL */}
+            <Button
+              onClick={handleOpenAdd}
+              disabled={availableProducts.length === 0}
+              className="w-full h-16 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl gap-3"
+            >
+              <Pictogram type="add" size="md" showBackground={false} />
+              <span>Ajouter un produit</span>
+            </Button>
           </div>
         }
         
@@ -174,12 +238,12 @@ export default function MerchantStock() {
         emptyState={
           <Card className="bg-muted/30">
             <CardContent className="p-8 text-center">
-              <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                {searchQuery || statusFilter !== "all" ? "Aucun produit trouvé" : "Aucun produit en stock"}
+              <Pictogram type="stock" size="xl" className="mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-semibold text-foreground mb-2">
+                {searchQuery || statusFilter !== "all" ? "Aucun produit trouvé" : "Ton stock est vide"}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ajoutez des produits pour commencer
+              <p className="text-muted-foreground">
+                Appuie sur le bouton + pour ajouter
               </p>
             </CardContent>
           </Card>
