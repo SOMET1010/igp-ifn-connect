@@ -642,6 +642,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          category: string
+          created_at: string | null
+          icon: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          category: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          category?: string
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       offline_sync: {
         Row: {
           action: string
@@ -1596,6 +1641,19 @@ export type Database = {
       check_rbac_permission: {
         Args: { _action_code: string; _resource_code: string; _user_id: string }
         Returns: boolean
+      }
+      create_notification: {
+        Args: {
+          p_action_url?: string
+          p_category: string
+          p_icon?: string
+          p_message: string
+          p_metadata?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
       }
       decrement_stock: {
         Args: { p_quantity: number; p_stock_id: string }
