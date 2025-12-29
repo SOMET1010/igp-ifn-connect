@@ -1,4 +1,4 @@
-import { Banknote, Smartphone, Wifi, RefreshCw } from "lucide-react";
+import { Banknote, Smartphone, Wifi, RefreshCw, Mic, Ear } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
@@ -7,6 +7,7 @@ import { CalculatorKeypad } from "@/components/merchant/CalculatorKeypad";
 import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/components/merchant/ProductSelector";
 import type { SelectedProduct, PaymentMethod, StockItemForSelector } from "../../types/transaction.types";
 import { formatCurrency } from "../../utils/cashierCalculations";
+import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
 
 // ============================================
 // Props du composant
@@ -24,7 +25,21 @@ interface CashierInputStepProps {
 }
 
 // ============================================
-// Composant étape d'entrée
+// TTS Helper - Synthèse vocale rapide
+// ============================================
+const speakText = (text: string) => {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-FR';
+    utterance.rate = 0.9;
+    utterance.volume = 0.8;
+    window.speechSynthesis.speak(utterance);
+  }
+};
+
+// ============================================
+// Composant étape d'entrée INCLUSIVE
 // ============================================
 export function CashierInputStep({
   stocks,
@@ -37,14 +52,17 @@ export function CashierInputStep({
   onSelectMethod,
   isRetrying,
 }: CashierInputStepProps) {
-  const { t } = useLanguage();
-  const { triggerMoney } = useSensoryFeedback();
+  const { t, language } = useLanguage();
+  const { triggerMoney, triggerTap } = useSensoryFeedback();
 
   const formattedAmount = formatCurrency(numericAmount);
+  const isAmountEmpty = numericAmount === 0;
 
-  // Handle method selection with sensory feedback
+  // Handle method selection with sensory + vocal feedback
   const handleSelectMethod = (method: PaymentMethod) => {
     triggerMoney();
+    const scriptKey = method === "cash" ? "cashier_cash" : "cashier_mobile";
+    speakText(getCashierScript(scriptKey, language));
     onSelectMethod(method);
   };
 
@@ -58,6 +76,22 @@ export function CashierInputStep({
   // Map ProductSelector products to our type
   const handleProductsChange = (products: ProductSelectorProduct[]) => {
     onProductsChange(products as SelectedProduct[]);
+  };
+
+  // Tap on speaking header to play welcome audio
+  const handleSpeakingHeaderTap = () => {
+    triggerTap();
+    speakText(getCashierScript("cashier_welcome", language));
+  };
+
+  // Tap on amount zone to speak current amount or "listening"
+  const handleAmountZoneTap = () => {
+    triggerTap();
+    if (numericAmount > 0) {
+      speakText(`${formattedAmount} francs CFA`);
+    } else {
+      speakText(getCashierScript("cashier_listening", language));
+    }
   };
 
   return (
@@ -78,11 +112,42 @@ export function CashierInputStep({
         isLoading={stocksLoading}
       />
 
-      {/* Amount display - GIANT */}
-      <div className="text-center py-4">
-        <p className="text-lg text-muted-foreground font-medium mb-2">
-          {selectedProducts.length > 0 ? t("total") || "Total" : t("how_much")}
-        </p>
+      {/* Speaking Header - INCLUSIF */}
+      <button 
+        type="button"
+        onClick={handleSpeakingHeaderTap}
+        className="speaking-header"
+        aria-label={t("how_much")}
+      >
+        <Mic className="w-5 h-5 micro-icon" />
+        <span className="text-sm text-muted-foreground font-medium">
+          {selectedProducts.length > 0 
+            ? t("total") || "Total" 
+            : t("say_amount") || "Dis le montant ou appuie sur un billet"
+          }
+        </span>
+      </button>
+
+      {/* Amount Zone - ACTIVE & PULSANTE */}
+      <button
+        type="button"
+        onClick={handleAmountZoneTap}
+        className={`text-center transition-all duration-300 ${
+          isAmountEmpty ? "amount-zone-listening" : "amount-zone-active"
+        }`}
+        aria-label={numericAmount > 0 ? `${formattedAmount} FCFA` : t("listening") || "J'écoute"}
+      >
+        {/* Ear icon when listening */}
+        {isAmountEmpty && (
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Ear className="w-5 h-5 ear-icon" />
+            <span className="text-sm text-muted-foreground">
+              {t("listening") || "J'écoute..."}
+            </span>
+          </div>
+        )}
+        
+        {/* Giant Amount Display */}
         <div className="flex items-baseline justify-center gap-2">
           <span
             className={`text-6xl sm:text-7xl font-black tracking-tight transition-all duration-200 ${
@@ -93,20 +158,25 @@ export function CashierInputStep({
           </span>
           <span className="text-2xl text-muted-foreground font-bold">FCFA</span>
         </div>
-      </div>
+      </button>
 
       {/* CFA Bills Quick Input - Only show if no products selected */}
       {selectedProducts.length === 0 && (
         <>
-          <CashDenominationPad onAddAmount={handleAddAmount} />
-          <CalculatorKeypad value={amount} onChange={onAmountChange} maxLength={10} />
+          <CashDenominationPad onAddAmount={handleAddAmount} speakAmount />
+          <CalculatorKeypad 
+            value={amount} 
+            onChange={onAmountChange} 
+            maxLength={10} 
+            speakDigits 
+          />
         </>
       )}
 
       {/* Spacer pour le sticky */}
       <div className="flex-1" />
 
-      {/* Sticky Cart Summary + Payment Buttons - Design KPATA */}
+      {/* Sticky Cart Summary + Payment Buttons - Design KPATA INCLUSIF */}
       <div className="sticky bottom-0 -mx-4 px-4 py-4 bg-card/95 backdrop-blur-sm border-t border-border shadow-lg space-y-4">
         {/* Résumé produits (si présents) */}
         {selectedProducts.length > 0 && (
@@ -120,26 +190,28 @@ export function CashierInputStep({
           </div>
         )}
 
-        {/* Payment buttons XXL */}
+        {/* Payment buttons XXL - PICTOGRAMME-FIRST */}
         <div className="grid grid-cols-2 gap-4">
           <Button
             onClick={() => handleSelectMethod("cash")}
             disabled={numericAmount < 100}
-            className="btn-kpata-success h-20 sm:h-24 flex-col gap-2 disabled:opacity-30"
+            className="btn-kpata-success h-24 flex-col gap-2 disabled:opacity-30"
+            aria-label={t("cash") || "Espèces"}
           >
-            <Banknote className="w-8 h-8 sm:w-10 sm:h-10" />
-            <span className="text-lg sm:text-xl font-black">
-              {t("cash").toUpperCase()}
+            <Banknote className="w-10 h-10" />
+            <span className="text-xl font-black">
+              {t("cash")?.toUpperCase() || "ESPÈCES"}
             </span>
           </Button>
 
           <Button
             onClick={() => handleSelectMethod("mobile_money")}
             disabled={numericAmount < 100}
-            className="btn-kpata-primary h-20 sm:h-24 flex-col gap-2 disabled:opacity-30"
+            className="btn-kpata-primary h-24 flex-col gap-2 disabled:opacity-30"
+            aria-label="Mobile Money"
           >
-            <Smartphone className="w-8 h-8 sm:w-10 sm:h-10" />
-            <span className="text-lg sm:text-xl font-black">MOBILE</span>
+            <Smartphone className="w-10 h-10" />
+            <span className="text-xl font-black">MOBILE</span>
           </Button>
         </div>
 

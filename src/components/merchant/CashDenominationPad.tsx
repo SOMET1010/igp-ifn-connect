@@ -3,6 +3,7 @@ import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { playPrerecordedAudio, stopAudio } from "@/lib/audioService";
+import { getCashierScript, type CashierScriptKey } from "@/features/voice-auth/config/cashierScripts";
 
 // Import bill images
 import bill500 from "@/assets/bills/500-fcfa.png";
@@ -13,22 +14,23 @@ import bill10000 from "@/assets/bills/10000-fcfa.png";
 
 interface CashDenominationPadProps {
   onAddAmount: (value: number) => void;
+  speakAmount?: boolean;
 }
 
-// CFA Bills with realistic images
+// CFA Bills with realistic images - mapping to cashier scripts
 const BILLS = [
-  { value: 500, image: bill500, label: "500", audioKey: "bill_500" },
-  { value: 1000, image: bill1000, label: "1 000", audioKey: "bill_1000" },
-  { value: 2000, image: bill2000, label: "2 000", audioKey: "bill_2000" },
-  { value: 5000, image: bill5000, label: "5 000", audioKey: "bill_5000" },
-  { value: 10000, image: bill10000, label: "10 000", audioKey: "bill_10000" },
+  { value: 500, image: bill500, label: "500", scriptKey: "cashier_bill_500" as CashierScriptKey },
+  { value: 1000, image: bill1000, label: "1 000", scriptKey: "cashier_bill_1000" as CashierScriptKey },
+  { value: 2000, image: bill2000, label: "2 000", scriptKey: "cashier_bill_2000" as CashierScriptKey },
+  { value: 5000, image: bill5000, label: "5 000", scriptKey: "cashier_bill_5000" as CashierScriptKey },
+  { value: 10000, image: bill10000, label: "10 000", scriptKey: "cashier_bill_10000" as CashierScriptKey },
 ];
 
 const COINS = [
-  { value: 25, label: "25", audioKey: "coin_25" },
-  { value: 50, label: "50", audioKey: "coin_50" },
-  { value: 100, label: "100", audioKey: "coin_100" },
-  { value: 200, label: "200", audioKey: "coin_200" },
+  { value: 25, label: "25", scriptKey: "cashier_coin_25" as CashierScriptKey },
+  { value: 50, label: "50", scriptKey: "cashier_coin_50" as CashierScriptKey },
+  { value: 100, label: "100", scriptKey: "cashier_coin_100" as CashierScriptKey },
+  { value: 200, label: "200", scriptKey: "cashier_coin_200" as CashierScriptKey },
 ];
 
 // Multi-sensory feedback for denomination tap
@@ -79,45 +81,47 @@ function FloatingAmount({ value }: FloatingAmountProps) {
   );
 }
 
-// TTS fallback using Web Speech API
-const speakWithWebSpeech = (text: string, lang: string) => {
+// TTS using Web Speech API
+const speakWithWebSpeech = (text: string) => {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'dioula' ? 'fr-FR' : 'fr-FR'; // Use French voice for both
+    utterance.lang = 'fr-FR';
     utterance.rate = 0.9;
     utterance.volume = 0.8;
     window.speechSynthesis.speak(utterance);
   }
 };
 
-export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
-  const { t, language } = useLanguage();
+export function CashDenominationPad({ onAddAmount, speakAmount = false }: CashDenominationPadProps) {
+  const { language } = useLanguage();
   const [showCoins, setShowCoins] = useState(false);
   const [floatingAmounts, setFloatingAmounts] = useState<FloatingAmountProps[]>([]);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const playDenominationAudio = async (audioKey: string) => {
+  const playDenominationAudio = async (scriptKey: CashierScriptKey) => {
+    if (!speakAmount) return;
+    
     // Stop any currently playing audio
     stopAudio(currentAudioRef.current);
     
-    // Try pre-recorded audio first
-    const result = await playPrerecordedAudio(audioKey, language);
+    // Try pre-recorded audio first (using script key as audio key)
+    const result = await playPrerecordedAudio(scriptKey, language);
     if (result.success && result.audio) {
       currentAudioRef.current = result.audio;
     } else {
-      // Fallback to Web Speech TTS with translated text
-      const text = t(audioKey);
-      speakWithWebSpeech(text, language);
+      // Fallback to Web Speech TTS with script text
+      const text = getCashierScript(scriptKey, language);
+      speakWithWebSpeech(text);
     }
   };
 
-  const handleDenominationClick = (value: number, audioKey: string) => {
+  const handleDenominationClick = (value: number, scriptKey: CashierScriptKey) => {
     triggerDenominationFeedback();
     onAddAmount(value);
     
     // Play audio feedback
-    playDenominationAudio(audioKey);
+    playDenominationAudio(scriptKey);
     
     // Add floating animation
     const id = `${Date.now()}-${value}`;
@@ -145,12 +149,9 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
         }
       `}</style>
 
-      {/* Quick Bills Section with realistic images */}
+      {/* Quick Bills Section - ENLARGED */}
       <div className="bg-muted/30 rounded-2xl p-3">
-        <p className="text-xs text-muted-foreground font-medium mb-2 text-center">
-          {t("quick_bills") || "Billets rapides"}
-        </p>
-        
+        {/* Removed text label - pictograms speak for themselves */}
         <div className="grid grid-cols-5 gap-2">
           {BILLS.map((bill) => (
             <Button
@@ -158,13 +159,14 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
               type="button"
               variant="ghost"
               className="
-                relative h-20 sm:h-24 p-1 flex flex-col items-center justify-center gap-1
+                relative bill-button-xl h-24 p-1 flex flex-col items-center justify-center gap-1
                 rounded-xl
                 transition-all duration-150 active:scale-90 hover:brightness-95
                 shadow-sm hover:shadow-lg
                 bg-transparent hover:bg-muted/50
               "
-              onClick={() => handleDenominationClick(bill.value, bill.audioKey)}
+              onClick={() => handleDenominationClick(bill.value, bill.scriptKey)}
+              aria-label={`${bill.value} FCFA`}
             >
               {/* Floating amounts for this bill */}
               {floatingAmounts
@@ -174,8 +176,8 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
                 ))
               }
               
-              {/* Realistic bill image */}
-              <div className="w-full h-12 sm:h-14 overflow-hidden rounded-lg shadow-md border border-border/50">
+              {/* Realistic bill image - ENLARGED */}
+              <div className="w-full h-14 overflow-hidden rounded-lg shadow-md border border-border/50">
                 <img 
                   src={bill.image} 
                   alt={`${bill.value} FCFA`}
@@ -198,9 +200,11 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
         variant="ghost"
         className="w-full h-10 text-sm text-muted-foreground hover:text-foreground"
         onClick={() => setShowCoins(!showCoins)}
+        aria-expanded={showCoins}
+        aria-label={showCoins ? "Masquer pièces" : "Afficher pièces"}
       >
-        <Coins className="w-4 h-4 mr-2" />
-        {showCoins ? (t("hide_coins") || "Masquer pièces") : (t("add_coins") || "+ Pièces")}
+        <Coins className="w-5 h-5 mr-2" />
+        {showCoins ? "−" : "+"}
       </Button>
 
       {/* Coins Section - Hidden by default */}
@@ -220,7 +224,8 @@ export function CashDenominationPad({ onAddAmount }: CashDenominationPadProps) {
                   transition-all duration-150 active:scale-90
                   shadow-sm hover:shadow-md
                 "
-                onClick={() => handleDenominationClick(coin.value, coin.audioKey)}
+                onClick={() => handleDenominationClick(coin.value, coin.scriptKey)}
+                aria-label={`${coin.value} FCFA`}
               >
                 {/* Floating amounts for this coin */}
                 {floatingAmounts
