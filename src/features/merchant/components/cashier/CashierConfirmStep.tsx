@@ -2,6 +2,7 @@ import { Banknote, Smartphone, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import type { PaymentMethod } from "../../types/transaction.types";
 import { formatCurrency } from "../../utils/cashierCalculations";
 
@@ -31,7 +32,13 @@ export function CashierConfirmStep({
   onEdit,
 }: CashierConfirmStepProps) {
   const { t } = useLanguage();
+  const { triggerTap } = useSensoryFeedback();
   const formattedAmount = formatCurrency(amount);
+
+  const handleEdit = () => {
+    triggerTap();
+    onEdit();
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -84,15 +91,15 @@ export function CashierConfirmStep({
         </CardContent>
       </Card>
 
-      {/* Boutons d'action */}
+      {/* Boutons d'action - Design KPATA */}
       <div className="space-y-3">
         <Button
           onClick={onConfirm}
           disabled={isLoading}
-          className={`w-full h-16 rounded-2xl text-xl font-bold shadow-lg transition-all duration-200 ${
+          className={`w-full h-16 rounded-2xl text-xl font-bold shadow-lg kpata-interactive ${
             method === "cash"
-              ? "bg-success hover:bg-success/90 text-success-foreground"
-              : "bg-primary hover:bg-primary/90 text-primary-foreground"
+              ? "btn-kpata-success"
+              : "btn-kpata-primary"
           }`}
         >
           {isLoading ? (
@@ -107,9 +114,9 @@ export function CashierConfirmStep({
 
         <Button
           variant="outline"
-          onClick={onEdit}
+          onClick={handleEdit}
           disabled={isLoading}
-          className="w-full h-14 rounded-xl text-lg"
+          className="btn-kpata-secondary w-full h-14"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
           {t("edit")}

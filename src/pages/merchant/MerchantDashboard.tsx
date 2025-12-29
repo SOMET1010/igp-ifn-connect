@@ -6,6 +6,7 @@ import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
 import { useMerchantNotifications } from "@/hooks/useMerchantNotifications";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
+import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/templates";
 import { merchantNavItems } from "@/config/navigation";
@@ -27,6 +28,7 @@ export default function MerchantDashboard() {
   const { signOut } = useAuth();
   const { t } = useLanguage();
   const { isOnline } = useOnlineStatus();
+  const { triggerTap, triggerMoney } = useSensoryFeedback();
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const notifications = useMerchantNotifications();
@@ -96,13 +98,19 @@ export default function MerchantDashboard() {
 
             <UnifiedBigNumber label={t("your_sales_today")} value={todayTotal} unit="FCFA" />
 
-            {/* CTA principaux */}
-            <Button onClick={() => navigate("/marchand/encaisser")} className="btn-institutional w-full h-14 text-lg">
+            {/* CTA principaux - Design KPATA */}
+            <Button 
+              onClick={() => { triggerMoney(); navigate("/marchand/encaisser"); }} 
+              className="btn-kpata-primary w-full"
+            >
               <Banknote className="w-6 h-6 mr-2" />
               {t("collect_payment")}
             </Button>
 
-            <Button onClick={() => navigate("/marchand/argent")} variant="outline" className="btn-institutional-outline w-full">
+            <Button 
+              onClick={() => { triggerTap(); navigate("/marchand/argent"); }} 
+              className="btn-kpata-secondary w-full"
+            >
               <BarChart3 className="w-5 h-5 mr-2" />
               {t("your_money")}
             </Button>

@@ -264,6 +264,117 @@
 }
 
 /* ============================================
+   KPATA Design System - Micro-interactions tactiles
+   ============================================ */
+
+@layer components {
+  /* Micro-interaction tactile universelle */
+  .kpata-interactive {
+    @apply transition-all duration-150 ease-out;
+  }
+  
+  .kpata-interactive:hover {
+    transform: scale(1.02);
+  }
+  
+  .kpata-interactive:active {
+    transform: scale(0.95);
+  }
+
+  /* Bouton CTA principal KPATA - Gradient vivant */
+  .btn-kpata-primary {
+    @apply h-14 px-6 text-lg font-bold rounded-2xl text-primary-foreground shadow-lg;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--orange-light)) 100%);
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-kpata-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 30px -8px hsl(var(--primary) / 0.4);
+  }
+  
+  .btn-kpata-primary:active {
+    transform: scale(0.95);
+  }
+
+  /* Bouton secondaire KPATA */
+  .btn-kpata-secondary {
+    @apply h-12 px-5 rounded-xl border-2 border-primary text-primary font-semibold;
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-kpata-secondary:hover {
+    @apply bg-primary/10;
+    transform: scale(1.02);
+  }
+  
+  .btn-kpata-secondary:active {
+    transform: scale(0.95);
+  }
+
+  /* Bouton succès KPATA (validations) */
+  .btn-kpata-success {
+    @apply h-14 px-6 text-lg font-bold rounded-2xl text-secondary-foreground shadow-lg;
+    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--green-light)) 100%);
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-kpata-success:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 30px -8px hsl(var(--secondary) / 0.4);
+  }
+  
+  .btn-kpata-success:active {
+    transform: scale(0.95);
+  }
+
+  /* Input XXL tactile */
+  .input-kpata {
+    @apply h-14 text-lg rounded-xl border-2 border-border px-4;
+    transition: all 0.2s ease-out;
+  }
+  
+  .input-kpata:focus {
+    @apply border-primary ring-2 ring-primary/30;
+  }
+
+  /* Carte avec effet de survol KPATA */
+  .card-kpata {
+    @apply rounded-2xl border border-border bg-card p-4;
+    transition: all 0.2s ease-out;
+  }
+  
+  .card-kpata:hover {
+    @apply shadow-lg;
+    transform: scale(1.01);
+  }
+
+  /* Bouton icône KPATA (+ / - quantité) */
+  .btn-kpata-icon {
+    @apply h-9 w-9 rounded-full flex items-center justify-center;
+    transition: all 0.15s ease-out;
+  }
+  
+  .btn-kpata-icon:hover {
+    @apply bg-primary/10;
+  }
+  
+  .btn-kpata-icon:active {
+    transform: scale(0.85);
+  }
+
+  /* Badge KPATA animé */
+  .badge-kpata {
+    @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold;
+    transition: all 0.2s ease-out;
+  }
+  
+  .badge-kpata:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* ============================================
    Accessibilité : Support prefers-reduced-motion
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
