@@ -54,7 +54,6 @@ export default function MerchantDashboard() {
     isClosing,
     getSummary,
   } = useDailySession();
-  const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
 
   const merchant = data?.merchant;
   const todayTotal = data?.todayTotal || 0;
