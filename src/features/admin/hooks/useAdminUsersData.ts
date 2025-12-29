@@ -6,6 +6,7 @@ import type {
   AppRole,
   ExpectedEntityType
 } from '../types/users.types';
+import { adminLogger } from '@/infra/logger';
 
 const getExpectedEntityType = (phone: string | null, roles: AppRole[]): ExpectedEntityType => {
   if (roles.includes('agent')) return 'agent';
@@ -39,7 +40,7 @@ export const useAdminUsersData = () => {
       const data = await usersService.getAllUsers();
       setRawData(data);
     } catch (err) {
-      console.error('Error fetching admin users data:', err);
+      adminLogger.error('Error fetching admin users data', err);
       setError(err instanceof Error ? err : new Error('Erreur de chargement'));
     } finally {
       setIsLoading(false);

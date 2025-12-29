@@ -6,6 +6,7 @@
 import { useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { coopLogger } from "@/infra/logger";
 
 interface UseOrdersRealtimeOptions {
   cooperativeId: string | null;
@@ -52,7 +53,7 @@ export function useOrdersRealtime({
           filter: `cooperative_id=eq.${cooperativeId}`,
         },
         (payload) => {
-          console.log("New order received:", payload);
+          coopLogger.debug("New order received", { orderId: payload.new });
           handleNewOrder();
         }
       )

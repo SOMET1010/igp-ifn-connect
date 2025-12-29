@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { adminLogger } from '@/infra/logger';
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { PageHero } from '@/components/shared/PageHero';
@@ -83,7 +84,7 @@ const AdminVivriers: React.FC = () => {
       setCooperatives(coopsResponse.data || []);
       setMembers(membersResponse.data || []);
     } catch (error) {
-      console.error('Error fetching vivriers data:', error);
+      adminLogger.error('Error fetching vivriers data', error);
       toast.error('Erreur lors du chargement des données');
     } finally {
       setIsLoading(false);
@@ -130,7 +131,7 @@ const AdminVivriers: React.FC = () => {
         return;
       }
 
-      console.log(`Parsed ${data.length} rows for ${type}`);
+      adminLogger.debug(`Parsed ${data.length} rows for ${type}`);
 
       const payload = type === 'cooperatives' 
         ? { cooperatives: data }
@@ -150,7 +151,7 @@ const AdminVivriers: React.FC = () => {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error('Import error:', error);
+      adminLogger.error('Import error', error);
       toast.error(`Erreur lors de l'import: ${error}`);
     } finally {
       setIsImporting(false);
@@ -161,7 +162,7 @@ const AdminVivriers: React.FC = () => {
   const handleLinkMembers = async () => {
     setIsImporting(true);
     try {
-      console.log('Linking members manually...');
+      adminLogger.debug('Linking members manually...');
       
       const { data: coops } = await supabase
         .from('vivriers_cooperatives')
@@ -180,7 +181,7 @@ const AdminVivriers: React.FC = () => {
       toast.success('Membres liés aux coopératives');
       fetchData();
     } catch (error) {
-      console.error('Link error:', error);
+      adminLogger.error('Link error', error);
       toast.error('Erreur lors de la liaison');
     } finally {
       setIsImporting(false);

@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { promotionsService } from "../services/promotionsService";
 import type { Promotion, PromotionFilter, NewPromotionInput } from "../types/promotions.types";
 import { isPromotionExpired } from "../types/promotions.types";
+import { merchantLogger } from "@/infra/logger";
 
 interface UsePromotionsResult {
   promotions: Promotion[];
@@ -42,7 +43,7 @@ export function usePromotions(): UsePromotionsResult {
         setPromotions(data);
       }
     } catch (error) {
-      console.error("Error fetching promotions:", error);
+      merchantLogger.error("Error fetching promotions", error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les promotions",
@@ -100,7 +101,7 @@ export function usePromotions(): UsePromotionsResult {
         await fetchPromotions();
         return true;
       } catch (error) {
-        console.error("Error creating promotion:", error);
+        merchantLogger.error("Error creating promotion", error);
         toast({
           title: "Erreur",
           description: "Impossible de créer la promotion",
@@ -121,7 +122,7 @@ export function usePromotions(): UsePromotionsResult {
         });
         await fetchPromotions();
       } catch (error) {
-        console.error("Error toggling promotion:", error);
+        merchantLogger.error("Error toggling promotion", error);
         toast({
           title: "Erreur",
           description: "Impossible de modifier la promotion",
@@ -141,7 +142,7 @@ export function usePromotions(): UsePromotionsResult {
         });
         await fetchPromotions();
       } catch (error) {
-        console.error("Error deleting promotion:", error);
+        merchantLogger.error("Error deleting promotion", error);
         toast({
           title: "Erreur",
           description: "Impossible de supprimer la promotion",

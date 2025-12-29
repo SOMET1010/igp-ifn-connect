@@ -5,6 +5,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Notification, CreateNotificationInput } from "../types/notification.types";
+import { notificationLogger } from "@/infra/logger";
 
 /**
  * Récupérer les notifications d'un utilisateur
@@ -18,7 +19,7 @@ export async function getNotifications(userId: string, limit = 50): Promise<Noti
     .limit(limit);
 
   if (error) {
-    console.error("Error fetching notifications:", error);
+    notificationLogger.error("Error fetching notifications", error);
     throw error;
   }
 
@@ -36,7 +37,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
     .eq("read", false);
 
   if (error) {
-    console.error("Error counting unread notifications:", error);
+    notificationLogger.error("Error counting unread notifications", error);
     return 0;
   }
 
@@ -53,7 +54,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
     .eq("id", notificationId);
 
   if (error) {
-    console.error("Error marking notification as read:", error);
+    notificationLogger.error("Error marking notification as read", error);
     throw error;
   }
 }
@@ -69,7 +70,7 @@ export async function markAllAsRead(userId: string): Promise<void> {
     .eq("read", false);
 
   if (error) {
-    console.error("Error marking all notifications as read:", error);
+    notificationLogger.error("Error marking all notifications as read", error);
     throw error;
   }
 }
@@ -84,7 +85,7 @@ export async function deleteNotification(notificationId: string): Promise<void> 
     .eq("id", notificationId);
 
   if (error) {
-    console.error("Error deleting notification:", error);
+    notificationLogger.error("Error deleting notification", error);
     throw error;
   }
 }
@@ -109,7 +110,7 @@ export async function createNotification(input: CreateNotificationInput): Promis
     .single();
 
   if (error) {
-    console.error("Error creating notification:", error);
+    notificationLogger.error("Error creating notification", error);
     throw error;
   }
 

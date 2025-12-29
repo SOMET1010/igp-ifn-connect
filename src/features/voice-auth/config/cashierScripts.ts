@@ -5,6 +5,7 @@
 
 // Import global LanguageCode from translations
 import { LanguageCode } from '@/lib/translations';
+import { logger } from '@/infra/logger';
 
 export type CashierScriptKey = 
   | 'cashier_welcome'
@@ -245,7 +246,7 @@ export function getCashierScript(
   const scriptObj = cashierScripts[key];
 
   if (!scriptObj) {
-    console.warn(`[SUTA Audio] Script "${key}" introuvable`);
+    logger.warn(`[SUTA Audio] Script "${key}" introuvable`);
     return '';
   }
 

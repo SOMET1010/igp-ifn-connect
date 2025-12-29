@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { creditsService } from '../services/creditsService';
 import type { CustomerCredit, CreditFilter, NewCreditInput } from '../types/credits.types';
 import { isCreditOverdue } from '../types/credits.types';
+import { merchantLogger } from '@/infra/logger';
 
 export function useMerchantCredits() {
   const { user } = useAuth();
@@ -25,7 +26,7 @@ export function useMerchantCredits() {
         setCredits(data);
       }
     } catch (error) {
-      console.error('Error fetching credits:', error);
+      merchantLogger.error('Error fetching credits', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les crédits',
@@ -52,7 +53,7 @@ export function useMerchantCredits() {
       await fetchCredits();
       return true;
     } catch (error) {
-      console.error('Error adding credit:', error);
+      merchantLogger.error('Error adding credit', error);
       toast({
         title: 'Erreur',
         description: "Impossible d'ajouter le crédit",
@@ -80,7 +81,7 @@ export function useMerchantCredits() {
       await fetchCredits();
       return true;
     } catch (error) {
-      console.error('Error recording payment:', error);
+      merchantLogger.error('Error recording payment', error);
       toast({
         title: 'Erreur',
         description: "Impossible d'enregistrer le paiement",

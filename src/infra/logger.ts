@@ -234,6 +234,8 @@ export const authLogger = logger.withContext({ module: 'Auth' });
 export const merchantLogger = logger.withContext({ module: 'Merchant' });
 export const coopLogger = logger.withContext({ module: 'Cooperative' });
 export const adminLogger = logger.withContext({ module: 'Admin' });
+export const agentLogger = logger.withContext({ module: 'Agent' });
+export const notificationLogger = logger.withContext({ module: 'Notification' });
 export const syncLogger = logger.withContext({ module: 'Sync' });
 export const networkLogger = logger.withContext({ module: 'Network' });
 
