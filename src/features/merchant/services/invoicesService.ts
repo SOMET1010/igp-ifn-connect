@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Invoice, MerchantInvoiceData, NewInvoiceInput } from '../types/invoices.types';
-import { generateSecurityHash, generateVerificationUrl } from '@/lib/invoiceUtils';
+import { generateSecurityHash, generateVerificationUrl } from '../utils/invoiceUtils';
 import { merchantLogger } from '@/infra/logger';
 
 export const invoicesService = {

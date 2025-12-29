@@ -116,6 +116,7 @@ export async function exportInvoiceToPDF(invoice: InvoiceData): Promise<void> {
   });
 
   // Get final Y after table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const finalY = (doc as any).lastAutoTable.finalY || yPos + 50;
 
   // Security hash
@@ -226,6 +227,7 @@ export async function exportSalesReportToPDF(
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const summaryFinalY = (doc as any).lastAutoTable.finalY || yPos + 60;
 
   // Transactions list
