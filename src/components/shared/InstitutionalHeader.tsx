@@ -39,10 +39,10 @@ export const InstitutionalHeader: React.FC<InstitutionalHeaderProps> = ({
           {/* Titre central */}
           <div className="text-center flex-1">
             <h1 className="font-semibold text-sm text-foreground">
-              Plateforme IFN – {subtitle}
+              PNAVIM-CI – {subtitle}
             </h1>
             <p className="text-xs text-muted-foreground">
-              République de Côte d'Ivoire · Portail officiel
+              Plateforme Nationale des Acteurs du Vivrier Marchand
             </p>
           </div>
           

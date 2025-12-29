@@ -24,8 +24,8 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   fr: {
     // Page d'accueil
     "welcome": "Bienvenue",
-    "platform_title": "Plateforme IFN",
-    "platform_subtitle": "Pour les marchands du vivrier",
+    "platform_title": "PNAVIM-CI",
+    "platform_subtitle": "Plateforme Nationale des Acteurs du Vivrier Marchand",
     "who_are_you": "Qui êtes-vous ?",
     "choose_access": "Choisissez votre accès pour continuer",
     "help_text": "Tu hésites ? Demande à ton agent ou ta coopérative.",
@@ -62,7 +62,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Promos",
     "campaigns": "Campagnes",
     "suppliers": "Fournisseurs",
-    "ifn_cooperatives": "Coopératives IFN",
+    "ifn_cooperatives": "Coopératives PNAVIM",
     "cmu_protection": "Protection CMU",
     "contribution_benefits": "Cotisation & avantages",
     "cmu_number": "Numéro CMU",
@@ -235,7 +235,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   dioula: {
     // Page d'accueil
     "welcome": "Aw ni sɔgɔma",
-    "platform_title": "IFN Fɛɛrɛ",
+    "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Julakɛlaw ka fɛɛrɛ",
     "who_are_you": "I ye jon ye?",
     "choose_access": "I ka ɲɛnama sugandi",
@@ -272,7 +272,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Sɔngɔ jigin",
     "campaigns": "Lakana",
     "suppliers": "Nafolo difaw",
-    "ifn_cooperatives": "IFN Jɛkuluw",
+    "ifn_cooperatives": "PNAVIM Jɛkuluw",
     "cmu_protection": "CMU Lakana",
     "contribution_benefits": "Sara ani nafaw",
     "cmu_number": "CMU nimɔrɔ",
@@ -440,7 +440,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   baoule: {
     // Page d'accueil
     "welcome": "Afuɛ",
-    "platform_title": "IFN Junman",
+    "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Atonvuɛfuɛ mun'n be junman",
     "who_are_you": "A ti wan?",
     "choose_access": "Fa ɔ akpasua",
@@ -477,7 +477,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Sran ngua",
     "campaigns": "Junman",
     "suppliers": "Be nga be fa ninnge'm be ba'n",
-    "ifn_cooperatives": "IFN akpɔ mun",
+    "ifn_cooperatives": "PNAVIM akpɔ mun",
     "cmu_protection": "CMU Sasafuɛ",
     "contribution_benefits": "Kle nin ye",
     "cmu_number": "CMU numeru",
@@ -629,7 +629,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   bete: {
     // Page d'accueil
     "welcome": "Woué",
-    "platform_title": "IFN Djré",
+    "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Gbogbo yéré nya djré",
     "who_are_you": "A yi wè?",
     "choose_access": "Wla ni da",
@@ -666,7 +666,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Djré klou",
     "campaigns": "Djré",
     "suppliers": "Zégbé nou",
-    "ifn_cooperatives": "IFN klou la",
+    "ifn_cooperatives": "PNAVIM klou la",
     "cmu_protection": "CMU Kpalo",
     "contribution_benefits": "Kplo nu bé",
     "cmu_number": "CMU numéro",
@@ -804,7 +804,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   senoufo: {
     // Page d'accueil
     "welcome": "I ni cɛ",
-    "platform_title": "IFN Baara",
+    "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Julaw ka baara",
     "who_are_you": "E ye jɔn ye?",
     "choose_access": "I ka sira sugandi",
@@ -841,7 +841,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Sɔngɔ dɔgɔya",
     "campaigns": "Baara",
     "suppliers": "Fɛn dilaw",
-    "ifn_cooperatives": "IFN Tonw",
+    "ifn_cooperatives": "PNAVIM Tonw",
     "cmu_protection": "CMU Lakana",
     "contribution_benefits": "Sara ni nafa",
     "cmu_number": "CMU nimɛrɔ",
@@ -979,7 +979,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
   malinke: {
     // Page d'accueil
     "welcome": "I ni kɛnɛ",
-    "platform_title": "IFN Baro",
+    "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Julakɛla baro",
     "who_are_you": "I ye mun ye?",
     "choose_access": "I ka sira suben",
@@ -1016,7 +1016,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "promotions": "Sɔnkɔ dɔkɔya",
     "campaigns": "Baro",
     "suppliers": "Nafolo dila",
-    "igp_cooperatives": "IGP Jɛkulu",
+    "ifn_cooperatives": "PNAVIM Jɛkulu",
     "cmu_protection": "CMU Takabi",
     "contribution_benefits": "Sara ní nafa",
     "cmu_number": "CMU nimɔrɔ",
