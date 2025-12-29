@@ -184,10 +184,10 @@ const InclusiveRoleCard = ({ role, index, isFeatured }: InclusiveRoleCardProps) 
           "bg-white/10 hover:bg-white/20 active:scale-95",
           role.textColor
         )}
-        aria-label={t("audio_play") || "Cliquez pour écouter"}
+        aria-label={t("audio_play") || "Écouter"}
       >
         <Volume2 className="w-4 h-4" />
-        <span className="text-sm">{t("audio_play") || "Cliquez pour écouter"}</span>
+        <span className="text-sm">{t("audio_play") || "🔊 Écouter"}</span>
       </button>
     </Link>
   );
