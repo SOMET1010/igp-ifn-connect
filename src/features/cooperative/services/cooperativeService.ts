@@ -3,7 +3,14 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { coopLogger } from "@/infra/logger";
+import { getDateRangeForFilter, type DateFilterValue } from "../types/dateFilter.types";
 import type { CooperativeData, DashboardStats, DashboardData } from "../types/cooperative.types";
+
+interface RevenueDataPoint {
+  date: string;
+  label: string;
+  revenue: number;
+}
 
 export const cooperativeService = {
   /**
@@ -38,18 +45,30 @@ export const cooperativeService = {
   },
 
   /**
-   * Récupère les statistiques du dashboard
+   * Récupère les statistiques du dashboard avec filtre temporel
    */
-  async getDashboardStats(cooperativeId: string): Promise<DashboardStats> {
+  async getDashboardStats(cooperativeId: string, dateFilter: DateFilterValue = 'all'): Promise<DashboardStats> {
+    const { startDate } = getDateRangeForFilter(dateFilter);
+
+    // Requêtes de base
+    const stocksQuery = supabase
+      .from('stocks')
+      .select('quantity, unit_price')
+      .eq('cooperative_id', cooperativeId);
+
+    // Requête commandes avec filtre temporel optionnel
+    let ordersQuery = supabase
+      .from('orders')
+      .select('status, total_amount, created_at')
+      .eq('cooperative_id', cooperativeId);
+
+    if (startDate) {
+      ordersQuery = ordersQuery.gte('created_at', startDate.toISOString());
+    }
+
     const [stocksResult, ordersResult] = await Promise.all([
-      supabase
-        .from('stocks')
-        .select('quantity, unit_price')
-        .eq('cooperative_id', cooperativeId),
-      supabase
-        .from('orders')
-        .select('status, total_amount')
-        .eq('cooperative_id', cooperativeId),
+      stocksQuery,
+      ordersQuery,
     ]);
 
     const stocks = stocksResult.data ?? [];
@@ -88,10 +107,53 @@ export const cooperativeService = {
   },
 
   /**
+   * Récupère les données de CA des 7 derniers jours
+   */
+  async getWeeklyRevenue(cooperativeId: string): Promise<RevenueDataPoint[]> {
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 6);
+    weekAgo.setHours(0, 0, 0, 0);
+
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('total_amount, created_at')
+      .eq('cooperative_id', cooperativeId)
+      .eq('status', 'delivered')
+      .gte('created_at', weekAgo.toISOString());
+
+    // Initialiser les 7 jours
+    const days: RevenueDataPoint[] = [];
+    const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      days.push({
+        date: dateStr,
+        label: dayNames[date.getDay()],
+        revenue: 0,
+      });
+    }
+
+    // Agréger les revenus par jour
+    (orders ?? []).forEach(order => {
+      const orderDate = new Date(order.created_at).toISOString().split('T')[0];
+      const day = days.find(d => d.date === orderDate);
+      if (day) {
+        day.revenue += Number(order.total_amount) || 0;
+      }
+    });
+
+    return days;
+  },
+
+  /**
    * Récupère toutes les données du dashboard en une seule fois
    */
-  async fetchDashboardData(userId: string): Promise<DashboardData> {
-    coopLogger.info('Fetching cooperative dashboard data', { userId });
+  async fetchDashboardData(userId: string, dateFilter: DateFilterValue = 'all'): Promise<DashboardData> {
+    coopLogger.info('Fetching cooperative dashboard data', { userId, dateFilter });
 
     const cooperative = await this.getCooperativeByUserId(userId);
     
@@ -99,7 +161,7 @@ export const cooperativeService = {
       throw new Error('Coopérative non trouvée');
     }
 
-    const stats = await this.getDashboardStats(cooperative.id);
+    const stats = await this.getDashboardStats(cooperative.id, dateFilter);
 
     coopLogger.info('Dashboard data fetched successfully', {
       cooperativeId: cooperative.id,

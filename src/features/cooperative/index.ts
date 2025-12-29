@@ -21,6 +21,10 @@ export * as profileService from "./services/profileService";
 export type { Cooperative, CooperativeData, DashboardStats, DashboardData } from "./types/cooperative.types";
 export { CooperativeSchema } from "./types/cooperative.types";
 
+// Types DateFilter
+export type { DateFilterValue, DateFilterOption } from "./types/dateFilter.types";
+export { DATE_FILTER_OPTIONS, getDateRangeForFilter } from "./types/dateFilter.types";
+
 // Types Stock
 export type { CooperativeStockItem, CooperativeProduct, StockStatus, AddStockInput } from "./types/stock.types";
 export { getStockStatus, LOW_STOCK_THRESHOLD, EXPIRY_WARNING_DAYS, AddStockInputSchema } from "./types/stock.types";
@@ -45,10 +49,12 @@ export {
 // Composants Dashboard
 export { 
   CooperativeStats, 
-  CooperativeOrdersChart, 
+  CooperativeOrdersChart,
+  CooperativeRevenueChart,
   CooperativeAlerts, 
   PendingOrdersAlert, 
-  QuickGuide 
+  QuickGuide,
+  DateFilterTabs,
 } from "./components/dashboard";
 
 // Composants Profile
