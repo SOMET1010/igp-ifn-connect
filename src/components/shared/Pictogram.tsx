@@ -8,7 +8,8 @@ export type PictogramType =
   | 'cash' | 'mobile' | 'transfer' | 'credit'
   | 'scan' | 'promo' | 'supplier' | 'history'
   | 'play' | 'language' | 'help' | 'settings'
-  | 'calendar' | 'id' | 'logout' | 'edit' | 'validated' | 'pending_status' | 'sound' | 'notification';
+  | 'calendar' | 'id' | 'logout' | 'edit' | 'validated' | 'pending_status' | 'sound' | 'notification'
+  | 'add' | 'restock' | 'delete' | 'box' | 'alert' | 'low_stock' | 'in_stock';
 
 interface PictogramConfig {
   emoji: string;
@@ -71,6 +72,15 @@ const PICTOGRAMS: Record<PictogramType, PictogramConfig> = {
   pending_status: { emoji: '⏳', color: 'text-amber-600', bgColor: 'bg-amber-100' },
   sound: { emoji: '🔊', color: 'text-blue-600', bgColor: 'bg-blue-100' },
   notification: { emoji: '🔔', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  
+  // Stock inclusif
+  add: { emoji: '➕', color: 'text-primary', bgColor: 'bg-primary/10' },
+  restock: { emoji: '📥', color: 'text-green-600', bgColor: 'bg-green-100' },
+  delete: { emoji: '🗑️', color: 'text-destructive', bgColor: 'bg-destructive/10' },
+  box: { emoji: '📦', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  alert: { emoji: '🚨', color: 'text-destructive', bgColor: 'bg-destructive/10' },
+  low_stock: { emoji: '📉', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  in_stock: { emoji: '✅', color: 'text-green-600', bgColor: 'bg-green-100' },
 };
 
 interface PictogramProps {
