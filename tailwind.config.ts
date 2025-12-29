@@ -174,6 +174,10 @@ export default {
             transform: "scale(1.05)"
           }
         },
+        "audio-bar": {
+          "0%, 100%": { height: "0.5rem" },
+          "50%": { height: "0.875rem" }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -188,6 +192,7 @@ export default {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "confetti-fall": "confetti-fall 2.5s ease-out forwards",
         "fade-pulse": "fade-pulse 3s ease-in-out infinite",
+        "audio-bar": "audio-bar 0.5s ease-in-out infinite",
       },
       boxShadow: {
         "africa": "0 10px 40px -10px hsl(var(--orange) / 0.3)",
