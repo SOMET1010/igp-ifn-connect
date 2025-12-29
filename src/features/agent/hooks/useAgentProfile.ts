@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { agentProfileService } from '../services/profileService';
 import type { AgentProfileData, AgentProfileEditInput } from '../types/profile.types';
 import { useToast } from '@/hooks/use-toast';
+import { agentLogger } from '@/infra/logger';
 
 export function useAgentProfile() {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ export function useAgentProfile() {
       const data = await agentProfileService.fetchProfile(user.id);
       setProfile(data);
     } catch (error) {
-      console.error('Error loading profile:', error);
+      agentLogger.error('Error loading profile', error);
       toast({
         title: "Erreur",
         description: "Impossible de charger le profil",
@@ -62,7 +63,7 @@ export function useAgentProfile() {
         return false;
       }
     } catch (error) {
-      console.error('Error saving profile:', error);
+      agentLogger.error('Error saving profile', error);
       toast({
         title: "Erreur",
         description: "Une erreur est survenue",

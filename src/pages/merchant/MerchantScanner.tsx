@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
+import { merchantLogger } from "@/infra/logger";
 
 
 interface ScannedProduct {
@@ -130,7 +131,7 @@ export default function MerchantScanner() {
         };
         detect();
       } catch (initError) {
-        console.warn('BarcodeDetector initialization failed:', initError);
+        merchantLogger.warn('BarcodeDetector initialization failed', { error: initError });
         toast({
           title: "Info",
           description: "Utilisez la saisie manuelle du code"

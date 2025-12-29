@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { AgentProfileData, AgentProfileEditInput } from '../types/profile.types';
+import { agentLogger } from '@/infra/logger';
 
 export const agentProfileService = {
   async fetchProfile(userId: string): Promise<AgentProfileData | null> {
@@ -11,7 +12,7 @@ export const agentProfileService = {
       .maybeSingle();
 
     if (profileError) {
-      console.error('Error fetching profile:', profileError);
+      agentLogger.error('Error fetching profile', profileError);
       return null;
     }
 
@@ -23,7 +24,7 @@ export const agentProfileService = {
       .maybeSingle();
 
     if (agentError) {
-      console.error('Error fetching agent:', agentError);
+      agentLogger.error('Error fetching agent', agentError);
       return null;
     }
 
@@ -58,7 +59,7 @@ export const agentProfileService = {
       .eq('user_id', userId);
 
     if (profileError) {
-      console.error('Error updating profile:', profileError);
+      agentLogger.error('Error updating profile', profileError);
       return { success: false, error: profileError.message };
     }
 
@@ -71,7 +72,7 @@ export const agentProfileService = {
       .eq('user_id', userId);
 
     if (agentError) {
-      console.error('Error updating agent:', agentError);
+      agentLogger.error('Error updating agent', agentError);
       return { success: false, error: agentError.message };
     }
 

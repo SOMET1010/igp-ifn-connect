@@ -11,6 +11,7 @@ import { translations, LANGUAGES, LanguageCode } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle } from 'lucide-react';
+import { adminLogger } from '@/infra/logger';
 
 interface RecordingStatus {
   [key: string]: boolean;
@@ -76,7 +77,7 @@ export default function AdminStudio() {
       });
       setRecordingStatus(status);
     } catch (err) {
-      console.error('Error loading recordings:', err);
+      adminLogger.error('Error loading recordings', err);
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +100,7 @@ export default function AdminStudio() {
 
       setExistingAudioUrl(data?.file_path || null);
     } catch (err) {
-      console.error('Error loading existing audio:', err);
+      adminLogger.error('Error loading existing audio', err);
       setExistingAudioUrl(null);
     }
   }, [selectedKey, selectedLanguage, recordingStatus]);
@@ -173,7 +174,7 @@ export default function AdminStudio() {
       }
 
     } catch (err) {
-      console.error('Error saving recording:', err);
+      adminLogger.error('Error saving recording', err);
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder l'enregistrement.",
@@ -220,7 +221,7 @@ export default function AdminStudio() {
       });
 
     } catch (err) {
-      console.error('Error deleting recording:', err);
+      adminLogger.error('Error deleting recording', err);
       toast({
         title: "Erreur",
         description: "Impossible de supprimer l'enregistrement.",
@@ -299,7 +300,7 @@ export default function AdminStudio() {
         audio.play();
       }
     } catch (err) {
-      console.error('Error playing recording:', err);
+      adminLogger.error('Error playing recording', err);
     }
   };
 

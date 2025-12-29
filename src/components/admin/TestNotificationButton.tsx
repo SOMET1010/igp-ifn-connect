@@ -27,6 +27,7 @@ import { Bell, TestTube } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createNotification, NotificationType, NotificationCategory } from '@/features/notifications';
 import { toast } from 'sonner';
+import { adminLogger } from '@/infra/logger';
 
 const NOTIFICATION_TYPES: { value: NotificationType; label: string; icon: string }[] = [
   { value: 'info', label: 'Info', icon: 'ℹ️' },
@@ -84,7 +85,7 @@ export const TestNotificationButton: React.FC = () => {
       toast.success('Notification créée ! Vérifiez le dropdown.');
       setOpen(false);
     } catch (error) {
-      console.error('Error creating test notification:', error);
+      adminLogger.error('Error creating test notification', error);
       toast.error('Erreur lors de la création de la notification');
     } finally {
       setIsLoading(false);

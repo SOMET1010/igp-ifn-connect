@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { logger } from '@/infra/logger';
 
 export type PictogramType = 
   | 'money' | 'cart' | 'check' | 'error' | 'warning'
@@ -108,7 +109,7 @@ export function Pictogram({
   const { container, emoji } = sizeStyles[size];
 
   if (!config) {
-    console.warn(`Pictogram type "${type}" not found`);
+    logger.warn(`Pictogram type "${type}" not found`);
     return null;
   }
 

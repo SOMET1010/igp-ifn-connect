@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { merchantLogger } from "@/infra/logger";
 
 interface DailyStats {
   total: number;
@@ -66,7 +67,7 @@ export function DailyRevenue({ refreshTrigger, dailyGoal = 100000 }: DailyRevenu
           setStats(totals);
         }
       } catch (error) {
-        console.error("Error fetching daily stats:", error);
+        merchantLogger.error("Error fetching daily stats", error);
       } finally {
         setIsLoading(false);
       }

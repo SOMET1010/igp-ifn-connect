@@ -35,6 +35,7 @@ import { ActivityTimeline } from '@/components/admin/ActivityTimeline';
 import { useAdminUserDetail, type AppRole } from '@/features/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { adminLogger } from '@/infra/logger';
 
 const roleConfig: Record<AppRole, { label: string; color: string }> = {
   admin: { label: 'Admin', color: 'bg-red-500' },
@@ -94,7 +95,7 @@ const AdminUserDetail = () => {
       refetch();
     } catch (err) {
       toast.error('Erreur lors de la mise à jour');
-      console.error(err);
+      adminLogger.error('Error updating profile', err);
     } finally {
       setIsSaving(false);
     }
@@ -124,7 +125,7 @@ const AdminUserDetail = () => {
       }
     } catch (err) {
       toast.error("Erreur lors de l'ajout du rôle");
-      console.error(err);
+      adminLogger.error('Error adding role', err);
     } finally {
       setIsAddingRole(false);
     }
@@ -154,7 +155,7 @@ const AdminUserDetail = () => {
       refetch();
     } catch (err) {
       toast.error('Erreur lors de la suppression du rôle');
-      console.error(err);
+      adminLogger.error('Error removing role', err);
     } finally {
       setIsRemovingRole(false);
     }

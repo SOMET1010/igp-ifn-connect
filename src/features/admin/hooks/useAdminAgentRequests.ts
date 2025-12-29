@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { agentRequestsService } from '../services/agentRequestsService';
 import type { AgentRequest, AgentRequestsFilters, AgentRequestsStats } from '../types/agentRequests.types';
+import { adminLogger } from '@/infra/logger';
 
 export function useAdminAgentRequests() {
   const [requests, setRequests] = useState<AgentRequest[]>([]);
@@ -28,7 +29,7 @@ export function useAdminAgentRequests() {
       const data = await agentRequestsService.getRequests(filters);
       setRequests(data);
     } catch (err) {
-      console.error('Error fetching agent requests:', err);
+      adminLogger.error('Error fetching agent requests', err);
       setError('Erreur lors du chargement des demandes');
     } finally {
       setIsLoading(false);
@@ -40,7 +41,7 @@ export function useAdminAgentRequests() {
       const stats = await agentRequestsService.getStats();
       setStats(stats);
     } catch (err) {
-      console.error('Error fetching stats:', err);
+      adminLogger.error('Error fetching stats', err);
     }
   }, []);
 
@@ -68,7 +69,7 @@ export function useAdminAgentRequests() {
       fetchStats();
       return true;
     } catch (err) {
-      console.error('Error approving request:', err);
+      adminLogger.error('Error approving request', err);
       toast({
         title: 'Erreur',
         description: "Impossible d'approuver la demande",
@@ -94,7 +95,7 @@ export function useAdminAgentRequests() {
       fetchStats();
       return true;
     } catch (err) {
-      console.error('Error rejecting request:', err);
+      adminLogger.error('Error rejecting request', err);
       toast({
         title: 'Erreur',
         description: 'Impossible de rejeter la demande',
