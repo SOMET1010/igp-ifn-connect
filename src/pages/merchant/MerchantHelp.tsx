@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge } from "@/components/ifn";
 import { toast } from "sonner";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 
@@ -28,10 +28,11 @@ export default function MerchantHelp() {
         size="lg"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("my_help")}
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-5">

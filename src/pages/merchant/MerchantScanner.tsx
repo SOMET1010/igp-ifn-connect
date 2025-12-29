@@ -21,7 +21,7 @@ import {
   Wallet
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 
 
 interface ScannedProduct {
@@ -254,7 +254,7 @@ export default function MerchantScanner() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Scanner"
         subtitle="Scan rapide des produits"
         showBack
@@ -264,6 +264,8 @@ export default function MerchantScanner() {
             {mode === "sale" ? "Vente" : "Stock"}
           </Badge>
         }
+        showNotifications={false}
+        showLanguageToggle={false}
       />
 
       <main className="p-4 space-y-4">

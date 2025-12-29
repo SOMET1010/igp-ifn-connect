@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { LANGUAGES } from "@/lib/translations";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { useMerchantProfile } from "@/features/merchant/hooks/useMerchantProfile";
@@ -56,10 +56,11 @@ export default function MerchantProfile() {
         />
       )}
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("my_profile")}
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-6 max-w-lg mx-auto">

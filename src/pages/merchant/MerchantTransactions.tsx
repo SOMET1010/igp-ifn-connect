@@ -6,7 +6,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { format } from "date-fns";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { CardLarge, ButtonSecondary, StatusBanner } from "@/components/ifn";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import {
@@ -56,11 +56,12 @@ export default function MerchantTransactions() {
         size="lg"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("your_sales")}
         subtitle={`${totalCount} vente${totalCount !== 1 ? "s" : ""}`}
         showBack
         backTo="/marchand"
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-6">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { merchantNavItems } from "@/config/navigation";
@@ -113,11 +113,13 @@ export default function MerchantCashier() {
         size="lg"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("collect_title")}
         showBack
         backTo={step === "input" ? "/marchand" : undefined}
         onSignOut={step !== "input" ? handleReset : undefined}
+        showNotifications={false}
+        showLanguageToggle={false}
       />
 
       <main className="p-4 space-y-4">

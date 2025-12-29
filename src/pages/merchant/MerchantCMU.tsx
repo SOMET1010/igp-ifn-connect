@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Calendar, FileText, Check } from "lucide-react";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
@@ -80,12 +80,13 @@ export default function MerchantCMU() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Protection CMU"
         subtitle="Couverture Maladie Universelle"
         showBack
         backTo="/marchand"
         rightContent={<Shield className="h-6 w-6 text-muted-foreground" />}
+        showNotifications={false}
       />
 
       <main className="p-4 space-y-5">
