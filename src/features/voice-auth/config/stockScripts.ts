@@ -1,144 +1,178 @@
 /**
  * Scripts vocaux SUTA pour la gestion du stock marchand
- * Guidage audio inclusif pour utilisateurs non-lecteurs
+ * Français Ivoirien courant : chaleureux, accessible, respectueux
  */
+
+// Import global LanguageCode from translations
+import { LanguageCode } from '@/lib/translations';
 
 export interface StockAudioScript {
   key: string;
-  fr: string;
-  dioula?: string;
-  nouchi?: string;
+  fr: string;       // Français Ivoirien courant
+  dioula?: string;  // Dioula véhiculaire
+  nouchi?: string;  // Français Ivoirien populaire (accessible, pas argot)
 }
 
 export const stockScripts: Record<string, StockAudioScript> = {
-  // Accueil et navigation
+  // --- ACCUEIL & NAVIGATION ---
   stock_welcome: {
     key: 'stock_welcome',
-    fr: 'Voici ton stock. Appuie sur un produit pour modifier.',
+    fr: 'Voici tes marchandises. Appuie sur un produit pour modifier.',
     dioula: 'I ka stock ye nin ye. Produit dɔ kɔ don ka a changé.',
+    nouchi: 'Voici tes marchandises. Appuie sur un produit pour modifier.',
   },
   stock_empty: {
     key: 'stock_empty',
     fr: 'Ton stock est vide. Appuie sur le plus pour ajouter.',
     dioula: 'I ka stock ye bagan ye. Plus kɔ don ka fara kan.',
+    nouchi: 'Ton stock est vide. Appuie sur le plus pour ajouter.',
   },
   stock_count: {
     key: 'stock_count',
-    fr: '{count} produits dans ton stock.',
+    fr: 'Tu as {count} produits au total.',
     dioula: 'Produit {count} bɛ i ka stock kɔnɔ.',
+    nouchi: 'Tu as {count} produits au total.',
   },
 
-  // Alertes
+  // --- ALERTES (Urgence et Action) ---
   stock_alert_out: {
     key: 'stock_alert_out',
-    fr: 'Attention ! {count} produit en rupture de stock.',
+    fr: "Attention ! {count} produit fini. Y'a plus rien !",
     dioula: 'Kɛlɛ! Produit {count} banna!',
+    nouchi: "Attention ! {count} produit fini. Y'a plus rien !",
   },
   stock_alert_low: {
     key: 'stock_alert_low',
-    fr: '{count} produit avec stock bas. Pense à réapprovisionner.',
+    fr: 'Attention, {count} produit va bientôt finir. Pense à compléter.',
     dioula: 'Produit {count} ka stock ye dɔgɔ ye. A miiri ka stock dɔ fara kan.',
+    nouchi: 'Attention, {count} produit va bientôt finir. Pense à compléter.',
   },
   stock_all_ok: {
     key: 'stock_all_ok',
-    fr: 'Tout va bien ! Tous tes produits sont en stock.',
+    fr: 'Tout est bon ! Ton stock est complet.',
     dioula: 'A ka di! I ka produit bɛɛ bɛ stock kɔnɔ.',
+    nouchi: 'Tout est bon ! Ton stock est complet.',
   },
 
-  // Actions
+  // --- ACTIONS (Verbes d'action directs) ---
   stock_add: {
     key: 'stock_add',
-    fr: 'Ajouter un nouveau produit au stock.',
+    fr: 'Ajouter un nouveau produit.',
     dioula: 'Produit kura dɔ fara stock kan.',
+    nouchi: 'Ajouter un nouveau produit.',
   },
   stock_restock: {
     key: 'stock_restock',
-    fr: 'Combien tu ajoutes ?',
+    fr: 'Tu veux ajouter combien ?',
     dioula: 'I bɛ joli fara kan?',
+    nouchi: 'Tu veux ajouter combien ?',
   },
   stock_edit: {
     key: 'stock_edit',
     fr: 'Modifier la quantité.',
     dioula: 'Quantité changé.',
+    nouchi: 'Modifier la quantité.',
   },
   stock_delete: {
     key: 'stock_delete',
-    fr: 'Veux-tu vraiment supprimer ce produit ?',
+    fr: 'Tu veux vraiment enlever ce produit ?',
     dioula: 'I bɛ fɛ ka nin produit bɔ tiɛn?',
+    nouchi: 'Tu veux vraiment enlever ce produit ?',
   },
   stock_saved: {
     key: 'stock_saved',
-    fr: "C'est enregistré !",
+    fr: "C'est noté !",
     dioula: 'A sɛbɛnna!',
+    nouchi: "C'est noté !",
   },
   stock_deleted: {
     key: 'stock_deleted',
-    fr: 'Produit supprimé.',
+    fr: 'Produit enlevé.',
     dioula: 'Produit bɔra.',
+    nouchi: 'Produit enlevé.',
   },
 
-  // Filtres
+  // --- FILTRES (Catégorisation simple) ---
   stock_filter_all: {
     key: 'stock_filter_all',
-    fr: 'Tous les produits.',
+    fr: 'Tout voir.',
     dioula: 'Produit bɛɛ.',
+    nouchi: 'Tout voir.',
   },
   stock_filter_out: {
     key: 'stock_filter_out',
-    fr: 'Produits en rupture.',
+    fr: 'Ce qui est fini.',
     dioula: 'Produit minnu banna.',
+    nouchi: 'Ce qui est fini.',
   },
   stock_filter_low: {
     key: 'stock_filter_low',
-    fr: 'Produits avec stock bas.',
+    fr: 'Ce qui va bientôt finir.',
     dioula: 'Produit minnu ka stock ye dɔgɔ ye.',
+    nouchi: 'Ce qui va bientôt finir.',
   },
   stock_filter_ok: {
     key: 'stock_filter_ok',
     fr: 'Produits en stock.',
     dioula: 'Produit minnu bɛ stock kɔnɔ.',
+    nouchi: 'Produits en stock.',
   },
 
-  // Quantités rapides
+  // --- QUANTITÉS RAPIDES ---
   stock_add_five: {
     key: 'stock_add_five',
     fr: 'Plus cinq.',
     dioula: 'Fara duuru kan.',
+    nouchi: 'Plus cinq.',
   },
   stock_add_ten: {
     key: 'stock_add_ten',
     fr: 'Plus dix.',
     dioula: 'Fara tan kan.',
+    nouchi: 'Plus dix.',
   },
   stock_add_twenty: {
     key: 'stock_add_twenty',
     fr: 'Plus vingt.',
     dioula: 'Fara mugan kan.',
+    nouchi: 'Plus vingt.',
   },
 
-  // Produit individuel
+  // --- PRODUIT INDIVIDUEL ---
   stock_product_info: {
     key: 'stock_product_info',
-    fr: '{name}. {quantity} {unit} en stock.',
+    fr: '{name}. Il reste {quantity} {unit}.',
     dioula: '{name}. {quantity} {unit} bɛ stock kɔnɔ.',
+    nouchi: '{name}. Il reste {quantity} {unit}.',
   },
 };
 
 /**
- * Retourne le script audio avec les variables remplacées
+ * Options pour la génération du script
+ */
+interface ScriptOptions {
+  variables?: Record<string, string | number>;
+  language?: LanguageCode;
+}
+
+/**
+ * Retourne le script audio avec les variables remplacées.
+ * API unifiée avec options object.
  */
 export function getStockScript(
   key: string,
-  variables?: Record<string, string | number>,
-  language: 'fr' | 'dioula' | 'nouchi' = 'fr'
+  options: ScriptOptions = {}
 ): string {
-  const script = stockScripts[key];
-  if (!script) {
-    console.warn(`Stock script "${key}" not found`);
+  const { variables, language = 'fr' } = options;
+  const scriptObj = stockScripts[key];
+
+  if (!scriptObj) {
+    console.warn(`[SUTA Audio] Script "${key}" introuvable`);
     return '';
   }
 
-  let text = script[language] || script.fr;
+  // Fallback langue : nouchi → fr → string vide
+  let text = scriptObj[language] || scriptObj.fr || '';
 
   if (variables) {
     Object.entries(variables).forEach(([varKey, value]) => {
