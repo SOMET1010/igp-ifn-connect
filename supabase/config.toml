@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.openai-tts]
 verify_jwt = false
+
+[functions.voice-auth-stt]
+verify_jwt = false
+
+[functions.voice-auth-validate]
+verify_jwt = false
