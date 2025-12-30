@@ -148,7 +148,10 @@ export default function MerchantLogin() {
     setIsLoading(true);
 
     const result = await executeWithRetry(async () => {
-      const { error: signUpError, data } = await supabase.auth.signUp({
+      let userId: string;
+      
+      // Essayer d'abord l'inscription
+      const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
         email,
         password: "marchand123",
         options: {
@@ -157,25 +160,49 @@ export default function MerchantLogin() {
         }
       });
       
-      if (signUpError || !data.user) {
+      // Si l'utilisateur existe déjà, essayer la connexion
+      if (signUpError?.message?.includes('already') || signUpError?.message?.includes('User already registered')) {
+        const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
+          email,
+          password: "marchand123"
+        });
+        
+        if (signInError) {
+          authLogger.error("SignIn error after existing user:", signInError);
+          throw new Error("Ce compte existe déjà avec un mot de passe différent");
+        }
+        
+        userId = signInData.user!.id;
+      } else if (signUpError || !signUpData.user) {
         throw signUpError || new Error("Échec inscription");
+      } else {
+        userId = signUpData.user.id;
       }
 
-      const userId = data.user.id;
       const cleanPhone = phone.replace(/\s/g, "");
 
-      const { error: merchantError } = await supabase.from("merchants").insert({
-        user_id: userId,
-        full_name: fullName,
-        phone: cleanPhone,
-        cmu_number: `CMU-${Date.now()}`,
-        activity_type: "Détaillant",
-        status: "validated"
-      });
+      // Vérifier si un marchand existe déjà pour ce user_id
+      const { data: existingMerchant } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      if (!existingMerchant) {
+        // Créer le marchand seulement s'il n'existe pas
+        const { error: merchantError } = await supabase.from("merchants").insert({
+          user_id: userId,
+          full_name: fullName,
+          phone: cleanPhone,
+          cmu_number: `CMU-${Date.now()}`,
+          activity_type: "Détaillant",
+          status: "validated"
+        });
 
-      if (merchantError) {
-        authLogger.error("Merchant creation error:", merchantError);
-        throw merchantError;
+        if (merchantError) {
+          authLogger.error("Merchant creation error:", merchantError);
+          throw merchantError;
+        }
       }
 
       const { error: roleError } = await supabase.rpc('assign_merchant_role', {
