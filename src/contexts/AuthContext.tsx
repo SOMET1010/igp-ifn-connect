@@ -37,17 +37,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserRole = async (userId: string) => {
     try {
+      // Récupérer TOUS les rôles de l'utilisateur (sans .single() pour éviter erreur 406)
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
       
-      if (error) {
-        authLogger.warn('Error fetching user role', { userId, error: error.message });
+      if (error || !data || data.length === 0) {
+        authLogger.warn('No roles found for user', { userId, error: error?.message });
         return null;
       }
-      return data?.role as AppRole;
+      
+      // Si un seul rôle, le retourner directement
+      if (data.length === 1) {
+        return data[0].role as AppRole;
+      }
+      
+      // Priorité des rôles : admin > agent > cooperative > merchant > user
+      const rolePriority: Record<string, number> = {
+        admin: 5,
+        agent: 4,
+        cooperative: 3,
+        merchant: 2,
+        user: 1
+      };
+      
+      // Trier par priorité décroissante et prendre le premier
+      const sortedRoles = [...data].sort((a, b) => 
+        (rolePriority[b.role] || 0) - (rolePriority[a.role] || 0)
+      );
+      
+      authLogger.info('User has multiple roles, using highest priority', { 
+        userId, 
+        roles: data.map(r => r.role),
+        selected: sortedRoles[0].role 
+      });
+      
+      return sortedRoles[0].role as AppRole;
     } catch (err) {
       authLogger.error('Error in fetchUserRole', err, { userId });
       return null;
