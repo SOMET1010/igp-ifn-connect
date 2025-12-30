@@ -62,7 +62,7 @@ export default function MerchantLogin() {
       .from("merchants")
       .select("id, full_name")
       .eq("phone", phone.replace(/\s/g, ""))
-      .single();
+      .maybeSingle();
 
     if (existingMerchant) {
       setFullName(existingMerchant.full_name);
