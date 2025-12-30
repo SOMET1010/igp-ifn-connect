@@ -128,6 +128,90 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_context_scores: {
+        Row: {
+          created_at: string | null
+          device_fingerprint: string | null
+          device_name: string | null
+          failed_logins: number | null
+          gps_tolerance_meters: number | null
+          id: string
+          is_primary_device: boolean | null
+          last_login_at: string | null
+          last_login_ip: string | null
+          merchant_id: string
+          successful_logins: number | null
+          trust_score: number | null
+          trust_score_updated_at: string | null
+          updated_at: string | null
+          usual_days_of_week: number[] | null
+          usual_gps_latitude: number | null
+          usual_gps_longitude: number | null
+          usual_login_hours_end: number | null
+          usual_login_hours_start: number | null
+          usual_market_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          device_name?: string | null
+          failed_logins?: number | null
+          gps_tolerance_meters?: number | null
+          id?: string
+          is_primary_device?: boolean | null
+          last_login_at?: string | null
+          last_login_ip?: string | null
+          merchant_id: string
+          successful_logins?: number | null
+          trust_score?: number | null
+          trust_score_updated_at?: string | null
+          updated_at?: string | null
+          usual_days_of_week?: number[] | null
+          usual_gps_latitude?: number | null
+          usual_gps_longitude?: number | null
+          usual_login_hours_end?: number | null
+          usual_login_hours_start?: number | null
+          usual_market_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_fingerprint?: string | null
+          device_name?: string | null
+          failed_logins?: number | null
+          gps_tolerance_meters?: number | null
+          id?: string
+          is_primary_device?: boolean | null
+          last_login_at?: string | null
+          last_login_ip?: string | null
+          merchant_id?: string
+          successful_logins?: number | null
+          trust_score?: number | null
+          trust_score_updated_at?: string | null
+          updated_at?: string | null
+          usual_days_of_week?: number[] | null
+          usual_gps_latitude?: number | null
+          usual_gps_longitude?: number | null
+          usual_login_hours_end?: number | null
+          usual_login_hours_start?: number | null
+          usual_market_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_context_scores_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auth_context_scores_usual_market_id_fkey"
+            columns: ["usual_market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cmu_payments: {
         Row: {
           amount: number
@@ -169,6 +253,77 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_validations: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          rejection_reason: string | null
+          request_context: string | null
+          requested_at: string | null
+          status: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by_user_id: string | null
+          validation_location_latitude: number | null
+          validation_location_longitude: number | null
+          validation_method: string | null
+          validator_name: string | null
+          validator_phone: string | null
+          validator_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          rejection_reason?: string | null
+          request_context?: string | null
+          requested_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by_user_id?: string | null
+          validation_location_latitude?: number | null
+          validation_location_longitude?: number | null
+          validation_method?: string | null
+          validator_name?: string | null
+          validator_phone?: string | null
+          validator_type: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          request_context?: string | null
+          requested_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by_user_id?: string | null
+          validation_location_latitude?: number | null
+          validation_location_longitude?: number | null
+          validation_method?: string | null
+          validator_name?: string | null
+          validator_phone?: string | null
+          validator_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_validations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
             referencedColumns: ["id"]
           },
         ]
@@ -470,6 +625,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "merchant_daily_sessions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_security_questions: {
+        Row: {
+          answer_hash: string
+          answer_normalized: string
+          audio_prompt_key: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          merchant_id: string
+          question_text: string
+          question_text_dioula: string | null
+          question_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer_hash: string
+          answer_normalized: string
+          audio_prompt_key?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id: string
+          question_text: string
+          question_text_dioula?: string | null
+          question_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer_hash?: string
+          answer_normalized?: string
+          audio_prompt_key?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          merchant_id?: string
+          question_text?: string
+          question_text_dioula?: string | null
+          question_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_security_questions_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
@@ -1638,6 +1843,19 @@ export type Database = {
         Returns: undefined
       }
       assign_merchant_role: { Args: { p_user_id: string }; Returns: undefined }
+      calculate_trust_score: {
+        Args: {
+          p_device_fingerprint: string
+          p_latitude?: number
+          p_login_hour?: number
+          p_longitude?: number
+          p_merchant_id: string
+        }
+        Returns: {
+          factors: Json
+          trust_score: number
+        }[]
+      }
       check_rbac_permission: {
         Args: { _action_code: string; _resource_code: string; _user_id: string }
         Returns: boolean
