@@ -1,13 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, Loader2, Phone, ArrowRight, RefreshCw } from 'lucide-react';
+import { Mic, Loader2, Phone, ArrowRight, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSocialAuth, AuthStep } from '../hooks/useSocialAuth';
+import { useSocialAuth } from '../hooks/useSocialAuth';
+import { useVoiceTranscription } from '../hooks/useVoiceTranscription';
 import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
 import { AudioBars } from '@/components/merchant/AudioBars';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';
+import { toast } from 'sonner';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 interface VoiceSocialAuthProps {
@@ -38,6 +40,7 @@ export function VoiceSocialAuth({
   const [manualPhone, setManualPhone] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
   const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
 
   const {
     step,
@@ -56,12 +59,33 @@ export function VoiceSocialAuth({
     generatedOtp,
   } = useSocialAuth({ redirectPath, userType });
 
+  // Hook de transcription vocale ElevenLabs
+  const { 
+    startListening, 
+    stopListening, 
+    isConnected, 
+    isConnecting,
+    transcript 
+  } = useVoiceTranscription({
+    onPhoneDetected: (detectedPhone) => {
+      console.log('[VoiceSocialAuth] Phone detected:', detectedPhone);
+      setMicState('processing');
+      stopListening();
+      processPhoneNumber(detectedPhone);
+    },
+    onError: (errorMsg) => {
+      console.error('[VoiceSocialAuth] Voice error:', errorMsg);
+      setVoiceError(errorMsg);
+      setMicState('idle');
+      // Fallback gracieux vers saisie manuelle
+      setShowManualInput(true);
+    }
+  });
+
   const { speak, isSpeaking, stop } = useSpeechTts({
     lang: 'fr',
     onEnd: () => {
-      if (micState === 'listening') {
-        // Start actual listening
-      }
+      // Audio fini, on peut commencer à écouter si on est en mode listening
     }
   });
 
@@ -84,32 +108,31 @@ export function VoiceSocialAuth({
     }
   }, []);
 
-  const handleMicClick = useCallback(() => {
-    if (isLoading) return;
+  const handleMicClick = useCallback(async () => {
+    if (isLoading || isConnecting) return;
     
     triggerHaptic();
     stop();
+    setVoiceError(null);
 
-    if (micState === 'idle') {
-      setMicState('listening');
-      speak('listen');
-      
-      // Simulate voice detection (in production, use ElevenLabs STT)
-      setTimeout(() => {
-        setMicState('processing');
-        speak('wait');
-        
-        // Simulate detected phone number
-        setTimeout(() => {
-          setMicState('idle');
-          // Demo: simulate detected phone number
-          processPhoneNumber('0701020304');
-        }, 2000);
-      }, 3000);
-    } else {
+    if (micState === 'idle' && !isConnected) {
+      // Démarrer l'écoute
+      try {
+        setMicState('listening');
+        speak('listen');
+        await startListening();
+      } catch (err) {
+        console.error('[VoiceSocialAuth] Failed to start listening:', err);
+        setMicState('idle');
+        setShowManualInput(true);
+        toast.error('Micro non disponible, utilise le clavier');
+      }
+    } else if (isConnected) {
+      // Arrêter l'écoute
+      stopListening();
       setMicState('idle');
     }
-  }, [isLoading, micState, speak, stop, triggerHaptic, processPhoneNumber]);
+  }, [isLoading, isConnecting, isConnected, micState, speak, stop, triggerHaptic, startListening, stopListening]);
 
   const handleManualSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -227,12 +250,14 @@ export function VoiceSocialAuth({
           <button
             type="button"
             onClick={handleMicClick}
-            disabled={isLoading}
+            disabled={isLoading || isConnecting}
             className={getMicButtonClass()}
             aria-label={micState === 'listening' ? 'Écoute en cours' : 'Appuyer pour parler'}
           >
-            {micState === 'processing' || isLoading ? (
+            {micState === 'processing' || isLoading || isConnecting ? (
               <Loader2 className="w-12 h-12 text-white animate-spin" />
+            ) : isConnected ? (
+              <MicOff className="w-12 h-12 text-white" />
             ) : (
               <Mic className={cn(
                 "w-12 h-12 text-white transition-transform",
@@ -242,12 +267,27 @@ export function VoiceSocialAuth({
           </button>
 
           {/* Audio bars */}
-          <AudioBars isActive={micState === 'listening'} />
+          <AudioBars isActive={micState === 'listening' || isConnected} />
+
+          {/* Transcription temps réel */}
+          {(micState === 'listening' || isConnected) && transcript && (
+            <div className="bg-muted/50 rounded-lg p-3 text-center max-w-xs animate-in fade-in">
+              <p className="text-xs text-muted-foreground mb-1">J'entends :</p>
+              <p className="text-lg font-medium text-foreground">{transcript}</p>
+            </div>
+          )}
 
           {/* Status label */}
           <p className="text-center text-muted-foreground text-base font-medium">
-            {getStatusLabel()}
+            {isConnecting ? 'Connexion au micro...' : getStatusLabel()}
           </p>
+
+          {/* Voice error message */}
+          {voiceError && (
+            <p className="text-sm text-destructive text-center max-w-xs">
+              {voiceError}
+            </p>
+          )}
 
           {/* Speaking indicator */}
           {isSpeaking && (

@@ -10,6 +10,7 @@ export { HumanFallback } from './components/HumanFallback';
 export { useSocialAuth } from './hooks/useSocialAuth';
 export { useDeviceFingerprint } from './hooks/useDeviceFingerprint';
 export { useTrustScore } from './hooks/useTrustScore';
+export { useVoiceTranscription } from './hooks/useVoiceTranscription';
 
 // Config
 export { 
