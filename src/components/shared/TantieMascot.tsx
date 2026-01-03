@@ -8,6 +8,8 @@ interface TantieMascotProps {
   variant?: "small" | "large";
   /** Nom du marchand pour personnalisation */
   merchantName?: string;
+  /** URL de l'image de la mascotte (optionnel, fallback sur emoji) */
+  imageUrl?: string | null;
   /** Classes additionnelles */
   className?: string;
   /** Callback au clic sur la mascotte */
@@ -22,6 +24,7 @@ export const TantieMascot: React.FC<TantieMascotProps> = ({
   message,
   variant = "large",
   merchantName,
+  imageUrl,
   className,
   onClick,
 }) => {
@@ -43,16 +46,32 @@ export const TantieMascot: React.FC<TantieMascotProps> = ({
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      {/* Avatar Tantie Sagesse */}
-      <div 
-        className={cn(
-          "flex-shrink-0 rounded-full flex items-center justify-center shadow-lg",
-          "bg-gradient-to-br from-orange-sanguine to-terre-battue",
-          isSmall ? "w-14 h-14 text-2xl" : "w-20 h-20 text-4xl"
-        )}
-      >
-        <span role="img" aria-label="Tantie Sagesse">👩🏾‍🌾</span>
-      </div>
+      {/* Avatar Tantie Sagesse - Image ou Emoji fallback */}
+      {imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt="Tantie Sagesse"
+          className={cn(
+            "flex-shrink-0 rounded-full object-cover shadow-lg",
+            "ring-4 ring-orange-sanguine/30 bg-gradient-to-br from-orange-sanguine to-terre-battue",
+            isSmall ? "w-14 h-14" : "w-20 h-20"
+          )}
+          onError={(e) => {
+            // Fallback: cacher l'image si erreur de chargement
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      ) : (
+        <div 
+          className={cn(
+            "flex-shrink-0 rounded-full flex items-center justify-center shadow-lg",
+            "bg-gradient-to-br from-orange-sanguine to-terre-battue",
+            isSmall ? "w-14 h-14 text-2xl" : "w-20 h-20 text-4xl"
+          )}
+        >
+          <span role="img" aria-label="Tantie Sagesse">👩🏾‍🌾</span>
+        </div>
+      )}
 
       {/* Bulle de dialogue */}
       <div 

@@ -8,6 +8,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
+import { useMascotImage } from "@/hooks/useMascotImage";
 import { Button } from "@/components/ui/button";
 import { merchantNavItems } from "@/config/navigation";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
@@ -54,6 +55,7 @@ export default function MerchantDashboard() {
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
+  const { imageUrl: mascotImageUrl } = useMascotImage();
   
   const {
     todaySession,
@@ -141,6 +143,7 @@ export default function MerchantDashboard() {
             <TantieMascot
               message={welcomeMessage}
               merchantName={merchant?.full_name?.split(" ")[0]}
+              imageUrl={mascotImageUrl}
               variant="large"
               className="mb-2"
             />

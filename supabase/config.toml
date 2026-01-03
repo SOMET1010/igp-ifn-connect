@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.wallet-transfer]
 verify_jwt = true
+
+[functions.generate-mascot]
+verify_jwt = false
