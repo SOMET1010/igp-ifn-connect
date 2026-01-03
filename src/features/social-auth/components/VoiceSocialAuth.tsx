@@ -159,9 +159,14 @@ export function VoiceSocialAuth({
 
   // Render based on current step
   if (step === 'challenge') {
+    // Get the question text - handle both string and object formats
+    const questionText = typeof challengeQuestion === 'string' 
+      ? challengeQuestion 
+      : challengeQuestion?.question_text || getMessage('challenge');
+    
     return (
       <CulturalChallenge
-        question={challengeQuestion || getMessage('challenge')}
+        question={questionText}
         personaName={currentPersona.name}
         personaAvatar={currentPersona.avatar}
         onAnswer={validateChallengeAnswer}
