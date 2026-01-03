@@ -24,18 +24,27 @@ const INTERVIEW_QUESTIONS = {
     { key: 'activity_type', question: "Tu vends quoi au marché ?", prompt: "Qu'est-ce que tu vends ?" },
     { key: 'market_name', question: "C'est où ton marché ?", prompt: "Dans quel marché tu travailles ?" },
     { key: 'phone', question: "C'est quoi ton numéro de téléphone ?", prompt: "Donne-moi ton numéro." },
+    // Questions de sécurité (Phase 2)
+    { key: 'mother_name', question: "Pour sécuriser ton compte, quel est le prénom de ta maman ?", prompt: "Le prénom de ta mère ?", isSecurityQuestion: true },
+    { key: 'neighborhood', question: "Et ton surnom au quartier, c'est quoi ?", prompt: "Comment on t'appelle ?", isSecurityQuestion: true },
   ],
   nouchi: [
     { key: 'full_name', question: "C'est comment on t'appelle ?", prompt: "Ton nom là, c'est quoi ?" },
     { key: 'activity_type', question: "Tu fais quoi comme commerce ?", prompt: "Tu vends quoi au marché ?" },
     { key: 'market_name', question: "Tu es où ? C'est quel marché ?", prompt: "Ton marché c'est lequel ?" },
     { key: 'phone', question: "Donne ton numéro de téléphone", prompt: "C'est quoi ton numéro ?" },
+    // Questions de sécurité (Phase 2)
+    { key: 'mother_name', question: "C'est comment ta daronne s'appelle ?", prompt: "Le nom de ta mère là ?", isSecurityQuestion: true },
+    { key: 'neighborhood', question: "On t'appelle comment au grin ?", prompt: "Ton surnom au quartier ?", isSecurityQuestion: true },
   ],
   suta: [
     { key: 'full_name', question: "Bonjour ! Je suis Tantie Sagesse. Comment tu t'appelles ma fille ?", prompt: "Dis-moi ton nom complet, je t'écoute." },
     { key: 'activity_type', question: "D'accord. Tu vends quoi au marché ?", prompt: "Dis-moi ce que tu vends, les tomates, le poisson, les pagnes ?" },
     { key: 'market_name', question: "Très bien. C'est où ton marché ?", prompt: "Tu travailles à Adjamé, Treichville, Yopougon ?" },
     { key: 'phone', question: "Parfait. C'est quoi ton numéro de téléphone ?", prompt: "Donne-moi ton numéro, chiffre par chiffre." },
+    // Questions de sécurité (Phase 2)
+    { key: 'mother_name', question: "Très bien ma fille ! Pour ta sécurité, dis-moi le prénom de ta maman ?", prompt: "Le prénom de ta maman, comment elle s'appelle ?", isSecurityQuestion: true },
+    { key: 'neighborhood', question: "Et dans ton quartier, on t'appelle comment ? Ton surnom ?", prompt: "C'est quoi ton surnom au quartier ?", isSecurityQuestion: true },
   ],
 };
 

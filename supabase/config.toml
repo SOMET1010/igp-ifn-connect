@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.elevenlabs-scribe-token]
 verify_jwt = false
+
+[functions.save-security-questions]
+verify_jwt = false

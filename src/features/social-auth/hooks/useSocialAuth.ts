@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrustScore } from './useTrustScore';
 import { useDeviceFingerprint } from './useDeviceFingerprint';
-import { PersonaType, PERSONAS } from '../config/personas';
+import { PersonaType, PERSONAS, CULTURAL_QUESTIONS } from '../config/personas';
+import { normalizeAnswer, similarityScore } from '../utils/normalize';
 import { toast } from 'sonner';
 
 /**
@@ -28,6 +29,14 @@ export type AuthStep =
   | 'success'      // Accès accordé
   | 'register';    // Nouvel utilisateur
 
+interface SecurityQuestion {
+  id: string;
+  question_type: string;
+  question_text: string;
+  question_text_dioula: string | null;
+  answer_normalized: string;
+}
+
 interface SocialAuthState {
   layer: AuthLayer;
   step: AuthStep;
@@ -36,7 +45,7 @@ interface SocialAuthState {
   trustScore: number;
   merchantId: string | null;
   merchantName: string | null;
-  challengeQuestion: string | null;
+  challengeQuestion: SecurityQuestion | null;
   error: string | null;
 }
 
@@ -105,22 +114,38 @@ export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseS
       if (trustResult.decision === 'direct_access') {
         // Score élevé = Accès direct
         await proceedToLogin(formattedPhone, trustResult.merchantId!);
-      } else if (trustResult.decision === 'challenge') {
-        // Score moyen = Question culturelle
-        setState(prev => ({
-          ...prev,
-          layer: 3,
-          step: 'challenge',
-          challengeQuestion: currentPersona.greetings.challenge,
-        }));
-      } else if (trustResult.merchantId) {
-        // Score bas mais utilisateur connu = Challenge aussi
-        setState(prev => ({
-          ...prev,
-          layer: 3,
-          step: 'challenge',
-          challengeQuestion: currentPersona.greetings.challenge,
-        }));
+      } else if (trustResult.decision === 'challenge' || (trustResult.merchantId && trustResult.score < 70)) {
+        // Score moyen = Question culturelle - chercher une vraie question de sécurité
+        const { data: securityQuestions } = await supabase
+          .from('merchant_security_questions')
+          .select('id, question_type, question_text, question_text_dioula, answer_normalized')
+          .eq('merchant_id', trustResult.merchantId!)
+          .eq('is_active', true);
+        
+        if (securityQuestions && securityQuestions.length > 0) {
+          // Choisir une question aléatoire
+          const randomQ = securityQuestions[Math.floor(Math.random() * securityQuestions.length)];
+          setState(prev => ({
+            ...prev,
+            layer: 3,
+            step: 'challenge',
+            challengeQuestion: randomQ,
+          }));
+        } else {
+          // Pas de question configurée - utiliser le challenge générique du persona
+          setState(prev => ({
+            ...prev,
+            layer: 3,
+            step: 'challenge',
+            challengeQuestion: {
+              id: 'generic',
+              question_type: 'mother_name',
+              question_text: CULTURAL_QUESTIONS.mother_name.fr,
+              question_text_dioula: CULTURAL_QUESTIONS.mother_name.dioula,
+              answer_normalized: '',
+            },
+          }));
+        }
       } else {
         // Nouvel utilisateur = Inscription
         setState(prev => ({ ...prev, step: 'register' }));
@@ -138,6 +163,19 @@ export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseS
       setIsLoading(false);
     }
   }, [calculateTrustScore, currentPersona, onPhoneValidated]);
+
+  // Layer 4: Escalade vers agent humain (déclaré en premier car utilisé par les autres fonctions)
+  const escalateToHuman = useCallback((reason: string) => {
+    setState(prev => ({
+      ...prev,
+      layer: 4,
+      step: 'fallback',
+      error: reason,
+    }));
+    
+    // TODO: Créer un ticket d'assistance et notifier les agents
+    toast.error(currentPersona.greetings.error);
+  }, [currentPersona]);
 
   // Procéder à la connexion OTP
   const proceedToLogin = useCallback(async (phone: string, merchantId?: string) => {
@@ -167,52 +205,45 @@ export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseS
     } finally {
       setIsLoading(false);
     }
-  }, [recordSuccessfulLogin]);
+  }, [recordSuccessfulLogin, escalateToHuman]);
 
   // Layer 3: Valider la réponse au challenge culturel
   const validateChallengeAnswer = useCallback(async (answer: string) => {
     setIsLoading(true);
     
     try {
-      if (!state.merchantId) {
+      const { challengeQuestion, merchantId, phone, trustScore } = state;
+      
+      if (!merchantId) {
         throw new Error('No merchant ID');
       }
       
-      // Récupérer la question de sécurité du marchand
-      const { data: securityQuestion, error } = await supabase
-        .from('merchant_security_questions')
-        .select('answer_normalized, answer_hash')
-        .eq('merchant_id', state.merchantId)
-        .eq('is_active', true)
-        .single();
-      
-      if (error || !securityQuestion) {
-        // Pas de question configurée - on accepte si le score est > 30
-        if (state.trustScore > 30) {
-          await proceedToLogin(state.phone!, state.merchantId);
+      // Si c'est une question générique (pas de réponse stockée)
+      if (challengeQuestion?.id === 'generic' || !challengeQuestion?.answer_normalized) {
+        // On accepte si le score est > 30 (l'utilisateur est probablement légitime)
+        if (trustScore > 30) {
+          await proceedToLogin(phone!, merchantId);
           return true;
         }
-        escalateToHuman("Vérification impossible");
+        escalateToHuman("Vérification impossible - pas de question configurée");
         return false;
       }
       
       // Normaliser et comparer la réponse
-      const normalizedAnswer = answer.toLowerCase().trim()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+      const normalizedAnswer = normalizeAnswer(answer);
+      const expectedAnswer = challengeQuestion.answer_normalized;
       
-      const expectedAnswer = securityQuestion.answer_normalized.toLowerCase();
+      // Comparaison avec tolérance aux fautes
+      const similarity = similarityScore(normalizedAnswer, expectedAnswer);
       
-      // Comparaison floue (tolérance aux fautes de frappe)
-      const isMatch = normalizedAnswer === expectedAnswer ||
-        normalizedAnswer.includes(expectedAnswer) ||
-        expectedAnswer.includes(normalizedAnswer);
-      
-      if (isMatch) {
-        await proceedToLogin(state.phone!, state.merchantId);
+      // Accepter si similarité > 80% (tolérance aux fautes mineures)
+      if (similarity >= 80) {
+        console.log(`[Layer3] Answer accepted with similarity ${similarity}%`);
+        await proceedToLogin(phone!, merchantId);
         return true;
       } else {
         // Mauvaise réponse - escalade humaine
+        console.log(`[Layer3] Answer rejected - similarity ${similarity}%`);
         escalateToHuman("Réponse incorrecte");
         return false;
       }
@@ -224,20 +255,7 @@ export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseS
     } finally {
       setIsLoading(false);
     }
-  }, [state.merchantId, state.phone, state.trustScore, proceedToLogin]);
-
-  // Layer 4: Escalade vers agent humain
-  const escalateToHuman = useCallback((reason: string) => {
-    setState(prev => ({
-      ...prev,
-      layer: 4,
-      step: 'fallback',
-      error: reason,
-    }));
-    
-    // TODO: Créer un ticket d'assistance et notifier les agents
-    toast.error(currentPersona.greetings.error);
-  }, [currentPersona]);
+  }, [state, proceedToLogin, escalateToHuman]);
 
   // Vérifier l'OTP et finaliser la connexion
   const verifyAndLogin = useCallback(async (otp: string) => {

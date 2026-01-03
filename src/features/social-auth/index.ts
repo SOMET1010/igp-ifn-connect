@@ -20,3 +20,6 @@ export {
   FRIENDLY_ERRORS,
   type PersonaType 
 } from './config/personas';
+
+// Utils
+export { normalizeAnswer, compareAnswers, similarityScore } from './utils/normalize';

@@ -26,7 +26,7 @@ export default function MerchantVoiceRegister() {
     setIsProcessing(true);
     
     try {
-      const { full_name, activity_type, market_name, phone } = data;
+      const { full_name, activity_type, market_name, phone, mother_name, neighborhood } = data;
       
       if (!full_name || !phone) {
         toast.error("Informations incomplètes");
@@ -74,6 +74,8 @@ export default function MerchantVoiceRegister() {
         .eq("user_id", userId)
         .maybeSingle();
 
+      let merchantId: string;
+
       if (!existingMerchant) {
         // Trouver le marché correspondant
         let marketId = null;
@@ -90,7 +92,7 @@ export default function MerchantVoiceRegister() {
         }
 
         // Créer le marchand
-        const { error: merchantError } = await supabase.from("merchants").insert({
+        const { data: newMerchant, error: merchantError } = await supabase.from("merchants").insert({
           user_id: userId,
           full_name,
           phone: cleanPhone,
@@ -99,10 +101,53 @@ export default function MerchantVoiceRegister() {
           activity_description: activity_type,
           market_id: marketId,
           status: "validated"
-        });
+        }).select("id").single();
 
         if (merchantError) {
           throw merchantError;
+        }
+        
+        merchantId = newMerchant.id;
+      } else {
+        merchantId = existingMerchant.id;
+      }
+
+      // Sauvegarder les questions de sécurité si fournies
+      if (merchantId && (mother_name || neighborhood)) {
+        const securityQuestions = [];
+        
+        if (mother_name) {
+          securityQuestions.push({
+            question_type: 'mother_name',
+            answer: mother_name,
+            question_text: "Prénom de ta maman",
+            question_text_dioula: "I ba tɔgɔ"
+          });
+        }
+        
+        if (neighborhood) {
+          securityQuestions.push({
+            question_type: 'neighborhood',
+            answer: neighborhood,
+            question_text: "Ton surnom au quartier",
+            question_text_dioula: "I tɔgɔ caman"
+          });
+        }
+        
+        if (securityQuestions.length > 0) {
+          const { error: securityError } = await supabase.functions.invoke('save-security-questions', {
+            body: {
+              merchant_id: merchantId,
+              questions: securityQuestions
+            }
+          });
+          
+          if (securityError) {
+            console.error("Error saving security questions:", securityError);
+            // Ne pas bloquer l'inscription si les questions échouent
+          } else {
+            console.log(`Saved ${securityQuestions.length} security questions for merchant ${merchantId}`);
+          }
         }
       }
 
