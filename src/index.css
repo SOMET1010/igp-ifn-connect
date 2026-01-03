@@ -71,6 +71,13 @@
     --earth-light: 25 30% 50%;
     --earth-dark: 25 50% 20%;
 
+    /* Palette "L'Âme du Marché" */
+    --terre-battue: 27 100% 38%;
+    --orange-sanguine: 28 81% 52%;
+    --sable: 36 100% 95%;
+    --charbon: 195 8% 19%;
+    --vert-manioc: 123 46% 34%;
+
     /* Success et Warning */
     --success: 145 50% 35%;
     --success-foreground: 0 0% 100%;
