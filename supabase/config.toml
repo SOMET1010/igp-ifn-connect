@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.voice-auth-validate]
 verify_jwt = false
+
+[functions.wallet-transfer]
+verify_jwt = true
