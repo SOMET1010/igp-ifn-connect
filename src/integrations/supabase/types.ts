@@ -212,6 +212,54 @@ export type Database = {
           },
         ]
       }
+      beneficiaries: {
+        Row: {
+          beneficiary_wallet_id: string
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          last_transfer_at: string | null
+          nickname: string | null
+          owner_wallet_id: string
+          transfer_count: number | null
+        }
+        Insert: {
+          beneficiary_wallet_id: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          last_transfer_at?: string | null
+          nickname?: string | null
+          owner_wallet_id: string
+          transfer_count?: number | null
+        }
+        Update: {
+          beneficiary_wallet_id?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          last_transfer_at?: string | null
+          nickname?: string | null
+          owner_wallet_id?: string
+          transfer_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiaries_beneficiary_wallet_id_fkey"
+            columns: ["beneficiary_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "beneficiaries_owner_wallet_id_fkey"
+            columns: ["owner_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cmu_payments: {
         Row: {
           amount: number
@@ -1832,6 +1880,107 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          counterparty_name: string | null
+          counterparty_phone: string | null
+          counterparty_wallet_id: string | null
+          created_at: string
+          description: string | null
+          fee: number | null
+          id: string
+          metadata: Json | null
+          reference: string
+          status: string
+          type: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          counterparty_name?: string | null
+          counterparty_phone?: string | null
+          counterparty_wallet_id?: string | null
+          created_at?: string
+          description?: string | null
+          fee?: number | null
+          id?: string
+          metadata?: Json | null
+          reference: string
+          status?: string
+          type: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          counterparty_name?: string | null
+          counterparty_phone?: string | null
+          counterparty_wallet_id?: string | null
+          created_at?: string
+          description?: string | null
+          fee?: number | null
+          id?: string
+          metadata?: Json | null
+          reference?: string
+          status?: string
+          type?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_counterparty_wallet_id_fkey"
+            columns: ["counterparty_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          merchant_id: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1877,6 +2026,7 @@ export type Database = {
         Args: { p_quantity: number; p_stock_id: string }
         Returns: undefined
       }
+      generate_wallet_reference: { Args: never; Returns: string }
       get_merchant_today_total: {
         Args: { _merchant_id: string }
         Returns: number
