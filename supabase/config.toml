@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.generate-market-background]
 verify_jwt = false
+
+[functions.voice-interview]
+verify_jwt = false

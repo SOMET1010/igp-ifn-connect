@@ -48,6 +48,7 @@ import MerchantHelp from "./pages/merchant/MerchantHelp";
 import MerchantUnderstand from "./pages/merchant/MerchantUnderstand";
 import MerchantInvoices from "./pages/merchant/MerchantInvoices";
 import MerchantWallet from "./pages/merchant/MerchantWallet";
+import MerchantVoiceRegister from "./pages/merchant/MerchantVoiceRegister";
 
 // Cooperative pages
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
@@ -144,6 +145,7 @@ const App = () => (
                   
                   {/* Merchant Routes */}
                   <Route path="/marchand/login" element={<MerchantLogin />} />
+                  <Route path="/marchand/inscription-vocale" element={<MerchantVoiceRegister />} />
                   <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
                     <Route path="/marchand" element={<MerchantDashboard />} />
                     <Route path="/marchand/encaisser" element={<MerchantCashier />} />
