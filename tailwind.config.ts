@@ -78,6 +78,22 @@ export default {
           light: "hsl(var(--earth-light))",
           dark: "hsl(var(--earth-dark))",
         },
+        // Palette "L'Âme du Marché"
+        "terre-battue": {
+          DEFAULT: "hsl(var(--terre-battue))",
+        },
+        "orange-sanguine": {
+          DEFAULT: "hsl(var(--orange-sanguine))",
+        },
+        sable: {
+          DEFAULT: "hsl(var(--sable))",
+        },
+        charbon: {
+          DEFAULT: "hsl(var(--charbon))",
+        },
+        "vert-manioc": {
+          DEFAULT: "hsl(var(--vert-manioc))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
@@ -94,6 +110,10 @@ export default {
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
         "3xl": "calc(var(--radius) + 16px)",
+      },
+      fontFamily: {
+        nunito: ['Nunito', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       fontSize: {
         "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
