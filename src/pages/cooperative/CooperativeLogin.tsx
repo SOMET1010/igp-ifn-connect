@@ -1,7 +1,67 @@
-import { GenericOtpLoginPage, cooperativeLoginConfig } from "@/features/auth";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { VoiceSocialAuth } from '@/features/social-auth';
+import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
+import { GlassCard } from '@/components/shared/GlassCard';
+import logoDge from '@/assets/logo-dge.png';
+import logoAnsut from '@/assets/logo-ansut.png';
 
+/**
+ * CooperativeLogin - Page de connexion Coopérative
+ * Utilise le protocole d'Authentification Sociale PNAVIM
+ */
 const CooperativeLogin = () => {
-  return <GenericOtpLoginPage config={cooperativeLoginConfig} />;
+  return (
+    <div className="min-h-screen relative">
+      {/* Fond immersif */}
+      <ImmersiveBackground variant="warm-gradient" />
+      
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Header institutionnel */}
+        <header className="flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-sm border-b border-border/50">
+          <div className="flex items-center gap-3">
+            <img src={logoDge} alt="DGE" className="h-10 md:h-12 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-sm md:text-base font-bold text-foreground">PNAVIM-CI</span>
+              <span className="text-[10px] md:text-xs text-muted-foreground">République de Côte d'Ivoire</span>
+              <span className="text-[9px] text-muted-foreground/70 italic">Espace Coopérative</span>
+            </div>
+          </div>
+          <img src={logoAnsut} alt="ANSUT" className="h-9 md:h-11 object-contain" />
+        </header>
+
+        {/* Contenu principal */}
+        <main className="flex-1 flex items-center justify-center px-4 py-8">
+          <GlassCard className="w-full max-w-md p-6">
+            <VoiceSocialAuth
+              redirectPath="/cooperative/dashboard"
+              userType="cooperative"
+            />
+
+            {/* Lien vers inscription */}
+            <div className="mt-6 pt-4 border-t border-border/50 text-center">
+              <p className="text-sm text-muted-foreground">
+                Vous êtes une nouvelle coopérative ?
+              </p>
+              <Link 
+                to="/cooperative/register" 
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Demander l'accès
+              </Link>
+            </div>
+          </GlassCard>
+        </main>
+
+        {/* Footer discret */}
+        <footer className="py-3 text-center">
+          <p className="text-[10px] text-muted-foreground/60">
+            Plateforme opérée par l'ANSUT pour le compte de la DGE
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
 };
 
 export default CooperativeLogin;
