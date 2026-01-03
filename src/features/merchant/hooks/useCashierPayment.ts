@@ -101,6 +101,11 @@ export function useCashierPayment(
   // Sélection de la méthode de paiement
   const selectPaymentMethod = useCallback(
     (selectedMethod: PaymentMethod, t: (key: string) => string) => {
+      // Vérifier qu'au moins un produit est sélectionné
+      if (selectedProducts.length === 0) {
+        toast.error("Sélectionnez au moins un produit à vendre");
+        return;
+      }
       if (numericAmount < 100) {
         toast.error(t("min_amount_error"));
         return;
@@ -108,7 +113,7 @@ export function useCashierPayment(
       setMethod(selectedMethod);
       setStep("confirm");
     },
-    [numericAmount]
+    [numericAmount, selectedProducts.length]
   );
 
   // Confirmation du paiement

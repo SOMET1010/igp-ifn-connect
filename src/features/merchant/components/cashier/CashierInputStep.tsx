@@ -1,4 +1,4 @@
-import { Banknote, Smartphone, Wifi, RefreshCw, Mic, Ear } from "lucide-react";
+import { Banknote, Smartphone, Wifi, RefreshCw, Mic, Ear, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
@@ -171,16 +171,13 @@ export function CashierInputStep({
         </button>
       )}
 
-      {/* CFA Bills Quick Input - Only show if no products selected */}
+      {/* Message si aucun produit sélectionné */}
       {selectedProducts.length === 0 && (
-        <GlassCard borderColor="none" padding="sm" className="space-y-3">
-          <CashDenominationPad onAddAmount={handleAddAmount} speakAmount />
-          <CalculatorKeypad 
-            value={amount} 
-            onChange={onAmountChange} 
-            maxLength={10} 
-            speakDigits 
-          />
+        <GlassCard borderColor="orange" padding="md" className="text-center">
+          <ShoppingBag className="w-10 h-10 mx-auto text-orange-sanguine/50 mb-2" />
+          <p className="text-charbon/70 font-inter text-sm">
+            Sélectionnez des produits ci-dessus pour encaisser
+          </p>
         </GlassCard>
       )}
 
@@ -210,7 +207,7 @@ export function CashierInputStep({
             {/* Bouton ESPÈCES - Vert succès */}
             <Button
               onClick={() => handleSelectMethod("cash")}
-              disabled={numericAmount < 100}
+              disabled={selectedProducts.length === 0 || numericAmount < 100}
               className="relative h-28 rounded-3xl flex-col gap-2 overflow-hidden
                 bg-gradient-to-br from-vert-manioc to-green-700
                 shadow-xl shadow-vert-manioc/30
@@ -228,7 +225,7 @@ export function CashierInputStep({
             {/* Bouton MOBILE - Bleu/Violet */}
             <Button
               onClick={() => handleSelectMethod("mobile_money")}
-              disabled={numericAmount < 100}
+              disabled={selectedProducts.length === 0 || numericAmount < 100}
               className="relative h-28 rounded-3xl flex-col gap-2 overflow-hidden
                 bg-gradient-to-br from-blue-500 to-violet-600
                 shadow-xl shadow-blue-500/30
