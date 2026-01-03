@@ -1,0 +1,378 @@
+import React, { useState, useCallback, useEffect } from 'react';
+import { Mic, Loader2, Phone, ArrowRight, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useSocialAuth, AuthStep } from '../hooks/useSocialAuth';
+import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { AudioBars } from '@/components/merchant/AudioBars';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { CulturalChallenge } from './CulturalChallenge';
+import { HumanFallback } from './HumanFallback';
+import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
+
+interface VoiceSocialAuthProps {
+  redirectPath: string;
+  userType: 'merchant' | 'cooperative' | 'agent';
+  onSuccess?: () => void;
+  className?: string;
+}
+
+type MicState = 'idle' | 'listening' | 'processing';
+
+/**
+ * VoiceSocialAuth - Composant principal d'Authentification Sociale PNAVIM
+ * 
+ * Implémente le protocole à 4 couches :
+ * Layer 1: Identification vocale ("C'est qui est là ?")
+ * Layer 2: Vérification invisible (device + contexte) 
+ * Layer 3: Challenge social (question culturelle)
+ * Layer 4: Fallback humain (escalade vers agent)
+ */
+export function VoiceSocialAuth({ 
+  redirectPath, 
+  userType,
+  onSuccess,
+  className 
+}: VoiceSocialAuthProps) {
+  const [micState, setMicState] = useState<MicState>('idle');
+  const [manualPhone, setManualPhone] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
+
+  const {
+    step,
+    layer,
+    phone,
+    isLoading,
+    currentPersona,
+    merchantName,
+    challengeQuestion,
+    error,
+    processPhoneNumber,
+    validateChallengeAnswer,
+    verifyAndLogin,
+    reset,
+    getMessage,
+    generatedOtp,
+  } = useSocialAuth({ redirectPath, userType });
+
+  const { speak, isSpeaking, stop } = useSpeechTts({
+    lang: 'fr',
+    onEnd: () => {
+      if (micState === 'listening') {
+        // Start actual listening
+      }
+    }
+  });
+
+  // Auto-play welcome message
+  useEffect(() => {
+    if (hasPlayedWelcome || step !== 'welcome') return;
+    
+    const timer = setTimeout(() => {
+      speak('welcome');
+      setHasPlayedWelcome(true);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [speak, hasPlayedWelcome, step]);
+
+  // Haptic feedback
+  const triggerHaptic = useCallback(() => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+  }, []);
+
+  const handleMicClick = useCallback(() => {
+    if (isLoading) return;
+    
+    triggerHaptic();
+    stop();
+
+    if (micState === 'idle') {
+      setMicState('listening');
+      speak('listen');
+      
+      // Simulate voice detection (in production, use ElevenLabs STT)
+      setTimeout(() => {
+        setMicState('processing');
+        speak('wait');
+        
+        // Simulate detected phone number
+        setTimeout(() => {
+          setMicState('idle');
+          // Demo: simulate detected phone number
+          processPhoneNumber('0701020304');
+        }, 2000);
+      }, 3000);
+    } else {
+      setMicState('idle');
+    }
+  }, [isLoading, micState, speak, stop, triggerHaptic, processPhoneNumber]);
+
+  const handleManualSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (manualPhone.length >= 10) {
+      processPhoneNumber(manualPhone);
+    }
+  }, [manualPhone, processPhoneNumber]);
+
+  const getMicButtonClass = () => {
+    return cn(
+      'mic-button-xl',
+      micState === 'listening' && 'is-listening',
+      micState === 'processing' && 'is-processing',
+      isLoading && 'opacity-50 cursor-not-allowed'
+    );
+  };
+
+  const getStatusLabel = () => {
+    if (isLoading) return 'Vérification en cours...';
+    if (micState === 'idle') return 'Appuie et parle';
+    if (micState === 'listening') return "Je t'écoute...";
+    return 'Un instant...';
+  };
+
+  // Render based on current step
+  if (step === 'challenge') {
+    return (
+      <CulturalChallenge
+        question={challengeQuestion || getMessage('challenge')}
+        personaName={currentPersona.name}
+        personaAvatar={currentPersona.avatar}
+        onAnswer={validateChallengeAnswer}
+        onCancel={reset}
+        isLoading={isLoading}
+      />
+    );
+  }
+
+  if (step === 'fallback') {
+    return (
+      <HumanFallback
+        reason={error || 'Vérification impossible'}
+        phone={phone || undefined}
+        merchantName={merchantName || undefined}
+        onRetry={reset}
+      />
+    );
+  }
+
+  if (step === 'success' && generatedOtp) {
+    return (
+      <div className="flex flex-col items-center gap-5 py-4">
+        {/* Avatar avec animation de succès */}
+        <div className="relative">
+          <div className="merchant-avatar-lg border-4 border-secondary">
+            <img 
+              src={marcheIvoirien} 
+              alt="Marché ivoirien"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-secondary rounded-full border-2 border-white flex items-center justify-center">
+            ✓
+          </div>
+        </div>
+
+        <div className="text-center space-y-2">
+          <p className="text-lg font-medium text-foreground">
+            {merchantName ? `Bienvenue ${merchantName} !` : 'Bienvenue !'}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Code envoyé au {phone}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            (Mode dev: {generatedOtp})
+          </p>
+        </div>
+
+        {/* OTP Input */}
+        <OtpVerification 
+          onVerify={verifyAndLogin} 
+          isLoading={isLoading}
+          expectedOtp={generatedOtp}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex flex-col items-center gap-5 py-4", className)}>
+      {/* Avatar Persona */}
+      <div className="relative">
+        <div className="merchant-avatar-lg">
+          <img 
+            src={marcheIvoirien} 
+            alt="Marché ivoirien"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        {/* Status indicator */}
+        <div className={cn(
+          "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white",
+          isLoading ? "bg-amber-500 animate-pulse" : "bg-secondary animate-pulse"
+        )} />
+      </div>
+
+      {/* Message persona */}
+      <p className="text-center text-foreground font-medium text-lg max-w-xs">
+        {getMessage('welcome')}
+      </p>
+
+      {!showManualInput ? (
+        <>
+          {/* GROS Bouton Micro */}
+          <button
+            type="button"
+            onClick={handleMicClick}
+            disabled={isLoading}
+            className={getMicButtonClass()}
+            aria-label={micState === 'listening' ? 'Écoute en cours' : 'Appuyer pour parler'}
+          >
+            {micState === 'processing' || isLoading ? (
+              <Loader2 className="w-12 h-12 text-white animate-spin" />
+            ) : (
+              <Mic className={cn(
+                "w-12 h-12 text-white transition-transform",
+                micState === 'listening' && 'scale-110'
+              )} />
+            )}
+          </button>
+
+          {/* Audio bars */}
+          <AudioBars isActive={micState === 'listening'} />
+
+          {/* Status label */}
+          <p className="text-center text-muted-foreground text-base font-medium">
+            {getStatusLabel()}
+          </p>
+
+          {/* Speaking indicator */}
+          {isSpeaking && (
+            <div className="flex items-center gap-1.5 text-primary text-xs">
+              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+              Audio en cours...
+            </div>
+          )}
+
+          {/* Separator */}
+          <div className="flex items-center gap-3 w-full max-w-xs">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">ou</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          {/* Manual input fallback */}
+          <button
+            type="button"
+            onClick={() => setShowManualInput(true)}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+          >
+            📝 Je préfère taper mon numéro
+          </button>
+        </>
+      ) : (
+        <form onSubmit={handleManualSubmit} className="w-full max-w-xs space-y-4">
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="tel"
+              placeholder="07 01 02 03 04"
+              value={manualPhone}
+              onChange={(e) => setManualPhone(e.target.value)}
+              className="pl-11 text-lg h-14"
+              autoFocus
+            />
+          </div>
+          
+          <Button 
+            type="submit" 
+            className="w-full h-12"
+            disabled={manualPhone.length < 10 || isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                Continuer
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => setShowManualInput(false)}
+            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Retour au mode vocal
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+// Composant OTP intégré
+function OtpVerification({ 
+  onVerify, 
+  isLoading,
+  expectedOtp 
+}: { 
+  onVerify: (otp: string) => Promise<boolean>;
+  isLoading: boolean;
+  expectedOtp?: string;
+}) {
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) return;
+    
+    const success = await onVerify(otp);
+    if (!success) {
+      setError('Code incorrect');
+      setOtp('');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="w-full max-w-xs space-y-4">
+      <Input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        maxLength={6}
+        placeholder="• • • • • •"
+        value={otp}
+        onChange={(e) => {
+          setOtp(e.target.value.replace(/\D/g, ''));
+          setError('');
+        }}
+        className="text-center text-2xl tracking-[0.5em] h-14"
+        autoFocus
+      />
+      
+      {error && (
+        <p className="text-sm text-destructive text-center">{error}</p>
+      )}
+      
+      <Button 
+        type="submit" 
+        className="w-full h-12"
+        disabled={otp.length !== 6 || isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          'Valider'
+        )}
+      </Button>
+    </form>
+  );
+}
+
+export default VoiceSocialAuth;
