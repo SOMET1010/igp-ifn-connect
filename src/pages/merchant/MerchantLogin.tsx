@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Loader2, ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -454,8 +454,17 @@ export default function MerchantLogin() {
           </div>
         </div>
 
+        {/* Lien inscription vocale conversationnelle */}
+        <Link
+          to="/marchand/inscription-vocale"
+          className="flex items-center justify-center gap-2 mt-4 text-white/90 hover:text-white transition-colors bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20"
+        >
+          <Sparkles className="w-5 h-5 text-amber-400" />
+          <span className="font-medium">Nouvelle inscription avec Tantie Sagesse</span>
+        </Link>
+
         {/* Note institutionnelle */}
-        <p className="text-xs text-white/80 text-center mt-6 max-w-sm drop-shadow-lg">
+        <p className="text-xs text-white/80 text-center mt-4 max-w-sm drop-shadow-lg">
           Sécurisé par l'ANSUT · Service Public
         </p>
       </main>
