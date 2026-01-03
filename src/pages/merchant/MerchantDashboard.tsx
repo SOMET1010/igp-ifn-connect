@@ -9,6 +9,7 @@ import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { useMascotImage } from "@/hooks/useMascotImage";
+import { useMarketBackground } from "@/hooks/useMarketBackground";
 import { Button } from "@/components/ui/button";
 import { merchantNavItems } from "@/config/navigation";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
@@ -56,6 +57,7 @@ export default function MerchantDashboard() {
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
   const { imageUrl: mascotImageUrl } = useMascotImage();
+  const { imageUrl: marketBgUrl } = useMarketBackground();
   
   const {
     todaySession,
@@ -120,8 +122,13 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen relative pb-24">
-      {/* Fond immersif Afro-Futuriste */}
-      <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
+      {/* Fond immersif Afro-Futuriste avec image de marché */}
+      <ImmersiveBackground 
+        variant="market-blur" 
+        backgroundImageUrl={marketBgUrl}
+        showWaxPattern 
+        showBlobs 
+      />
 
       {showConfetti && <Confetti duration={3000} particleCount={60} />}
 

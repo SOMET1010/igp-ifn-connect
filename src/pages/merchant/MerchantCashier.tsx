@@ -7,6 +7,7 @@ import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
 import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
+import { useMarketBackground } from "@/hooks/useMarketBackground";
 import {
   useMerchantStock,
   useCashierPayment,
@@ -42,6 +43,9 @@ export default function MerchantCashier() {
   
   // Stock data
   const { stocks, isLoading: stocksLoading } = useMerchantStock();
+  
+  // Fond de marché
+  const { imageUrl: marketBgUrl } = useMarketBackground();
   
   // Hook métier de paiement
   const {
@@ -134,8 +138,13 @@ export default function MerchantCashier() {
 
   return (
     <div className="min-h-screen relative pb-20">
-      {/* Fond immersif Afro-Futuriste */}
-      <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
+      {/* Fond immersif Afro-Futuriste avec image de marché */}
+      <ImmersiveBackground 
+        variant="market-blur" 
+        backgroundImageUrl={marketBgUrl}
+        showWaxPattern 
+        showBlobs 
+      />
 
       {/* Floating Audio Button */}
       <AudioButton

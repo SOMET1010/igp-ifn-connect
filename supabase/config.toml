@@ -38,3 +38,6 @@ verify_jwt = true
 
 [functions.generate-mascot]
 verify_jwt = false
+
+[functions.generate-market-background]
+verify_jwt = false
