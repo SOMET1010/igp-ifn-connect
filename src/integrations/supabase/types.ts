@@ -588,6 +588,83 @@ export type Database = {
           },
         ]
       }
+      kyc_requests: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          id: string
+          id_document_expiry: string | null
+          id_document_number: string | null
+          id_document_type: string | null
+          id_document_url: string | null
+          level: Database["public"]["Enums"]["kyc_level"]
+          merchant_id: string | null
+          phone_verified: boolean | null
+          phone_verified_at: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string | null
+          status: Database["public"]["Enums"]["kyc_status"]
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          id_document_expiry?: string | null
+          id_document_number?: string | null
+          id_document_type?: string | null
+          id_document_url?: string | null
+          level?: Database["public"]["Enums"]["kyc_level"]
+          merchant_id?: string | null
+          phone_verified?: boolean | null
+          phone_verified_at?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          id?: string
+          id_document_expiry?: string | null
+          id_document_number?: string | null
+          id_document_type?: string | null
+          id_document_url?: string | null
+          level?: Database["public"]["Enums"]["kyc_level"]
+          merchant_id?: string | null
+          phone_verified?: boolean | null
+          phone_verified_at?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_requests_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markets: {
         Row: {
           commune: string
@@ -2032,6 +2109,10 @@ export type Database = {
         Returns: number
       }
       get_total_transactions_amount: { Args: never; Returns: number }
+      get_user_kyc_level: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["kyc_level"]
+      }
       get_user_rbac_permissions: {
         Args: { _user_id: string }
         Returns: {
@@ -2056,6 +2137,13 @@ export type Database = {
           profile_name: string
         }[]
       }
+      has_kyc_level: {
+        Args: {
+          _min_level: Database["public"]["Enums"]["kyc_level"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2067,6 +2155,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agent" | "merchant" | "cooperative" | "user"
+      kyc_level: "level_0" | "level_1" | "level_2"
+      kyc_status:
+        | "draft"
+        | "submitted"
+        | "under_review"
+        | "approved"
+        | "rejected"
       merchant_status: "pending" | "validated" | "rejected" | "suspended"
       order_status:
         | "pending"
@@ -2203,6 +2298,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agent", "merchant", "cooperative", "user"],
+      kyc_level: ["level_0", "level_1", "level_2"],
+      kyc_status: [
+        "draft",
+        "submitted",
+        "under_review",
+        "approved",
+        "rejected",
+      ],
       merchant_status: ["pending", "validated", "rejected", "suspended"],
       order_status: [
         "pending",

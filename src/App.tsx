@@ -49,6 +49,7 @@ import MerchantUnderstand from "./pages/merchant/MerchantUnderstand";
 import MerchantInvoices from "./pages/merchant/MerchantInvoices";
 import MerchantWallet from "./pages/merchant/MerchantWallet";
 import MerchantVoiceRegister from "./pages/merchant/MerchantVoiceRegister";
+import MerchantKyc from "./pages/merchant/MerchantKyc";
 
 // Cooperative pages
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
@@ -72,6 +73,7 @@ import AdminStudio from "./pages/admin/AdminStudio";
 import AdminVivriers from "./pages/admin/AdminVivriers";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminUserDetail from "./pages/admin/AdminUserDetail";
+import AdminKycReview from "./pages/admin/AdminKycReview";
 
 // Loading fallback for lazy components
 const LazyLoadingFallback = () => (
@@ -162,6 +164,7 @@ const App = () => (
                     <Route path="/marchand/comprendre" element={<MerchantUnderstand />} />
                     <Route path="/marchand/factures" element={<MerchantInvoices />} />
                     <Route path="/marchand/wallet" element={<MerchantWallet />} />
+                    <Route path="/marchand/kyc" element={<MerchantKyc />} />
                   </Route>
 
                   {/* Cooperative Routes */}
@@ -189,6 +192,7 @@ const App = () => (
                     <Route path="/admin/vivriers" element={<AdminVivriers />} />
                     <Route path="/admin/utilisateurs" element={<AdminUsers />} />
                     <Route path="/admin/utilisateurs/:userId" element={<AdminUserDetail />} />
+                    <Route path="/admin/kyc" element={<AdminKycReview />} />
                   </Route>
                   
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
