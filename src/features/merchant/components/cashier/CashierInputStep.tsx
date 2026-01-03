@@ -5,6 +5,9 @@ import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
 import { CalculatorKeypad } from "@/components/merchant/CalculatorKeypad";
 import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/components/merchant/ProductSelector";
+import { GlassCard } from "@/components/shared/GlassCard";
+import { VibrantTotalBar } from "@/components/shared/VibrantTotalBar";
+import { WaxPattern } from "@/components/shared/WaxPattern";
 import type { SelectedProduct, PaymentMethod, StockItemForSelector } from "../../types/transaction.types";
 import { formatCurrency } from "../../utils/cashierCalculations";
 import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
@@ -39,7 +42,7 @@ const speakText = (text: string) => {
 };
 
 // ============================================
-// Composant étape d'entrée INCLUSIVE
+// Composant étape d'entrée AFRO-FUTURISTE
 // ============================================
 export function CashierInputStep({
   stocks,
@@ -95,32 +98,34 @@ export function CashierInputStep({
   };
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-180px)] gap-3">
-      {/* Product Selector - Optional */}
-      <ProductSelector
-        stocks={stocks.map((s) => ({
-          id: s.id,
-          product_id: s.product_id,
-          product_name: s.product_name,
-          quantity: Number(s.quantity),
-          unit_price: s.unit_price,
-          image_url: s.image_url ?? null,
-          unit: s.unit,
-        }))}
-        selectedProducts={selectedProducts as ProductSelectorProduct[]}
-        onProductsChange={handleProductsChange}
-        isLoading={stocksLoading}
-      />
+    <div className="flex flex-col min-h-[calc(100vh-180px)] gap-4">
+      {/* Product Selector dans une GlassCard */}
+      <GlassCard borderColor="orange" padding="sm">
+        <ProductSelector
+          stocks={stocks.map((s) => ({
+            id: s.id,
+            product_id: s.product_id,
+            product_name: s.product_name,
+            quantity: Number(s.quantity),
+            unit_price: s.unit_price,
+            image_url: s.image_url ?? null,
+            unit: s.unit,
+          }))}
+          selectedProducts={selectedProducts as ProductSelectorProduct[]}
+          onProductsChange={handleProductsChange}
+          isLoading={stocksLoading}
+        />
+      </GlassCard>
 
-      {/* Speaking Header - INCLUSIF */}
+      {/* Speaking Header - INCLUSIF avec style glass */}
       <button 
         type="button"
         onClick={handleSpeakingHeaderTap}
-        className="speaking-header"
+        className="flex items-center justify-center gap-2 py-3 px-4 bg-white/70 backdrop-blur-sm rounded-xl border border-orange-sanguine/20 transition-all hover:bg-white/80"
         aria-label={t("how_much")}
       >
-        <Mic className="w-5 h-5 micro-icon" />
-        <span className="text-sm text-muted-foreground font-medium">
+        <Mic className="w-5 h-5 text-orange-sanguine animate-pulse" />
+        <span className="text-sm text-charbon font-medium font-inter">
           {selectedProducts.length > 0 
             ? t("total") || "Total" 
             : t("say_amount") || "Dis le montant ou appuie sur un billet"
@@ -128,41 +133,47 @@ export function CashierInputStep({
         </span>
       </button>
 
-      {/* Amount Zone - ACTIVE & PULSANTE */}
-      <button
-        type="button"
-        onClick={handleAmountZoneTap}
-        className={`text-center transition-all duration-300 ${
-          isAmountEmpty ? "amount-zone-listening" : "amount-zone-active"
-        }`}
-        aria-label={numericAmount > 0 ? `${formattedAmount} FCFA` : t("listening") || "J'écoute"}
-      >
-        {/* Ear icon when listening */}
-        {isAmountEmpty && (
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Ear className="w-5 h-5 ear-icon" />
-            <span className="text-sm text-muted-foreground">
-              {t("listening") || "J'écoute..."}
-            </span>
+      {/* Amount Zone - VIBRANT TOTAL BAR */}
+      {numericAmount > 0 ? (
+        <VibrantTotalBar
+          label="Total à encaisser"
+          amount={formattedAmount}
+          currency="FCFA"
+          onClick={handleAmountZoneTap}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={handleAmountZoneTap}
+          className="relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm border-2 border-dashed border-orange-sanguine/30 px-6 py-6 text-center transition-all hover:border-orange-sanguine/50"
+          aria-label={t("listening") || "J'écoute"}
+        >
+          {/* Wax pattern subtil */}
+          <WaxPattern variant="geometric" opacity={0.04} className="absolute inset-0" />
+          
+          <div className="relative z-10">
+            {/* Ear icon when listening */}
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Ear className="w-6 h-6 text-orange-sanguine animate-pulse" />
+              <span className="text-sm text-muted-foreground font-inter">
+                {t("listening") || "J'écoute..."}
+              </span>
+            </div>
+            
+            {/* Giant Amount Display */}
+            <div className="flex items-baseline justify-center gap-2">
+              <span className="text-5xl sm:text-6xl font-nunito font-extrabold text-charbon/30">
+                0
+              </span>
+              <span className="text-xl text-muted-foreground font-bold">FCFA</span>
+            </div>
           </div>
-        )}
-        
-        {/* Giant Amount Display */}
-        <div className="flex items-baseline justify-center gap-2">
-          <span
-            className={`text-6xl sm:text-7xl font-black tracking-tight transition-all duration-200 ${
-              numericAmount > 0 ? "text-foreground" : "text-muted-foreground/50"
-            }`}
-          >
-            {numericAmount > 0 ? formattedAmount : "0"}
-          </span>
-          <span className="text-2xl text-muted-foreground font-bold">FCFA</span>
-        </div>
-      </button>
+        </button>
+      )}
 
       {/* CFA Bills Quick Input - Only show if no products selected */}
       {selectedProducts.length === 0 && (
-        <>
+        <GlassCard borderColor="none" padding="sm" className="space-y-3">
           <CashDenominationPad onAddAmount={handleAddAmount} speakAmount />
           <CalculatorKeypad 
             value={amount} 
@@ -170,63 +181,80 @@ export function CashierInputStep({
             maxLength={10} 
             speakDigits 
           />
-        </>
+        </GlassCard>
       )}
 
       {/* Spacer pour le sticky */}
       <div className="flex-1" />
 
-      {/* Sticky Cart Summary + Payment Buttons - Design KPATA INCLUSIF */}
-      <div className="sticky bottom-0 -mx-4 px-4 py-4 bg-card/95 backdrop-blur-sm border-t border-border shadow-lg space-y-4">
-        {/* Résumé produits (si présents) */}
-        {selectedProducts.length > 0 && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              {selectedProducts.length} produit{selectedProducts.length > 1 ? 's' : ''} sélectionné{selectedProducts.length > 1 ? 's' : ''}
-            </span>
-            <span className="font-bold text-foreground">
-              {formattedAmount} FCFA
-            </span>
+      {/* Sticky Payment Buttons - Design AFRO-FUTURISTE */}
+      <div className="sticky bottom-0 -mx-4 px-4 py-4 space-y-4">
+        {/* Fond glassmorphism pour le sticky */}
+        <div className="absolute inset-0 bg-sable/95 backdrop-blur-xl border-t border-orange-sanguine/20" />
+        
+        <div className="relative z-10 space-y-4">
+          {/* Résumé produits (si présents) */}
+          {selectedProducts.length > 0 && (
+            <div className="flex items-center justify-between text-sm px-1">
+              <span className="text-charbon/70 font-inter">
+                {selectedProducts.length} produit{selectedProducts.length > 1 ? 's' : ''} sélectionné{selectedProducts.length > 1 ? 's' : ''}
+              </span>
+              <span className="font-bold text-charbon font-nunito">
+                {formattedAmount} FCFA
+              </span>
+            </div>
+          )}
+
+          {/* Payment buttons MASSIFS - Style pilule */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Bouton ESPÈCES - Vert succès */}
+            <Button
+              onClick={() => handleSelectMethod("cash")}
+              disabled={numericAmount < 100}
+              className="relative h-28 rounded-3xl flex-col gap-2 overflow-hidden
+                bg-gradient-to-br from-vert-manioc to-green-700
+                shadow-xl shadow-vert-manioc/30
+                hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]
+                disabled:opacity-40 disabled:hover:scale-100
+                transition-all duration-300"
+              aria-label={t("cash") || "Espèces"}
+            >
+              <Banknote className="w-12 h-12 text-white" />
+              <span className="text-xl font-nunito font-extrabold text-white">
+                {t("cash")?.toUpperCase() || "ESPÈCES"}
+              </span>
+            </Button>
+
+            {/* Bouton MOBILE - Bleu/Violet */}
+            <Button
+              onClick={() => handleSelectMethod("mobile_money")}
+              disabled={numericAmount < 100}
+              className="relative h-28 rounded-3xl flex-col gap-2 overflow-hidden
+                bg-gradient-to-br from-blue-500 to-violet-600
+                shadow-xl shadow-blue-500/30
+                hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]
+                disabled:opacity-40 disabled:hover:scale-100
+                transition-all duration-300"
+              aria-label="Mobile Money"
+            >
+              <Smartphone className="w-12 h-12 text-white" />
+              <span className="text-xl font-nunito font-extrabold text-white">MOBILE</span>
+            </Button>
           </div>
-        )}
 
-        {/* Payment buttons XXL - PICTOGRAMME-FIRST */}
-        <div className="grid grid-cols-2 gap-4">
-          <Button
-            onClick={() => handleSelectMethod("cash")}
-            disabled={numericAmount < 100}
-            className="btn-kpata-success h-24 flex-col gap-2 disabled:opacity-30"
-            aria-label={t("cash") || "Espèces"}
-          >
-            <Banknote className="w-10 h-10" />
-            <span className="text-xl font-black">
-              {t("cash")?.toUpperCase() || "ESPÈCES"}
-            </span>
-          </Button>
-
-          <Button
-            onClick={() => handleSelectMethod("mobile_money")}
-            disabled={numericAmount < 100}
-            className="btn-kpata-primary h-24 flex-col gap-2 disabled:opacity-30"
-            aria-label="Mobile Money"
-          >
-            <Smartphone className="w-10 h-10" />
-            <span className="text-xl font-black">MOBILE</span>
-          </Button>
+          {/* Retry indicator or offline message */}
+          {isRetrying ? (
+            <p className="text-center text-sm text-orange-sanguine flex items-center justify-center gap-2 font-inter">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              Nouvelle tentative en cours...
+            </p>
+          ) : (
+            <p className="text-center text-xs text-charbon/50 flex items-center justify-center gap-2 font-inter">
+              <Wifi className="w-3 h-3" />
+              {t("offline_message")}
+            </p>
+          )}
         </div>
-
-        {/* Retry indicator or offline message */}
-        {isRetrying ? (
-          <p className="text-center text-sm text-warning flex items-center justify-center gap-2">
-            <RefreshCw className="w-4 h-4 animate-spin" />
-            Nouvelle tentative en cours...
-          </p>
-        ) : (
-          <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-2 opacity-70">
-            <Wifi className="w-3 h-3" />
-            {t("offline_message")}
-          </p>
-        )}
       </div>
     </div>
   );

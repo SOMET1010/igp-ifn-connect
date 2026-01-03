@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { AudioButton } from "@/components/shared/AudioButton";
+import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
@@ -132,7 +133,10 @@ export default function MerchantCashier() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen relative pb-20">
+      {/* Fond immersif Afro-Futuriste */}
+      <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
+
       {/* Floating Audio Button */}
       <AudioButton
         textToRead={getStepAudioText()}
@@ -149,7 +153,7 @@ export default function MerchantCashier() {
         showLanguageToggle={false}
       />
 
-      <main className="p-4 space-y-4">
+      <main className="p-4 space-y-4 max-w-2xl mx-auto">
         {step === "input" && (
           <CashierInputStep
             stocks={stocksForSelector}

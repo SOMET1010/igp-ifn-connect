@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Banknote, Mic } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
@@ -9,15 +9,22 @@ import { useFirstSaleCelebration } from "@/hooks/useFirstSaleCelebration";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { Button } from "@/components/ui/button";
-import { PageLayout } from "@/templates";
 import { merchantNavItems } from "@/config/navigation";
-import { AudioButton } from "@/components/shared/AudioButton";
-import { UnifiedBigNumber } from "@/components/shared/UnifiedBigNumber";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
+import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { MerchantDashboardSkeleton } from "@/components/merchant/MerchantDashboardSkeleton";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { Confetti } from "@/components/shared/Confetti";
 import { OnlineStatusIndicator } from "@/components/merchant/dashboard";
-import { InclusiveToolsGrid } from "@/components/merchant/dashboard/InclusiveToolsGrid";
+
+// Nouveaux composants Afro-Futuristes
+import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
+import { TantieMascot } from "@/components/shared/TantieMascot";
+import { GlassCard } from "@/components/shared/GlassCard";
+import { HeroActionCard } from "@/components/shared/HeroActionCard";
+import { DashboardStatCard } from "@/components/merchant/dashboard/DashboardStatCard";
+import { VoiceHeroButton } from "@/components/shared/VoiceHeroButton";
+
 import {
   OpenDayDialog,
   CloseDayDialog,
@@ -27,6 +34,11 @@ import {
   getDashboardScript, 
   formatAmountForSpeech 
 } from "@/features/voice-auth/config/dashboardScripts";
+
+// Formater le montant
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("fr-FR").format(amount);
+};
 
 export default function MerchantDashboard() {
   const navigate = useNavigate();
@@ -38,6 +50,7 @@ export default function MerchantDashboard() {
 
   const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
+  const [voiceState, setVoiceState] = useState<"idle" | "listening" | "playing">("idle");
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
@@ -56,21 +69,6 @@ export default function MerchantDashboard() {
   const merchant = data?.merchant;
   const todayTotal = data?.todayTotal || 0;
 
-  // Script audio contextuel pour le bouton flottant
-  const getAssistantAudioText = (): string => {
-    if (sessionStatus === "none") {
-      return getDashboardScript("day_closed");
-    }
-    return getDashboardScript("assistant_prompt");
-  };
-
-  // Script audio pour le montant
-  const getAmountAudioText = (): string => {
-    return getDashboardScript("today_amount", { 
-      amount: formatAmountForSpeech(todayTotal) 
-    });
-  };
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/marchand/login');
@@ -81,91 +79,143 @@ export default function MerchantDashboard() {
     navigate("/marchand/encaisser");
   };
 
-  const handleAmountTap = () => {
-    // L'audio sera joué via le composant AudioButton ou TTS externe
-    console.log("Amount tapped, audio text:", getAmountAudioText());
+  const handleHistorique = () => {
+    triggerTap();
+    navigate("/marchand/historique");
   };
+
+  const handleVoiceCommand = () => {
+    setVoiceState(voiceState === "idle" ? "listening" : "idle");
+    // Intégration TTS ici
+  };
+
+  // Message de bienvenue personnalisé pour Tantie
+  const welcomeMessage = sessionStatus === "none"
+    ? "Bonjour {nom} ! N'oublie pas d'ouvrir ta journée 🌅"
+    : "Bonjour {nom} ! Prêt pour les affaires aujourd'hui ? 💪";
 
   if (error) {
     return (
-      <PageLayout
-        title={t("merchant")}
-        subtitle="Espace Marchand"
-        showSignOut
-        onSignOut={handleSignOut}
-        navItems={merchantNavItems}
-        maxWidth="2xl"
-      >
-        <div className="py-4">
+      <div className="min-h-screen relative">
+        <ImmersiveBackground />
+        <EnhancedHeader
+          title={t("merchant")}
+          subtitle="Espace Marchand"
+          showSignOut
+          onSignOut={handleSignOut}
+        />
+        <main className="p-4">
           <ErrorState
             message={error instanceof Error ? error.message : "Erreur de chargement"}
             onRetry={() => refetch()}
             isNetworkError={!isOnline}
           />
-        </div>
-      </PageLayout>
+        </main>
+        <UnifiedBottomNav items={merchantNavItems} />
+      </div>
     );
   }
 
   return (
-    <PageLayout
-      title={merchant?.full_name || t("merchant")}
-      subtitle="Espace Marchand"
-      showSignOut
-      onSignOut={handleSignOut}
-      navItems={merchantNavItems}
-      maxWidth="2xl"
-    >
+    <div className="min-h-screen relative pb-24">
+      {/* Fond immersif Afro-Futuriste */}
+      <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
+
       {showConfetti && <Confetti duration={3000} particleCount={60} />}
-      
-      {/* Assistant vocal flottant */}
-      <AudioButton 
-        textToRead={getAssistantAudioText()}
-        className="fixed bottom-24 right-4 z-50"
-        size="lg"
+
+      {/* Header avec fond transparent pour voir le gradient */}
+      <EnhancedHeader
+        title={merchant?.full_name || t("merchant")}
+        subtitle="Espace Marchand"
+        showSignOut
+        onSignOut={handleSignOut}
+        variant="default"
       />
 
-      <div className="py-4 space-y-6">
+      <main className="px-4 py-4 space-y-5 max-w-2xl mx-auto">
         {isLoading ? (
           <MerchantDashboardSkeleton />
         ) : (
           <>
-            {/* 1. CARTE SESSION - État de la journée */}
-            <DaySessionBanner
-              sessionStatus={sessionStatus}
-              session={todaySession}
-              onOpenDay={() => setOpenDayDialogOpen(true)}
-              onCloseDay={() => setCloseDayDialogOpen(true)}
-              inclusive
+            {/* 1. MASCOTTE TANTIE SAGESSE */}
+            <TantieMascot
+              message={welcomeMessage}
+              merchantName={merchant?.full_name?.split(" ")[0]}
+              variant="large"
+              className="mb-2"
             />
 
-            {/* 2. MONTANT DU JOUR - XXL, interactif */}
-            <UnifiedBigNumber 
-              label={t("your_sales_today") || "Aujourd'hui"} 
-              value={todayTotal} 
-              unit="FCFA"
-              sizeXXL
-              onTap={handleAmountTap}
-            />
+            {/* 2. CARTE SESSION - État de la journée */}
+            <GlassCard borderColor="gold" padding="sm">
+              <DaySessionBanner
+                sessionStatus={sessionStatus}
+                session={todaySession}
+                onOpenDay={() => setOpenDayDialogOpen(true)}
+                onCloseDay={() => setCloseDayDialogOpen(true)}
+                inclusive
+              />
+            </GlassCard>
 
-            {/* 3. BOUTON HÉROS - ENCAISSER */}
-            <Button 
-              onClick={handleEncaisser} 
-              className="btn-cashier-hero w-full flex items-center justify-center gap-3"
-              disabled={!isSessionOpen}
-            >
-              <Banknote className="w-8 h-8" />
-              <span className="text-xl">ENCAISSER</span>
-            </Button>
+            {/* 3. STATISTIQUES EN CARTES GLASS */}
+            <div className="grid grid-cols-3 gap-3">
+              <DashboardStatCard
+                label="Ventes"
+                value={formatCurrency(todayTotal)}
+                emoji="📊"
+                borderColor="orange"
+              />
+              <DashboardStatCard
+                label="Solde"
+                value={formatCurrency(0)}
+                emoji="🏦"
+                borderColor="green"
+              />
+              <DashboardStatCard
+                label="Alertes"
+                value="0"
+                emoji="🔔"
+                borderColor="gold"
+              />
+            </div>
 
-            {/* 4. TUILES OUTILS INCLUSIVES - 2x2 grid */}
-            <InclusiveToolsGrid />
+            {/* 4. CARTES ACTION HÉROS - VENDRE & HISTORIQUE */}
+            <div className="space-y-4">
+              <HeroActionCard
+                title="VENDRE"
+                subtitle="Encaisser une vente"
+                emoji="🛒"
+                variant="orange"
+                onClick={handleEncaisser}
+                disabled={!isSessionOpen}
+              />
+              
+              <HeroActionCard
+                title="HISTORIQUE"
+                subtitle="Voir mes ventes"
+                emoji="📜"
+                variant="violet"
+                onClick={handleHistorique}
+              />
+            </div>
 
-            {/* 5. Indicateur de connexion discret */}
+            {/* 5. BOUTON COMMANDES VOCALES */}
+            <div className="flex justify-center pt-2">
+              <VoiceHeroButton
+                state={voiceState}
+                onClick={handleVoiceCommand}
+                label="Commandes vocales"
+                size="lg"
+              />
+            </div>
+
+            {/* 6. Indicateur de connexion */}
             <OnlineStatusIndicator isOnline={isOnline} />
           </>
         )}
-      </div>
+      </main>
+
+      {/* Bottom Navigation */}
+      <UnifiedBottomNav items={merchantNavItems} />
 
       {/* Dialogs */}
       <OpenDayDialog
@@ -188,6 +238,6 @@ export default function MerchantDashboard() {
         getSummary={getSummary}
         isLoading={isClosing}
       />
-    </PageLayout>
+    </div>
   );
 }
