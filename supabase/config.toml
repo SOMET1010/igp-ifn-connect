@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.voice-interview]
 verify_jwt = false
+
+[functions.elevenlabs-scribe-token]
+verify_jwt = false
