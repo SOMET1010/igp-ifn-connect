@@ -4,6 +4,8 @@ import { WaxPattern } from "./WaxPattern";
 interface ImmersiveBackgroundProps {
   /** Variante du fond */
   variant?: "warm-gradient" | "market-blur";
+  /** URL de l'image de fond (pour variant market-blur) */
+  backgroundImageUrl?: string | null;
   /** Afficher le pattern Wax */
   showWaxPattern?: boolean;
   /** Afficher les blobs décoratifs */
@@ -18,21 +20,49 @@ interface ImmersiveBackgroundProps {
  */
 export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
   variant = "warm-gradient",
+  backgroundImageUrl,
   showWaxPattern = true,
   showBlobs = true,
   className = "",
 }) => {
+  const showMarketImage = variant === "market-blur" && backgroundImageUrl;
+
   return (
     <div className={`fixed inset-0 -z-10 overflow-hidden ${className}`}>
-      {/* Gradient de base chaud */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: variant === "warm-gradient" 
-            ? "linear-gradient(135deg, hsl(36 100% 95%) 0%, hsl(28 81% 90%) 50%, hsl(36 100% 92%) 100%)"
-            : "linear-gradient(180deg, hsl(28 81% 85%) 0%, hsl(36 100% 95%) 100%)"
-        }}
-      />
+      {/* Image de fond du marché (si disponible) */}
+      {showMarketImage && (
+        <>
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${backgroundImageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: "blur(8px)",
+              transform: "scale(1.1)",
+            }}
+          />
+          {/* Overlay semi-transparent chaleureux sur l'image */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(180deg, hsl(28 81% 44% / 0.4) 0%, hsl(36 100% 50% / 0.3) 100%)"
+            }}
+          />
+        </>
+      )}
+
+      {/* Gradient de base chaud (fallback ou warm-gradient) */}
+      {!showMarketImage && (
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: variant === "warm-gradient" 
+              ? "linear-gradient(135deg, hsl(36 100% 95%) 0%, hsl(28 81% 90%) 50%, hsl(36 100% 92%) 100%)"
+              : "linear-gradient(180deg, hsl(28 81% 85%) 0%, hsl(36 100% 95%) 100%)"
+          }}
+        />
+      )}
 
       {/* Overlay chaleureux subtil */}
       <div 
