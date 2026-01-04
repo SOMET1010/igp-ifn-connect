@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Volume2, Wallet, UserCheck, Users } from 'lucide-react';
+import { Volume2, Wallet, UserCheck, Users, ShoppingBasket, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
@@ -35,11 +35,15 @@ const ACCENT_STYLES: Record<AccentColor, { gradient: string; iconBg: string }> =
   },
 };
 
+// Pictogrammes XXL par rôle
 const ROLE_ICONS: Record<string, React.ElementType> = {
-  marchand: Wallet,
-  agent: UserCheck,
+  marchand: ShoppingBasket,
+  agent: BadgeCheck,
   cooperative: Users,
 };
+
+// Motif Wax SVG en filigrane (pattern géométrique africain)
+const WAX_PATTERN_SVG = `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M30 0l30 30-30 30L0 30 30 0zm0 10L10 30l20 20 20-20-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`;
 
 export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
   role,
@@ -73,7 +77,8 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(audioMessage);
       utterance.lang = 'fr-FR';
-      utterance.rate = 0.9;
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
       window.speechSynthesis.speak(utterance);
     }
   }, [audioMessage, triggerTap]);
@@ -81,8 +86,7 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
   return (
     <motion.div
       onClick={handleCardClick}
-      className={`relative group cursor-pointer overflow-hidden rounded-[2rem] h-[280px] sm:h-[320px] shadow-2xl transition-all hover:scale-[1.02] hover:shadow-3xl ${className}`}
-      whileTap={{ scale: 0.98 }}
+      className={`relative group cursor-pointer overflow-hidden rounded-[2rem] h-[280px] sm:h-[320px] shadow-xl transition-all active:scale-[0.98] ${className}`}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -92,9 +96,18 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
     >
       {/* Fond Dégradé Glassmorphism */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} backdrop-blur-xl`} />
+      <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} backdrop-blur-sm`} />
       <div className="absolute inset-0 bg-white/5" />
       <div className="absolute inset-0 border border-white/20 rounded-[2rem]" />
+      
+      {/* Motif Wax Digital (filigrane 6% opacity) */}
+      <div 
+        className="absolute inset-0 opacity-[0.06] pointer-events-none rounded-[2rem]"
+        style={{
+          backgroundImage: WAX_PATTERN_SVG,
+          backgroundSize: '40px 40px',
+        }}
+      />
 
       {/* Badge */}
       {showBadge && (
@@ -109,17 +122,18 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
       )}
 
       {/* Contenu */}
-      <div className="relative z-10 h-full flex flex-col justify-between p-6">
-        {/* Haut : Icône + Titres */}
+      <div className="relative z-10 h-full flex flex-col justify-between p-5 sm:p-6">
+        {/* Haut : Icône XXL + Titres */}
         <div className="space-y-3">
-          <div className={`w-12 h-12 ${styles.iconBg} rounded-2xl flex items-center justify-center backdrop-blur-sm`}>
-            <IconComponent className="w-6 h-6 text-white" />
+          {/* Pictogramme XXL (48px minimum) */}
+          <div className={`w-16 h-16 sm:w-20 sm:h-20 ${styles.iconBg} rounded-2xl flex items-center justify-center backdrop-blur-sm`}>
+            <IconComponent className="w-8 h-8 sm:w-10 sm:h-10 text-white" strokeWidth={2} />
           </div>
           <div>
             <h2 className="text-2xl sm:text-3xl font-nunito font-extrabold text-white leading-tight">
               {title}
             </h2>
-            <p className="text-white/80 text-sm sm:text-base mt-1">
+            <p className="text-white/80 text-base sm:text-lg mt-1">
               {subtitle}
             </p>
           </div>
@@ -129,11 +143,11 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
         <div className="flex items-end justify-between">
           <button
             onClick={handleAudioClick}
-            className="bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-full flex items-center gap-2 backdrop-blur-md transition-colors font-medium text-sm border border-white/10"
+            className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white px-4 py-3 rounded-full flex items-center gap-2 backdrop-blur-sm transition-colors font-semibold text-sm border border-white/10 min-h-[52px]"
             aria-label={t('click_to_listen') || 'Écouter'}
           >
-            <Volume2 className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('click_to_listen') || 'Écouter'}</span>
+            <Volume2 className="w-5 h-5" />
+            <span>{t('click_to_listen') || 'Écouter'}</span>
           </button>
 
           {/* Mascotte/Image (positionnée pour dépasser) */}
@@ -141,7 +155,7 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
             <motion.img
               src={mascotImage}
               alt=""
-              className="absolute -bottom-2 -right-2 w-32 h-32 sm:w-40 sm:h-40 object-contain drop-shadow-2xl"
+              className="absolute -bottom-2 -right-2 w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-xl"
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}

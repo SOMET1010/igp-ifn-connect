@@ -98,10 +98,8 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
               </div>
             </Link>
 
-            {/* Center: Navigation (Desktop only) */}
-            {showNavigation && (
-              <PnavimNavMenu className="mx-4" />
-            )}
+            {/* Center: Navigation masquée sur Home (trop web pour marchands) */}
+            {/* Navigation désactivée pour l'inclusion - garder uniquement les contrôles essentiels */}
 
             {/* Right: Controls */}
             <div className="flex items-center gap-2">
@@ -157,14 +155,14 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                 </button>
               )}
 
-              {/* Login Button */}
+              {/* Login Button - Orange PNAVIM (pas noir) */}
               {showLoginButton && (
                 <button
                   onClick={onLoginClick}
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 bg-charbon text-white rounded-full text-sm font-medium hover:bg-charbon/90 transition-colors shadow-md"
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-sanguine text-white rounded-full text-sm font-medium hover:bg-orange-sanguine/90 transition-colors shadow-md min-h-[44px]"
                 >
                   <User className="h-4 w-4" />
-                  <span>Se connecter</span>
+                  <span className="hidden sm:inline">Se connecter</span>
                 </button>
               )}
 
