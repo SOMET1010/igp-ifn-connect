@@ -238,6 +238,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "Félicitations !",
     "first_sale_today": "Première vente du jour",
+    
+    // Aide
+    "need_help": "Besoin d'aide ?",
+    "ask_your_agent": "Demande à ton agent",
   },
   
   dioula: {
@@ -443,6 +447,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "I ni cɛ !",
     "first_sale_today": "Tile in ka fɔlɔ feere",
+    
+    // Aide
+    "need_help": "I bε dεmεni fε wa?",
+    "ask_your_agent": "I ka i ka ajan wele",
   },
   
   baoule: {
@@ -632,6 +640,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "Mo ti ɔ !",
     "first_sale_today": "Andɛ jue klikli",
+    
+    // Aide
+    "need_help": "A kunndε uka?",
+    "ask_your_agent": "Bo wɔ ajan",
   },
   
   bete: {
@@ -807,6 +819,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "O dré !",
     "first_sale_today": "Dré tile la gbu",
+    
+    // Aide
+    "need_help": "A lagbé déhi?",
+    "ask_your_agent": "Sé wɔ agent",
   },
   
   senoufo: {
@@ -982,6 +998,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "I ni cɛ !",
     "first_sale_today": "Tile in feere fɔlɔ",
+    
+    // Aide
+    "need_help": "A pií dembélé?",
+    "ask_your_agent": "Yi ajan segue",
   },
   
   malinke: {
@@ -1157,6 +1177,10 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     // Toast première vente
     "congratulations": "I ni cɛ !",
     "first_sale_today": "Tile in feere fɔlɔ",
+    
+    // Aide
+    "need_help": "I bε dεmεni fε wa?",
+    "ask_your_agent": "I ka i ka ajan wele",
   },
 };
 
