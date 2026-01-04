@@ -57,15 +57,7 @@ export const ROLE_PAGES = {
     'users',
     'kyc',
   ],
-  client: [
-    'dashboard',
-    'services',
-    'transactions',
-    'wallet',
-    'kyc',
-    'profile',
-    'support',
-  ],
+  client: [], // Deprecated - hors périmètre PNAVIM
   user: [
     'profile',
   ],
@@ -100,16 +92,7 @@ export const ROLE_ACTIONS = {
     'manage_profile',
   ],
   admin: ['*'], // Toutes les actions
-  client: [
-    'view_profile',
-    'manage_profile',
-    'view_services',
-    'activate_service',
-    'view_transactions',
-    'make_transaction',
-    'view_wallet',
-    'request_support',
-  ],
+  client: [], // Deprecated - hors périmètre PNAVIM
   user: ['view_profile'], // Rôle de base
 } as const satisfies Record<AppRole, readonly string[]>;
 
@@ -140,10 +123,10 @@ export const ROLE_PERMISSIONS = {
     basePath: '/admin',
   },
   client: {
-    pages: ROLE_PAGES.client,
-    actions: ROLE_ACTIONS.client,
-    redirectTo: '/auth?role=client',
-    basePath: '/client',
+    pages: [],
+    actions: [],
+    redirectTo: '/', // Deprecated - hors périmètre PNAVIM
+    basePath: '/',
   },
   user: {
     pages: ROLE_PAGES.user,
@@ -192,7 +175,7 @@ export const ROLE_PRIORITY: Record<AppRole, number> = {
   agent: 4,
   cooperative: 3,
   merchant: 2,
-  client: 1.5,
+  client: 1, // Deprecated - hors périmètre PNAVIM
   user: 1,
 };
 

@@ -14,7 +14,7 @@ const ROLE_LABELS: Record<AppRole, string> = {
   agent: 'Agent',
   merchant: 'Marchand',
   cooperative: 'Coopérative',
-  client: 'Client',
+  client: 'Client', // Deprecated - hors périmètre PNAVIM
   user: 'Utilisateur',
 };
 
