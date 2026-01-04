@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft, Mic, Volume2, Calculator, Shield, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSpeechTts } from '@/features/social-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 
 interface TutorialStep {
   id: number;
@@ -62,7 +62,7 @@ export const OnboardingTutorial: React.FC<OnboardingTutorialProps> = ({
   onComplete
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const { speak, isSpeaking, stop } = useSpeechTts();
+  const { speak, isSpeaking, stop } = useTts();
 
   const step = TUTORIAL_STEPS[currentStep];
 

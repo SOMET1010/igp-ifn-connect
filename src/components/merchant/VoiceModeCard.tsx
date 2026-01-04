@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { Mic, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VoiceAuthLang } from '@/features/voice-auth/config/audioScripts';
-import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 import { AudioBars } from './AudioBars';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
@@ -28,7 +28,7 @@ export function VoiceModeCard({
   const [micState, setMicState] = useState<MicState>('idle');
   const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
 
-  const { speak, isSpeaking, stop } = useSpeechTts({ 
+  const { speakScript, isSpeaking, stop } = useTts({ 
     lang,
     onEnd: () => {
       if (micState === 'listening') {
@@ -42,12 +42,12 @@ export function VoiceModeCard({
     if (hasPlayedWelcome) return;
     
     const timer = setTimeout(() => {
-      speak('welcome');
+      speakScript('welcome');
       setHasPlayedWelcome(true);
     }, 800);
     
     return () => clearTimeout(timer);
-  }, [speak, hasPlayedWelcome]);
+  }, [speakScript, hasPlayedWelcome]);
 
   // Haptic feedback
   const triggerHaptic = useCallback(() => {
@@ -64,13 +64,13 @@ export function VoiceModeCard({
 
     if (micState === 'idle') {
       setMicState('listening');
-      speak('listen');
+      speakScript('listen');
       
       // Simulate phone detection after 3 seconds (demo)
       // In production, this would use actual speech recognition
       setTimeout(() => {
         setMicState('processing');
-        speak('wait');
+        speakScript('wait');
         
         // Simulate successful detection
         setTimeout(() => {
@@ -82,7 +82,7 @@ export function VoiceModeCard({
     } else {
       setMicState('idle');
     }
-  }, [disabled, micState, speak, stop, triggerHaptic, onPhoneDetected]);
+  }, [disabled, micState, speakScript, stop, triggerHaptic, onPhoneDetected]);
 
   const getMicButtonClass = () => {
     return cn(
