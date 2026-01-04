@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
@@ -80,6 +80,10 @@ const Index: React.FC = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [micState, setMicState] = useState<'idle' | 'listening' | 'processing'>('idle');
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  
+  // Refs
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Check for tutorial visibility on mount
   useEffect(() => {
@@ -92,6 +96,26 @@ const Index: React.FC = () => {
     } catch (error) {
       console.warn('LocalStorage access failed:', error);
     }
+  }, []);
+
+  // Detect active card on scroll (mobile carousel)
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const handleScroll = () => {
+      const card = carousel.querySelector('[data-card]') as HTMLElement;
+      if (!card) return;
+      
+      const scrollLeft = carousel.scrollLeft;
+      const cardWidth = card.clientWidth;
+      const gap = 16; // gap-4 = 16px
+      const index = Math.round(scrollLeft / (cardWidth + gap));
+      setActiveCardIndex(Math.max(0, Math.min(index, 1)));
+    };
+
+    carousel.addEventListener('scroll', handleScroll, { passive: true });
+    return () => carousel.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Handlers
@@ -108,6 +132,23 @@ const Index: React.FC = () => {
     triggerTap();
     navigate('/marchand/connexion');
   }, [navigate, triggerTap]);
+
+  // Scroll to specific card (for dot navigation)
+  const scrollToCard = useCallback((index: number) => {
+    triggerTap();
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    
+    const card = carousel.querySelector('[data-card]') as HTMLElement;
+    if (!card) return;
+    
+    const cardWidth = card.clientWidth;
+    const gap = 16;
+    carousel.scrollTo({
+      left: index * (cardWidth + gap),
+      behavior: 'smooth'
+    });
+  }, [triggerTap]);
 
   const toggleAudio = useCallback(() => {
     triggerTap();
@@ -245,6 +286,7 @@ const Index: React.FC = () => {
 
         {/* Mobile: Scroll Horizontal | Desktop: Grille 2 colonnes */}
         <motion.div 
+          ref={carouselRef}
           className="md:grid md:grid-cols-2 md:gap-6 
                      flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 
                      -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide"
@@ -256,6 +298,7 @@ const Index: React.FC = () => {
         >
           {/* Carte Marchand (Orange) */}
           <motion.div 
+            data-card
             className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
             variants={itemVariants}
           >
@@ -273,6 +316,7 @@ const Index: React.FC = () => {
 
           {/* Carte Agent (Vert) */}
           <motion.div 
+            data-card
             className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
             variants={itemVariants}
           >
@@ -286,6 +330,23 @@ const Index: React.FC = () => {
             />
           </motion.div>
         </motion.div>
+
+        {/* Pagination dots - Mobile only */}
+        <div className="flex justify-center gap-3 mt-4 md:hidden">
+          {[0, 1].map((index) => (
+            <button
+              key={index}
+              onClick={() => scrollToCard(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                activeCardIndex === index
+                  ? 'bg-jaune-sahel scale-125 shadow-lg shadow-jaune-sahel/50'
+                  : 'bg-white/40 hover:bg-white/60'
+              }`}
+              aria-label={`Aller à la carte ${index + 1}`}
+              aria-current={activeCardIndex === index ? 'true' : undefined}
+            />
+          ))}
+        </div>
 
         {/* Carte Coopérative (optionnelle - plus petite) */}
         <motion.div
