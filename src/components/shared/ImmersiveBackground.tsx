@@ -1,13 +1,18 @@
 import React from "react";
 import { WaxPattern } from "./WaxPattern";
+import marcheImage from "@/assets/marche-ivoirien.jpg";
 
 export type TimeVariant = "dawn" | "morning" | "afternoon" | "evening" | "night";
 
 interface ImmersiveBackgroundProps {
   /** Variante du fond */
-  variant?: "warm-gradient" | "market-blur" | TimeVariant;
+  variant?: "warm-gradient" | "market-blur" | "solar" | TimeVariant;
   /** URL de l'image de fond (pour variant market-blur) */
   backgroundImageUrl?: string | null;
+  /** Afficher la photo du marché en fond */
+  showMarketPhoto?: boolean;
+  /** Niveau de flou pour l'image */
+  blurAmount?: "none" | "sm" | "md" | "lg";
   /** Afficher le pattern Wax */
   showWaxPattern?: boolean;
   /** Afficher les blobs décoratifs */
@@ -49,29 +54,69 @@ const TIME_GRADIENTS: Record<TimeVariant, {
   }
 };
 
+// Overlay solaire chaleureux (style image de référence)
+const SOLAR_OVERLAY = `linear-gradient(
+  to bottom,
+  hsl(28 81% 50% / 0.35) 0%,
+  hsl(36 100% 50% / 0.2) 40%,
+  hsl(28 81% 55% / 0.45) 100%
+)`;
+
 const isTimeVariant = (variant: string): variant is TimeVariant => {
   return ["dawn", "morning", "afternoon", "evening", "night"].includes(variant);
+};
+
+const BLUR_MAP = {
+  none: "0px",
+  sm: "4px",
+  md: "8px",
+  lg: "16px",
 };
 
 /**
  * Fond de page immersif "L'Âme du Marché"
  * Gradient chaud + WaxPattern + blobs optionnels
  * Supporte les variantes temporelles (dawn, morning, afternoon, evening, night)
+ * Supporte le mode "solar" avec photo du marché et overlay chaleureux
  */
 export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
   variant = "warm-gradient",
   backgroundImageUrl,
+  showMarketPhoto = false,
+  blurAmount = "md",
   showWaxPattern = true,
   showBlobs = true,
   className = "",
 }) => {
   const showMarketImage = variant === "market-blur" && backgroundImageUrl;
+  const showSolarPhoto = variant === "solar" || showMarketPhoto;
   const timeConfig = isTimeVariant(variant) ? TIME_GRADIENTS[variant] : null;
 
   return (
     <div className={`fixed inset-0 -z-10 overflow-hidden ${className}`}>
-      {/* Image de fond du marché (si disponible) */}
-      {showMarketImage && (
+      {/* Photo du marché avec overlay solaire (mode PNAVIM 2.0) */}
+      {showSolarPhoto && (
+        <>
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url(${marcheImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              filter: `blur(${BLUR_MAP[blurAmount]})`,
+              transform: "scale(1.1)",
+            }}
+          />
+          {/* Overlay solaire chaleureux */}
+          <div 
+            className="absolute inset-0"
+            style={{ background: SOLAR_OVERLAY }}
+          />
+        </>
+      )}
+
+      {/* Image de fond du marché custom (si fournie) */}
+      {showMarketImage && !showSolarPhoto && (
         <>
           <div 
             className="absolute inset-0"
@@ -83,7 +128,6 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
               transform: "scale(1.1)",
             }}
           />
-          {/* Overlay semi-transparent chaleureux sur l'image */}
           <div 
             className="absolute inset-0"
             style={{
@@ -93,8 +137,8 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
         </>
       )}
 
-      {/* Gradient de base - temporel ou classique */}
-      {!showMarketImage && (
+      {/* Gradient de base - temporel ou classique (si pas de photo) */}
+      {!showMarketImage && !showSolarPhoto && (
         <div 
           className="absolute inset-0 transition-all duration-1000"
           style={{
@@ -108,17 +152,19 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
       )}
 
       {/* Overlay - temporel ou classique */}
-      <div 
-        className="absolute inset-0 opacity-30 transition-all duration-1000"
-        style={{
-          background: timeConfig 
-            ? timeConfig.overlay
-            : "radial-gradient(ellipse at top, hsl(27 100% 38% / 0.15) 0%, transparent 70%)"
-        }}
-      />
+      {!showSolarPhoto && (
+        <div 
+          className="absolute inset-0 opacity-30 transition-all duration-1000"
+          style={{
+            background: timeConfig 
+              ? timeConfig.overlay
+              : "radial-gradient(ellipse at top, hsl(27 100% 38% / 0.15) 0%, transparent 70%)"
+          }}
+        />
+      )}
 
-      {/* Wax Pattern - opacité réduite la nuit */}
-      {showWaxPattern && (
+      {/* Wax Pattern - opacité réduite la nuit ou avec photo */}
+      {showWaxPattern && !showSolarPhoto && (
         <WaxPattern 
           variant="kente" 
           opacity={variant === "night" ? 0.03 : 0.06} 
@@ -126,20 +172,17 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
         />
       )}
 
-      {/* Blobs décoratifs - adaptés au moment */}
-      {showBlobs && (
+      {/* Blobs décoratifs - adaptés au moment (pas avec photo) */}
+      {showBlobs && !showSolarPhoto && (
         <>
-          {/* Blob en haut à droite */}
           <div 
             className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl transition-all duration-1000"
             style={{ background: timeConfig ? timeConfig.blobs[0] : "hsl(28 81% 52% / 0.2)" }}
           />
-          {/* Blob en bas à gauche */}
           <div 
             className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full blur-3xl transition-all duration-1000"
             style={{ background: timeConfig ? timeConfig.blobs[1] : "hsl(27 100% 38% / 0.15)" }}
           />
-          {/* Blob central subtil */}
           <div 
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl transition-all duration-1000"
             style={{ background: timeConfig ? timeConfig.blobs[2] : "hsl(36 100% 95% / 0.5)" }}

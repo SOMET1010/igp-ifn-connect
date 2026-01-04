@@ -5,6 +5,8 @@
 
 export { PnavimCard } from "./PnavimCard";
 export { PnavimRoleCard } from "./PnavimRoleCard";
+export { PnavimHeroCard } from "./PnavimHeroCard";
+export { PnavimHelpButton } from "./PnavimHelpButton";
 export { PnavimPillButton } from "./PnavimPillButton";
 export { PnavimVoiceFab } from "./PnavimVoiceFab";
 export { PnavimHeader } from "./PnavimHeader";
