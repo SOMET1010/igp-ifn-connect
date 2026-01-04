@@ -189,13 +189,16 @@ export type Database = {
           decision: string
           device_fingerprint: string | null
           factors: Json | null
+          hour_bucket: number | null
           id: string
           ip_address: string | null
           latitude: number | null
           longitude: number | null
+          market_code: string | null
           merchant_id: string | null
           outcome: string | null
           phone: string
+          reason_codes: Json | null
           trust_score: number | null
           user_agent: string | null
         }
@@ -204,13 +207,16 @@ export type Database = {
           decision: string
           device_fingerprint?: string | null
           factors?: Json | null
+          hour_bucket?: number | null
           id?: string
           ip_address?: string | null
           latitude?: number | null
           longitude?: number | null
+          market_code?: string | null
           merchant_id?: string | null
           outcome?: string | null
           phone: string
+          reason_codes?: Json | null
           trust_score?: number | null
           user_agent?: string | null
         }
@@ -219,13 +225,16 @@ export type Database = {
           decision?: string
           device_fingerprint?: string | null
           factors?: Json | null
+          hour_bucket?: number | null
           id?: string
           ip_address?: string | null
           latitude?: number | null
           longitude?: number | null
+          market_code?: string | null
           merchant_id?: string | null
           outcome?: string | null
           phone?: string
+          reason_codes?: Json | null
           trust_score?: number | null
           user_agent?: string | null
         }
@@ -973,7 +982,9 @@ export type Database = {
           longitude: number | null
           market_id: string | null
           ncc: string | null
+          persona: string | null
           phone: string
+          preferred_lang: string | null
           rsti_balance: number | null
           status: Database["public"]["Enums"]["merchant_status"] | null
           updated_at: string
@@ -998,7 +1009,9 @@ export type Database = {
           longitude?: number | null
           market_id?: string | null
           ncc?: string | null
+          persona?: string | null
           phone: string
+          preferred_lang?: string | null
           rsti_balance?: number | null
           status?: Database["public"]["Enums"]["merchant_status"] | null
           updated_at?: string
@@ -1023,7 +1036,9 @@ export type Database = {
           longitude?: number | null
           market_id?: string | null
           ncc?: string | null
+          persona?: string | null
           phone?: string
+          preferred_lang?: string | null
           rsti_balance?: number | null
           status?: Database["public"]["Enums"]["merchant_status"] | null
           updated_at?: string
@@ -1743,6 +1758,44 @@ export type Database = {
           },
         ]
       }
+      social_answers_hashed: {
+        Row: {
+          answer_hash: string
+          answer_salt: string
+          challenge_key: string
+          created_at: string | null
+          id: string
+          merchant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer_hash: string
+          answer_salt: string
+          challenge_key: string
+          created_at?: string | null
+          id?: string
+          merchant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          answer_hash?: string
+          answer_salt?: string
+          challenge_key?: string
+          created_at?: string | null
+          id?: string
+          merchant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_answers_hashed_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stocks: {
         Row: {
           cooperative_id: string
@@ -1925,6 +1978,7 @@ export type Database = {
           expires_at: string | null
           id: string
           merchant_id: string
+          method: string | null
           notes: string | null
           reason: string | null
           requested_by_phone: string | null
@@ -1940,6 +1994,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           merchant_id: string
+          method?: string | null
           notes?: string | null
           reason?: string | null
           requested_by_phone?: string | null
@@ -1955,6 +2010,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           merchant_id?: string
+          method?: string | null
           notes?: string | null
           reason?: string | null
           requested_by_phone?: string | null
@@ -1968,6 +2024,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "trust_validations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trusted_devices: {
+        Row: {
+          device_fingerprint: string
+          device_label: string | null
+          first_seen_at: string | null
+          id: string
+          is_revoked: boolean | null
+          last_seen_at: string | null
+          merchant_id: string
+        }
+        Insert: {
+          device_fingerprint: string
+          device_label?: string | null
+          first_seen_at?: string | null
+          id?: string
+          is_revoked?: boolean | null
+          last_seen_at?: string | null
+          merchant_id: string
+        }
+        Update: {
+          device_fingerprint?: string
+          device_label?: string | null
+          first_seen_at?: string | null
+          id?: string
+          is_revoked?: boolean | null
+          last_seen_at?: string | null
+          merchant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trusted_devices_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
