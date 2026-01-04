@@ -20,6 +20,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 
+// TTS (voix PNAVIM uniquement)
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+
 // Assets
 import logoDGE from '@/assets/logo-dge.png';
 import logoANSUT from '@/assets/logo-ansut.png';
@@ -84,6 +88,62 @@ const Index: React.FC = () => {
   
   // Refs
   const carouselRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
+  const stopTtsAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+  }, []);
+
+  const playTtsAudio = useCallback(
+    async (text: string, voiceId: string = PNAVIM_VOICES.DEFAULT) => {
+      if (!text || text.trim().length === 0) return;
+
+      stopTtsAudio();
+
+      try {
+        const audioBlob = await generateSpeech(text, { voiceId });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioUrlRef.current = audioUrl;
+
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        const cleanup = () => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+          }
+          if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current);
+            audioUrlRef.current = null;
+          }
+        };
+
+        audio.onended = cleanup;
+        audio.onerror = cleanup;
+
+        await audio.play();
+      } catch (err) {
+        stopTtsAudio();
+        console.error('Erreur ElevenLabs TTS (Home)', err);
+      }
+    },
+    [stopTtsAudio]
+  );
+
+  // Cleanup quand on quitte la page
+  useEffect(() => {
+    return () => stopTtsAudio();
+  }, [stopTtsAudio]);
 
   // Check for tutorial visibility on mount
   useEffect(() => {
@@ -152,45 +212,38 @@ const Index: React.FC = () => {
 
   const toggleAudio = useCallback(() => {
     triggerTap();
-    setAudioEnabled(prev => !prev);
-  }, [triggerTap]);
+    setAudioEnabled((prev) => {
+      const next = !prev;
+      if (!next) stopTtsAudio();
+      return next;
+    });
+  }, [stopTtsAudio, triggerTap]);
 
   // Script audio complet SUTA
   const playWelcomeAudio = useCallback(() => {
     if (!audioEnabled) return;
     triggerTap();
-    
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const langKey = language === 'dioula' ? 'dioula' : 'fr';
-      const message = AUDIO_SCRIPTS.welcome[langKey];
-      
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
-      window.speechSynthesis.speak(utterance);
-    }
-  }, [audioEnabled, language, triggerTap]);
+
+    const langKey = language === 'dioula' ? 'dioula' : 'fr';
+    const message = AUDIO_SCRIPTS.welcome[langKey];
+
+    void playTtsAudio(message, PNAVIM_VOICES.DEFAULT);
+  }, [audioEnabled, language, playTtsAudio, triggerTap]);
 
   // Handler FAB Micro -> navigation vers social-login
   const handleMicClick = useCallback(() => {
     triggerTap();
-    
-    // Jouer le script audio micro
-    if ('speechSynthesis' in window && audioEnabled) {
-      window.speechSynthesis.cancel();
+
+    // Jouer le script audio micro (voix PNAVIM)
+    if (audioEnabled) {
       const langKey = language === 'dioula' ? 'dioula' : 'fr';
       const message = AUDIO_SCRIPTS.micro[langKey];
-      const utterance = new SpeechSynthesisUtterance(message);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
+      void playTtsAudio(message, PNAVIM_VOICES.DEFAULT);
     }
-    
+
     // Navigation vers auth vocale
     navigate('/social-login');
-  }, [navigate, triggerTap, audioEnabled, language]);
+  }, [navigate, triggerTap, audioEnabled, language, playTtsAudio]);
 
   // Dynamic badge based on time
   const getTimeBadge = useCallback(() => {

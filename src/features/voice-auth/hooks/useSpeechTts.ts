@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { VoiceAuthLang, VoiceScriptKey, getVoiceScript } from '../config/audioScripts';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 
 interface UseSpeechTtsOptions {
   lang: VoiceAuthLang;
@@ -16,117 +18,136 @@ interface UseSpeechTtsReturn {
 }
 
 /**
- * Hook TTS multi-langue avec fallback Web Speech API
- * Priorité: fichiers audio pré-enregistrés > Web Speech API
+ * Hook TTS multi-langue (voix PNAVIM uniquement)
+ * Priorité: fichiers audio pré-enregistrés > ElevenLabs TTS
+ * IMPORTANT: aucun fallback Web Speech (voix par défaut interdites)
  */
-export function useSpeechTts({ 
-  lang, 
-  onStart, 
-  onEnd 
+export function useSpeechTts({
+  lang,
+  onStart,
+  onEnd,
 }: UseSpeechTtsOptions): UseSpeechTtsReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
-  const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  const isSupported = typeof window !== 'undefined';
 
   const stop = useCallback(() => {
-    // Stop audio element
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    
-    // Stop Web Speech API
-    if (isSupported) {
-      window.speechSynthesis.cancel();
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
     }
-    
     setIsSpeaking(false);
-  }, [isSupported]);
+  }, []);
 
-  const speakWithWebSpeech = useCallback((text: string) => {
-    if (!isSupported) return;
+  const speakWithElevenLabs = useCallback(
+    async (text: string) => {
+      if (!text.trim()) return;
 
-    stop();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-FR'; // French for both FR and Nouchi
-    utterance.rate = 0.9; // Slightly slower for clarity
-    utterance.pitch = 1.0;
-    
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      onStart?.();
-    };
-    
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      onEnd?.();
-    };
-    
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-      onEnd?.();
-    };
+      stop();
 
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [isSupported, stop, onStart, onEnd]);
+      // Nouchi = ton "jeune" (Gbairai), sinon Tantie par défaut
+      const voiceId = lang === 'nouchi' ? PNAVIM_VOICES.GBAIRAI : PNAVIM_VOICES.TANTIE_SAGESSE;
 
-  const tryPlayPrerecorded = useCallback(async (key: string): Promise<boolean> => {
-    const audioPath = `/audio/${lang}/${key}.mp3`;
-    
-    return new Promise((resolve) => {
-      const audio = new Audio(audioPath);
-      audioRef.current = audio;
-      
-      audio.oncanplaythrough = () => {
-        setIsSpeaking(true);
-        onStart?.();
-        audio.play().catch(() => resolve(false));
-      };
-      
-      audio.onended = () => {
+      try {
+        const audioBlob = await generateSpeech(text, { voiceId });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioUrlRef.current = audioUrl;
+
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        const cleanup = () => {
+          setIsSpeaking(false);
+          if (audioUrlRef.current) {
+            URL.revokeObjectURL(audioUrlRef.current);
+            audioUrlRef.current = null;
+          }
+          audioRef.current = null;
+          onEnd?.();
+        };
+
+        audio.onplay = () => {
+          setIsSpeaking(true);
+          onStart?.();
+        };
+
+        audio.onended = cleanup;
+        audio.onerror = cleanup;
+
+        await audio.play();
+      } catch (e) {
         setIsSpeaking(false);
         onEnd?.();
-        resolve(true);
-      };
-      
-      audio.onerror = () => {
-        resolve(false);
-      };
-      
-      // Timeout for loading
-      setTimeout(() => {
-        if (!audio.duration) {
+      }
+    },
+    [lang, onEnd, onStart, stop]
+  );
+
+  const tryPlayPrerecorded = useCallback(
+    async (key: string): Promise<boolean> => {
+      const audioPath = `/audio/${lang}/${key}.mp3`;
+
+      return new Promise((resolve) => {
+        const audio = new Audio(audioPath);
+        audioRef.current = audio;
+
+        audio.oncanplaythrough = () => {
+          setIsSpeaking(true);
+          onStart?.();
+          audio.play().catch(() => resolve(false));
+        };
+
+        audio.onended = () => {
+          setIsSpeaking(false);
+          onEnd?.();
+          resolve(true);
+        };
+
+        audio.onerror = () => {
           resolve(false);
+        };
+
+        // Timeout for loading
+        setTimeout(() => {
+          if (!audio.duration) {
+            resolve(false);
+          }
+        }, 500);
+      });
+    },
+    [lang, onEnd, onStart]
+  );
+
+  const speak = useCallback(
+    (key: VoiceScriptKey, variables?: Record<string, string>) => {
+      void (async () => {
+        stop();
+
+        // Try pre-recorded audio first
+        const played = await tryPlayPrerecorded(key);
+
+        if (!played) {
+          const text = getVoiceScript(lang, key, variables);
+          await speakWithElevenLabs(text);
         }
-      }, 500);
-    });
-  }, [lang, onStart, onEnd]);
+      })();
+    },
+    [lang, speakWithElevenLabs, stop, tryPlayPrerecorded]
+  );
 
-  const speak = useCallback(async (
-    key: VoiceScriptKey, 
-    variables?: Record<string, string>
-  ) => {
-    stop();
-    
-    // Try pre-recorded audio first
-    const played = await tryPlayPrerecorded(key);
-    
-    if (!played) {
-      // Fallback to Web Speech API with script text
-      const text = getVoiceScript(lang, key, variables);
-      speakWithWebSpeech(text);
-    }
-  }, [lang, stop, tryPlayPrerecorded, speakWithWebSpeech]);
-
-  const speakRaw = useCallback((text: string) => {
-    stop();
-    speakWithWebSpeech(text);
-  }, [stop, speakWithWebSpeech]);
+  const speakRaw = useCallback(
+    (text: string) => {
+      void speakWithElevenLabs(text);
+    },
+    [speakWithElevenLabs]
+  );
 
   return {
     speak,
