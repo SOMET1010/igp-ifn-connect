@@ -54,7 +54,9 @@ export function useElevenLabsTts({
     setIsLoading(true);
 
     try {
-      // Appeler l'Edge Function ElevenLabs TTS
+      console.log(`[ElevenLabs TTS] Speaking with voice: ${voiceId}, text: ${text.substring(0, 50)}...`);
+      
+      // Appeler l'Edge Function ElevenLabs TTS avec la voix clonée
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -65,8 +67,8 @@ export function useElevenLabsTts({
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({
-            text,
-            voiceId,
+            text: text,
+            voiceId: voiceId,
             modelId: 'eleven_multilingual_v2'
           }),
         }
