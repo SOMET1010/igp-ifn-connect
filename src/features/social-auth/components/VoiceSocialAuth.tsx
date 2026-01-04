@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, Loader2, Phone, ArrowRight, MicOff, Users } from 'lucide-react';
+import { Mic, Loader2, Phone, ArrowRight, Volume2, Keyboard, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSocialAuth } from '../hooks/useSocialAuth';
 import { useVoiceTranscription } from '../hooks/useVoiceTranscription';
 import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
@@ -12,7 +13,6 @@ import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';
 import { PersonaSelector } from './PersonaSelector';
 import { toast } from 'sonner';
-import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 interface VoiceSocialAuthProps {
   redirectPath: string;
@@ -25,12 +25,7 @@ type MicState = 'idle' | 'listening' | 'processing';
 
 /**
  * VoiceSocialAuth - Composant principal d'Authentification Sociale PNAVIM
- * 
- * Implémente le protocole à 4 couches :
- * Layer 1: Identification vocale ("C'est qui est là ?")
- * Layer 2: Vérification invisible (device + contexte) 
- * Layer 3: Challenge social (question culturelle)
- * Layer 4: Fallback humain (escalade vers agent)
+ * Design inspiré des maquettes avec style africain
  */
 export function VoiceSocialAuth({ 
   redirectPath, 
@@ -78,7 +73,7 @@ export function VoiceSocialAuth({
     setPersistedPersona(newPersona);
     setPersona(newPersona);
     setShowPersonaSelector(false);
-    setHasPlayedWelcome(false); // Rejouer le message de bienvenue
+    setHasPlayedWelcome(false);
   }, [setPersistedPersona, setPersona]);
 
   // Hook de transcription vocale ElevenLabs
@@ -99,16 +94,14 @@ export function VoiceSocialAuth({
       console.error('[VoiceSocialAuth] Voice error:', errorMsg);
       setVoiceError(errorMsg);
       setMicState('idle');
-      // Fallback gracieux vers saisie manuelle
       setShowManualInput(true);
     }
   });
 
-  // Hook TTS ElevenLabs avec voix clonée du persona
+  // Hook TTS ElevenLabs avec voix clonée PNAVIM
   const { speak, isSpeaking, stop, isLoading: ttsLoading } = useElevenLabsTts({
     voiceId: currentPersona.voiceId!,
     onStart: () => {
-      // Haptic feedback quand le TTS commence
       if ('vibrate' in navigator) {
         navigator.vibrate(30);
       }
@@ -118,7 +111,7 @@ export function VoiceSocialAuth({
     }
   });
 
-  // Auto-play welcome message avec voix clonée
+  // Auto-play welcome message
   useEffect(() => {
     if (hasPlayedWelcome || step !== 'welcome') return;
     
@@ -130,7 +123,6 @@ export function VoiceSocialAuth({
     return () => clearTimeout(timer);
   }, [speak, hasPlayedWelcome, step, getMessage]);
 
-  // Haptic feedback
   const triggerHaptic = useCallback(() => {
     if ('vibrate' in navigator) {
       navigator.vibrate(50);
@@ -145,7 +137,6 @@ export function VoiceSocialAuth({
     setVoiceError(null);
 
     if (micState === 'idle' && !isConnected) {
-      // Démarrer l'écoute
       try {
         setMicState('listening');
         speak(getMessage('listen'));
@@ -157,7 +148,6 @@ export function VoiceSocialAuth({
         toast.error('Micro non disponible, utilise le clavier');
       }
     } else if (isConnected) {
-      // Arrêter l'écoute
       stopListening();
       setMicState('idle');
     }
@@ -170,21 +160,9 @@ export function VoiceSocialAuth({
     }
   }, [manualPhone, processPhoneNumber]);
 
-  const getMicButtonClass = () => {
-    return cn(
-      'mic-button-xl',
-      micState === 'listening' && 'is-listening',
-      micState === 'processing' && 'is-processing',
-      isLoading && 'opacity-50 cursor-not-allowed'
-    );
-  };
-
-  const getStatusLabel = () => {
-    if (isLoading) return 'Vérification en cours...';
-    if (micState === 'idle') return 'Appuie et parle';
-    if (micState === 'listening') return "Je t'écoute...";
-    return 'Un instant...';
-  };
+  const handlePlayWelcome = useCallback(() => {
+    speak(getMessage('welcome'));
+  }, [speak, getMessage]);
 
   // Afficher le sélecteur de persona
   if (showPersonaSelector) {
@@ -210,7 +188,6 @@ export function VoiceSocialAuth({
 
   // Render based on current step
   if (step === 'challenge') {
-    // Get the question text - handle both string and object formats
     const questionText = typeof challengeQuestion === 'string' 
       ? challengeQuestion 
       : challengeQuestion?.question_text || getMessage('challenge');
@@ -244,33 +221,28 @@ export function VoiceSocialAuth({
   if (step === 'success' && generatedOtp) {
     return (
       <div className="flex flex-col items-center gap-5 py-4">
-        {/* Avatar avec animation de succès */}
-        <div className="relative">
-          <div className="merchant-avatar-lg border-4 border-secondary">
-            <img 
-              src={marcheIvoirien} 
-              alt="Marché ivoirien"
-              className="w-full h-full object-cover"
-            />
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative"
+        >
+          <div className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center shadow-xl">
+            <span className="text-4xl">✓</span>
           </div>
-          <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-secondary rounded-full border-2 border-white flex items-center justify-center">
-            ✓
-          </div>
-        </div>
+        </motion.div>
 
         <div className="text-center space-y-2">
-          <p className="text-lg font-medium text-foreground">
+          <p className="text-lg font-bold text-foreground">
             {merchantName ? `Bienvenue ${merchantName} !` : 'Bienvenue !'}
           </p>
           <p className="text-sm text-muted-foreground">
             Code envoyé au {phone}
           </p>
-          <p className="text-xs text-muted-foreground">
-            (Mode dev: {generatedOtp})
+          <p className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+            Mode dev: {generatedOtp}
           </p>
         </div>
 
-        {/* OTP Input */}
         <OtpVerification 
           onVerify={verifyAndLogin} 
           isLoading={isLoading}
@@ -280,151 +252,191 @@ export function VoiceSocialAuth({
     );
   }
 
+  // Main auth view - PNAVIM Style
   return (
-    <div className={cn("flex flex-col items-center gap-5 py-4", className)}>
-      {/* Avatar Persona */}
-      <div className="relative">
-        <div className="merchant-avatar-lg">
-          <img 
-            src={marcheIvoirien} 
-            alt="Marché ivoirien"
-            className="w-full h-full object-cover"
-          />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn("flex flex-col items-center gap-4", className)}
+    >
+      {/* Card principale avec style PNAVIM */}
+      <div className="w-full max-w-sm bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 shadow-xl">
+        {/* Badge type d'accès */}
+        <div className="flex justify-center mb-4">
+          <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full">
+            Accès {userType === 'agent' ? 'Agent' : userType === 'cooperative' ? 'Coopérative' : 'Commerçant'}
+          </span>
         </div>
-        {/* Status indicator */}
-        <div className={cn(
-          "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white",
-          isLoading ? "bg-amber-500 animate-pulse" : "bg-secondary animate-pulse"
-        )} />
+
+        {/* Avatar avec badge nom */}
+        <div className="flex flex-col items-center mb-4">
+          <motion.div 
+            className="relative"
+            animate={{ scale: isSpeaking ? 1.05 : 1 }}
+            transition={{ repeat: isSpeaking ? Infinity : 0, duration: 0.5 }}
+          >
+            <div className="w-28 h-28 rounded-full bg-white p-1.5 shadow-lg">
+              <img
+                src={currentPersona.avatar}
+                alt={currentPersona.name}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentPersona.name)}&background=fff&color=f97316&size=128&bold=true`;
+                }}
+              />
+            </div>
+            {/* Indicateur d'état */}
+            <div className={cn(
+              "absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-3 border-white flex items-center justify-center",
+              isSpeaking ? "bg-emerald-400" : "bg-emerald-500"
+            )}>
+              {isSpeaking && <Volume2 className="w-3 h-3 text-white animate-pulse" />}
+            </div>
+          </motion.div>
+
+          {/* Badge nom */}
+          <div className="bg-white px-5 py-1.5 rounded-full shadow-md -mt-3 z-10">
+            <span className="font-bold text-gray-800 text-sm">
+              {currentPersona.name}
+            </span>
+          </div>
+        </div>
+
+        {/* Bulle de message */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={step + (transcript || 'welcome')}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-white/95 rounded-2xl p-4 mb-4 shadow-inner"
+          >
+            <p className="text-center text-gray-800 font-medium">
+              {micState === 'listening' && transcript 
+                ? `J'entends : "${transcript}"` 
+                : getMessage('welcome')}
+            </p>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Boutons d'action */}
+        {!showManualInput ? (
+          <div className="space-y-3">
+            {/* Bouton écouter/parler */}
+            <motion.button
+              onClick={handlePlayWelcome}
+              disabled={ttsLoading || isSpeaking}
+              whileTap={{ scale: 0.97 }}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all",
+                (ttsLoading || isSpeaking) && "opacity-50"
+              )}
+            >
+              <Volume2 className={cn("w-5 h-5", isSpeaking && "animate-pulse")} />
+              {isSpeaking ? 'Écoute...' : 'Cliquez pour écouter'}
+            </motion.button>
+
+            {/* Bouton micro principal */}
+            <motion.button
+              onClick={handleMicClick}
+              disabled={isLoading || isConnecting || ttsLoading}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                "w-full flex items-center justify-center gap-3 bg-white text-amber-600 font-bold py-4 px-6 rounded-xl shadow-lg transition-all",
+                (isLoading || isConnecting) && "opacity-50",
+                isConnected && "bg-red-500 text-white"
+              )}
+            >
+              {isLoading || isConnecting ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <Mic className={cn("w-6 h-6", micState === 'listening' && "animate-pulse")} />
+              )}
+              {isConnected ? 'Arrêter' : 'Parler mon numéro'}
+            </motion.button>
+
+            {/* Audio visualization */}
+            {(micState === 'listening' || isConnected) && (
+              <div className="flex justify-center">
+                <AudioBars isActive={true} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <form onSubmit={handleManualSubmit} className="space-y-3">
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="tel"
+                placeholder="07 01 02 03 04"
+                value={manualPhone}
+                onChange={(e) => setManualPhone(e.target.value)}
+                className="pl-12 text-lg h-14 bg-white border-0 rounded-xl"
+                autoFocus
+              />
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-white text-amber-600 hover:bg-white/90 font-bold rounded-xl"
+              disabled={manualPhone.length < 10 || isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Continuer
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </Button>
+          </form>
+        )}
+
+        {/* Error message */}
+        {voiceError && (
+          <p className="text-sm text-white/90 text-center mt-3 bg-red-500/30 rounded-lg p-2">
+            {voiceError}
+          </p>
+        )}
       </div>
 
-      {/* Message persona */}
-      <p className="text-center text-foreground font-medium text-lg max-w-xs">
-        {getMessage('welcome')}
-      </p>
-
-      {!showManualInput ? (
-        <>
-          {/* GROS Bouton Micro */}
-          <button
-            type="button"
-            onClick={handleMicClick}
-            disabled={isLoading || isConnecting || ttsLoading}
-            className={getMicButtonClass()}
-            aria-label={micState === 'listening' ? 'Écoute en cours' : 'Appuyer pour parler'}
-          >
-            {micState === 'processing' || isLoading || isConnecting || ttsLoading ? (
-              <Loader2 className="w-12 h-12 text-white animate-spin" />
-            ) : isConnected ? (
-              <MicOff className="w-12 h-12 text-white" />
-            ) : (
-              <Mic className={cn(
-                "w-12 h-12 text-white transition-transform",
-                micState === 'listening' && 'scale-110'
-              )} />
-            )}
-          </button>
-
-          {/* Audio bars */}
-          <AudioBars isActive={micState === 'listening' || isConnected} />
-
-          {/* Transcription temps réel */}
-          {(micState === 'listening' || isConnected) && transcript && (
-            <div className="bg-muted/50 rounded-lg p-3 text-center max-w-xs animate-in fade-in">
-              <p className="text-xs text-muted-foreground mb-1">J'entends :</p>
-              <p className="text-lg font-medium text-foreground">{transcript}</p>
-            </div>
-          )}
-
-          {/* Status label */}
-          <p className="text-center text-muted-foreground text-base font-medium">
-            {ttsLoading ? 'Préparation audio...' : isConnecting ? 'Connexion au micro...' : getStatusLabel()}
-          </p>
-
-          {/* Voice error message */}
-          {voiceError && (
-            <p className="text-sm text-destructive text-center max-w-xs">
-              {voiceError}
-            </p>
-          )}
-
-          {/* Speaking indicator */}
-          {isSpeaking && (
-            <div className="flex items-center gap-1.5 text-primary text-xs">
-              <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              {currentPersona.name} parle...
-            </div>
-          )}
-
-          {/* Separator */}
-          <div className="flex items-center gap-3 w-full max-w-xs">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wide">ou</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          {/* Manual input fallback */}
+      {/* Actions secondaires sous la carte */}
+      <div className="flex flex-col items-center gap-2 w-full max-w-sm">
+        {!showManualInput ? (
           <button
             type="button"
             onClick={() => setShowManualInput(true)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            📝 Je préfère taper mon numéro
+            <Keyboard className="w-4 h-4" />
+            Mode clavier
           </button>
-
-          {/* Bouton changer de guide */}
-          <button
-            type="button"
-            onClick={() => setShowPersonaSelector(true)}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Users className="w-3.5 h-3.5" />
-            Changer de guide ({currentPersona.name})
-          </button>
-        </>
-      ) : (
-        <form onSubmit={handleManualSubmit} className="w-full max-w-xs space-y-4">
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              type="tel"
-              placeholder="07 01 02 03 04"
-              value={manualPhone}
-              onChange={(e) => setManualPhone(e.target.value)}
-              className="pl-11 text-lg h-14"
-              autoFocus
-            />
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full h-12"
-            disabled={manualPhone.length < 10 || isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <>
-                Continuer
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </Button>
-
+        ) : (
           <button
             type="button"
             onClick={() => setShowManualInput(false)}
-            className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Retour au mode vocal
           </button>
-        </form>
-      )}
-    </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setShowPersonaSelector(true)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Users className="w-3.5 h-3.5" />
+          Changer de guide
+        </button>
+      </div>
+    </motion.div>
   );
 }
 
-// Composant OTP intégré
+// Composant OTP
 function OtpVerification({ 
   onVerify, 
   isLoading,

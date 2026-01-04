@@ -26,26 +26,26 @@ export const PERSONAS: Record<PersonaType, Persona> = {
     avatar: '/lovable-uploads/tantie-sagesse.png',
     voiceId: 'PWiCgOlgDsq0Da8bhS6a', // Voix clonée PNAVIM
     greetings: {
-      welcome: "Bonne arrivée mon enfant ! C'est qui est là ?",
-      listen: "Dis-moi ton numéro de téléphone, je t'écoute...",
-      recognized: "Ah ! {name} ! Ça va bien ? Entre donc.",
-      doubt: "Je ne te reconnais pas bien aujourd'hui...",
+      welcome: "Bonjour ! Prêt pour les affaires ?",
+      listen: "Dis-moi ton numéro, je t'écoute...",
+      recognized: "Ah {name} ! Content de te revoir.",
+      doubt: "Je ne te reconnais pas bien...",
       challenge: "Rappelle-moi le prénom de ta maman ?",
-      error: "Mon enfant, on va appeler quelqu'un pour t'aider. Ne quitte pas.",
-      success: "C'est bon mon enfant, tu peux entrer !"
+      error: "On va appeler quelqu'un pour t'aider.",
+      success: "C'est bon, tu peux entrer !"
     }
   },
   jeune: {
     name: 'Gbairai',
     avatar: '/lovable-uploads/gbairai.png',
-    voiceId: 'PWiCgOlgDsq0Da8bhS6a', // Voix clonée PNAVIM (même voix pour l'instant)
+    voiceId: 'PWiCgOlgDsq0Da8bhS6a', // Voix clonée PNAVIM
     greetings: {
-      welcome: "Yo ! C'est qui là ? Dis ton numéro !",
-      listen: "Je t'écoute, envoie le numéro !",
-      recognized: "Ehhh {name} ! T'es là ! Entre vite !",
-      doubt: "Attends... Je te calcule pas trop là...",
-      challenge: "Dis-moi, c'est quoi ton surnom au quartier ?",
-      error: "Frère, y'a un souci. On va appeler le boss.",
+      welcome: "Salut ! On va bosser ?",
+      listen: "Envoie ton numéro !",
+      recognized: "Ehhh {name} ! T'es là !",
+      doubt: "Attends... Je te calcule pas là...",
+      challenge: "C'est quoi ton surnom au quartier ?",
+      error: "Y'a un souci. On appelle le boss.",
       success: "C'est carré ! Tu peux go !"
     }
   }
