@@ -19,13 +19,13 @@ export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./src/__tests__/setup.ts"],
     include: ["src/**/*.{test,spec}.{js,ts,tsx}"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["src/features/**/*.ts"],
-      exclude: ["**/*.test.ts", "**/*.d.ts", "**/index.ts"],
+      include: ["src/features/**/*.ts", "src/components/**/*.tsx", "src/hooks/**/*.ts"],
+      exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.d.ts", "**/index.ts"],
     },
   },
 }));
