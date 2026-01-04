@@ -3,12 +3,14 @@
  * Tantie Sagesse pour les femmes âgées, Gbairai pour les jeunes
  */
 
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+
 export type PersonaType = 'tantie' | 'jeune';
 
 export interface Persona {
   name: string;
   avatar: string;
-  voiceId?: string; // ElevenLabs voice ID
+  voiceId: string; // ElevenLabs voice ID
   greetings: {
     welcome: string;
     listen: string;
@@ -24,7 +26,7 @@ export const PERSONAS: Record<PersonaType, Persona> = {
   tantie: {
     name: 'Tantie Sagesse',
     avatar: '/lovable-uploads/tantie-sagesse.png',
-    voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Tantie Sagesse
+    voiceId: PNAVIM_VOICES.TANTIE_SAGESSE, // PWiCgOlgDsq0Da8bhS6a
     greetings: {
       welcome: "Bonne arrivée mon enfant ! Que Dieu bénisse ton marché aujourd'hui.",
       listen: "Je t'écoute. Donne-moi doucement ton numéro de téléphone.",
@@ -38,7 +40,7 @@ export const PERSONAS: Record<PersonaType, Persona> = {
   jeune: {
     name: 'Gbairai',
     avatar: '/lovable-uploads/gbairai.png',
-    voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Gbairai
+    voiceId: PNAVIM_VOICES.GBAIRAI, // LZZ0J6eX2D30k2TKgBOR
     greetings: {
       welcome: "Salut le Boss ! Prêt à faire bouger les choses aujourd'hui ?",
       listen: "Vas-y, je t'écoute. Donne-moi ton numéro.",
