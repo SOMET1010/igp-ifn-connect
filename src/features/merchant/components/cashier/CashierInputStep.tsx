@@ -10,7 +10,7 @@ import { VibrantTotalBar } from "@/components/shared/VibrantTotalBar";
 import { WaxPattern } from "@/components/shared/WaxPattern";
 import type { SelectedProduct, PaymentMethod, StockItemForSelector } from "../../types/transaction.types";
 import { formatCurrency } from "../../utils/cashierCalculations";
-import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
+import { getCashierScript } from "@/shared/config/audio/cashierScripts";
 
 // ============================================
 // Props du composant

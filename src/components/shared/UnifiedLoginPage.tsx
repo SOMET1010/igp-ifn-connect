@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { VoiceSocialAuth } from '@/features/social-auth';
+import { VoiceSocialAuth } from '@/features/auth';
 import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
 import { GlassCard } from '@/components/shared/GlassCard';
 import { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';

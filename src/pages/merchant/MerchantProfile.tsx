@@ -15,7 +15,7 @@ import { merchantNavItems } from "@/config/navigation";
 import { useMerchantProfile } from "@/features/merchant/hooks/useMerchantProfile";
 import { ProfileEditForm } from "@/features/merchant/components/profile";
 import { InclusiveProfileHeader } from "@/features/merchant/components/profile/InclusiveProfileHeader";
-import { getProfileScript, type ProfileScriptKey } from "@/features/voice-auth/config/profileScripts";
+import { getProfileScript, type ProfileScriptKey } from "@/shared/config/audio/profileScripts";
 import {
   AlertDialog,
   AlertDialogAction,

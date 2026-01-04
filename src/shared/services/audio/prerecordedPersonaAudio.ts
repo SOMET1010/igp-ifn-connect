@@ -3,7 +3,7 @@
  * Utilise les vraies voix clonées (Tantie Sagesse / Gbairai)
  */
 
-import type { PersonaType } from '@/features/social-auth/config/personas';
+import type { PersonaType } from '@/features/auth/config/personas';
 
 // Types de messages disponibles
 export type MessageKey = 

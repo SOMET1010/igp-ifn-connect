@@ -1,6 +1,6 @@
 import { Delete } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { digitToScriptKey, getCashierScript } from "@/features/voice-auth/config/cashierScripts";
+import { digitToScriptKey, getCashierScript } from "@/shared/config/audio/cashierScripts";
 import type { LanguageCode } from "@/lib/translations";
 
 interface CalculatorKeypadProps {

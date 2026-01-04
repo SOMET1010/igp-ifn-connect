@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { PersonaType } from '../config/personas';
+import { PersonaType } from '@/features/auth/config/personas';
 
 const STORAGE_KEY = 'pnavim_preferred_persona';
 const DEFAULT_PERSONA: PersonaType = 'tantie';

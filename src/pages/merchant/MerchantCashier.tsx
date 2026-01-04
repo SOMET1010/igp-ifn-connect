@@ -6,7 +6,7 @@ import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
-import { getCashierScript } from "@/features/voice-auth/config/cashierScripts";
+import { getCashierScript } from "@/shared/config/audio/cashierScripts";
 import { useMarketBackground } from "@/hooks/useMarketBackground";
 import {
   useMerchantStock,

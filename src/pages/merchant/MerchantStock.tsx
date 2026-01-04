@@ -14,7 +14,7 @@ import { merchantNavItems } from "@/config/navigation";
 import { PageWithList, FilterOption } from "@/templates";
 import { Pictogram } from "@/components/shared/Pictogram";
 import { useTts } from "@/shared/hooks/useTts";
-import { getStockScript } from "@/features/voice-auth/config/stockScripts";
+import { getStockScript } from "@/shared/config/audio/stockScripts";
 import {
   StockCard,
   StockAlerts,

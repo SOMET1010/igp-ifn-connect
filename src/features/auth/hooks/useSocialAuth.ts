@@ -2,10 +2,10 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTrustScore } from './useTrustScore';
-import { useDeviceFingerprint } from './useDeviceFingerprint';
-import { PersonaType, PERSONAS, CULTURAL_QUESTIONS } from '../config/personas';
-import { normalizeAnswer, similarityScore } from '../utils/normalize';
+import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
+import { useDeviceFingerprint } from '@/features/auth/hooks/useDeviceFingerprint';
+import { PersonaType, PERSONAS, CULTURAL_QUESTIONS } from '@/features/auth/config/personas';
+import { normalizeAnswer, similarityScore } from '@/features/auth/utils/normalize';
 import { toast } from 'sonner';
 
 /**

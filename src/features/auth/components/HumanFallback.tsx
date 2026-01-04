@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Phone, RefreshCw, HeadphonesIcon, Clock, AlertCircle, Shield, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTts } from '@/shared/hooks/useTts';
-import { AgentValidationRequest } from './AgentValidationRequest';
+import { AgentValidationRequest } from '@/features/auth/components/AgentValidationRequest';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 interface HumanFallbackProps {

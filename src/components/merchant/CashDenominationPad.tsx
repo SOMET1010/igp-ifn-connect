@@ -3,7 +3,7 @@ import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { playPrerecordedAudio, stopAudio } from "@/lib/audioService";
-import { getCashierScript, type CashierScriptKey } from "@/features/voice-auth/config/cashierScripts";
+import { getCashierScript, type CashierScriptKey } from "@/shared/config/audio/cashierScripts";
 
 // Import bill images
 import bill500 from "@/assets/bills/500-fcfa.png";

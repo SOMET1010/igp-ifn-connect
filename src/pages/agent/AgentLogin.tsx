@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { VoiceSocialAuth } from '@/features/social-auth';
+import { VoiceSocialAuth } from '@/features/auth';
 import { Shield, HelpCircle } from 'lucide-react';
 import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';
