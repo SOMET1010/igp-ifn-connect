@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDeviceFingerprint } from './useDeviceFingerprint';
 import { TRUST_THRESHOLDS } from '../config/personas';
+import { useAuthLogging } from './useAuthLogging';
 
 /**
  * Hook pour calculer le score de confiance (Layer 2)
@@ -35,6 +36,8 @@ export function useTrustScore() {
   const { fingerprint, deviceName } = useDeviceFingerprint();
   const [isCalculating, setIsCalculating] = useState(false);
   const [lastResult, setLastResult] = useState<TrustResult | null>(null);
+  const { logAuthDecision, detectRiskEvents, updateAuthOutcome } = useAuthLogging();
+  const currentLogIdRef = useRef<string | null>(null);
 
   const calculateTrustScore = useCallback(async (phone: string): Promise<TrustResult> => {
     setIsCalculating(true);
@@ -144,6 +147,21 @@ export function useTrustScore() {
       };
       
       setLastResult(result);
+
+      // Journaliser la décision d'authentification
+      const logId = await logAuthDecision({
+        merchantId: merchant.id,
+        phone,
+        decision,
+        trustScore,
+        factors: { ...factors },
+        deviceFingerprint: fingerprint || undefined,
+      });
+      currentLogIdRef.current = logId;
+
+      // Détecter les événements de risque
+      await detectRiskEvents(merchant.id, factors, trustScore);
+
       return result;
       
     } catch (error) {
@@ -196,14 +214,29 @@ export function useTrustScore() {
       if (error) {
         console.error('Error recording successful login:', error);
       }
+
+      // Mettre à jour le log d'auth avec succès
+      if (currentLogIdRef.current) {
+        await updateAuthOutcome(currentLogIdRef.current, 'success');
+        currentLogIdRef.current = null;
+      }
     } catch (error) {
       console.error('Error in recordSuccessfulLogin:', error);
     }
-  }, [fingerprint, deviceName]);
+  }, [fingerprint, deviceName, updateAuthOutcome]);
+
+  // Enregistrer un échec d'authentification
+  const recordFailedLogin = useCallback(async () => {
+    if (currentLogIdRef.current) {
+      await updateAuthOutcome(currentLogIdRef.current, 'failed');
+      currentLogIdRef.current = null;
+    }
+  }, [updateAuthOutcome]);
 
   return {
     calculateTrustScore,
     recordSuccessfulLogin,
+    recordFailedLogin,
     isCalculating,
     lastResult,
     thresholds: TRUST_THRESHOLDS,
