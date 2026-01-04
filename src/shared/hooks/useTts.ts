@@ -5,6 +5,7 @@
  * - Messages persona (social-auth)
  * - Scripts multilingues (voice-auth)
  * - Toggle voix persisté en localStorage
+ * - Anti-superposition via voiceQueue
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -19,6 +20,7 @@ import {
 import type { VoiceAuthLang, VoiceScriptKey } from '@/features/auth/config/audioScripts';
 import { getVoiceScript } from '@/features/auth/config/audioScripts';
 import { toast } from 'sonner';
+import { voiceQueue } from '@/shared/services/voice/voiceQueue';
 
 const VOICE_ENABLED_KEY = 'ifn_voice_enabled';
 
@@ -114,8 +116,11 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
     };
   }, []);
 
-  // Arrêter l'audio en cours
+  // Arrêter l'audio en cours (via voiceQueue pour annuler tout)
   const stop = useCallback(() => {
+    // Annuler via voiceQueue (annule aussi speechSynthesis)
+    voiceQueue.cancel();
+    
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -130,10 +135,13 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
     setError(null);
   }, []);
 
-  // Génération ElevenLabs TTS
+  // Génération ElevenLabs TTS (avec anti-superposition)
   const speakWithElevenLabs = useCallback(async (text: string) => {
     if (!text.trim()) return;
 
+    // Annuler tout audio précédent AVANT de commencer
+    voiceQueue.cancel();
+    
     setIsLoading(true);
     setError(null);
 
@@ -159,13 +167,19 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
       audio.onplay = () => {
         setIsLoading(false);
         setIsSpeaking(true);
+        // Enregistrer l'audio dans voiceQueue pour cancel global
+        voiceQueue.setCurrentAudio(audio);
         if (navigator.vibrate) navigator.vibrate(30);
         onStart?.();
       };
 
-      audio.onended = cleanup;
+      audio.onended = () => {
+        voiceQueue.setCurrentAudio(null);
+        cleanup();
+      };
 
       audio.onerror = () => {
+        voiceQueue.setCurrentAudio(null);
         setError('Erreur de lecture audio');
         cleanup();
         onError?.('Erreur de lecture audio');
