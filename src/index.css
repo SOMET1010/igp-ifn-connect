@@ -30,6 +30,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Masquer scrollbar natif tout en gardant le scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Design System Africain - IFN
    Palette: Orange vif, Vert forêt, Jaune doré, Terre/Marron
    All colors MUST be HSL.
