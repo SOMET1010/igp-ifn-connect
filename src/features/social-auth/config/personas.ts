@@ -26,7 +26,7 @@ export const PERSONAS: Record<PersonaType, Persona> = {
     avatar: '/lovable-uploads/tantie-sagesse.png',
     voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Tantie Sagesse
     greetings: {
-      welcome: "Bonne arrivée ma fille ! Que Dieu bénisse ton marché aujourd'hui.",
+      welcome: "Bonne arrivée mon enfant ! Que Dieu bénisse ton marché aujourd'hui.",
       listen: "Je t'écoute. Donne-moi doucement ton numéro de téléphone.",
       recognized: "Ah {name}, c'est toi ! J'espère que la famille se porte bien.",
       doubt: "Pardon, je n'ai pas bien vu ton visage. Rapproche-toi un peu mon enfant.",
