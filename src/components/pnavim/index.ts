@@ -12,3 +12,7 @@ export { PnavimBillSelector } from "./PnavimBillSelector";
 export { PnavimNumpad } from "./PnavimNumpad";
 export { PnavimPictogramNav } from "./PnavimPictogramNav";
 export { PnavimWaxCurve } from "./PnavimWaxCurve";
+export { PnavimInstitutionalHeader } from "./PnavimInstitutionalHeader";
+export { PnavimTricolorLine } from "./PnavimTricolorLine";
+export { PnavimZoomControls } from "./PnavimZoomControls";
+export { PnavimNavMenu } from "./PnavimNavMenu";
