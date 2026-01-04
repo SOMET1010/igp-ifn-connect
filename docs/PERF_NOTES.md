@@ -93,11 +93,15 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'rec
 
 ---
 
-## Quick Wins appliqués (RC1)
+## Optimisations appliquées (RC1 - Janvier 2026)
 
 1. ✅ Memoisation AuthContext value
 2. ✅ Lazy loading des routes admin avec carte
-3. ⏳ Migration progressive vers useQuery (post-RC1)
+3. ✅ Singleton pattern Supabase dans Edge Functions (check-low-stock, verify-otp, send-otp-sms, wallet-transfer, save-security-questions, send-push-notification)
+4. ✅ Requêtes JOINs optimisées dans check-low-stock (5 requêtes → 1)
+5. ✅ Parallélisation dans AuthContext + cache localStorage du rôle utilisateur
+6. ✅ Exécution parallèle des opérations non-critiques dans Edge Functions
+7. ⏳ Migration progressive vers useQuery (post-RC1)
 
 ---
 

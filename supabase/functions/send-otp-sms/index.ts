@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 interface SendOTPRequest {
   phone: string;
 }
@@ -34,29 +39,24 @@ serve(async (req: Request) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    // Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Delete existing OTPs and store new one in parallel
+    const [, insertResult] = await Promise.all([
+      supabase
+        .from("otp_codes")
+        .delete()
+        .eq("phone", cleanPhone),
+      supabase
+        .from("otp_codes")
+        .insert({
+          phone: cleanPhone,
+          code: code,
+          expires_at: expiresAt.toISOString(),
+          verified: false,
+        })
+    ]);
 
-    // Delete any existing OTPs for this phone
-    await supabase
-      .from("otp_codes")
-      .delete()
-      .eq("phone", cleanPhone);
-
-    // Store new OTP
-    const { error: insertError } = await supabase
-      .from("otp_codes")
-      .insert({
-        phone: cleanPhone,
-        code: code,
-        expires_at: expiresAt.toISOString(),
-        verified: false,
-      });
-
-    if (insertError) {
-      console.error("[send-otp-sms] Error storing OTP:", insertError);
+    if (insertResult.error) {
+      console.error("[send-otp-sms] Error storing OTP:", insertResult.error);
       return new Response(
         JSON.stringify({ error: "Erreur lors de l'enregistrement du code" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 interface VerifyOTPRequest {
   phone: string;
   code: string;
@@ -30,11 +35,6 @@ serve(async (req: Request) => {
     // Clean phone number
     const cleanPhone = phone.replace(/\s/g, "");
     console.log(`[verify-otp] Verifying OTP for ${cleanPhone}`);
-
-    // Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Find valid OTP
     const { data: otpRecord, error: selectError } = await supabase
@@ -65,22 +65,22 @@ serve(async (req: Request) => {
       );
     }
 
-    // Mark OTP as verified
-    const { error: updateError } = await supabase
-      .from("otp_codes")
-      .update({ verified: true })
-      .eq("id", otpRecord.id);
+    // Mark OTP as verified and cleanup old OTPs in parallel
+    const [updateResult] = await Promise.all([
+      supabase
+        .from("otp_codes")
+        .update({ verified: true })
+        .eq("id", otpRecord.id),
+      supabase
+        .from("otp_codes")
+        .delete()
+        .eq("phone", cleanPhone)
+        .neq("id", otpRecord.id)
+    ]);
 
-    if (updateError) {
-      console.error("[verify-otp] Error updating OTP:", updateError);
+    if (updateResult.error) {
+      console.error("[verify-otp] Error updating OTP:", updateResult.error);
     }
-
-    // Clean up old OTPs for this phone
-    await supabase
-      .from("otp_codes")
-      .delete()
-      .eq("phone", cleanPhone)
-      .neq("id", otpRecord.id);
 
     console.log(`[verify-otp] OTP verified successfully for ${cleanPhone}`);
 

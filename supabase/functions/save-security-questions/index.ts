@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 /**
  * Normalise une réponse pour stockage et comparaison tolérante
  * - Minuscules
@@ -50,45 +55,44 @@ serve(async (req) => {
 
     console.log(`[save-security-questions] Saving ${questions.length} questions for merchant ${merchant_id}`);
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    // Process all questions in parallel
+    const validQuestions = questions.filter(q => q.question_type && q.answer);
+    
+    const processedQuestions = await Promise.all(
+      validQuestions.map(async (q) => {
+        const [answerHash, answerNormalized] = await Promise.all([
+          hashAnswer(q.answer),
+          Promise.resolve(normalizeAnswer(q.answer))
+        ]);
+
+        return {
+          merchant_id,
+          question_type: q.question_type,
+          question_text: q.question_text || q.question_type,
+          question_text_dioula: q.question_text_dioula || null,
+          answer_hash: answerHash,
+          answer_normalized: answerNormalized,
+          is_active: true
+        };
+      })
     );
 
-    const results = [];
+    // Bulk insert all questions at once
+    const { data, error } = await supabase
+      .from("merchant_security_questions")
+      .insert(processedQuestions)
+      .select("id, question_type");
 
-    for (const q of questions) {
-      if (!q.question_type || !q.answer) {
-        console.log(`[save-security-questions] Skipping question with missing data:`, q);
-        continue;
-      }
-
-      const answerHash = await hashAnswer(q.answer);
-      const answerNormalized = normalizeAnswer(q.answer);
-
-      console.log(`[save-security-questions] Saving question type: ${q.question_type}`);
-
-      const { data, error } = await supabase.from("merchant_security_questions").insert({
-        merchant_id,
-        question_type: q.question_type,
-        question_text: q.question_text || q.question_type,
-        question_text_dioula: q.question_text_dioula || null,
-        answer_hash: answerHash,
-        answer_normalized: answerNormalized,
-        is_active: true
-      }).select().single();
-
-      if (error) {
-        console.error(`[save-security-questions] Error saving question:`, error);
-        throw error;
-      }
-
-      results.push({
-        id: data.id,
-        question_type: q.question_type,
-        saved: true
-      });
+    if (error) {
+      console.error(`[save-security-questions] Error saving questions:`, error);
+      throw error;
     }
+
+    const results = data?.map(d => ({
+      id: d.id,
+      question_type: d.question_type,
+      saved: true
+    })) || [];
 
     console.log(`[save-security-questions] Successfully saved ${results.length} questions`);
 

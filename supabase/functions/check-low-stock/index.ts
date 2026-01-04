@@ -6,18 +6,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 serve(async (req) => {
+  const startTime = Date.now();
+  
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     // Parse request body to check if checking merchant or cooperative
     let checkType = "all";
     try {
@@ -27,88 +29,104 @@ serve(async (req) => {
       // Default to all if no body
     }
 
-    console.log(`Checking low stock for: ${checkType}`);
+    console.log(`[check-low-stock] Checking low stock for: ${checkType}`);
 
     let merchantNotified = 0;
     let cooperativeNotified = 0;
     let merchantLowStockCount = 0;
     let cooperativeLowStockCount = 0;
 
-    // Check merchant stocks
-    if (checkType === "all" || checkType === "merchant") {
-      const { data: merchantStocks, error: merchantStocksError } = await supabase
-        .from("merchant_stocks")
-        .select("*");
+    // Run merchant and cooperative checks in parallel when checking "all"
+    const checkPromises: Promise<void>[] = [];
 
-      if (merchantStocksError) {
-        console.error("Error fetching merchant stocks:", merchantStocksError);
-      } else {
-        // Filter stocks where quantity < min_threshold
-        const lowMerchantStocks = merchantStocks?.filter(
+    // Check merchant stocks with optimized JOIN query
+    if (checkType === "all" || checkType === "merchant") {
+      checkPromises.push((async () => {
+        // Optimized query using JOINs instead of multiple sequential queries
+        const { data: lowMerchantStocks, error: merchantStocksError } = await supabase
+          .from("merchant_stocks")
+          .select(`
+            id, quantity, min_threshold, merchant_id, product_id,
+            merchant:merchants!inner(id, full_name, user_id),
+            product:products!inner(id, name)
+          `)
+          .lt('quantity', 10); // Filter low stock server-side
+
+        if (merchantStocksError) {
+          console.error("[check-low-stock] Error fetching merchant stocks:", merchantStocksError);
+          return;
+        }
+
+        // Further filter by individual min_threshold
+        const filteredStocks = lowMerchantStocks?.filter(
           (stock) => stock.quantity < (stock.min_threshold || 5)
         ) || [];
 
-        merchantLowStockCount = lowMerchantStocks.length;
-        console.log(`Found ${merchantLowStockCount} low merchant stock items`);
+        merchantLowStockCount = filteredStocks.length;
+        console.log(`[check-low-stock] Found ${merchantLowStockCount} low merchant stock items (${Date.now() - startTime}ms)`);
 
-        if (lowMerchantStocks.length > 0) {
-          // Get merchant and product details
-          const merchantIds = [...new Set(lowMerchantStocks.map((s) => s.merchant_id))];
-          const productIds = [...new Set(lowMerchantStocks.map((s) => s.product_id))];
+        if (filteredStocks.length === 0) return;
 
-          const { data: merchants } = await supabase
-            .from("merchants")
-            .select("id, full_name, user_id")
-            .in("id", merchantIds);
+        // Group by merchant user_id
+        const merchantAlerts = new Map<string, { user_id: string; name: string; items: string[] }>();
 
-          const { data: products } = await supabase
-            .from("products")
-            .select("id, name")
-            .in("id", productIds);
+        for (const stock of filteredStocks) {
+          // Handle the joined data - Supabase returns single objects for !inner joins
+          const merchantData = stock.merchant as unknown as { id: string; full_name: string; user_id: string } | null;
+          const productData = stock.product as unknown as { id: string; name: string } | null;
 
-          const merchantMap = new Map(merchants?.map((m) => [m.id, m]) || []);
-          const productMap = new Map(products?.map((p) => [p.id, p]) || []);
-
-          // Group by merchant
-          const merchantAlerts = new Map<string, { user_id: string; name: string; items: string[] }>();
-
-          for (const stock of lowMerchantStocks) {
-            const merchant = merchantMap.get(stock.merchant_id);
-            const product = productMap.get(stock.product_id);
-
-            if (merchant && merchant.user_id && product) {
-              if (!merchantAlerts.has(merchant.user_id)) {
-                merchantAlerts.set(merchant.user_id, {
-                  user_id: merchant.user_id,
-                  name: merchant.full_name,
-                  items: [],
-                });
-              }
-              merchantAlerts.get(merchant.user_id)!.items.push(
-                `${product.name}: ${stock.quantity}/${stock.min_threshold || 5}`
-              );
+          if (merchantData?.user_id && productData) {
+            if (!merchantAlerts.has(merchantData.user_id)) {
+              merchantAlerts.set(merchantData.user_id, {
+                user_id: merchantData.user_id,
+                name: merchantData.full_name,
+                items: [],
+              });
             }
+            merchantAlerts.get(merchantData.user_id)!.items.push(
+              `${productData.name}: ${stock.quantity}/${stock.min_threshold || 5}`
+            );
           }
+        }
 
-          // Send notifications
-          for (const [userId, alert] of merchantAlerts) {
-            const { data: subscriptions } = await supabase
-              .from("push_subscriptions")
-              .select("*")
-              .eq("user_id", userId);
+        // Get all subscriptions for these users in one query
+        const userIds = Array.from(merchantAlerts.keys());
+        if (userIds.length === 0) return;
 
-            if (!subscriptions || subscriptions.length === 0) continue;
+        const { data: allSubscriptions } = await supabase
+          .from("push_subscriptions")
+          .select("*")
+          .in("user_id", userIds);
 
-            const itemsList = alert.items.slice(0, 3).join(", ");
-            const moreItems = alert.items.length > 3 ? ` +${alert.items.length - 3} autres` : "";
+        if (!allSubscriptions || allSubscriptions.length === 0) return;
 
-            const notification = {
-              title: "⚠️ Alerte stock bas",
-              body: `${itemsList}${moreItems}`,
-              data: { type: "low_stock", url: "/marchand/stock" },
-            };
+        // Group subscriptions by user
+        const subsByUser = new Map<string, typeof allSubscriptions>();
+        for (const sub of allSubscriptions) {
+          if (!subsByUser.has(sub.user_id)) {
+            subsByUser.set(sub.user_id, []);
+          }
+          subsByUser.get(sub.user_id)!.push(sub);
+        }
 
-            for (const sub of subscriptions) {
+        // Send notifications in parallel
+        const sendPromises: Promise<void>[] = [];
+        
+        for (const [userId, alert] of merchantAlerts) {
+          const subscriptions = subsByUser.get(userId);
+          if (!subscriptions || subscriptions.length === 0) continue;
+
+          const itemsList = alert.items.slice(0, 3).join(", ");
+          const moreItems = alert.items.length > 3 ? ` +${alert.items.length - 3} autres` : "";
+
+          const notification = {
+            title: "⚠️ Alerte stock bas",
+            body: `${itemsList}${moreItems}`,
+            data: { type: "low_stock", url: "/marchand/stock" },
+          };
+
+          for (const sub of subscriptions) {
+            sendPromises.push((async () => {
               try {
                 const response = await fetch(sub.endpoint, {
                   method: "POST",
@@ -132,86 +150,97 @@ serve(async (req) => {
                   await supabase.from("push_subscriptions").delete().eq("id", sub.id);
                 }
               } catch (err) {
-                console.error(`Error sending push:`, err);
+                console.error(`[check-low-stock] Error sending push:`, err);
               }
-            }
+            })());
           }
         }
-      }
+
+        await Promise.all(sendPromises);
+      })());
     }
 
-    // Check cooperative stocks
+    // Check cooperative stocks with optimized JOIN query
     if (checkType === "all" || checkType === "cooperative") {
-      const { data: coopStocks, error: coopStocksError } = await supabase
-        .from("stocks")
-        .select("*");
+      checkPromises.push((async () => {
+        // Optimized query using JOINs
+        const { data: lowCoopStocks, error: coopStocksError } = await supabase
+          .from("stocks")
+          .select(`
+            id, quantity, cooperative_id, product_id,
+            cooperative:cooperatives!inner(id, name, user_id),
+            product:products!inner(id, name)
+          `)
+          .lt('quantity', 10); // Filter low stock server-side
 
-      if (coopStocksError) {
-        console.error("Error fetching cooperative stocks:", coopStocksError);
-      } else {
-        // Filter cooperative stocks where quantity < 10 (default threshold for cooperatives)
-        const lowCoopStocks = coopStocks?.filter(
-          (stock) => stock.quantity < 10
-        ) || [];
+        if (coopStocksError) {
+          console.error("[check-low-stock] Error fetching cooperative stocks:", coopStocksError);
+          return;
+        }
 
-        cooperativeLowStockCount = lowCoopStocks.length;
-        console.log(`Found ${cooperativeLowStockCount} low cooperative stock items`);
+        cooperativeLowStockCount = lowCoopStocks?.length || 0;
+        console.log(`[check-low-stock] Found ${cooperativeLowStockCount} low cooperative stock items (${Date.now() - startTime}ms)`);
 
-        if (lowCoopStocks.length > 0) {
-          const cooperativeIds = [...new Set(lowCoopStocks.map((s) => s.cooperative_id))];
-          const productIds = [...new Set(lowCoopStocks.map((s) => s.product_id))];
+        if (!lowCoopStocks || lowCoopStocks.length === 0) return;
 
-          const { data: cooperatives } = await supabase
-            .from("cooperatives")
-            .select("id, name, user_id")
-            .in("id", cooperativeIds);
+        // Group by cooperative user_id
+        const coopAlerts = new Map<string, { user_id: string; name: string; items: string[] }>();
 
-          const { data: products } = await supabase
-            .from("products")
-            .select("id, name")
-            .in("id", productIds);
+        for (const stock of lowCoopStocks) {
+          // Handle the joined data - Supabase returns single objects for !inner joins
+          const coopData = stock.cooperative as unknown as { id: string; name: string; user_id: string } | null;
+          const productData = stock.product as unknown as { id: string; name: string } | null;
 
-          const coopMap = new Map(cooperatives?.map((c) => [c.id, c]) || []);
-          const productMap = new Map(products?.map((p) => [p.id, p]) || []);
-
-          const coopAlerts = new Map<string, { user_id: string; name: string; items: string[] }>();
-
-          for (const stock of lowCoopStocks) {
-            const coop = coopMap.get(stock.cooperative_id);
-            const product = productMap.get(stock.product_id);
-
-            if (coop && coop.user_id && product) {
-              if (!coopAlerts.has(coop.user_id)) {
-                coopAlerts.set(coop.user_id, {
-                  user_id: coop.user_id,
-                  name: coop.name,
-                  items: [],
-                });
-              }
-              coopAlerts.get(coop.user_id)!.items.push(
-                `${product.name}: ${stock.quantity} unités`
-              );
+          if (coopData?.user_id && productData) {
+            if (!coopAlerts.has(coopData.user_id)) {
+              coopAlerts.set(coopData.user_id, {
+                user_id: coopData.user_id,
+                name: coopData.name,
+                items: [],
+              });
             }
+            coopAlerts.get(coopData.user_id)!.items.push(`${productData.name}: ${stock.quantity} unités`);
           }
+        }
 
-          for (const [userId, alert] of coopAlerts) {
-            const { data: subscriptions } = await supabase
-              .from("push_subscriptions")
-              .select("*")
-              .eq("user_id", userId);
+        // Get all subscriptions for these users in one query
+        const userIds = Array.from(coopAlerts.keys());
+        if (userIds.length === 0) return;
 
-            if (!subscriptions || subscriptions.length === 0) continue;
+        const { data: allSubscriptions } = await supabase
+          .from("push_subscriptions")
+          .select("*")
+          .in("user_id", userIds);
 
-            const itemsList = alert.items.slice(0, 3).join(", ");
-            const moreItems = alert.items.length > 3 ? ` +${alert.items.length - 3} autres` : "";
+        if (!allSubscriptions || allSubscriptions.length === 0) return;
 
-            const notification = {
-              title: "🌾 Alerte stock coopérative",
-              body: `${itemsList}${moreItems}`,
-              data: { type: "low_stock_coop", url: "/cooperative/stock" },
-            };
+        // Group subscriptions by user
+        const subsByUser = new Map<string, typeof allSubscriptions>();
+        for (const sub of allSubscriptions) {
+          if (!subsByUser.has(sub.user_id)) {
+            subsByUser.set(sub.user_id, []);
+          }
+          subsByUser.get(sub.user_id)!.push(sub);
+        }
 
-            for (const sub of subscriptions) {
+        // Send notifications in parallel
+        const sendPromises: Promise<void>[] = [];
+
+        for (const [userId, alert] of coopAlerts) {
+          const subscriptions = subsByUser.get(userId);
+          if (!subscriptions || subscriptions.length === 0) continue;
+
+          const itemsList = alert.items.slice(0, 3).join(", ");
+          const moreItems = alert.items.length > 3 ? ` +${alert.items.length - 3} autres` : "";
+
+          const notification = {
+            title: "🌾 Alerte stock coopérative",
+            body: `${itemsList}${moreItems}`,
+            data: { type: "low_stock_coop", url: "/cooperative/stock" },
+          };
+
+          for (const sub of subscriptions) {
+            sendPromises.push((async () => {
               try {
                 const response = await fetch(sub.endpoint, {
                   method: "POST",
@@ -235,19 +264,26 @@ serve(async (req) => {
                   await supabase.from("push_subscriptions").delete().eq("id", sub.id);
                 }
               } catch (err) {
-                console.error(`Error sending push:`, err);
+                console.error(`[check-low-stock] Error sending push:`, err);
               }
-            }
+            })());
           }
         }
-      }
+
+        await Promise.all(sendPromises);
+      })());
     }
 
-    console.log(`Notified: ${merchantNotified} merchants, ${cooperativeNotified} cooperatives`);
+    // Wait for all checks to complete
+    await Promise.all(checkPromises);
+
+    const totalTime = Date.now() - startTime;
+    console.log(`[check-low-stock] Completed in ${totalTime}ms - Notified: ${merchantNotified} merchants, ${cooperativeNotified} cooperatives`);
 
     return new Response(
       JSON.stringify({
         success: true,
+        executionTime: totalTime,
         merchant: { lowStockCount: merchantLowStockCount, notified: merchantNotified },
         cooperative: { lowStockCount: cooperativeLowStockCount, notified: cooperativeNotified },
       }),
@@ -255,11 +291,10 @@ serve(async (req) => {
     );
   } catch (err: unknown) {
     const error = err instanceof Error ? err.message : "Unknown error";
-    console.error("Error:", error);
+    console.error("[check-low-stock] Error:", error);
     return new Response(
       JSON.stringify({ error }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
-
