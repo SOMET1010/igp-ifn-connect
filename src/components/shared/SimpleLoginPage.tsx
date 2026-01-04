@@ -1,7 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { SimplePhoneAuth } from '@/features/auth/components/SimplePhoneAuth';
+import { InclusivePhoneAuth } from '@/features/auth/components/InclusivePhoneAuth';
 import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';
 
@@ -14,9 +13,12 @@ interface SimpleLoginPageProps {
 }
 
 /**
- * SimpleLoginPage - Page de login simplifiée PNAVIM
- * Flow linéaire : Téléphone → OTP → Connecté
- * ZERO complexité, ZERO persona, ZERO trust score
+ * SimpleLoginPage - Page de login inclusive PNAVIM
+ * 
+ * Flow linéaire visible : Téléphone → OTP → Connecté
+ * Rails sociaux invisibles : Risk Gate silencieux après OTP
+ * 
+ * Inclusion : voix guidée, clavier contrôlé, répéter/corriger
  */
 export function SimpleLoginPage({
   userType,
@@ -70,8 +72,8 @@ export function SimpleLoginPage({
             </p>
           </div>
 
-          {/* Composant d'auth simplifié */}
-          <SimplePhoneAuth
+          {/* Composant d'auth inclusive */}
+          <InclusivePhoneAuth
             redirectPath={redirectPath}
             userType={userType}
           />
