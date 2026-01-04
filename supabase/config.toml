@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.lafricamobile-stt]
 verify_jwt = false
+
+[functions.voice-otp-callback]
+verify_jwt = false
