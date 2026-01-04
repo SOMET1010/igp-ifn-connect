@@ -53,9 +53,10 @@ interface UseSocialAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
   onPhoneValidated?: (phone: string) => void;
+  initialPersona?: PersonaType;
 }
 
-export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseSocialAuthProps) {
+export function useSocialAuth({ redirectPath, userType, onPhoneValidated, initialPersona = 'tantie' }: UseSocialAuthProps) {
   const navigate = useNavigate();
   const { signInWithPhone, verifyOtp } = useAuth();
   const { calculateTrustScore, recordSuccessfulLogin } = useTrustScore();
@@ -65,7 +66,7 @@ export function useSocialAuth({ redirectPath, userType, onPhoneValidated }: UseS
     layer: 1,
     step: 'welcome',
     phone: null,
-    persona: 'tantie', // Default persona
+    persona: initialPersona,
     trustScore: 0,
     merchantId: null,
     merchantName: null,
