@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Globe } from 'lucide-react';
 
+import { playPnavimTts } from '@/shared/services/tts/pnavimTtsPlayer';
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+
 interface LanguageSelectorProps {
   variant?: 'icon' | 'full';
   className?: string;
@@ -17,17 +20,11 @@ export function LanguageSelector({ variant = 'icon', className }: LanguageSelect
   const handleSelect = (code: string) => {
     setLanguage(code as any);
     setOpen(false);
-    
-    // Feedback sonore
-    if ('speechSynthesis' in window) {
-      const lang = languages.find(l => l.code === code);
-      if (lang) {
-        const utterance = new SpeechSynthesisUtterance(lang.nativeName);
-        utterance.rate = 0.9;
-        utterance.volume = 0.7;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-      }
+
+    // Feedback sonore (voix PNAVIM)
+    const lang = languages.find(l => l.code === code);
+    if (lang) {
+      void playPnavimTts(lang.nativeName, { voiceId: PNAVIM_VOICES.DEFAULT });
     }
   };
 
