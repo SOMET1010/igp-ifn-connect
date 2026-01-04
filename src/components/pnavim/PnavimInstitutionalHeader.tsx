@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Volume2, VolumeX, User, Menu } from 'lucide-react';
-import { PnavimTricolorLine } from './PnavimTricolorLine';
-import { PnavimZoomControls } from './PnavimZoomControls';
-import { PnavimNavMenu } from './PnavimNavMenu';
+import { Volume2, VolumeX, User, Minus, Plus } from 'lucide-react';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageCode } from '@/lib/translations';
@@ -19,7 +16,6 @@ const languageFlags: Record<string, string> = {
 };
 
 interface PnavimInstitutionalHeaderProps {
-  showNavigation?: boolean;
   showAccessibility?: boolean;
   showAudioToggle?: boolean;
   showLanguageSelector?: boolean;
@@ -33,10 +29,9 @@ interface PnavimInstitutionalHeaderProps {
 
 /**
  * Header institutionnel PNAVIM complet
- * Branding + Navigation + Accessibilité + Ligne tricolore
+ * Branding + Accessibilité + Ligne tricolore
  */
 export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps> = ({
-  showNavigation = true,
   showAccessibility = true,
   showAudioToggle = true,
   showLanguageSelector = true,
@@ -48,7 +43,7 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
   className,
 }) => {
   const [internalAudioEnabled, setInternalAudioEnabled] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [zoom, setZoom] = useState(100);
   const { triggerTap } = useSensoryFeedback();
   const { language, setLanguage, languages } = useLanguage();
 
@@ -66,6 +61,13 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
   const handleLanguageChange = (langCode: LanguageCode) => {
     triggerTap();
     setLanguage(langCode);
+  };
+
+  const handleZoomChange = (newZoom: number) => {
+    const clampedZoom = Math.min(150, Math.max(80, newZoom));
+    setZoom(clampedZoom);
+    document.documentElement.style.fontSize = `${clampedZoom}%`;
+    triggerTap();
   };
 
   const isCompact = variant === 'compact';
@@ -98,16 +100,37 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
               </div>
             </Link>
 
-            {/* Center: Navigation masquée sur Home (trop web pour marchands) */}
-            {/* Navigation désactivée pour l'inclusion - garder uniquement les contrôles essentiels */}
-
             {/* Right: Controls */}
             <div className="flex items-center gap-2">
               
-              {/* Zoom Controls - Desktop only */}
+              {/* Inline Zoom Controls - Desktop only */}
               {showAccessibility && (
-                <div className="hidden md:block">
-                  <PnavimZoomControls />
+                <div 
+                  className="hidden md:flex items-center gap-1 bg-muted/50 rounded-full px-2 py-1"
+                  role="group"
+                  aria-label="Contrôles de zoom"
+                >
+                  <button
+                    onClick={() => handleZoomChange(zoom - 10)}
+                    disabled={zoom <= 80}
+                    className="p-1 rounded-full hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Diminuer la taille du texte"
+                  >
+                    <Minus className="h-3.5 w-3.5 text-foreground" />
+                  </button>
+                  
+                  <span className="text-xs font-medium text-foreground min-w-[40px] text-center">
+                    {zoom}%
+                  </span>
+                  
+                  <button
+                    onClick={() => handleZoomChange(zoom + 10)}
+                    disabled={zoom >= 150}
+                    className="p-1 rounded-full hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Augmenter la taille du texte"
+                  >
+                    <Plus className="h-3.5 w-3.5 text-foreground" />
+                  </button>
                 </div>
               )}
 
@@ -155,7 +178,7 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                 </button>
               )}
 
-              {/* Login Button - Orange PNAVIM (pas noir) */}
+              {/* Login Button - Orange PNAVIM */}
               {showLoginButton && (
                 <button
                   onClick={onLoginClick}
@@ -165,45 +188,19 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                   <span className="hidden sm:inline">Se connecter</span>
                 </button>
               )}
-
-              {/* Mobile Menu Button */}
-              {showNavigation && (
-                <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center bg-muted hover:bg-muted/80 transition-colors"
-                  aria-label="Menu"
-                  aria-expanded={mobileMenuOpen}
-                >
-                  <Menu className="h-5 w-5 text-foreground" />
-                </button>
-              )}
             </div>
           </div>
         </div>
-
-        {/* Mobile Navigation Dropdown */}
-        {showNavigation && mobileMenuOpen && (
-          <div className="lg:hidden border-t border-border bg-card/95 backdrop-blur-lg">
-            <div className="max-w-7xl mx-auto px-4 py-3">
-              <PnavimNavMenu variant="vertical" />
-              
-              {/* Mobile Login */}
-              {showLoginButton && (
-                <button
-                  onClick={onLoginClick}
-                  className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-3 bg-charbon text-white rounded-xl text-sm font-medium"
-                >
-                  <User className="h-4 w-4" />
-                  <span>Se connecter</span>
-                </button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Tricolor Line */}
-      <PnavimTricolorLine />
+      {/* Tricolor Line - inline */}
+      <div 
+        className="h-1 w-full"
+        style={{
+          background: 'linear-gradient(90deg, #E67E22 0%, #E67E22 33%, #FFFFFF 33%, #FFFFFF 66%, #2E7D32 66%, #2E7D32 100%)'
+        }}
+        aria-hidden="true"
+      />
     </header>
   );
 };
