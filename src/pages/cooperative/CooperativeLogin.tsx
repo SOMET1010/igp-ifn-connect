@@ -1,25 +1,29 @@
 import React from 'react';
-import { UnifiedLoginPage } from '@/components/shared/UnifiedLoginPage';
+import { SimpleLoginPage } from '@/components/shared/SimpleLoginPage';
+import { Link } from 'react-router-dom';
 
 /**
- * CooperativeLogin - Page de connexion Coopérative unifiée
- * Utilise le composant UnifiedLoginPage avec couleur Violet
+ * CooperativeLogin - Page de connexion Coopérative simplifiée
+ * Flow linéaire : Téléphone → OTP → Connecté
  */
 const CooperativeLogin = () => {
   return (
-    <UnifiedLoginPage
+    <SimpleLoginPage
       userType="cooperative"
-      accentColor="violet"
-      title="Espace Coopérative"
-      subtitle="Authentification Sociale PNAVIM"
       redirectPath="/cooperative/dashboard"
-      registerLink={{
-        text: "Vous êtes une nouvelle coopérative ?",
-        linkText: "Demander l'accès",
-        to: "/cooperative/register"
-      }}
-      backgroundVariant="warm-gradient"
-    />
+    >
+      <div className="mt-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Vous êtes une nouvelle coopérative ?
+        </p>
+        <Link 
+          to="/cooperative/register" 
+          className="text-sm text-violet-600 hover:underline font-medium"
+        >
+          Demander l'accès →
+        </Link>
+      </div>
+    </SimpleLoginPage>
   );
 };
 
