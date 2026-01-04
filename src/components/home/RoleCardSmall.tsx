@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Users, Warehouse } from 'lucide-react';
-import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -39,7 +39,7 @@ export const RoleCardSmall: React.FC<RoleCardSmallProps> = ({ role }) => {
   const { language } = useLanguage();
   // Map language to voice auth lang (fr/nouchi/suta)
   const voiceLang = language === 'dioula' ? 'nouchi' : 'fr';
-  const { speakRaw, stop, isSpeaking } = useSpeechTts({ lang: voiceLang });
+  const { speak, stop, isSpeaking } = useTts({ lang: voiceLang });
   const config = roleConfig[role];
 
   const handlePlayClick = useCallback(
@@ -59,14 +59,14 @@ export const RoleCardSmall: React.FC<RoleCardSmallProps> = ({ role }) => {
         const text = role === 'agent' 
           ? 'Agent terrain. Vous pouvez enrôler les marchands et suivre vos inscriptions.'
           : 'Coopérative. Gérez vos stocks et recevez des commandes des marchands.';
-        await speakRaw(text);
+        speak(text);
       } catch (error) {
         console.error('TTS error:', error);
       } finally {
         setIsPlaying(false);
       }
     },
-    [isPlaying, role, speakRaw, stop]
+    [isPlaying, role, speak, stop]
   );
 
   // Update state when TTS finishes

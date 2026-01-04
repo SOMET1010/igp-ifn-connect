@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocialAuth } from '../hooks/useSocialAuth';
 import { useVoiceTranscription } from '../hooks/useVoiceTranscription';
-import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
+import { useTts } from '@/shared/hooks/useTts';
 import { usePersistedPersona } from '../hooks/usePersistedPersona';
 import { AudioBars } from '@/components/merchant/AudioBars';
 import { Input } from '@/components/ui/input';
@@ -100,8 +100,8 @@ export function VoiceSocialAuth({
   });
 
   // Hook TTS ElevenLabs avec voix clonée PNAVIM
-  const { speak, isSpeaking, stop, isLoading: ttsLoading } = useElevenLabsTts({
-    voiceId: currentPersona.voiceId!,
+  const { speak, isSpeaking, stop, isLoading: ttsLoading } = useTts({
+    voiceId: currentPersona.voiceId as import('@/shared/config/voiceConfig').PnavimVoiceId,
     persona,
     onStart: () => {
       if ('vibrate' in navigator) {
@@ -118,7 +118,7 @@ export function VoiceSocialAuth({
     if (hasPlayedWelcome || step !== 'welcome') return;
     
     const timer = setTimeout(() => {
-      speak(getMessage('welcome'), 'welcome');
+      speak(getMessage('welcome'), { messageKey: 'welcome' });
       setHasPlayedWelcome(true);
     }, 800);
     
@@ -141,7 +141,7 @@ export function VoiceSocialAuth({
     if (micState === 'idle' && !isConnected) {
       try {
         setMicState('listening');
-        speak(getMessage('listen'), 'listen');
+        speak(getMessage('listen'), { messageKey: 'listen' });
         await startListening();
       } catch (err) {
         console.error('[VoiceSocialAuth] Failed to start listening:', err);
@@ -163,7 +163,7 @@ export function VoiceSocialAuth({
   }, [manualPhone, processPhoneNumber]);
 
   const handlePlayWelcome = useCallback(() => {
-    speak(getMessage('welcome'), 'welcome');
+    speak(getMessage('welcome'), { messageKey: 'welcome' });
   }, [speak, getMessage]);
 
   // Afficher le sélecteur de persona

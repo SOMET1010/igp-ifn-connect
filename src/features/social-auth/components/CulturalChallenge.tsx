@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AudioBars } from '@/components/merchant/AudioBars';
-import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
+import { useTts } from '@/shared/hooks/useTts';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 interface CulturalChallengeProps {
@@ -46,8 +46,8 @@ export function CulturalChallenge({
   const [hasPlayedQuestion, setHasPlayedQuestion] = useState(false);
 
   // Hook TTS ElevenLabs avec voix clonée
-  const { speak, isSpeaking, stop } = useElevenLabsTts({
-    voiceId,
+  const { speak, isSpeaking, stop } = useTts({
+    voiceId: voiceId as import('@/shared/config/voiceConfig').PnavimVoiceId,
     onStart: () => {
       if ('vibrate' in navigator) {
         navigator.vibrate(30);

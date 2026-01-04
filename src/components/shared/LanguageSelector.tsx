@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Globe } from 'lucide-react';
 
-import { playPnavimTts } from '@/shared/services/tts/pnavimTtsPlayer';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
 import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 
 interface LanguageSelectorProps {
@@ -24,7 +24,13 @@ export function LanguageSelector({ variant = 'icon', className }: LanguageSelect
     // Feedback sonore (voix PNAVIM)
     const lang = languages.find(l => l.code === code);
     if (lang) {
-      void playPnavimTts(lang.nativeName, { voiceId: PNAVIM_VOICES.DEFAULT });
+      void (async () => {
+        try {
+          const audioBlob = await generateSpeech(lang.nativeName, { voiceId: PNAVIM_VOICES.DEFAULT });
+          const audio = new Audio(URL.createObjectURL(audioBlob));
+          await audio.play();
+        } catch { /* silent fail */ }
+      })();
     }
   };
 

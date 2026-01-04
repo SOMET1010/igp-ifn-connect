@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle, Volume2, X, ChevronRight } from 'lucide-react';
-import { useSpeechTts } from '@/features/social-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 
 interface HelpItem {
   id: string;
@@ -92,7 +92,7 @@ export const ContextualHelp: React.FC<ContextualHelpProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
-  const { speak, isSpeaking, stop } = useSpeechTts();
+  const { speak, isSpeaking, stop } = useTts();
 
   const helpItems = HELP_CONTENT[pageKey] || [];
 

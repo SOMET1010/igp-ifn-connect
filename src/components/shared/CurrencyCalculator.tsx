@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Volume2, Minus, Plus, Calculator, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSpeechTts } from '@/features/social-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 
 interface DenominationCount {
   value: number;
@@ -39,7 +39,7 @@ export const CurrencyCalculator: React.FC<CurrencyCalculatorProps> = ({
   const [denominations, setDenominations] = useState<DenominationCount[]>(
     DENOMINATIONS.map(d => ({ ...d }))
   );
-  const { speak, isSpeaking } = useSpeechTts();
+  const { speak, isSpeaking } = useTts();
 
   const total = useMemo(() => {
     return denominations.reduce((sum, d) => sum + (d.value * d.count), 0);

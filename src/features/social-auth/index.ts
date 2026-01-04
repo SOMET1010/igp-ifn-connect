@@ -12,7 +12,7 @@ export { useSocialAuth } from './hooks/useSocialAuth';
 export { useDeviceFingerprint } from './hooks/useDeviceFingerprint';
 export { useTrustScore } from './hooks/useTrustScore';
 export { useVoiceTranscription } from './hooks/useVoiceTranscription';
-export { useElevenLabsTts } from './hooks/useElevenLabsTts';
+
 export { usePersistedPersona } from './hooks/usePersistedPersona';
 
 // Config

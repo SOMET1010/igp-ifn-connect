@@ -39,7 +39,7 @@ export default function MerchantStock() {
     checkLowStock,
   } = useMerchantStock();
 
-  const { speak, isVoiceEnabled, toggleVoice, isPlaying } = useTts();
+  const { speak, isVoiceEnabled, toggleVoice, isSpeaking: isPlaying } = useTts();
   const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");

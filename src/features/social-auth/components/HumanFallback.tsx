@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, RefreshCw, HeadphonesIcon, Clock, AlertCircle, Shield, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
+import { useTts } from '@/shared/hooks/useTts';
 import { AgentValidationRequest } from './AgentValidationRequest';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
@@ -42,8 +42,8 @@ export function HumanFallback({
   const [hasPlayedMessage, setHasPlayedMessage] = useState(false);
 
   // Hook TTS ElevenLabs avec voix clonée
-  const { speak, isSpeaking } = useElevenLabsTts({
-    voiceId,
+  const { speak, isSpeaking } = useTts({
+    voiceId: voiceId as import('@/shared/config/voiceConfig').PnavimVoiceId,
     onStart: () => {
       if ('vibrate' in navigator) {
         navigator.vibrate(30);

@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { VoiceHeroButton, VoiceHeroState } from '@/components/shared/VoiceHeroButton';
-import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { useTts } from '@/shared/hooks/useTts';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User } from 'lucide-react';
 
@@ -11,7 +11,7 @@ export const HeroMerchantCard: React.FC = () => {
   const { language } = useLanguage();
   // Map language to voice auth lang (fr/nouchi/suta)
   const voiceLang = language === 'dioula' ? 'nouchi' : 'fr';
-  const { speak, stop, isSpeaking } = useSpeechTts({ lang: voiceLang });
+  const { speakScript, stop, isSpeaking } = useTts({ lang: voiceLang });
 
   const handleVoiceClick = useCallback(async () => {
     if (voiceState === 'playing') {
@@ -23,13 +23,13 @@ export const HeroMerchantCard: React.FC = () => {
     setVoiceState('playing');
     
     try {
-      await speak('welcome');
+      speakScript('welcome');
     } catch (error) {
       console.error('TTS error:', error);
     } finally {
       setVoiceState('idle');
     }
-  }, [voiceState, speak, stop]);
+  }, [voiceState, speakScript, stop]);
 
   // Update state when TTS finishes
   React.useEffect(() => {

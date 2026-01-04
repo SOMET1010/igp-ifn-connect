@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 
 // TTS (voix PNAVIM uniquement)
-import { playPnavimTts } from "@/shared/services/tts/pnavimTtsPlayer";
+import { generateSpeech } from "@/shared/services/tts/elevenlabsTts";
 import { PNAVIM_VOICES } from "@/shared/config/voiceConfig";
 
 interface RoleCard {
@@ -89,7 +89,13 @@ const triggerHaptic = () => {
 
 // Text-to-Speech (ElevenLabs PNAVIM)
 const speakText = (text: string) => {
-  void playPnavimTts(text, { voiceId: PNAVIM_VOICES.DEFAULT });
+  void (async () => {
+    try {
+      const audioBlob = await generateSpeech(text, { voiceId: PNAVIM_VOICES.DEFAULT });
+      const audio = new Audio(URL.createObjectURL(audioBlob));
+      await audio.play();
+    } catch { /* silent fail */ }
+  })();
 };
 
 interface InclusiveRoleCardProps {

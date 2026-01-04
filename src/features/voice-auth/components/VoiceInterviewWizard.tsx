@@ -4,7 +4,7 @@ import { Mic, MicOff, Check, ChevronRight, RotateCcw, Volume2 } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useSpeechTts } from "../hooks/useSpeechTts";
+import { useTts } from '@/shared/hooks/useTts';
 import type { VoiceAuthLang } from "../config/audioScripts";
 
 interface InterviewQuestion {
@@ -43,7 +43,7 @@ export function VoiceInterviewWizard({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   
-  const { speakRaw, isSpeaking, stop: stopSpeaking } = useSpeechTts({
+  const { speak, isSpeaking, stop: stopSpeaking } = useTts({
     lang,
     onEnd: () => {
       // Auto-start recording after speaking
@@ -93,7 +93,7 @@ export function VoiceInterviewWizard({
 
   const speakQuestion = (text: string) => {
     stopSpeaking();
-    speakRaw(text);
+    speak(text);
   };
 
   const startRecording = async () => {
@@ -179,7 +179,7 @@ export function VoiceInterviewWizard({
           
           // Lire la confirmation
           const confirmText = getConfirmationText(data.processedValue, data.questionKey);
-          speakRaw(confirmText);
+          speak(confirmText);
         } else {
           setError(data.error || "Erreur de transcription");
           setRecordingState("idle");
