@@ -1,14 +1,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, Loader2, Phone, ArrowRight, MicOff } from 'lucide-react';
+import { Mic, Loader2, Phone, ArrowRight, MicOff, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSocialAuth } from '../hooks/useSocialAuth';
 import { useVoiceTranscription } from '../hooks/useVoiceTranscription';
 import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
+import { usePersistedPersona } from '../hooks/usePersistedPersona';
 import { AudioBars } from '@/components/merchant/AudioBars';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';
+import { PersonaSelector } from './PersonaSelector';
 import { toast } from 'sonner';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
@@ -41,6 +43,10 @@ export function VoiceSocialAuth({
   const [showManualInput, setShowManualInput] = useState(false);
   const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [showPersonaSelector, setShowPersonaSelector] = useState(false);
+
+  // Hook pour persister le choix de persona
+  const { persona: persistedPersona, setPersona: setPersistedPersona, isLoaded, isFirstVisit } = usePersistedPersona();
 
   const {
     step,
@@ -57,7 +63,23 @@ export function VoiceSocialAuth({
     reset,
     getMessage,
     generatedOtp,
-  } = useSocialAuth({ redirectPath, userType });
+    setPersona,
+  } = useSocialAuth({ redirectPath, userType, initialPersona: persistedPersona });
+
+  // Afficher le sélecteur à la première visite
+  useEffect(() => {
+    if (isLoaded && isFirstVisit) {
+      setShowPersonaSelector(true);
+    }
+  }, [isLoaded, isFirstVisit]);
+
+  // Synchroniser le persona quand il change
+  const handlePersonaChange = useCallback((newPersona: typeof persistedPersona) => {
+    setPersistedPersona(newPersona);
+    setPersona(newPersona);
+    setShowPersonaSelector(false);
+    setHasPlayedWelcome(false); // Rejouer le message de bienvenue
+  }, [setPersistedPersona, setPersona]);
 
   // Hook de transcription vocale ElevenLabs
   const { 
@@ -163,6 +185,28 @@ export function VoiceSocialAuth({
     if (micState === 'listening') return "Je t'écoute...";
     return 'Un instant...';
   };
+
+  // Afficher le sélecteur de persona
+  if (showPersonaSelector) {
+    return (
+      <div className={cn("flex flex-col items-center gap-5 py-4", className)}>
+        <PersonaSelector
+          selectedPersona={persistedPersona}
+          onSelect={handlePersonaChange}
+        />
+        
+        {!isFirstVisit && (
+          <button
+            type="button"
+            onClick={() => setShowPersonaSelector(false)}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Annuler
+          </button>
+        )}
+      </div>
+    );
+  }
 
   // Render based on current step
   if (step === 'challenge') {
@@ -326,6 +370,16 @@ export function VoiceSocialAuth({
             className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
           >
             📝 Je préfère taper mon numéro
+          </button>
+
+          {/* Bouton changer de guide */}
+          <button
+            type="button"
+            onClick={() => setShowPersonaSelector(true)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Users className="w-3.5 h-3.5" />
+            Changer de guide ({currentPersona.name})
           </button>
         </>
       ) : (
