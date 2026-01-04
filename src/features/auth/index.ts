@@ -1,8 +1,30 @@
-// Components
+// Auth Feature - Authentification PNAVIM Unifiée
+// Protocole à 4 couches pour l'inclusion des marchands ivoiriens
+
+// === OTP Auth Components (original) ===
 export { GenericOtpLoginPage } from "./components/GenericOtpLoginPage";
 export { AdminLoginPage } from "./components/AdminLoginPage";
 
-// Configs
+// === Social Auth Components (merged from social-auth) ===
+export { VoiceSocialAuth } from './components/VoiceSocialAuth';
+export { CulturalChallenge } from './components/CulturalChallenge';
+export { HumanFallback } from './components/HumanFallback';
+export { PersonaSelector } from './components/PersonaSelector';
+export { AgentValidationRequest } from './components/AgentValidationRequest';
+
+// === Voice Interview (merged from voice-auth) ===
+export { VoiceInterviewWizard } from './components/VoiceInterviewWizard';
+
+// === Hooks ===
+export { useSocialAuth } from './hooks/useSocialAuth';
+export { useDeviceFingerprint } from './hooks/useDeviceFingerprint';
+export { useTrustScore } from './hooks/useTrustScore';
+export { useVoiceTranscription } from './hooks/useVoiceTranscription';
+export { useAgentValidation } from './hooks/useAgentValidation';
+export { useAuthLogging } from './hooks/useAuthLogging';
+export { usePersistedPersona } from './hooks/usePersistedPersona';
+
+// === Configs ===
 export {
   merchantLoginConfig,
   agentLoginConfig,
@@ -10,7 +32,23 @@ export {
   adminLoginConfig,
 } from "./config/loginConfigs";
 
-// Types
+export { 
+  PERSONAS, 
+  CULTURAL_QUESTIONS, 
+  TRUST_THRESHOLDS,
+  FRIENDLY_ERRORS,
+  type PersonaType 
+} from './config/personas';
+
+export { 
+  VOICE_SCRIPTS,
+  getVoiceScript,
+  formatPhoneForSpeech,
+  type VoiceAuthLang,
+  type VoiceScriptKey
+} from './config/audioScripts';
+
+// === Types ===
 export type {
   LoginStep,
   LoginRole,
@@ -18,3 +56,6 @@ export type {
   AdminLoginConfig,
   StepConfig,
 } from "./types/login.types";
+
+// === Utils ===
+export { normalizeAnswer, compareAnswers, similarityScore } from './utils/normalize';

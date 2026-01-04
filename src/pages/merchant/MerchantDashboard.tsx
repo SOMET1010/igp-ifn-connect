@@ -35,7 +35,7 @@ import {
 import { 
   getDashboardScript, 
   formatAmountForSpeech 
-} from "@/features/voice-auth/config/dashboardScripts";
+} from "@/shared/config/audio/dashboardScripts";
 
 // Formater le montant
 const formatCurrency = (amount: number): string => {

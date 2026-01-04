@@ -2,7 +2,7 @@ import React from 'react';
 import { Mic, Loader2, RefreshCw } from 'lucide-react';
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Button } from '@/components/ui/button';
-import { VoiceAuthLang } from '@/features/voice-auth/config/audioScripts';
+import { VoiceAuthLang } from '@/features/auth/config/audioScripts';
 
 interface ClassicModeCardProps {
   lang: VoiceAuthLang;

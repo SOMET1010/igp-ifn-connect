@@ -10,14 +10,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
 import { PNAVIM_VOICES, type PnavimVoiceId } from '@/shared/config/voiceConfig';
-import type { PersonaType } from '@/features/social-auth/config/personas';
+import type { PersonaType } from '@/features/auth/config/personas';
 import { 
   hasPrerecordedMessage, 
   playPrerecordedMessage,
   type MessageKey 
 } from '@/shared/services/audio/prerecordedPersonaAudio';
-import type { VoiceAuthLang, VoiceScriptKey } from '@/features/voice-auth/config/audioScripts';
-import { getVoiceScript } from '@/features/voice-auth/config/audioScripts';
+import type { VoiceAuthLang, VoiceScriptKey } from '@/features/auth/config/audioScripts';
+import { getVoiceScript } from '@/features/auth/config/audioScripts';
 import { toast } from 'sonner';
 
 const VOICE_ENABLED_KEY = 'ifn_voice_enabled';

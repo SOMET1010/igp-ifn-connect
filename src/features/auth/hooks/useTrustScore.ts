@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useDeviceFingerprint } from './useDeviceFingerprint';
-import { TRUST_THRESHOLDS } from '../config/personas';
-import { useAuthLogging } from './useAuthLogging';
+import { useDeviceFingerprint } from '@/features/auth/hooks/useDeviceFingerprint';
+import { TRUST_THRESHOLDS } from '@/features/auth/config/personas';
+import { useAuthLogging } from '@/features/auth/hooks/useAuthLogging';
 
 /**
  * Hook pour calculer le score de confiance (Layer 2)
