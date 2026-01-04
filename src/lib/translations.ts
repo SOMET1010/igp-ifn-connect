@@ -28,6 +28,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     "platform_subtitle": "Plateforme Nationale des Acteurs du Vivrier Marchand",
     "who_are_you": "Qui êtes-vous ?",
     "choose_access": "Choisissez votre accès pour continuer",
+    "click_to_listen": "Cliquez pour écouter",
     "help_text": "Tu hésites ? Demande à ton agent ou ta coopérative.",
     "country": "République de Côte d'Ivoire",
     

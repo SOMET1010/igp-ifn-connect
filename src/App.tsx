@@ -50,8 +50,8 @@ import MerchantInvoices from "./pages/merchant/MerchantInvoices";
 import MerchantWallet from "./pages/merchant/MerchantWallet";
 import MerchantVoiceRegister from "./pages/merchant/MerchantVoiceRegister";
 import MerchantKyc from "./pages/merchant/MerchantKyc";
-
-// Cooperative pages
+import MerchantVoiceEntry from "./pages/merchant/MerchantVoiceEntry";
+import MerchantSecurityFallback from "./pages/merchant/MerchantSecurityFallback";
 import CooperativeLogin from "./pages/cooperative/CooperativeLogin";
 import CooperativeDashboard from "./pages/cooperative/CooperativeDashboard";
 import CooperativeStock from "./pages/cooperative/CooperativeStock";
@@ -147,6 +147,8 @@ const App = () => (
                   
                   {/* Merchant Routes */}
                   <Route path="/marchand/login" element={<MerchantLogin />} />
+                  <Route path="/marchand/connexion" element={<MerchantVoiceEntry />} />
+                  <Route path="/marchand/securite" element={<MerchantSecurityFallback />} />
                   <Route path="/marchand/inscription-vocale" element={<MerchantVoiceRegister />} />
                   <Route element={<ProtectedRoute requiredRole="merchant" redirectTo="/marchand/login" />}>
                     <Route path="/marchand" element={<MerchantDashboard />} />
