@@ -22,6 +22,7 @@ export type {
 export type {
   EnrollmentData,
   EnrollmentStep,
+  IdDocType,
 } from "./types/enrollment.types";
 
 export type {
@@ -38,9 +39,11 @@ export {
   EnrollmentStep1Schema,
   EnrollmentStep2Schema,
   EnrollmentStep3Schema,
+  EnrollmentStep4Schema,
   initialEnrollmentData,
   ENROLLMENT_DRAFT_KEY,
   ENROLLMENT_STEPS,
+  ID_DOC_TYPES,
 } from "./types/enrollment.types";
 
 export { agentProfileEditSchema } from "./types/profile.types";

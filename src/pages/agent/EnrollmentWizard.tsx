@@ -1,27 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { Step1Identity } from "@/components/agent/enrollment/Step1Identity";
-import { Step2Activity } from "@/components/agent/enrollment/Step2Activity";
+import { Step2Documents } from "@/components/agent/enrollment/Step2Documents";
 import { Step3Location } from "@/components/agent/enrollment/Step3Location";
-import { Step4Photos } from "@/components/agent/enrollment/Step4Photos";
+import { Step4Activity } from "@/components/agent/enrollment/Step4Activity";
 import { Step5Confirm } from "@/components/agent/enrollment/Step5Confirm";
-import { useEnrollmentForm } from "@/features/agent";
+import { useEnrollmentForm, enrollmentService } from "@/features/agent";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { usePhotoUpload } from "@/hooks/usePhotoUpload";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const STEPS = ["Identité", "Activité", "Localisation", "Photos", "Confirmation"];
+const STEPS = ["Identité", "Documents", "Localisation", "Activité", "Confirmation"];
 
 export default function EnrollmentWizard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isOnline, addToQueue } = useOfflineSync();
-  const { uploadMerchantPhotos, isUploading } = usePhotoUpload();
   const {
     data,
     currentStep,
@@ -33,15 +31,24 @@ export default function EnrollmentWizard() {
     isStep2Valid,
     isStep3Valid,
     isStep4Valid,
+    phoneError,
+    isCheckingPhone,
+    checkPhoneUnique,
   } = useEnrollmentForm();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
-  const canProceed = () => {
+  const handlePhoneBlur = async () => {
+    if (data.phone.length >= 8) {
+      await checkPhoneUnique(data.phone);
+    }
+  };
+
+  const canProceed = (): boolean => {
     switch (currentStep) {
       case 0:
-        return isStep1Valid();
+        return isStep1Valid() && !phoneError;
       case 1:
         return isStep2Valid();
       case 2:
@@ -55,9 +62,43 @@ export default function EnrollmentWizard() {
     }
   };
 
+  const uploadPhoto = async (
+    base64: string,
+    folder: string,
+    filename: string
+  ): Promise<string | null> => {
+    if (!base64) return null;
+
+    try {
+      const res = await fetch(base64);
+      const blob = await res.blob();
+
+      const path = `${folder}/${filename}_${Date.now()}.jpg`;
+      const { error } = await supabase.storage
+        .from("merchant-photos")
+        .upload(path, blob, { contentType: "image/jpeg" });
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from("merchant-photos")
+        .getPublicUrl(path);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!user) {
       toast.error("Vous devez être connecté");
+      return;
+    }
+
+    if (!confirmed) {
+      toast.error("Veuillez confirmer les informations");
       return;
     }
 
@@ -65,95 +106,68 @@ export default function EnrollmentWizard() {
 
     try {
       // Get agent ID
-      const { data: agentData } = await supabase
-        .from("agents")
-        .select("id, total_enrollments")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!agentData) {
+      const agentId = await enrollmentService.getAgentId(user.id);
+      if (!agentId) {
         toast.error("Profil agent non trouvé");
         setIsSubmitting(false);
         return;
       }
 
-      // Generate merchant ID for file paths
-      const merchantId = crypto.randomUUID();
-
-      let cmuPhotoUrl: string | null = null;
-      let locationPhotoUrl: string | null = null;
+      // Final phone check
+      const phoneUnique = await checkPhoneUnique(data.phone);
+      if (!phoneUnique) {
+        toast.error("Ce numéro de téléphone est déjà enregistré");
+        setIsSubmitting(false);
+        return;
+      }
 
       if (isOnline) {
-        // Upload photos to storage
-        const photoUrls = await uploadMerchantPhotos(
-          merchantId,
-          data.cmu_photo_file || data.cmu_photo_base64 || null,
-          data.location_photo_file || data.location_photo_base64 || null
-        );
-        cmuPhotoUrl = photoUrls.cmuPhotoUrl;
-        locationPhotoUrl = photoUrls.locationPhotoUrl;
+        // Upload photos in parallel
+        const [cmuPhotoUrl, locationPhotoUrl, idDocPhotoUrl] = await Promise.all([
+          uploadPhoto(data.cmu_photo_base64, "cmu", data.cmu_number),
+          uploadPhoto(data.location_photo_base64, "locations", data.phone),
+          uploadPhoto(data.id_doc_photo_base64, "id-docs", data.id_doc_number),
+        ]);
 
-        const merchantData = {
-          id: merchantId,
+        // Submit to database
+        await enrollmentService.submitEnrollment({
           cmu_number: data.cmu_number.trim(),
           full_name: data.full_name.trim(),
           phone: data.phone.trim(),
+          dob: data.dob,
           activity_type: data.activity_type,
-          activity_description: data.activity_description || null,
+          activity_description: data.activity_description || undefined,
           market_id: data.market_id,
           latitude: data.latitude,
           longitude: data.longitude,
-          enrolled_by: agentData.id,
-          status: "pending" as const,
           cmu_photo_url: cmuPhotoUrl,
           location_photo_url: locationPhotoUrl,
-        };
+          id_doc_type: data.id_doc_type,
+          id_doc_number: data.id_doc_number,
+          id_doc_photo_url: idDocPhotoUrl,
+          has_cnps: data.has_cnps,
+          cnps_number: data.has_cnps ? data.cnps_number : null,
+          enrolled_by: agentId,
+        });
 
-        // Direct insert to Supabase
-        const { error } = await supabase.from("merchants").insert(merchantData);
-
-        if (error) {
-          console.error("Insert error:", error);
-          toast.error("Erreur lors de l'enregistrement");
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Update agent enrollment count
-        await supabase
-          .from("agents")
-          .update({ total_enrollments: (agentData.total_enrollments || 0) + 1 })
-          .eq("id", agentData.id);
-
-        toast.success("Marchand enrôlé avec succès !");
+        toast.success("Marchand enregistré avec succès !");
       } else {
-        // Save to offline queue with base64 photos (will be uploaded on sync)
-        const merchantData = {
-          id: merchantId,
-          cmu_number: data.cmu_number.trim(),
-          full_name: data.full_name.trim(),
-          phone: data.phone.trim(),
-          activity_type: data.activity_type,
-          activity_description: data.activity_description || null,
-          market_id: data.market_id,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          enrolled_by: agentData.id,
-          status: "pending" as const,
-          // Store base64 for offline - will be converted to URLs on sync
-          cmu_photo_base64: data.cmu_photo_base64 || null,
-          location_photo_base64: data.location_photo_base64 || null,
+        // Save for offline sync
+        const offlineData = {
+          ...data,
+          enrolled_by: agentId,
+          created_at: new Date().toISOString(),
         };
 
-        addToQueue("merchants", "insert", merchantData);
-        toast.success("Enrôlement sauvegardé. Synchronisation automatique à la reconnexion.");
+        addToQueue("merchant_enrollment", "create", offlineData);
+        toast.success("Inscription sauvegardée (hors ligne)");
       }
 
       clearDraft();
-      navigate("/agent");
+      navigate("/agent/marchands");
     } catch (error) {
       console.error("Submit error:", error);
-      toast.error("Une erreur est survenue");
+      toast.error("Erreur lors de l'inscription");
     } finally {
       setIsSubmitting(false);
     }
@@ -162,13 +176,21 @@ export default function EnrollmentWizard() {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <Step1Identity data={data} updateField={updateField} />;
+        return (
+          <Step1Identity 
+            data={data} 
+            updateField={updateField}
+            phoneError={phoneError}
+            isCheckingPhone={isCheckingPhone}
+            onPhoneBlur={handlePhoneBlur}
+          />
+        );
       case 1:
-        return <Step2Activity data={data} updateField={updateField} />;
+        return <Step2Documents data={data} updateField={updateField} />;
       case 2:
         return <Step3Location data={data} updateField={updateField} />;
       case 3:
-        return <Step4Photos data={data} updateField={updateField} />;
+        return <Step4Activity data={data} updateField={updateField} />;
       case 4:
         return (
           <Step5Confirm
@@ -191,7 +213,7 @@ export default function EnrollmentWizard() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => (currentStep > 0 ? prevStep() : navigate("/agent"))}
+            onClick={() => navigate("/agent")}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -218,14 +240,16 @@ export default function EnrollmentWizard() {
       <div className="flex-1 overflow-y-auto pb-32">{renderStep()}</div>
 
       {/* Footer Navigation */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4 space-y-3">
-        <div className="flex gap-3">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4">
+        <div className="flex gap-3 max-w-lg mx-auto">
           {currentStep > 0 && (
             <Button
               variant="outline"
               onClick={prevStep}
+              disabled={isSubmitting}
               className="flex-1 h-14 text-lg rounded-xl"
             >
+              <ArrowLeft className="w-5 h-5 mr-2" />
               Précédent
             </Button>
           )}
@@ -233,24 +257,28 @@ export default function EnrollmentWizard() {
           {currentStep < 4 ? (
             <Button
               onClick={nextStep}
-              disabled={!canProceed()}
-              className="flex-1 h-14 text-lg rounded-xl bg-gradient-africa hover:opacity-90"
+              disabled={!canProceed() || isCheckingPhone}
+              className="flex-1 h-14 text-lg rounded-xl"
             >
               Suivant
+              <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!canProceed() || isSubmitting || isUploading}
-              className="flex-1 h-14 text-lg rounded-xl bg-gradient-forest hover:opacity-90"
+              disabled={!canProceed() || isSubmitting}
+              className="flex-1 h-14 text-lg rounded-xl bg-green-600 hover:bg-green-700"
             >
-              {isSubmitting || isUploading ? (
+              {isSubmitting ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  {isUploading ? "Upload photos..." : "Enregistrement..."}
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Envoi...
                 </>
               ) : (
-                <>✅ Enregistrer le Marchand</>
+                <>
+                  <Send className="w-5 h-5 mr-2" />
+                  Enregistrer
+                </>
               )}
             </Button>
           )}
