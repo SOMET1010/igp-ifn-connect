@@ -2419,6 +2419,7 @@ export type Database = {
           full_name: string
           id: string
           identifier_code: string | null
+          market_code: string | null
           notes: string | null
           phone: string | null
           phone2: string | null
@@ -2435,6 +2436,7 @@ export type Database = {
           full_name: string
           id?: string
           identifier_code?: string | null
+          market_code?: string | null
           notes?: string | null
           phone?: string | null
           phone2?: string | null
@@ -2451,6 +2453,7 @@ export type Database = {
           full_name?: string
           id?: string
           identifier_code?: string | null
+          market_code?: string | null
           notes?: string | null
           phone?: string | null
           phone2?: string | null
