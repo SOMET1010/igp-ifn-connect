@@ -3,7 +3,7 @@ import { Mic, Loader2, Phone, ArrowRight, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSocialAuth } from '../hooks/useSocialAuth';
 import { useVoiceTranscription } from '../hooks/useVoiceTranscription';
-import { useSpeechTts } from '@/features/voice-auth/hooks/useSpeechTts';
+import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
 import { AudioBars } from '@/components/merchant/AudioBars';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -82,24 +82,31 @@ export function VoiceSocialAuth({
     }
   });
 
-  const { speak, isSpeaking, stop } = useSpeechTts({
-    lang: 'fr',
-    onEnd: () => {
-      // Audio fini, on peut commencer à écouter si on est en mode listening
+  // Hook TTS ElevenLabs avec voix clonée du persona
+  const { speak, isSpeaking, stop, isLoading: ttsLoading } = useElevenLabsTts({
+    voiceId: currentPersona.voiceId!,
+    onStart: () => {
+      // Haptic feedback quand le TTS commence
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30);
+      }
+    },
+    onError: (err) => {
+      console.warn('[VoiceSocialAuth] TTS fallback:', err);
     }
   });
 
-  // Auto-play welcome message
+  // Auto-play welcome message avec voix clonée
   useEffect(() => {
     if (hasPlayedWelcome || step !== 'welcome') return;
     
     const timer = setTimeout(() => {
-      speak('welcome');
+      speak(getMessage('welcome'));
       setHasPlayedWelcome(true);
     }, 800);
     
     return () => clearTimeout(timer);
-  }, [speak, hasPlayedWelcome, step]);
+  }, [speak, hasPlayedWelcome, step, getMessage]);
 
   // Haptic feedback
   const triggerHaptic = useCallback(() => {
@@ -119,7 +126,7 @@ export function VoiceSocialAuth({
       // Démarrer l'écoute
       try {
         setMicState('listening');
-        speak('listen');
+        speak(getMessage('listen'));
         await startListening();
       } catch (err) {
         console.error('[VoiceSocialAuth] Failed to start listening:', err);
@@ -132,7 +139,7 @@ export function VoiceSocialAuth({
       stopListening();
       setMicState('idle');
     }
-  }, [isLoading, isConnecting, isConnected, micState, speak, stop, triggerHaptic, startListening, stopListening]);
+  }, [isLoading, isConnecting, isConnected, micState, speak, stop, triggerHaptic, startListening, stopListening, getMessage]);
 
   const handleManualSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -169,6 +176,7 @@ export function VoiceSocialAuth({
         question={questionText}
         personaName={currentPersona.name}
         personaAvatar={currentPersona.avatar}
+        voiceId={currentPersona.voiceId!}
         onAnswer={validateChallengeAnswer}
         onCancel={reset}
         isLoading={isLoading}
@@ -182,6 +190,8 @@ export function VoiceSocialAuth({
         reason={error || 'Vérification impossible'}
         phone={phone || undefined}
         merchantName={merchantName || undefined}
+        voiceId={currentPersona.voiceId!}
+        personaName={currentPersona.name}
         onRetry={reset}
       />
     );
@@ -255,11 +265,11 @@ export function VoiceSocialAuth({
           <button
             type="button"
             onClick={handleMicClick}
-            disabled={isLoading || isConnecting}
+            disabled={isLoading || isConnecting || ttsLoading}
             className={getMicButtonClass()}
             aria-label={micState === 'listening' ? 'Écoute en cours' : 'Appuyer pour parler'}
           >
-            {micState === 'processing' || isLoading || isConnecting ? (
+            {micState === 'processing' || isLoading || isConnecting || ttsLoading ? (
               <Loader2 className="w-12 h-12 text-white animate-spin" />
             ) : isConnected ? (
               <MicOff className="w-12 h-12 text-white" />
@@ -284,7 +294,7 @@ export function VoiceSocialAuth({
 
           {/* Status label */}
           <p className="text-center text-muted-foreground text-base font-medium">
-            {isConnecting ? 'Connexion au micro...' : getStatusLabel()}
+            {ttsLoading ? 'Préparation audio...' : isConnecting ? 'Connexion au micro...' : getStatusLabel()}
           </p>
 
           {/* Voice error message */}
@@ -298,7 +308,7 @@ export function VoiceSocialAuth({
           {isSpeaking && (
             <div className="flex items-center gap-1.5 text-primary text-xs">
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-              Audio en cours...
+              {currentPersona.name} parle...
             </div>
           )}
 

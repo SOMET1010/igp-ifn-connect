@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, RefreshCw, HeadphonesIcon, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useElevenLabsTts } from '../hooks/useElevenLabsTts';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 
 interface HumanFallbackProps {
   reason: string;
   phone?: string;
   merchantName?: string;
+  voiceId: string;
+  personaName: string;
   onRetry: () => void;
   supportPhone?: string;
 }
@@ -15,17 +18,45 @@ interface HumanFallbackProps {
  * HumanFallback - Layer 4 du protocole d'authentification sociale
  * 
  * Escalade vers un agent humain quand la vérification automatique échoue.
- * Message rassurant et non-technique.
+ * Message rassurant lu avec la voix clonée du persona.
  */
 export function HumanFallback({
   reason,
   phone,
   merchantName,
+  voiceId,
+  personaName,
   onRetry,
   supportPhone = '0800-PNAVIM',
 }: HumanFallbackProps) {
   const [waitTime, setWaitTime] = useState(0);
   const [ticketCreated, setTicketCreated] = useState(false);
+  const [hasPlayedMessage, setHasPlayedMessage] = useState(false);
+
+  // Hook TTS ElevenLabs avec voix clonée
+  const { speak, isSpeaking } = useElevenLabsTts({
+    voiceId,
+    onStart: () => {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30);
+      }
+    }
+  });
+
+  // Auto-play message de réassurance avec voix clonée
+  useEffect(() => {
+    if (hasPlayedMessage) return;
+    
+    const timer = setTimeout(() => {
+      const message = merchantName 
+        ? `${merchantName}, ne t'inquiète pas. On va appeler un agent pour t'aider.`
+        : "Ne t'inquiète pas mon enfant. On va appeler quelqu'un pour t'aider.";
+      speak(message);
+      setHasPlayedMessage(true);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [speak, hasPlayedMessage, merchantName]);
 
   // Simulate creating a support ticket
   useEffect(() => {
@@ -80,6 +111,14 @@ export function HumanFallback({
           Je ne reconnais pas bien ta voix aujourd'hui. 
           Ne t'inquiète pas, on va appeler un agent pour t'aider.
         </p>
+
+        {/* Indicateur TTS */}
+        {isSpeaking && (
+          <div className="flex items-center justify-center gap-1.5 text-primary text-xs">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+            {personaName} parle...
+          </div>
+        )}
 
         {/* Info utilisateur si disponible */}
         {(phone || merchantName) && (
