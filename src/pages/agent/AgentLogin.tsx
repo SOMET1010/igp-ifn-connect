@@ -6,6 +6,8 @@ import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 import { WaxPattern } from '@/components/shared/WaxPattern';
+import { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';
+import { ContextualHelp } from '@/components/shared/ContextualHelp';
 
 /**
  * AgentLogin - Page de connexion Agent Terrain
@@ -117,6 +119,12 @@ const AgentLogin = () => {
             Opérée par l'ANSUT pour le compte de la DGE
           </p>
         </footer>
+
+        {/* Floating Accessibility Button */}
+        <FloatingAccessibilityButton />
+        
+        {/* Contextual Help */}
+        <ContextualHelp pageKey="login" className="bottom-44 right-4" />
       </div>
     </div>
   );

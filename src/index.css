@@ -850,3 +850,29 @@
     animation: none !important;
   }
 }
+
+/* ============================================
+   ACCESSIBILITÉ - HIGH CONTRAST MODE
+   ============================================ */
+.high-contrast {
+  --foreground: 0 0% 0%;
+  --background: 0 0% 100%;
+  --primary: 28 100% 45%;
+  --muted-foreground: 0 0% 20%;
+  --border: 0 0% 30%;
+}
+
+.dark.high-contrast {
+  --foreground: 0 0% 100%;
+  --background: 0 0% 0%;
+  --primary: 28 100% 60%;
+  --muted-foreground: 0 0% 80%;
+  --border: 0 0% 70%;
+}
+
+/* Reduce motion override */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
