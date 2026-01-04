@@ -16,3 +16,4 @@ export { PnavimInstitutionalHeader } from "./PnavimInstitutionalHeader";
 export { PnavimTricolorLine } from "./PnavimTricolorLine";
 export { PnavimZoomControls } from "./PnavimZoomControls";
 export { PnavimNavMenu } from "./PnavimNavMenu";
+export { TimeAwareGreeting } from "./TimeAwareGreeting";
