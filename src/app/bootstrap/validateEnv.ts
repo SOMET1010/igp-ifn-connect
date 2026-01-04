@@ -53,29 +53,27 @@ export function validateEnvironment(): EnvValidationResult {
 }
 
 export function bootstrapEnvironment(): void {
-  const result = validateEnvironment();
+  try {
+    const result = validateEnvironment();
 
-  if (!result.valid) {
-    console.error('❌ P.NA.VIM - Erreurs de configuration:');
-    result.errors.forEach(err => console.error(`  • ${err}`));
-    
-    // En mode dev, afficher un warning mais continuer
-    if (import.meta.env.DEV) {
-      console.warn('⚠️ Mode développement: l\'application continue malgré les erreurs');
-    } else {
-      // En production, fail fast
-      throw new Error(
-        `P.NA.VIM - Configuration invalide:\n${result.errors.join('\n')}`
-      );
+    if (!result.valid) {
+      console.error('❌ P.NA.VIM - Erreurs de configuration:');
+      result.errors.forEach(err => console.error(`  • ${err}`));
+      console.warn('⚠️ L\'application continue malgré les erreurs de configuration');
     }
-  }
 
-  if (result.warnings.length > 0) {
-    console.warn('⚠️ P.NA.VIM - Avertissements de configuration:');
-    result.warnings.forEach(warn => console.warn(`  • ${warn}`));
-  }
+    if (result.warnings.length > 0) {
+      console.warn('⚠️ P.NA.VIM - Avertissements de configuration:');
+      result.warnings.forEach(warn => console.warn(`  • ${warn}`));
+    }
 
-  console.log('✅ P.NA.VIM - Environnement validé');
+    if (result.valid) {
+      console.log('✅ P.NA.VIM - Environnement validé');
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors de la validation environnement:', error);
+    // Ne jamais bloquer le rendu
+  }
 }
 
 export function getEnvStatus(): Record<string, { set: boolean; value?: string }> {
