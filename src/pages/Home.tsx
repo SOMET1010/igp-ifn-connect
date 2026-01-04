@@ -56,7 +56,21 @@ const AUDIO_SCRIPTS = {
   },
 };
 
-const Home: React.FC = () => {
+// Animation variants centralisées (hors composant pour performance)
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.3 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const Index: React.FC = () => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const { triggerTap } = useSensoryFeedback();
@@ -229,34 +243,49 @@ const Home: React.FC = () => {
           </PnavimPillButton>
         </motion.div>
 
-        {/* Grille des cartes de rôle - 2 colonnes sur desktop */}
-        <div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6"
+        {/* Mobile: Scroll Horizontal | Desktop: Grille 2 colonnes */}
+        <motion.div 
+          className="md:grid md:grid-cols-2 md:gap-6 
+                     flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 
+                     -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide"
           role="list"
           aria-label="Sélection du rôle utilisateur"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Carte Marchand (Orange) */}
-          <PnavimHeroCard
-            role="marchand"
-            title={t('i_am_merchant') || 'Marchand'}
-            subtitle={t('merchant_subtitle') || 'Encaisser, vendre, épargner'}
-            accentColor="orange"
-            showBadge
-            badgeText={getTimeBadge()}
-            audioMessage={getMerchantAudio()}
-            link="/marchand/connexion"
-          />
+          <motion.div 
+            className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
+            variants={itemVariants}
+          >
+            <PnavimHeroCard
+              role="marchand"
+              title={t('i_am_merchant') || 'Marchand'}
+              subtitle={t('merchant_subtitle') || 'Encaisser, vendre, épargner'}
+              accentColor="orange"
+              showBadge
+              badgeText={getTimeBadge()}
+              audioMessage={getMerchantAudio()}
+              link="/marchand/connexion"
+            />
+          </motion.div>
 
           {/* Carte Agent (Vert) */}
-          <PnavimHeroCard
-            role="agent"
-            title={t('field_agent') || 'Agent terrain'}
-            subtitle={t('agent_subtitle') || 'Accompagner les marchands'}
-            accentColor="green"
-            audioMessage={getAgentAudio()}
-            link="/agent/connexion"
-          />
-        </div>
+          <motion.div 
+            className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
+            variants={itemVariants}
+          >
+            <PnavimHeroCard
+              role="agent"
+              title={t('field_agent') || 'Agent terrain'}
+              subtitle={t('agent_subtitle') || 'Accompagner les marchands'}
+              accentColor="green"
+              audioMessage={getAgentAudio()}
+              link="/agent/connexion"
+            />
+          </motion.div>
+        </motion.div>
 
         {/* Carte Coopérative (optionnelle - plus petite) */}
         <motion.div
@@ -274,29 +303,34 @@ const Home: React.FC = () => {
           </button>
         </motion.div>
 
-        {/* Footer logos institutionnels */}
+        {/* Footer logos institutionnels avec fond dégradé */}
         <motion.footer
-          className="mt-10 text-center"
+          className="mt-10 relative"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          <p className="text-xs font-medium mb-3 text-white/70">
-            {t('initiative_by') || 'Une initiative de'}
-          </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            {PARTNERS.map((partner) => (
-              <img 
-                key={partner.id}
-                src={partner.logo} 
-                alt={partner.name} 
-                className="h-10 w-auto object-contain bg-white/90 rounded-lg px-3 py-1.5 shadow-sm"
-              />
-            ))}
+          {/* Fond dégradé pour lisibilité */}
+          <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-charbon/50 to-transparent -mx-4 px-4 py-6 rounded-t-3xl" />
+          
+          <div className="relative z-10 text-center py-6">
+            <p className="text-xs font-medium mb-3 text-white">
+              {t('initiative_by') || 'Une initiative de'}
+            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              {PARTNERS.map((partner) => (
+                <img 
+                  key={partner.id}
+                  src={partner.logo} 
+                  alt={partner.name} 
+                  className="h-10 w-auto object-contain bg-white/90 rounded-lg px-3 py-1.5 shadow-sm"
+                />
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-white/70">
+              République de Côte d'Ivoire
+            </p>
           </div>
-          <p className="mt-3 text-xs text-white/50">
-            République de Côte d'Ivoire
-          </p>
         </motion.footer>
       </main>
 
@@ -327,4 +361,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default React.memo(Home);
+export default React.memo(Index);
