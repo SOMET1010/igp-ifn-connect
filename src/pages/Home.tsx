@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
-import { PnavimRoleCard, PnavimPillButton } from '@/components/pnavim';
+import { PnavimRoleCard, PnavimPillButton, PnavimWaxCurve } from '@/components/pnavim';
 import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
@@ -56,10 +56,12 @@ const Home: React.FC = () => {
         <div className="flex items-center justify-between max-w-lg mx-auto">
           {/* Logo PNAVIM */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-nunito font-extrabold text-orange-sanguine">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-sanguine to-terre-battue flex items-center justify-center shadow-sm">
+              <span className="text-white font-bold text-sm">P</span>
+            </div>
+            <span className="text-sm font-nunito font-extrabold text-charbon">
               PNAVIM
             </span>
-            <span className="text-xs text-charbon/50">Côte d'Ivoire</span>
           </div>
 
           {/* Sélecteur langue par icônes */}
@@ -87,85 +89,84 @@ const Home: React.FC = () => {
       </header>
 
       {/* Contenu principal */}
-      <main className="relative z-10 container max-w-lg mx-auto px-4 pt-24 pb-32">
+      <main className="relative z-10 pt-24 pb-24">
         {/* Titre - Grande accroche */}
         <motion.div
-          className="text-center mb-8"
+          className="text-center mb-6 px-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-3xl font-nunito font-extrabold text-charbon leading-tight">
+          <h1 className="text-2xl font-nunito font-extrabold text-charbon leading-tight">
             {t('who_are_you')}
           </h1>
-          <p className="text-charbon/60 mt-2 text-lg">
+          <p className="text-charbon/60 mt-1 text-base">
             {t('choose_access')}
           </p>
         </motion.div>
 
         {/* Bouton Audio - "Cliquez pour écouter" */}
         <motion.div
-          className="flex justify-center mb-8"
+          className="flex justify-center mb-6 px-4"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
         >
           <PnavimPillButton
             variant="secondary"
-            size="lg"
-            leftIcon={<Volume2 className="w-5 h-5" />}
+            size="md"
+            leftIcon={<Volume2 className="w-4 h-4" />}
             onClick={playWelcomeAudio}
           >
             {t('click_to_listen') || 'Cliquez pour écouter'}
           </PnavimPillButton>
         </motion.div>
 
-        {/* Carte Marchand - HÉROS (plus grande) */}
+        {/* Carousel horizontal de cartes */}
         <motion.div
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 px-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
         >
+          {/* Carte Marchand - Hero (variant rich) */}
           <PnavimRoleCard
             persona="TANTIE"
+            variant="rich"
             size="xl"
+            showWelcomeBadge
+            badgeText="Bienvenue"
             link="/marchand/connexion"
             audioMessage="Je suis marchand. Appuyez pour accéder à votre espace."
+            className="snap-center min-w-[300px] flex-shrink-0"
+          />
+
+          {/* Carte Agent (variant solid) */}
+          <PnavimRoleCard
+            persona="AGENT"
+            variant="solid"
+            size="lg"
+            avatarStatus="online"
+            link="/agent/connexion"
+            audioMessage="Agent terrain. Validez et accompagnez les marchands."
+            className="snap-center min-w-[240px] flex-shrink-0"
+          />
+
+          {/* Carte Coopérative (variant glass) */}
+          <PnavimRoleCard
+            persona="COOP"
+            variant="glass"
+            size="lg"
+            link="/cooperative/connexion"
+            audioMessage="Coopérative agricole. Vendez aux marchands."
+            className="snap-center min-w-[240px] flex-shrink-0"
           />
         </motion.div>
 
-        {/* Cartes secondaires */}
-        <div className="mt-6 space-y-4">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.45, duration: 0.3 }}
-          >
-            <PnavimRoleCard
-              persona="AGENT"
-              size="md"
-              link="/agent/connexion"
-              audioMessage="Agent terrain. Validez et accompagnez les marchands."
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.55, duration: 0.3 }}
-          >
-            <PnavimRoleCard
-              persona="COOP"
-              size="md"
-              link="/cooperative/connexion"
-              audioMessage="Coopérative agricole. Vendez aux marchands."
-            />
-          </motion.div>
-        </div>
-
         {/* Footer logos institutionnels */}
         <motion.footer
-          className="mt-12 text-center"
+          className="mt-10 text-center px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
@@ -173,7 +174,7 @@ const Home: React.FC = () => {
           <p className="text-xs text-charbon/50 font-medium mb-3">
             Une initiative de
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="flex items-center justify-center gap-3 flex-wrap">
             <span className="text-xs font-bold text-charbon/60 bg-white/70 px-3 py-1.5 rounded-lg shadow-sm">
               DGE
             </span>
@@ -184,11 +185,14 @@ const Home: React.FC = () => {
               DGI
             </span>
           </div>
-          <p className="mt-4 text-xs text-charbon/40">
+          <p className="mt-3 text-xs text-charbon/40">
             République de Côte d'Ivoire
           </p>
         </motion.footer>
       </main>
+
+      {/* Courbe décorative Wax en bas */}
+      <PnavimWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
 
       {/* Onboarding Tutorial */}
       <OnboardingTutorial 
