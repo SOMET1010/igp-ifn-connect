@@ -14,6 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_actions: {
+        Row: {
+          action_type: string
+          agent_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          outcome: string | null
+          target_merchant_id: string | null
+          validation_id: string | null
+        }
+        Insert: {
+          action_type: string
+          agent_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          outcome?: string | null
+          target_merchant_id?: string | null
+          validation_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          agent_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          outcome?: string | null
+          target_merchant_id?: string | null
+          validation_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_actions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_actions_target_merchant_id_fkey"
+            columns: ["target_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_actions_validation_id_fkey"
+            columns: ["validation_id"]
+            isOneToOne: false
+            referencedRelation: "trust_validations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_requests: {
         Row: {
           created_at: string
@@ -127,6 +182,62 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      auth_context_logs: {
+        Row: {
+          created_at: string | null
+          decision: string
+          device_fingerprint: string | null
+          factors: Json | null
+          id: string
+          ip_address: string | null
+          latitude: number | null
+          longitude: number | null
+          merchant_id: string | null
+          outcome: string | null
+          phone: string
+          trust_score: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          decision: string
+          device_fingerprint?: string | null
+          factors?: Json | null
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          merchant_id?: string | null
+          outcome?: string | null
+          phone: string
+          trust_score?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          decision?: string
+          device_fingerprint?: string | null
+          factors?: Json | null
+          id?: string
+          ip_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          merchant_id?: string | null
+          outcome?: string | null
+          phone?: string
+          trust_score?: number | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auth_context_logs_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       auth_context_scores: {
         Row: {
@@ -1588,6 +1699,50 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_events: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          merchant_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          merchant_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          merchant_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_events_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stocks: {
         Row: {
           cooperative_id: string
@@ -1757,6 +1912,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "transactions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trust_validations: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          merchant_id: string
+          notes: string | null
+          reason: string | null
+          requested_by_phone: string | null
+          result: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_code: string
+          validation_type: string
+          validator_role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id: string
+          notes?: string | null
+          reason?: string | null
+          requested_by_phone?: string | null
+          result?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_code: string
+          validation_type: string
+          validator_role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          merchant_id?: string
+          notes?: string | null
+          reason?: string | null
+          requested_by_phone?: string | null
+          result?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_code?: string
+          validation_type?: string
+          validator_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_validations_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants"
@@ -2103,6 +2314,8 @@ export type Database = {
         Args: { p_quantity: number; p_stock_id: string }
         Returns: undefined
       }
+      expire_old_validations: { Args: never; Returns: undefined }
+      generate_validation_code: { Args: never; Returns: string }
       generate_wallet_reference: { Args: never; Returns: string }
       get_merchant_today_total: {
         Args: { _merchant_id: string }
