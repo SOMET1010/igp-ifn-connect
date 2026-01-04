@@ -238,6 +238,9 @@ export const agentLogger = logger.withContext({ module: 'Agent' });
 export const notificationLogger = logger.withContext({ module: 'Notification' });
 export const syncLogger = logger.withContext({ module: 'Sync' });
 export const networkLogger = logger.withContext({ module: 'Network' });
+export const preprodLogger = logger.withContext({ module: 'Preprod' });
+export const routerLogger = logger.withContext({ module: 'Router' });
+export const apiLogger = logger.withContext({ module: 'API' });
 
 // ============================================
 // EXPORT PAR DÉFAUT

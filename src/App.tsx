@@ -9,6 +9,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AppShell } from "@/app/layouts";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { NetworkGuard } from "@/app/guards/NetworkGuard";
+import { PreprodDebugPanel } from "@/components/dev/PreprodDebugPanel";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -31,14 +33,26 @@ import NotFound from "./pages/NotFound";
 import MyAccount from "./pages/account/MyAccount";
 import DemoAccess from "./pages/DemoAccess";
 
+// Pages fallback PRÉ-PROD
+import { OfflinePage, MaintenancePage, ErrorPage, HelpPage } from "./pages/fallback";
+
 // Loading fallback for lazy components
 const LazyLoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+  <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+    <p className="text-muted-foreground">Chargement...</p>
   </div>
 );
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Register Service Worker
 function registerServiceWorker() {
@@ -78,37 +92,52 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
-                  <AppShell>
-                    <Suspense fallback={<LazyLoadingFallback />}>
-                      <Routes>
-                        {/* Routes publiques */}
-                        <Route path="/" element={<Home />} />
-                        <Route path="/auth" element={<AuthPage />} />
-                        <Route path="/demo" element={<DemoAccess />} />
-                        <Route path="/compte" element={<MyAccount />} />
-                        <Route path="/accueil" element={<Navigate to="/" replace />} />
+                  <NetworkGuard>
+                    <AppShell>
+                      <Suspense fallback={<LazyLoadingFallback />}>
+                        <Routes>
+                          {/* Routes publiques */}
+                          <Route path="/" element={<Home />} />
+                          <Route path="/auth" element={<AuthPage />} />
+                          <Route path="/demo" element={<DemoAccess />} />
+                          <Route path="/compte" element={<MyAccount />} />
+                          <Route path="/accueil" element={<Navigate to="/" replace />} />
 
-                        {/* Routes Marchand */}
-                        {merchantPublicRoutes}
-                        {merchantProtectedRoutes}
+                          {/* Routes fallback PRÉ-PROD */}
+                          <Route path="/offline" element={<OfflinePage />} />
+                          <Route path="/maintenance" element={<MaintenancePage />} />
+                          <Route path="/error" element={<ErrorPage />} />
+                          <Route path="/aide" element={<HelpPage />} />
 
-                        {/* Routes Agent */}
-                        {agentPublicRoutes}
-                        {agentProtectedRoutes}
+                          {/* Redirections pour routes alternatives */}
+                          <Route path="/social-login" element={<Navigate to="/marchand/connexion" replace />} />
+                          <Route path="/cooperative/connexion" element={<Navigate to="/cooperative/login" replace />} />
+                          <Route path="/agent/connexion" element={<Navigate to="/agent/login" replace />} />
 
-                        {/* Routes Coopérative */}
-                        {cooperativePublicRoutes}
-                        {cooperativeProtectedRoutes}
+                          {/* Routes Marchand */}
+                          {merchantPublicRoutes}
+                          {merchantProtectedRoutes}
 
-                        {/* Routes Admin */}
-                        {adminPublicRoutes}
-                        {adminProtectedRoutes}
+                          {/* Routes Agent */}
+                          {agentPublicRoutes}
+                          {agentProtectedRoutes}
 
-                        {/* 404 - doit être en dernier */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </Suspense>
-                  </AppShell>
+                          {/* Routes Coopérative */}
+                          {cooperativePublicRoutes}
+                          {cooperativeProtectedRoutes}
+
+                          {/* Routes Admin */}
+                          {adminPublicRoutes}
+                          {adminProtectedRoutes}
+
+                          {/* 404 - doit être en dernier */}
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </Suspense>
+                    </AppShell>
+                  </NetworkGuard>
+                  {/* Panel debug PRÉ-PROD */}
+                  <PreprodDebugPanel />
                 </BrowserRouter>
               </TooltipProvider>
             </AudioProvider>
