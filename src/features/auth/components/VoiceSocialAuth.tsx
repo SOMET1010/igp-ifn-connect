@@ -224,6 +224,46 @@ export function VoiceSocialAuth({
     );
   }
 
+  // Écran inscription nouvel utilisateur
+  if (step === 'register') {
+    return (
+      <div className="flex flex-col items-center gap-5 py-4">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative"
+        >
+          <div className="w-24 h-24 rounded-full bg-amber-500 flex items-center justify-center shadow-xl">
+            <Users className="w-12 h-12 text-white" />
+          </div>
+        </motion.div>
+
+        <div className="text-center space-y-2">
+          <p className="text-lg font-bold text-foreground">
+            Nouveau numéro détecté
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Le numéro {phone} n'est pas encore enregistré.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Contacte un agent PNAVIM pour t'inscrire.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 w-full max-w-xs">
+          <Button 
+            onClick={reset}
+            variant="outline"
+            className="w-full"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Réessayer avec un autre numéro
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (step === 'success' && generatedOtp) {
     return (
       <div className="flex flex-col items-center gap-5 py-4">
