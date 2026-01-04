@@ -28,6 +28,9 @@ import AdminVivriers from '@/pages/admin/AdminVivriers';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminUserDetail from '@/pages/admin/AdminUserDetail';
 import AdminKycReview from '@/pages/admin/AdminKycReview';
+import AdminDiagnostics from '@/pages/admin/AdminDiagnostics';
+import AdminCardsImport from '@/pages/admin/AdminCardsImport';
+import AdminCardsSearch from '@/pages/admin/AdminCardsSearch';
 
 /**
  * Routes publiques de l'admin (login)
@@ -57,6 +60,9 @@ export const adminProtectedRoutes = (
     <Route path="/admin/utilisateurs" element={<AdminUsers />} />
     <Route path="/admin/utilisateurs/:userId" element={<AdminUserDetail />} />
     <Route path="/admin/kyc" element={<AdminKycReview />} />
+    <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
+    <Route path="/admin/cartes/import" element={<AdminCardsImport />} />
+    <Route path="/admin/cartes/recherche" element={<AdminCardsSearch />} />
   </Route>
 );
 

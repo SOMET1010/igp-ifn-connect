@@ -10,6 +10,7 @@ export { dashboardService } from './services/dashboardService';
 export { agentRequestsService } from './services/agentRequestsService';
 export { usersService } from './services/usersService';
 export { mapService } from './services/mapService';
+export * from './services/cardsImportService';
 
 // Components
 export * from './components/dashboard';

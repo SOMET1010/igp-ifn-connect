@@ -38,6 +38,7 @@ import DemoAccess from "./pages/DemoAccess";
 
 // Pages fallback PRÉ-PROD
 import { OfflinePage, MaintenancePage, ErrorPage, HelpPage } from "./pages/fallback";
+import HealthPage from "./pages/public/HealthPage";
 
 // Loading fallback for lazy components
 const LazyLoadingFallback = () => (
@@ -112,6 +113,7 @@ const App = () => (
                           <Route path="/maintenance" element={<MaintenancePage />} />
                           <Route path="/error" element={<ErrorPage />} />
                           <Route path="/aide" element={<HelpPage />} />
+                          <Route path="/health" element={<HealthPage />} />
 
                           {/* Redirections pour routes alternatives */}
                           <Route path="/social-login" element={<Navigate to="/marchand/connexion" replace />} />
