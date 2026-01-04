@@ -1,9 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Volume2, Wallet, UserCheck, Users, ShoppingBasket, BadgeCheck } from 'lucide-react';
+import { Volume2, VolumeX, Loader2, Wallet, UserCheck, Users, ShoppingBasket, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { VOICE_BY_CONTEXT, PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 
 type AccentColor = 'orange' | 'green' | 'blue';
 
@@ -61,6 +63,11 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
   const { triggerTap } = useSensoryFeedback();
   const { t } = useLanguage();
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+
   const styles = ACCENT_STYLES[accentColor];
   const IconComponent = ROLE_ICONS[role] || Wallet;
 
@@ -69,19 +76,75 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
     navigate(link);
   }, [navigate, link, triggerTap]);
 
-  const handleAudioClick = useCallback((e: React.MouseEvent) => {
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setIsPlaying(false);
+  }, []);
+
+  const handleAudioClick = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     triggerTap();
     
-    if ('speechSynthesis' in window && audioMessage) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(audioMessage);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
-      window.speechSynthesis.speak(utterance);
+    if (!audioMessage) return;
+
+    // Si déjà en lecture, arrêter
+    if (isPlaying) {
+      stopAudio();
+      return;
     }
-  }, [audioMessage, triggerTap]);
+
+    setIsLoading(true);
+
+    try {
+      // Utiliser la voix ElevenLabs selon le rôle
+      const voiceId = VOICE_BY_CONTEXT[role] || PNAVIM_VOICES.DEFAULT;
+      const audioBlob = await generateSpeech(audioMessage, { voiceId });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioUrlRef.current = audioUrl;
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => {
+        setIsLoading(false);
+        setIsPlaying(true);
+        if (navigator.vibrate) navigator.vibrate(30);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        console.error('Erreur lecture audio ElevenLabs');
+        setIsLoading(false);
+        setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('Erreur ElevenLabs TTS:', error);
+      setIsLoading(false);
+      setIsPlaying(false);
+    }
+  }, [audioMessage, role, triggerTap, isPlaying, stopAudio]);
 
   return (
     <motion.div
@@ -143,11 +206,18 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
         <div className="flex items-end justify-between">
           <button
             onClick={handleAudioClick}
-            className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white px-4 py-3 rounded-full flex items-center gap-2 backdrop-blur-sm transition-colors font-semibold text-sm border border-white/10 min-h-[52px]"
-            aria-label={t('click_to_listen') || 'Écouter'}
+            disabled={isLoading}
+            className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white px-4 py-3 rounded-full flex items-center gap-2 backdrop-blur-sm transition-colors font-semibold text-sm border border-white/10 min-h-[52px] disabled:opacity-50"
+            aria-label={isPlaying ? 'Arrêter' : (t('click_to_listen') || 'Écouter')}
           >
-            <Volume2 className="w-5 h-5" />
-            <span>{t('click_to_listen') || 'Écouter'}</span>
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : isPlaying ? (
+              <VolumeX className="w-5 h-5" />
+            ) : (
+              <Volume2 className="w-5 h-5" />
+            )}
+            <span>{isPlaying ? 'Arrêter' : (t('click_to_listen') || 'Écouter')}</span>
           </button>
 
           {/* Mascotte/Image (positionnée pour dépasser) */}

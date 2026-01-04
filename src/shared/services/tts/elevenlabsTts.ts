@@ -1,10 +1,9 @@
 /**
- * Service TTS ElevenLabs avec voix ivoirienne
+ * Service TTS ElevenLabs avec voix PNAVIM custom
  * Appelle l'edge function elevenlabs-tts (ne jamais exposer l'API key côté client)
  */
 
-// Voice ID clonée Tantie Sagesse
-export const VOICE_ID_IVOIRIENNE = "LZZ0J6eX2D30k2TKgBOR";
+import { PNAVIM_VOICES, type PnavimVoiceId } from '@/shared/config/voiceConfig';
 
 // Configuration par défaut
 const DEFAULT_MODEL = "eleven_multilingual_v2";
@@ -24,7 +23,7 @@ export async function generateSpeech(
   text: string,
   options: ElevenLabsTtsOptions = {}
 ): Promise<Blob> {
-  const { voiceId = VOICE_ID_IVOIRIENNE, modelId = DEFAULT_MODEL } = options;
+  const { voiceId = PNAVIM_VOICES.DEFAULT, modelId = DEFAULT_MODEL } = options;
 
   if (!text || text.trim().length === 0) {
     throw new Error("Le texte est requis pour la synthèse vocale");
@@ -94,3 +93,6 @@ export function formatTextForIvorianVoice(text: string, localStyle = false): str
 
   return formatted;
 }
+
+// Re-export pour compatibilité
+export { PNAVIM_VOICES };

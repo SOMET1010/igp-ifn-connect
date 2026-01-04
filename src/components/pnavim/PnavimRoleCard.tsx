@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { Volume2 } from "lucide-react";
+import { Volume2, VolumeX, Loader2 } from "lucide-react";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { generateSpeech } from "@/shared/services/tts/elevenlabsTts";
+import { PNAVIM_VOICES } from "@/shared/config/voiceConfig";
 
 type PersonaType = "TANTIE" | "AGENT" | "COOP";
 type VariantType = "rich" | "solid" | "glass";
@@ -25,21 +27,25 @@ const personaConfig: Record<PersonaType, {
   emoji: string;
   title: string;
   subtitle: string;
+  voiceId: string;
 }> = {
   TANTIE: {
     emoji: "🧺",
     title: "Je suis Marchand",
     subtitle: "Encaisser, gérer mon stock",
+    voiceId: PNAVIM_VOICES.TANTIE_SAGESSE,
   },
   AGENT: {
     emoji: "👨🏾‍💼",
     title: "Agent Terrain",
     subtitle: "Valider, accompagner",
+    voiceId: PNAVIM_VOICES.GBAIRAI,
   },
   COOP: {
     emoji: "🌾",
     title: "Coopérative",
     subtitle: "Vendre aux marchands",
+    voiceId: PNAVIM_VOICES.TANTIE_SAGESSE,
   },
 };
 
@@ -110,9 +116,7 @@ const sizeStyles = {
 
 /**
  * Carte rôle persona PNAVIM avec variantes visuelles
- * - rich: fond gradient riche (Marchand)
- * - solid: couleur unie (Agent)
- * - glass: glassmorphism (Coopérative)
+ * Utilise exclusivement les voix ElevenLabs custom
  */
 export const PnavimRoleCard: React.FC<PnavimRoleCardProps> = ({
   persona,
@@ -130,6 +134,11 @@ export const PnavimRoleCard: React.FC<PnavimRoleCardProps> = ({
   const { triggerTap, triggerSuccess } = useSensoryFeedback();
   const prefersReducedMotion = useReducedMotion();
   
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  
   const config = personaConfig[persona];
   const styles = sizeStyles[size];
   const variantStyle = variantStyles[variant];
@@ -139,18 +148,80 @@ export const PnavimRoleCard: React.FC<PnavimRoleCardProps> = ({
     navigate(link);
   };
 
-  const handleVoice = (e: React.MouseEvent) => {
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+    setIsPlaying(false);
+  }, []);
+
+  const handleVoice = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     triggerTap();
+
     if (onVoiceClick) {
       onVoiceClick();
-    } else if (audioMessage && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(audioMessage);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 0.9;
-      speechSynthesis.speak(utterance);
+      return;
     }
-  };
+
+    if (!audioMessage) return;
+
+    // Si déjà en lecture, arrêter
+    if (isPlaying) {
+      stopAudio();
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Utiliser la voix ElevenLabs selon le persona
+      const voiceId = config.voiceId;
+      const audioBlob = await generateSpeech(audioMessage, { voiceId });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      audioUrlRef.current = audioUrl;
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onplay = () => {
+        setIsLoading(false);
+        setIsPlaying(true);
+        if (navigator.vibrate) navigator.vibrate(30);
+      };
+
+      audio.onended = () => {
+        setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
+      };
+
+      audio.onerror = () => {
+        console.error('Erreur lecture audio ElevenLabs');
+        setIsLoading(false);
+        setIsPlaying(false);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('Erreur ElevenLabs TTS:', error);
+      setIsLoading(false);
+      setIsPlaying(false);
+    }
+  }, [audioMessage, config.voiceId, triggerTap, isPlaying, stopAudio, onVoiceClick]);
 
   return (
     <button
@@ -224,14 +295,21 @@ export const PnavimRoleCard: React.FC<PnavimRoleCardProps> = ({
         {/* Bouton Audio */}
         <button
           onClick={handleVoice}
+          disabled={isLoading}
           className={cn(
             "shrink-0 w-11 h-11 rounded-full flex items-center justify-center shadow-md",
             variantStyle.audioBtn,
-            "active:scale-90 transition-transform"
+            "active:scale-90 transition-transform disabled:opacity-50"
           )}
-          aria-label="Écouter"
+          aria-label={isPlaying ? "Arrêter" : "Écouter"}
         >
-          <Volume2 className="w-5 h-5" />
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isPlaying ? (
+            <VolumeX className="w-5 h-5" />
+          ) : (
+            <Volume2 className="w-5 h-5" />
+          )}
         </button>
       </div>
     </button>

@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
-import { generateSpeech } from '@/shared/services/tts/openaiTts';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 import logger from '@/infra/logger';
 
 interface AudioButtonProps {
@@ -12,6 +13,7 @@ interface AudioButtonProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'floating' | 'inline';
+  voiceId?: string; // Voice ID ElevenLabs optionnel
 }
 
 export function AudioButton({ 
@@ -19,7 +21,8 @@ export function AudioButton({
   audioKey,
   className, 
   size = 'md',
-  variant = 'floating' 
+  variant = 'floating',
+  voiceId = PNAVIM_VOICES.DEFAULT,
 }: AudioButtonProps) {
   const { language, t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -50,14 +53,14 @@ export function AudioButton({
     setIsPlaying(false);
   }, []);
 
-  // TTS via OpenAI (Lovable AI Gateway - gratuit)
-  const speakWithOpenAI = useCallback(async () => {
+  // TTS via ElevenLabs (voix custom PNAVIM)
+  const speakWithElevenLabs = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      logger.debug('Appel OpenAI TTS', { module: 'AudioButton', text: textToRead.substring(0, 50) });
+      logger.debug('Appel ElevenLabs TTS', { module: 'AudioButton', text: textToRead.substring(0, 50), voiceId });
 
-      const audioBlob = await generateSpeech(textToRead);
+      const audioBlob = await generateSpeech(textToRead, { voiceId });
       const audioUrl = URL.createObjectURL(audioBlob);
       audioUrlRef.current = audioUrl;
 
@@ -80,7 +83,7 @@ export function AudioButton({
       };
 
       audio.onerror = (e) => {
-        logger.error('Erreur lecture audio OpenAI', e, { module: 'AudioButton' });
+        logger.error('Erreur lecture audio ElevenLabs', e, { module: 'AudioButton' });
         setIsLoading(false);
         setIsPlaying(false);
         if (audioUrlRef.current) {
@@ -92,11 +95,11 @@ export function AudioButton({
 
       await audio.play();
     } catch (error) {
-      logger.error('Erreur OpenAI TTS', error, { module: 'AudioButton' });
+      logger.error('Erreur ElevenLabs TTS', error, { module: 'AudioButton' });
       setIsLoading(false);
       setIsPlaying(false);
     }
-  }, [textToRead]);
+  }, [textToRead, voiceId]);
 
   // Fonction principale de lecture avec priorité audio pré-enregistré
   const speak = useCallback(async () => {
@@ -125,9 +128,9 @@ export function AudioButton({
       setIsLoading(false);
     }
 
-    // Priorité 2: OpenAI TTS (Lovable AI Gateway)
-    speakWithOpenAI();
-  }, [isPlaying, language, audioKey, stopAudio, speakWithOpenAI]);
+    // Priorité 2: ElevenLabs TTS (voix custom PNAVIM)
+    speakWithElevenLabs();
+  }, [isPlaying, language, audioKey, stopAudio, speakWithElevenLabs]);
 
   return (
     <button
@@ -160,9 +163,10 @@ export function AudioButton({
 interface PageAudioButtonProps {
   pageKey: string;
   className?: string;
+  voiceId?: string;
 }
 
-export function PageAudioButton({ pageKey, className }: PageAudioButtonProps) {
+export function PageAudioButton({ pageKey, className, voiceId = PNAVIM_VOICES.DEFAULT }: PageAudioButtonProps) {
   const { t } = useLanguage();
   const textToRead = t(pageKey);
   
@@ -172,6 +176,7 @@ export function PageAudioButton({ pageKey, className }: PageAudioButtonProps) {
       audioKey={pageKey}
       variant="floating"
       size="lg"
+      voiceId={voiceId}
       className={cn("bottom-24 right-4", className)}
     />
   );

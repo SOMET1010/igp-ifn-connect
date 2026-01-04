@@ -11,8 +11,8 @@ serve(async (req) => {
   }
 
   try {
-    // Voice ID clonée Tantie Sagesse par défaut
-    const { text, voiceId = "LZZ0J6eX2D30k2TKgBOR", modelId = "eleven_multilingual_v2" } = await req.json();
+    // Voix par défaut : Tantie Sagesse (PWiCgOlgDsq0Da8bhS6a)
+    const { text, voiceId = "PWiCgOlgDsq0Da8bhS6a", modelId = "eleven_multilingual_v2" } = await req.json();
     
     if (!text) {
       throw new Error('Text is required');

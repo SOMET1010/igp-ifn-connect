@@ -1,12 +1,17 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { generateSpeech } from '@/shared/services/tts/openaiTts';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { PNAVIM_VOICES, type PnavimVoiceId } from '@/shared/config/voiceConfig';
 import logger from '@/infra/logger';
 import { toast } from '@/hooks/use-toast';
 
 const VOICE_ENABLED_KEY = 'ifn_voice_enabled';
 
+interface UseTtsOptions {
+  voiceId?: PnavimVoiceId;
+}
+
 interface UseTtsReturn {
-  /** Lire un texte avec OpenAI TTS */
+  /** Lire un texte avec ElevenLabs TTS */
   speak: (text: string) => Promise<void>;
   /** Arrêter la lecture en cours */
   stop: () => void;
@@ -23,12 +28,14 @@ interface UseTtsReturn {
 }
 
 /**
- * Hook React pour gérer le TTS OpenAI via Lovable AI Gateway
+ * Hook React pour gérer le TTS ElevenLabs avec voix custom PNAVIM
+ * - Utilise exclusivement les voix Tantie Sagesse et Gbairai
  * - Gère l'état de lecture (loading, playing, error)
  * - Persiste le toggle voix en localStorage
- * - Gratuit avec Lovable Cloud (pas de clé API)
  */
-export function useTts(): UseTtsReturn {
+export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
+  const { voiceId = PNAVIM_VOICES.DEFAULT } = options;
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +76,7 @@ export function useTts(): UseTtsReturn {
     setError(null);
   }, []);
 
-  // Lire un texte avec OpenAI TTS
+  // Lire un texte avec ElevenLabs TTS
   const speak = useCallback(async (text: string) => {
     // Arrêter si déjà en lecture
     if (isPlaying) {
@@ -87,9 +94,9 @@ export function useTts(): UseTtsReturn {
     setError(null);
 
     try {
-      logger.debug('Appel OpenAI TTS', { module: 'useTts', text: text.substring(0, 50) });
+      logger.debug('Appel ElevenLabs TTS', { module: 'useTts', text: text.substring(0, 50), voiceId });
 
-      const audioBlob = await generateSpeech(text);
+      const audioBlob = await generateSpeech(text, { voiceId });
       const audioUrl = URL.createObjectURL(audioBlob);
       audioUrlRef.current = audioUrl;
 
@@ -126,7 +133,7 @@ export function useTts(): UseTtsReturn {
       await audio.play();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur TTS inconnue';
-      logger.error('Erreur OpenAI TTS', err, { module: 'useTts' });
+      logger.error('Erreur ElevenLabs TTS', err, { module: 'useTts' });
       setIsLoading(false);
       setIsPlaying(false);
       setError(errorMessage);
@@ -138,7 +145,7 @@ export function useTts(): UseTtsReturn {
         variant: "destructive",
       });
     }
-  }, [isPlaying, isVoiceEnabled, stop]);
+  }, [isPlaying, isVoiceEnabled, stop, voiceId]);
 
   // Toggle voix ON/OFF
   const toggleVoice = useCallback(() => {
