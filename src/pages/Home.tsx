@@ -296,10 +296,10 @@ const Index: React.FC = () => {
           initial="hidden"
           animate="visible"
         >
-          {/* Carte Marchand (Orange) */}
+          {/* Carte Marchand (Orange) - Plus grande, utilisateur principal */}
           <motion.div 
             data-card
-            className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
+            className="flex-shrink-0 w-[88vw] sm:w-[75vw] md:w-full snap-center"
             variants={itemVariants}
           >
             <PnavimHeroCard
@@ -311,13 +311,14 @@ const Index: React.FC = () => {
               badgeText={getTimeBadge()}
               audioMessage={getMerchantAudio()}
               link="/marchand/connexion"
+              className="min-h-[280px] sm:min-h-[300px]"
             />
           </motion.div>
 
-          {/* Carte Agent (Vert) */}
+          {/* Carte Agent (Vert) - Plus compacte */}
           <motion.div 
             data-card
-            className="flex-shrink-0 w-[85vw] sm:w-[70vw] md:w-full snap-center"
+            className="flex-shrink-0 w-[75vw] sm:w-[60vw] md:w-full snap-center"
             variants={itemVariants}
           >
             <PnavimHeroCard
@@ -327,6 +328,7 @@ const Index: React.FC = () => {
               accentColor="green"
               audioMessage={getAgentAudio()}
               link="/agent/connexion"
+              className="min-h-[240px] sm:min-h-[260px] opacity-95"
             />
           </motion.div>
         </motion.div>
