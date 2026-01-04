@@ -50,3 +50,18 @@ verify_jwt = false
 
 [functions.save-security-questions]
 verify_jwt = false
+
+[functions.auth-social-start]
+verify_jwt = false
+
+[functions.auth-social-confirm-phone]
+verify_jwt = false
+
+[functions.auth-social-answer]
+verify_jwt = false
+
+[functions.auth-social-escalate]
+verify_jwt = false
+
+[functions.auth-validation-approve]
+verify_jwt = false
