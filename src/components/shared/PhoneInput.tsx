@@ -5,9 +5,10 @@ import { Phone, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isValidCIPhonePrefix } from '@/lib/validationSchemas';
 
-interface PhoneInputProps {
+export interface PhoneInputProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   disabled?: boolean;
   id?: string;
@@ -21,6 +22,7 @@ interface PhoneInputProps {
 export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,
   onChange,
+  onBlur,
   placeholder = '07 01 02 03 04',
   disabled = false,
   id = 'phone',
@@ -57,6 +59,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             placeholder={placeholder}
             value={value}
             onChange={handleChange}
+            onBlur={onBlur}
             disabled={disabled}
             className={cn(
               "input-institutional pr-10",

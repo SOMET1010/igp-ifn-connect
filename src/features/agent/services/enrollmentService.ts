@@ -1,17 +1,22 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { EnrollmentData } from "../types/enrollment.types";
 
 export interface EnrollmentSubmitData {
   cmu_number: string;
   full_name: string;
   phone: string;
+  dob: string;
   activity_type: string;
-  activity_description: string;
+  activity_description?: string;
   market_id: string;
   latitude: number | null;
   longitude: number | null;
-  cmu_photo_url?: string;
-  location_photo_url?: string;
+  cmu_photo_url: string | null;
+  location_photo_url: string | null;
+  id_doc_type: string;
+  id_doc_number: string;
+  id_doc_photo_url: string | null;
+  has_cnps: boolean;
+  cnps_number: string | null;
   enrolled_by: string;
 }
 
@@ -33,27 +38,49 @@ export const enrollmentService = {
   /**
    * Submit a merchant enrollment
    */
-  async submitEnrollment(data: EnrollmentSubmitData): Promise<string> {
+  async submitEnrollment(submitData: EnrollmentSubmitData): Promise<string> {
     const { data: merchant, error } = await supabase
       .from("merchants")
       .insert({
-        cmu_number: data.cmu_number,
-        full_name: data.full_name,
-        phone: data.phone,
-        activity_type: data.activity_type,
-        activity_description: data.activity_description || null,
-        market_id: data.market_id,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        cmu_photo_url: data.cmu_photo_url || null,
-        location_photo_url: data.location_photo_url || null,
-        enrolled_by: data.enrolled_by,
+        cmu_number: submitData.cmu_number,
+        full_name: submitData.full_name,
+        phone: submitData.phone,
+        dob: submitData.dob,
+        activity_type: submitData.activity_type,
+        activity_description: submitData.activity_description || null,
+        market_id: submitData.market_id,
+        latitude: submitData.latitude,
+        longitude: submitData.longitude,
+        cmu_photo_url: submitData.cmu_photo_url,
+        location_photo_url: submitData.location_photo_url,
+        id_doc_type: submitData.id_doc_type,
+        id_doc_number: submitData.id_doc_number,
+        cnps_number: submitData.cnps_number,
+        enrolled_by: submitData.enrolled_by,
         status: "pending",
       })
       .select("id")
       .single();
 
     if (error) throw error;
+
+    // Note: merchant_documents table insertion will be handled when types are regenerated
+    // For now, the id_doc fields are stored directly on the merchant
+
+    // Increment agent's enrollment count
+    const { data: agentData } = await supabase
+      .from("agents")
+      .select("total_enrollments")
+      .eq("id", submitData.enrolled_by)
+      .single();
+
+    if (agentData) {
+      await supabase
+        .from("agents")
+        .update({ total_enrollments: (agentData.total_enrollments || 0) + 1 })
+        .eq("id", submitData.enrolled_by);
+    }
+
     return merchant.id;
   },
 
@@ -81,5 +108,23 @@ export const enrollmentService = {
 
     if (error) throw error;
     return data ?? [];
+  },
+
+  /**
+   * Check if a phone number is already registered
+   */
+  async isPhoneUnique(phone: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from("merchants")
+      .select("id")
+      .eq("phone", phone)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error checking phone:", error);
+      return true;
+    }
+
+    return !data;
   },
 };

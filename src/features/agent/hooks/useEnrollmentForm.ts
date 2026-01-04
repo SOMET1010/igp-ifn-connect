@@ -2,12 +2,19 @@ import { useState, useEffect, useCallback } from "react";
 import { 
   EnrollmentData, 
   initialEnrollmentData, 
-  ENROLLMENT_DRAFT_KEY 
+  ENROLLMENT_DRAFT_KEY,
+  EnrollmentStep1Schema,
+  EnrollmentStep2Schema,
+  EnrollmentStep3Schema,
+  EnrollmentStep4Schema,
 } from "../types/enrollment.types";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useEnrollmentForm() {
   const [data, setData] = useState<EnrollmentData>(initialEnrollmentData);
   const [currentStep, setCurrentStep] = useState(0);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
 
   // Load draft on mount
   useEffect(() => {
@@ -21,6 +28,7 @@ export function useEnrollmentForm() {
           ...parsed,
           cmu_photo_file: null,
           location_photo_file: null,
+          id_doc_photo_file: null,
         });
         setCurrentStep(parsed.currentStep || 0);
       }
@@ -36,6 +44,7 @@ export function useEnrollmentForm() {
         ...data,
         cmu_photo_file: null,
         location_photo_file: null,
+        id_doc_photo_file: null,
         currentStep,
       };
       localStorage.setItem(ENROLLMENT_DRAFT_KEY, JSON.stringify(toSave));
@@ -53,6 +62,40 @@ export function useEnrollmentForm() {
     value: EnrollmentData[K]
   ) => {
     setData((prev) => ({ ...prev, [field]: value }));
+    
+    // Clear phone error when phone changes
+    if (field === "phone") {
+      setPhoneError(null);
+    }
+  }, []);
+
+  // Check if phone is unique
+  const checkPhoneUnique = useCallback(async (phone: string): Promise<boolean> => {
+    if (!phone || phone.length < 8) return true;
+    
+    setIsCheckingPhone(true);
+    try {
+      const { data: existing, error } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("phone", phone)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error checking phone:", error);
+        return true; // Allow to proceed on error
+      }
+      
+      if (existing) {
+        setPhoneError("Ce numéro de téléphone est déjà enregistré");
+        return false;
+      }
+      
+      setPhoneError(null);
+      return true;
+    } finally {
+      setIsCheckingPhone(false);
+    }
   }, []);
 
   const nextStep = useCallback(() => {
@@ -71,31 +114,46 @@ export function useEnrollmentForm() {
     localStorage.removeItem(ENROLLMENT_DRAFT_KEY);
     setData(initialEnrollmentData);
     setCurrentStep(0);
+    setPhoneError(null);
   }, []);
 
-  const isStep1Valid = useCallback(() => {
-    return (
-      data.cmu_number.trim().length >= 5 &&
-      data.full_name.trim().length >= 3 &&
-      data.phone.trim().length >= 8
-    );
-  }, [data.cmu_number, data.full_name, data.phone]);
+  // Step validations using Zod schemas
+  const isStep1Valid = useCallback((): boolean => {
+    const result = EnrollmentStep1Schema.safeParse(data);
+    return result.success && !phoneError;
+  }, [data, phoneError]);
 
-  const isStep2Valid = useCallback(() => {
-    return data.activity_type.trim().length > 0;
-  }, [data.activity_type]);
+  const isStep2Valid = useCallback((): boolean => {
+    const result = EnrollmentStep2Schema.safeParse(data);
+    return result.success;
+  }, [data]);
 
-  const isStep3Valid = useCallback(() => {
-    return (
-      data.market_id.trim().length > 0 &&
-      data.latitude !== null &&
-      data.longitude !== null
-    );
-  }, [data.market_id, data.latitude, data.longitude]);
+  const isStep3Valid = useCallback((): boolean => {
+    const result = EnrollmentStep3Schema.safeParse(data);
+    return result.success;
+  }, [data]);
 
-  const isStep4Valid = useCallback(() => {
-    return data.cmu_photo_base64.length > 0 || data.cmu_photo_file !== null;
-  }, [data.cmu_photo_base64, data.cmu_photo_file]);
+  const isStep4Valid = useCallback((): boolean => {
+    const result = EnrollmentStep4Schema.safeParse(data);
+    return result.success;
+  }, [data]);
+
+  // Get validation errors for current step
+  const getStep1Errors = useCallback(() => {
+    const result = EnrollmentStep1Schema.safeParse(data);
+    if (!result.success) {
+      return result.error.flatten().fieldErrors;
+    }
+    return {};
+  }, [data]);
+
+  const getStep2Errors = useCallback(() => {
+    const result = EnrollmentStep2Schema.safeParse(data);
+    if (!result.success) {
+      return result.error.flatten().fieldErrors;
+    }
+    return {};
+  }, [data]);
 
   return {
     data,
@@ -109,5 +167,10 @@ export function useEnrollmentForm() {
     isStep2Valid,
     isStep3Valid,
     isStep4Valid,
+    getStep1Errors,
+    getStep2Errors,
+    phoneError,
+    isCheckingPhone,
+    checkPhoneUnique,
   };
 }
