@@ -1,16 +1,23 @@
 # Architecture du Projet IFN
 
-> Documentation mise à jour après 7 phases de cleanup (Janvier 2026)
+> Documentation mise à jour - Architecture "Industrie" (Janvier 2026)
 
 ## Vue d'ensemble
+
+Le projet IFN suit une architecture **Vertical Slices** professionnelle, avec :
+- **Features autonomes** : chaque module métier contient pages, composants, hooks et services
+- **RBAC centralisé** : une source unique de vérité pour les permissions
+- **Offline-first** : capability partagée pour le mode hors-ligne
+- **Routes par rôle** : séparation claire des accès
 
 ```mermaid
 graph TD
     subgraph Frontend["Frontend (React/Vite)"]
-        Pages[Pages]
-        Features[Feature Modules]
-        Components[Components]
-        Hooks[Hooks]
+        App[app/]
+        Routes[routes/]
+        Features[features/]
+        Domain[domain/]
+        Shared[shared/]
     end
     
     subgraph Backend["Backend (Lovable Cloud)"]
@@ -20,10 +27,11 @@ graph TD
         Auth[Authentication]
     end
     
-    Pages --> Features
-    Features --> Components
-    Features --> Hooks
-    Hooks --> EdgeFn
+    App --> Routes
+    Routes --> Features
+    Features --> Domain
+    Features --> Shared
+    Features --> EdgeFn
     EdgeFn --> DB
     EdgeFn --> Storage
     Auth --> DB
@@ -33,76 +41,89 @@ graph TD
 
 ```
 src/
-├── features/              # Modules métier (8 modules)
-│   ├── admin/             # Dashboard admin, RBAC, KYC
-│   ├── agent/             # Enrôlement, dashboard agent
-│   ├── auth/              # Authentification, sessions
-│   ├── cooperative/       # Gestion coopératives
-│   ├── kyc/               # Vérification identité
-│   ├── merchant/          # Caisse, stock, crédits
-│   ├── notifications/     # Push notifications
-│   └── wallet/            # Portefeuille, transferts
+├── app/                   # Bootstrap et configuration
+│   ├── guards/            # RequireRole, RequireAuth
+│   ├── layouts/           # AppShell
+│   ├── providers/         # Auth, Language, Audio
+│   └── index.ts
 │
-├── components/            # Composants UI (11 dossiers)
-│   ├── admin/             # Composants admin
-│   │   └── map/           # Cartographie (MapFilters, MapLegend)
-│   ├── agent/             # Composants agent
-│   │   └── enrollment/    # Wizard enrôlement (Step1-5)
-│   ├── auth/              # OTPInput, ProtectedRoute
-│   ├── cooperative/       # Orders, Stock
-│   ├── ifn/               # Composants institutionnels
-│   ├── market/            # Composants marché
-│   ├── merchant/          # Cashier, Stock, Credits
-│   ├── pnavim/            # Interface vocale (6 composants)
-│   │   ├── PnavimVoiceButton.tsx
-│   │   ├── PnavimVoiceRecorder.tsx
-│   │   ├── PnavimVoiceRecorderCompact.tsx
-│   │   ├── PnavimAnimatedCharacter.tsx
-│   │   ├── PnavimMascot.tsx
-│   │   └── pnavim-utils.ts
+├── routes/                # Routes par rôle
+│   ├── public.routes.tsx
+│   ├── merchant.routes.tsx
+│   ├── agent.routes.tsx
+│   ├── cooperative.routes.tsx
+│   ├── admin.routes.tsx
+│   └── index.ts
+│
+├── domain/                # Types métier et règles pures
+│   ├── rbac.ts            # RBAC centralisé
+│   └── index.ts
+│
+├── features/              # Modules métier (Vertical Slices)
+│   ├── admin/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── index.ts
+│   ├── agent/
+│   ├── auth/
+│   ├── cooperative/
+│   ├── kyc/
+│   ├── merchant/
+│   ├── notifications/
+│   └── wallet/
+│
+├── shared/                # Utilitaires partagés
+│   ├── offline/           # Capability offline
+│   │   ├── storage.ts     # IndexedDB
+│   │   ├── queues.ts      # Actions en attente
+│   │   └── syncEngine.ts  # Synchronisation
+│   ├── hooks/             # Hooks génériques
+│   ├── services/          # Services partagés
+│   ├── types/             # Types partagés
+│   └── index.ts
+│
+├── components/            # Composants UI
+│   ├── ui/                # shadcn/ui
 │   ├── shared/            # Headers, navs, états
-│   ├── studio/            # Enregistrement audio
-│   └── ui/                # shadcn/ui
+│   └── pnavim/            # Interface vocale
 │
-├── pages/                 # Pages de l'application
-│   ├── admin/             # Dashboard, RBAC, KYC, Maps
-│   ├── agent/             # Dashboard, Enrôlement
-│   ├── auth/              # Login, Register
-│   ├── cooperative/       # Dashboard, Orders, Stock
-│   ├── account/           # Mon compte
-│   └── merchant/          # Dashboard, Caisse, Stock
+├── pages/                 # Pages (legacy, migration en cours)
+│   ├── admin/
+│   ├── agent/
+│   ├── cooperative/
+│   └── merchant/
 │
 ├── contexts/              # Contextes React
-│   ├── AuthContext.tsx    # Session et rôles
-│   └── LanguageContext.tsx # i18n
+│   ├── AuthContext.tsx
+│   ├── LanguageContext.tsx
+│   └── AudioContext.tsx
 │
-├── hooks/                 # 19 hooks personnalisés
-│   ├── useDataFetching.ts # Fetch générique avec retry
-│   ├── useMerchantStock.ts
-│   ├── useCooperativeStock.ts
-│   ├── useCooperativeOrders.ts
-│   ├── useAdminMapData.ts
-│   ├── useOfflineSync.ts
-│   └── ...
-│
+├── hooks/                 # Hooks globaux
 ├── lib/                   # Utilitaires
-│   ├── validationSchemas.ts
-│   ├── offlineDB.ts
-│   ├── imageCompression.ts
-│   └── ...
-│
-├── infra/                 # Infrastructure
-│   └── logger.ts          # Logging centralisé
-│
-├── shared/                # Types partagés
-│   └── types/
-│       ├── errors.ts
-│       ├── ui.ts
-│       └── index.ts
-│
+├── infra/                 # Infrastructure (logger)
 └── integrations/          # Supabase client (auto-généré)
-    └── supabase/
 ```
+
+## Architecture "Industrie"
+
+### Principes
+
+1. **Vertical Slices** : Tout le code d'une feature au même endroit
+2. **RBAC Centralisé** : `src/domain/rbac.ts` comme source de vérité
+3. **Offline Partagé** : `src/shared/offline/` comme capability
+4. **Routes par Rôle** : `src/routes/*.routes.tsx`
+5. **Guards Réutilisables** : `src/app/guards/`
+
+### ADRs (Architecture Decision Records)
+
+| ADR | Titre | Statut |
+|-----|-------|--------|
+| [001](./adr/001-vertical-slices.md) | Architecture Vertical Slices | Accepté |
+| [002](./adr/002-edge-functions-naming.md) | Convention nommage Edge Functions | Accepté |
+| [003](./adr/003-rbac-centralized.md) | RBAC centralisé | Accepté |
+| [004](./adr/004-offline-first.md) | Stratégie Offline-First | Accepté |
 
 ## Architecture Backend
 
@@ -110,28 +131,28 @@ src/
 
 ```mermaid
 graph LR
-    subgraph Voice["Vocale"]
-        EL[elevenlabs-tts]
-        SC[elevenlabs-scribe-token]
-        VI[voice-interview]
+    subgraph Voice["voice-*"]
+        TTS[voice-tts]
+        STT[voice-stt]
+        INT[voice-interview]
+        SCR[voice-scribe-token]
     end
     
-    subgraph Business["Métier"]
-        CS[check-low-stock]
-        IV[import-vivriers]
-        SQ[save-security-questions]
+    subgraph Business["inventory-* / wallet-*"]
+        CS[inventory-check-low-stock]
+        IV[inventory-import-vivriers]
         WT[wallet-transfer]
     end
     
-    subgraph Comm["Communication"]
-        PN[send-push-notification]
-        AF[lafricamobile-stt]
+    subgraph Other["notif-* / security-*"]
+        PN[notif-push]
+        SQ[security-questions]
     end
     
-    EL --> ELEVENLABS_API_KEY
-    SC --> ELEVENLABS_API_KEY
-    VI --> ELEVENLABS_API_KEY
-    AF --> LAFRICAMOBILE_*
+    TTS --> ELEVENLABS_API_KEY
+    STT --> LAFRICAMOBILE_API_KEY
+    INT --> ELEVENLABS_API_KEY
+    SCR --> ELEVENLABS_API_KEY
     PN --> VAPID_*
 ```
 
@@ -139,15 +160,59 @@ graph LR
 
 | Fonction | Rôle | Secrets requis |
 |----------|------|----------------|
-| `check-low-stock` | Vérifie les stocks bas et génère alertes | - |
-| `elevenlabs-scribe-token` | Token pour transcription vocale | `ELEVENLABS_API_KEY` |
-| `elevenlabs-tts` | Synthèse vocale (Text-to-Speech) | `ELEVENLABS_API_KEY` |
-| `import-vivriers` | Import des produits vivriers | - |
-| `lafricamobile-stt` | Transcription via L'Africamobile | `LAFRICAMOBILE_*` |
-| `save-security-questions` | Sauvegarde questions de sécurité | - |
-| `send-push-notification` | Envoi notifications push | `VAPID_*` |
+| `voice-tts` | Synthèse vocale (Text-to-Speech) | `ELEVENLABS_API_KEY` |
+| `voice-stt` | Transcription via L'Africamobile | `LAFRICAMOBILE_*` |
 | `voice-interview` | Interview vocale interactive | `ELEVENLABS_API_KEY` |
+| `voice-scribe-token` | Token pour transcription | `ELEVENLABS_API_KEY` |
+| `inventory-check-low-stock` | Vérifie les stocks bas | - |
+| `inventory-import-vivriers` | Import des produits vivriers | - |
 | `wallet-transfer` | Transferts entre wallets | - |
+| `notif-push` | Envoi notifications push | `VAPID_*` |
+| `security-questions` | Sauvegarde questions sécurité | - |
+
+## RBAC Centralisé
+
+### Source de vérité : `src/domain/rbac.ts`
+
+```typescript
+// Rôles disponibles
+type AppRole = 'admin' | 'agent' | 'cooperative' | 'merchant' | 'user';
+
+// Pages par rôle
+ROLE_PAGES.merchant = ['dashboard', 'cashier', 'stock', ...];
+ROLE_PAGES.admin = ['dashboard', 'merchants', 'users', 'kyc', ...];
+
+// Actions par rôle
+ROLE_ACTIONS.merchant = ['sell', 'view_stock', 'transfer_money', ...];
+ROLE_ACTIONS.admin = ['*']; // Toutes les actions
+
+// Helpers
+hasPermission(role, action); // Vérifie une permission
+canAccessPage(role, page);   // Vérifie l'accès à une page
+```
+
+### Système de permissions
+
+```mermaid
+graph TD
+    User[Utilisateur]
+    Role[Rôle AppRole]
+    Pages[ROLE_PAGES]
+    Actions[ROLE_ACTIONS]
+    
+    User -->|a| Role
+    Role -->|accède| Pages
+    Role -->|peut| Actions
+```
+
+### Rôles et accès
+
+| Rôle | Chemin base | Pages clés |
+|------|-------------|------------|
+| `merchant` | `/marchand` | Dashboard, Caisse, Stock, Wallet |
+| `agent` | `/agent` | Dashboard, Enrôlement, Marchands |
+| `cooperative` | `/cooperative` | Dashboard, Stock, Commandes |
+| `admin` | `/admin` | Dashboard, Users, KYC, Maps |
 
 ## Architecture d'Authentification
 
@@ -189,18 +254,17 @@ graph TD
 sequenceDiagram
     participant M as Marchand
     participant App as Application
-    participant Auth as Auth Service
+    participant Guard as RequireRole
+    participant Auth as AuthContext
     participant DB as Database
     
-    M->>App: Saisie téléphone
-    App->>Auth: Demande OTP
-    Auth->>M: SMS OTP
-    M->>App: Saisie OTP
-    App->>Auth: Vérification
+    M->>App: Accès /marchand
+    App->>Guard: Vérification
+    Guard->>Auth: isAuthenticated?
     Auth->>DB: Check user_roles
     DB-->>Auth: Rôle trouvé
-    Auth-->>App: Session + Rôle
-    App->>M: Redirection dashboard
+    Auth-->>Guard: OK + rôle
+    Guard-->>App: Render page
 ```
 
 ## Flux de Données
@@ -209,85 +273,93 @@ sequenceDiagram
 sequenceDiagram
     participant M as Marchand
     participant App as Application
+    participant Offline as shared/offline
     participant EF as Edge Functions
     participant DB as Database
-    participant N as Notifications
     
     M->>App: Encaissement
-    App->>DB: Insert transaction
-    DB-->>App: Confirmation
-    App->>EF: check-low-stock
-    EF->>DB: Query stocks
     
-    alt Stock bas détecté
-        EF->>N: send-push-notification
-        N->>M: Alerte push
+    alt Online
+        App->>DB: Insert transaction
+        DB-->>App: Confirmation
+    else Offline
+        App->>Offline: enqueue('sales', data)
+        Offline-->>App: Stocké localement
     end
     
-    App->>M: Ticket généré
+    App->>EF: inventory-check-low-stock
+    
+    alt Stock bas détecté
+        EF->>EF: notif-push
+        EF->>M: Alerte push
+    end
 ```
 
-## Rôles et Permissions
+## Offline Capability
 
-| Rôle | Pages accessibles | Permissions clés |
-|------|-------------------|------------------|
-| `merchant` | `/marchand/*` | Caisse, stock, crédits, profil |
-| `cooperative` | `/cooperative/*` | Commandes, stock, livraisons |
-| `agent` | `/agent/*` | Enrôlement, validation, dashboard |
-| `admin` | `/admin/*` | RBAC, KYC, maps, supervision |
+### Structure : `src/shared/offline/`
 
-### Système RBAC
+```typescript
+// Storage - IndexedDB wrapper
+initOfflineStorage();
+getFromCache<T>(key);
+setInCache<T>(key, value);
+
+// Queues - Actions en attente
+enqueue('sales', 'create', saleData);
+getQueue('sales');
+dequeue(itemId);
+
+// Sync Engine - Synchronisation automatique
+registerSyncHandler('sales', handler);
+syncAll();
+setupAutoSync(); // Hook sur événement 'online'
+```
+
+### Architecture
 
 ```mermaid
 graph TD
-    User[Utilisateur]
-    Profile[Profil RBAC]
-    Permission[Permission]
-    Resource[Ressource]
-    Action[Action]
-    Scope[Portée]
+    Feature[Feature]
+    Enqueue[enqueue]
+    Queues[queues.ts]
+    Storage[storage.ts]
+    SyncEngine[syncEngine.ts]
+    API[Supabase API]
     
-    User -->|a| Profile
-    Profile -->|contient| Permission
-    Permission -->|sur| Resource
-    Permission -->|pour| Action
-    Permission -->|dans| Scope
+    Feature -->|offline| Enqueue
+    Enqueue --> Queues
+    Queues --> Storage
+    
+    SyncEngine -->|online| Queues
+    SyncEngine --> API
 ```
 
 ## Patterns Utilisés
 
-### 1. Feature-based Architecture
-- Chaque feature est autonome avec ses hooks, services et types
+### 1. Vertical Slices
+- Chaque feature est autonome
 - Export public via `index.ts`
-- Facilite le tree-shaking et la maintenance
+- Voir [ADR-001](./adr/001-vertical-slices.md)
 
-### 2. Séparation Logique / UI
-- **Hooks** contiennent la logique métier (`useMerchantStock`, `useCooperativeOrders`)
-- **Components** sont purement présentationnels
-- **Pages** orchestrent les composants et hooks
+### 2. RBAC Centralisé
+- Source unique : `src/domain/rbac.ts`
+- Guards réutilisables
+- Voir [ADR-003](./adr/003-rbac-centralized.md)
 
-### 3. Gestion des Erreurs
-- **AppError** (`src/shared/types/errors.ts`) - classe d'erreur standardisée
-- **useDataFetching** - hook avec retry automatique et gestion d'état
+### 3. Offline-First
+- Capability partagée : `src/shared/offline/`
+- Sync automatique
+- Voir [ADR-004](./adr/004-offline-first.md)
+
+### 4. Gestion des Erreurs
+- **AppError** - classe standardisée
+- **useDataFetching** - retry automatique
 - **ErrorBoundary** - capture erreurs React
 
-### 4. Logging Centralisé
-- **logger** (`src/infra/logger.ts`) - remplace console.*
-- Loggers pré-configurés: `authLogger`, `merchantLogger`, `agentLogger`, `coopLogger`, `adminLogger`, `syncLogger`
-- Stockage local pour debug
-
-### 5. Validation
-- **Zod** pour validation des formulaires (`src/lib/validationSchemas.ts`)
-- Schémas réutilisables: phone, email, password, OTP
-
-### 6. Types Centralisés
-- **`src/shared/types/index.ts`** - dérivés du schéma Supabase
-- Single Source of Truth pour les types métier
-
-### 7. Mode Hors-ligne
-- **IndexedDB** pour stockage local
-- **useOfflineSync** - queue et synchronisation
-- **Service Worker** pour PWA
+### 5. Logging Centralisé
+- **logger** (`src/infra/logger.ts`)
+- Loggers pré-configurés par domaine
 
 ## Conventions de Nommage
 
@@ -299,15 +371,7 @@ graph TD
 | Types | PascalCase | `MerchantStatus` |
 | Constantes | SCREAMING_SNAKE | `MAX_RETRY_COUNT` |
 | Features | kebab-case dossier | `src/features/merchant/` |
-
-## Règles de Refactoring
-
-1. **Aucun fichier > 300 lignes** - split en hooks et composants
-2. **Un composant = une responsabilité**
-3. **Hooks pour la logique réutilisable**
-4. **Types dans `shared/types` pour les données métier**
-5. **Logger centralisé au lieu de console.**
-6. **Feature modules pour le code métier isolé**
+| Edge Functions | domain-action | `voice-tts`, `inventory-check-low-stock` |
 
 ## Dépendances Clés
 
@@ -320,20 +384,23 @@ graph TD
 | Visualisation | Recharts, Leaflet |
 | Audio | ElevenLabs React |
 
-## Métriques Post-Cleanup
+## Métriques Post-Migration
 
-> Résultats des 7 phases de nettoyage (Janvier 2026)
+> Résultats de la migration vers l'architecture "Industrie"
 
-| Métrique | Avant | Après | Réduction |
-|----------|-------|-------|-----------|
-| Edge Functions | 14 | 9 | **-36%** |
-| Composants Pnavim | 16 | 6 | **-63%** |
-| Fichiers morts | 13 | 0 | **-100%** |
-| Lignes de code | ~8500 | ~7900 | **-7%** |
+| Métrique | Avant | Après | Changement |
+|----------|-------|-------|------------|
+| Edge Functions | 9 | 9 | Convention renommée |
+| ADRs | 0 | 4 | +4 documents |
+| Guards centralisés | 0 | 2 | +2 fichiers |
+| RBAC centralisé | Non | Oui | ✓ |
+| Offline capability | Dispersé | Centralisé | ✓ |
+| Routes par rôle | Non | Oui | ✓ |
 
-### Fichiers supprimés
-- 5 Edge Functions inutilisées
-- 10 composants Pnavim dupliqués
-- 2 pages legacy
-- 1 hook mock
-- Imports orphelins nettoyés
+### Nouveaux fichiers créés
+
+- `src/domain/rbac.ts` - RBAC centralisé
+- `src/app/guards/` - RequireRole, RequireAuth
+- `src/shared/offline/` - Capability offline
+- `src/routes/*.routes.tsx` - Routes par rôle
+- `docs/adr/*.md` - 4 ADRs documentés
