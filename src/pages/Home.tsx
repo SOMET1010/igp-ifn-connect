@@ -7,11 +7,13 @@ import {
   PnavimRoleCard, 
   PnavimPillButton, 
   PnavimWaxCurve,
-  PnavimInstitutionalHeader
+  PnavimInstitutionalHeader,
+  TimeAwareGreeting
 } from '@/components/pnavim';
 import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 
 // Logos institutionnels
 import logoDGE from '@/assets/logo-dge.png';
@@ -24,6 +26,7 @@ const Home: React.FC = () => {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const { language, t } = useLanguage();
   const { triggerTap } = useSensoryFeedback();
+  const { timeOfDay, marketStatus } = useTimeOfDay();
 
   // Show tutorial on first visit
   useEffect(() => {
@@ -61,12 +64,23 @@ const Home: React.FC = () => {
     }
   };
 
+  // Badge dynamique selon l'heure
+  const getTimeBadge = () => {
+    switch (timeOfDay) {
+      case 'dawn': return 'Debout tôt !';
+      case 'morning': return 'Bon matin !';
+      case 'afternoon': return 'Bon après-midi';
+      case 'evening': return 'Bonsoir !';
+      case 'night': return 'Bonne nuit';
+      default: return 'Bienvenue';
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fond immersif avec image du marché */}
+      {/* Fond immersif adapté au moment de la journée */}
       <ImmersiveBackground 
-        variant="market-blur" 
-        backgroundImageUrl={marcheImage}
+        variant={timeOfDay}
         showWaxPattern 
         showBlobs 
       />
@@ -86,17 +100,31 @@ const Home: React.FC = () => {
 
       {/* Contenu principal */}
       <main className="relative z-10 pt-24 pb-24">
+        {/* Salutation temporelle */}
+        <motion.div
+          className="mb-4 px-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <TimeAwareGreeting showMarketStatus={true} />
+        </motion.div>
+
         {/* Titre - Grande accroche */}
         <motion.div
           className="text-center mb-6 px-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
         >
-          <h1 className="text-2xl font-nunito font-extrabold text-charbon leading-tight">
+          <h1 className={`text-2xl font-nunito font-extrabold leading-tight ${
+            timeOfDay === 'night' ? 'text-white' : 'text-charbon'
+          }`}>
             {t('who_are_you')}
           </h1>
-          <p className="text-charbon/60 mt-1 text-base">
+          <p className={`mt-1 text-base ${
+            timeOfDay === 'night' ? 'text-white/60' : 'text-charbon/60'
+          }`}>
             {t('choose_access')}
           </p>
         </motion.div>
@@ -132,7 +160,7 @@ const Home: React.FC = () => {
             variant="rich"
             size="xl"
             showWelcomeBadge
-            badgeText="Bienvenue"
+            badgeText={getTimeBadge()}
             link="/marchand/connexion"
             audioMessage="Je suis marchand. Appuyez pour accéder à votre espace."
             className="snap-center min-w-[300px] flex-shrink-0"
@@ -167,7 +195,9 @@ const Home: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          <p className="text-xs text-charbon/50 font-medium mb-3">
+          <p className={`text-xs font-medium mb-3 ${
+            timeOfDay === 'night' ? 'text-white/50' : 'text-charbon/50'
+          }`}>
             Une initiative de
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -182,7 +212,9 @@ const Home: React.FC = () => {
               className="h-10 w-auto object-contain bg-white/80 rounded-lg px-3 py-1.5 shadow-sm"
             />
           </div>
-          <p className="mt-3 text-xs text-charbon/40">
+          <p className={`mt-3 text-xs ${
+            timeOfDay === 'night' ? 'text-white/40' : 'text-charbon/40'
+          }`}>
             République de Côte d'Ivoire
           </p>
         </motion.footer>
