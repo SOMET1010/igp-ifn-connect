@@ -47,6 +47,7 @@ export function VoiceSocialAuth({
     step,
     layer,
     phone,
+    persona,
     isLoading,
     currentPersona,
     merchantName,
@@ -101,6 +102,7 @@ export function VoiceSocialAuth({
   // Hook TTS ElevenLabs avec voix clonée PNAVIM
   const { speak, isSpeaking, stop, isLoading: ttsLoading } = useElevenLabsTts({
     voiceId: currentPersona.voiceId!,
+    persona,
     onStart: () => {
       if ('vibrate' in navigator) {
         navigator.vibrate(30);
@@ -116,7 +118,7 @@ export function VoiceSocialAuth({
     if (hasPlayedWelcome || step !== 'welcome') return;
     
     const timer = setTimeout(() => {
-      speak(getMessage('welcome'));
+      speak(getMessage('welcome'), 'welcome');
       setHasPlayedWelcome(true);
     }, 800);
     
@@ -139,7 +141,7 @@ export function VoiceSocialAuth({
     if (micState === 'idle' && !isConnected) {
       try {
         setMicState('listening');
-        speak(getMessage('listen'));
+        speak(getMessage('listen'), 'listen');
         await startListening();
       } catch (err) {
         console.error('[VoiceSocialAuth] Failed to start listening:', err);
@@ -161,7 +163,7 @@ export function VoiceSocialAuth({
   }, [manualPhone, processPhoneNumber]);
 
   const handlePlayWelcome = useCallback(() => {
-    speak(getMessage('welcome'));
+    speak(getMessage('welcome'), 'welcome');
   }, [speak, getMessage]);
 
   // Afficher le sélecteur de persona
