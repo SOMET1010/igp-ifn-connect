@@ -279,9 +279,8 @@ const Index: React.FC = () => {
         showBlobs={false}
       />
 
-      {/* Header institutionnel simplifié (pas de navigation web) */}
+      {/* Header institutionnel simplifié */}
       <PnavimInstitutionalHeader
-        showNavigation={false}
         showAccessibility={true}
         showAudioToggle={true}
         showLanguageSelector={true}
