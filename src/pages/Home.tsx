@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
-import { PnavimRoleCard, PnavimPillButton, PnavimWaxCurve } from '@/components/pnavim';
+import { 
+  PnavimRoleCard, 
+  PnavimPillButton, 
+  PnavimWaxCurve,
+  PnavimInstitutionalHeader
+} from '@/components/pnavim';
 import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
-import { LANGUAGES } from '@/lib/translations';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [showTutorial, setShowTutorial] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const { language, t } = useLanguage();
   const { triggerTap } = useSensoryFeedback();
 
   // Show tutorial on first visit
@@ -27,7 +34,13 @@ const Home: React.FC = () => {
     setShowTutorial(false);
   };
 
+  const handleLoginClick = () => {
+    triggerTap();
+    navigate('/marchand/connexion');
+  };
+
   const playWelcomeAudio = () => {
+    if (!audioEnabled) return;
     triggerTap();
     if ('speechSynthesis' in window) {
       const message = language === 'fr' 
@@ -43,50 +56,23 @@ const Home: React.FC = () => {
     }
   };
 
-  // Prendre les 3 premières langues pour le sélecteur
-  const displayLanguages = LANGUAGES.slice(0, 3);
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Fond immersif */}
       <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
 
-      {/* Header minimal */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-lg border-b border-white/20 px-4 py-3">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          {/* Logo PNAVIM */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-sanguine to-terre-battue flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <span className="text-sm font-nunito font-extrabold text-charbon">
-              PNAVIM
-            </span>
-          </div>
-
-          {/* Sélecteur langue par icônes */}
-          <div className="flex items-center gap-1 bg-white/60 rounded-full px-1.5 py-1">
-            {displayLanguages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => {
-                  triggerTap();
-                  setLanguage(lang.code);
-                }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-lg transition-all duration-200 ${
-                  language === lang.code
-                    ? "bg-orange-sanguine/25 scale-110 shadow-sm"
-                    : "hover:bg-white/80"
-                }`}
-                aria-label={lang.name}
-                title={lang.name}
-              >
-                {lang.symbol}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+      {/* Header institutionnel enrichi */}
+      <PnavimInstitutionalHeader
+        showNavigation={false}
+        showAccessibility={true}
+        showAudioToggle={true}
+        showLanguageSelector={true}
+        showLoginButton={true}
+        isAudioEnabled={audioEnabled}
+        onAudioToggle={() => setAudioEnabled(!audioEnabled)}
+        onLoginClick={handleLoginClick}
+        variant="compact"
+      />
 
       {/* Contenu principal */}
       <main className="relative z-10 pt-24 pb-24">
