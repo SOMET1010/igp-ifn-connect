@@ -13,7 +13,7 @@ import {
   Store,
   Calendar
 } from 'lucide-react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { PageHero } from '@/components/shared/PageHero';
@@ -159,7 +159,7 @@ const AdminMerchants: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Marchands"
         showBack
         backTo="/admin"

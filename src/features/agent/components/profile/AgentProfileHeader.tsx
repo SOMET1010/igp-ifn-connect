@@ -3,7 +3,7 @@ import { User, Phone, Briefcase, MapPin, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProfileInfoCard } from '@/components/shared/ProfileInfoCard';
-import { InstitutionalStatCard } from '@/components/shared/InstitutionalStatCard';
+import { StatCard } from '@/components/shared/StatCard';
 import type { AgentProfileData } from '../../types/profile.types';
 
 interface AgentProfileHeaderProps {
@@ -79,11 +79,11 @@ export const AgentProfileHeader: React.FC<AgentProfileHeaderProps> = ({
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <InstitutionalStatCard
+        <StatCard
           title="Enrôlements"
           value={profile.total_enrollments}
         />
-        <InstitutionalStatCard
+        <StatCard
           title="Organisation"
           value={profile.organization}
         />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UnifiedHeader } from "@/components/shared/UnifiedHeader";
+import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { 
@@ -55,7 +55,7 @@ export default function MerchantWallet() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader title="Mon Portefeuille" showBack />
+        <EnhancedHeader title="Mon Portefeuille" showBack />
         <main className="container max-w-lg mx-auto px-4 py-6 space-y-6">
           <Skeleton className="h-32 w-full rounded-xl" />
           <Skeleton className="h-16 w-full rounded-xl" />
@@ -70,7 +70,7 @@ export default function MerchantWallet() {
   if (!wallet) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader title="Mon Portefeuille" showBack />
+        <EnhancedHeader title="Mon Portefeuille" showBack />
         <main className="container max-w-lg mx-auto px-4 py-6">
           <div className="text-center py-12">
             <p className="text-muted-foreground">Portefeuille non disponible</p>
@@ -86,7 +86,7 @@ export default function MerchantWallet() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader title="Mon Portefeuille" showBack />
+      <EnhancedHeader title="Mon Portefeuille" showBack />
       
       <main className="container max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* Balance Card */}

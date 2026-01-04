@@ -1,5 +1,5 @@
 import { FileText, XCircle, Banknote } from 'lucide-react';
-import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { StatCard } from '@/components/shared/StatCard';
 
 interface InvoicesSummaryProps {
   issuedCount: number;
@@ -10,19 +10,19 @@ interface InvoicesSummaryProps {
 export function InvoicesSummary({ issuedCount, cancelledCount, totalAmount }: InvoicesSummaryProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
-      <UnifiedStatCard
+      <StatCard
         icon={FileText}
         value={issuedCount}
         title="Émises"
         variant="primary"
       />
-      <UnifiedStatCard
+      <StatCard
         icon={Banknote}
         value={`${(totalAmount / 1000).toFixed(0)}K`}
         title="Total FCFA"
         variant="success"
       />
-      <UnifiedStatCard
+      <StatCard
         icon={XCircle}
         value={cancelledCount}
         title="Annulées"

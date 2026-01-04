@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Phone, Calendar, ClipboardList, Users } from 'lucide-react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { PageHero } from '@/components/shared/PageHero';
@@ -113,7 +113,7 @@ const MerchantList: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Mes Marchands"
         showBack
         backTo="/agent"

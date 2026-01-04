@@ -2,7 +2,7 @@
  * Composant de statistiques enrichies du dashboard coopérative
  */
 import React from 'react';
-import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { StatCard } from '@/components/shared/StatCard';
 import { 
   Users, 
   Package, 
@@ -33,12 +33,12 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
     <div className="space-y-3">
       {/* Première ligne - Membres et Stock */}
       <div className="grid grid-cols-2 gap-3">
-        <UnifiedStatCard
+        <StatCard
           title={t("members")}
           value={membersCount ?? 0}
           icon={Users}
         />
-        <UnifiedStatCard
+        <StatCard
           title={t("products")}
           value={stats.products}
           icon={Package}
@@ -47,12 +47,12 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
 
       {/* Deuxième ligne - Valeur stock et quantité */}
       <div className="grid grid-cols-2 gap-3">
-        <UnifiedStatCard
+        <StatCard
           title="Valeur stock"
           value={`${formatCurrency(stats.stockValue)} F`}
           icon={Warehouse}
         />
-        <UnifiedStatCard
+        <StatCard
           title="Quantité totale"
           value={`${formatCurrency(stats.totalStockQuantity)} kg`}
           icon={Package}
@@ -61,19 +61,19 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
 
       {/* Troisième ligne - Commandes */}
       <div className="grid grid-cols-3 gap-3">
-        <UnifiedStatCard
+        <StatCard
           title={t("pending")}
           value={stats.pendingOrders}
           icon={ShoppingCart}
           variant={stats.pendingOrders > 0 ? "warning" : "default"}
         />
-        <UnifiedStatCard
+        <StatCard
           title="En transit"
           value={stats.inTransitOrders}
           icon={Truck}
           variant={stats.inTransitOrders > 0 ? "primary" : "default"}
         />
-        <UnifiedStatCard
+        <StatCard
           title="Livrées"
           value={stats.deliveredOrders}
           icon={TrendingUp}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClipboardList } from 'lucide-react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { cooperativeNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
@@ -46,7 +46,7 @@ const CooperativeOrders: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Commandes"
         subtitle={`${orders.length} commande(s)`}
         showBack

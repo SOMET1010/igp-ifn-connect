@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Phone, Fingerprint, HelpCircle, ArrowLeft, Shield, Heart } from "lucide-react";
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
-import { PnavimCard, PnavimPillButton } from "@/components/pnavim";
+import { GlassCard } from "@/components/shared/GlassCard";
+import { PnavimPillButton } from "@/components/pnavim";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -75,7 +76,7 @@ const MerchantSecurityFallback: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <PnavimCard accent="green" padding="lg" className="mb-6">
+          <GlassCard borderColor="green" padding="lg" className="mb-6">
             <div className="flex items-center gap-4">
               {/* Avatar Agent */}
               <div className="w-16 h-16 rounded-full bg-vert-manioc/20 flex items-center justify-center shrink-0">
@@ -90,7 +91,7 @@ const MerchantSecurityFallback: React.FC = () => {
                 </p>
               </div>
             </div>
-          </PnavimCard>
+          </GlassCard>
         </motion.div>
 
         {/* Bouton Appeler */}
@@ -132,7 +133,7 @@ const MerchantSecurityFallback: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <PnavimCard accent="none" padding="md" className="bg-white/60">
+          <GlassCard borderColor="none" padding="md" className="bg-white/60">
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-vert-manioc shrink-0 mt-0.5" />
               <div>
@@ -145,7 +146,7 @@ const MerchantSecurityFallback: React.FC = () => {
                 </p>
               </div>
             </div>
-          </PnavimCard>
+          </GlassCard>
         </motion.div>
 
         {/* Bouton aide vocale */}

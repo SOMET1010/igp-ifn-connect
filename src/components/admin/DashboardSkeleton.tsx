@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DashboardHeader } from '@/components/shared/DashboardHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 
 interface DashboardSkeletonProps {
   title?: string;
@@ -14,9 +14,10 @@ export const DashboardSkeleton: React.FC<DashboardSkeletonProps> = ({
 }) => {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <DashboardHeader
+      <EnhancedHeader
         title={title}
         subtitle={subtitle}
+        showSignOut
         onSignOut={() => {}}
       />
 

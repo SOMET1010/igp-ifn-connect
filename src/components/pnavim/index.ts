@@ -3,7 +3,6 @@
 // Composants inclusifs, mobile-first, accessibles
 // ============================================
 
-export { PnavimCard } from "./PnavimCard";
 export { PnavimRoleCard } from "./PnavimRoleCard";
 export { PnavimHeroCard } from "./PnavimHeroCard";
 export { PnavimHelpButton } from "./PnavimHelpButton";

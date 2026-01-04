@@ -1,7 +1,7 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
-import { UnifiedStatCard } from '@/components/shared/UnifiedStatCard';
+import { StatCard } from '@/components/shared/StatCard';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
@@ -174,7 +174,7 @@ export const PageWithDashboard: React.FC<PageWithDashboardProps> = ({
             >
               {stats.map((stat) => (
                 <AnimatedListItem key={stat.id}>
-                  <UnifiedStatCard
+                  <StatCard
                     title={stat.title}
                     value={stat.value}
                     icon={stat.icon}
