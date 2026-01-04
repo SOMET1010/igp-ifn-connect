@@ -11,3 +11,4 @@ export { PnavimHeader } from "./PnavimHeader";
 export { PnavimBillSelector } from "./PnavimBillSelector";
 export { PnavimNumpad } from "./PnavimNumpad";
 export { PnavimPictogramNav } from "./PnavimPictogramNav";
+export { PnavimWaxCurve } from "./PnavimWaxCurve";
