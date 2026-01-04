@@ -47,6 +47,12 @@
     --ansut-overlay: 214 50% 5%;
     --ansut-glass: 0 0% 100%;
 
+    /* === COULEURS PAR RÔLE === */
+    --role-merchant: 28 95% 55%;      /* Orange vif - Marchand */
+    --role-agent: 160 50% 40%;        /* Émeraude - Agent */
+    --role-cooperative: 270 50% 55%;  /* Violet - Coopérative */
+    --role-admin: 214 70% 45%;        /* Bleu ANSUT - Admin */
+
     /* Cartes */
     --card: 45 40% 99%;
     --card-foreground: 25 30% 15%;

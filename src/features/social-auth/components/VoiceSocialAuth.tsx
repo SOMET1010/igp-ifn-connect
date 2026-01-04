@@ -254,6 +254,15 @@ export function VoiceSocialAuth({
     );
   }
 
+  // Couleurs dynamiques par rôle
+  const roleColors: Record<typeof userType, { from: string; to: string; text: string }> = {
+    merchant: { from: 'from-orange-500', to: 'to-amber-500', text: 'text-orange-600' },
+    agent: { from: 'from-emerald-600', to: 'to-teal-500', text: 'text-emerald-600' },
+    cooperative: { from: 'from-violet-600', to: 'to-purple-500', text: 'text-violet-600' },
+  };
+  
+  const colors = roleColors[userType];
+
   // Main auth view - PNAVIM Style
   return (
     <motion.div 
@@ -261,8 +270,8 @@ export function VoiceSocialAuth({
       animate={{ opacity: 1, y: 0 }}
       className={cn("flex flex-col items-center gap-4", className)}
     >
-      {/* Card principale avec style PNAVIM */}
-      <div className="w-full max-w-sm bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-6 shadow-xl">
+      {/* Card principale avec style PNAVIM - couleur dynamique par rôle */}
+      <div className={cn("w-full max-w-sm bg-gradient-to-br rounded-3xl p-6 shadow-xl", colors.from, colors.to)}>
         {/* Badge type d'accès */}
         <div className="flex justify-center mb-4">
           <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full">
@@ -270,14 +279,14 @@ export function VoiceSocialAuth({
           </span>
         </div>
 
-        {/* Avatar avec badge nom */}
+        {/* Avatar avec badge nom - taille HERO 128px */}
         <div className="flex flex-col items-center mb-4">
           <motion.div 
             className="relative"
             animate={{ scale: isSpeaking ? 1.05 : 1 }}
             transition={{ repeat: isSpeaking ? Infinity : 0, duration: 0.5 }}
           >
-            <div className="w-28 h-28 rounded-full bg-white p-1.5 shadow-lg">
+            <div className="w-32 h-32 rounded-full bg-white p-1.5 shadow-lg">
               <img
                 src={currentPersona.avatar}
                 alt={currentPersona.name}

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic } from "lucide-react";
+import { Mic, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
@@ -53,6 +53,7 @@ export default function MerchantDashboard() {
   const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<"idle" | "listening" | "playing">("idle");
+  const [showBalance, setShowBalance] = useState(false); // Masquage solde par défaut
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
@@ -166,20 +167,34 @@ export default function MerchantDashboard() {
               />
             </GlassCard>
 
-            {/* 3. STATISTIQUES EN CARTES GLASS */}
+            {/* 3. STATISTIQUES EN CARTES GLASS - avec masquage solde */}
             <div className="grid grid-cols-3 gap-3">
               <DashboardStatCard
                 label="Ventes"
-                value={formatCurrency(todayTotal)}
+                value={showBalance ? formatCurrency(todayTotal) : "••••••"}
                 emoji="📊"
                 borderColor="orange"
               />
-              <DashboardStatCard
-                label="Solde"
-                value={formatCurrency(0)}
-                emoji="🏦"
-                borderColor="green"
-              />
+              <div className="relative">
+                <DashboardStatCard
+                  label="Solde"
+                  value={showBalance ? formatCurrency(0) : "••••••"}
+                  emoji="🏦"
+                  borderColor="green"
+                />
+                {/* Bouton œil pour toggle solde */}
+                <button
+                  onClick={() => setShowBalance(!showBalance)}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm"
+                  aria-label={showBalance ? "Masquer le solde" : "Afficher le solde"}
+                >
+                  {showBalance ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
               <DashboardStatCard
                 label="Alertes"
                 value="0"
