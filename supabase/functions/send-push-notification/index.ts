@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 interface PushPayload {
   title: string;
   body: string;
@@ -61,37 +66,34 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     const body: RequestBody = await req.json();
     const { user_ids, role, notification, type = "general" } = body;
 
-    console.log("Sending push notification:", { user_ids, role, type, notification });
+    console.log("[send-push-notification] Sending push notification:", { user_ids, role, type, notification });
 
     // Build query for subscriptions
-    let query = supabase.from("push_subscriptions").select("*");
+    let subscriptionUserIds = user_ids;
 
-    if (user_ids && user_ids.length > 0) {
-      query = query.in("user_id", user_ids);
-    } else if (role) {
+    if (!user_ids && role) {
       // Get users with specific role
       const { data: roleUsers } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", role);
       
-      if (roleUsers && roleUsers.length > 0) {
-        const roleUserIds = roleUsers.map((r: { user_id: string }) => r.user_id);
-        query = query.in("user_id", roleUserIds);
-      } else {
+      if (!roleUsers || roleUsers.length === 0) {
         return new Response(
           JSON.stringify({ success: true, sent: 0, message: "No users with specified role" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+      subscriptionUserIds = roleUsers.map((r: { user_id: string }) => r.user_id);
+    }
+
+    // Fetch subscriptions
+    let query = supabase.from("push_subscriptions").select("*");
+    if (subscriptionUserIds && subscriptionUserIds.length > 0) {
+      query = query.in("user_id", subscriptionUserIds);
     }
 
     const { data: subscriptions, error: subError } = await query;
@@ -100,7 +102,7 @@ serve(async (req) => {
       throw subError;
     }
 
-    console.log(`Found ${subscriptions?.length || 0} subscriptions`);
+    console.log(`[send-push-notification] Found ${subscriptions?.length || 0} subscriptions`);
 
     if (!subscriptions || subscriptions.length === 0) {
       return new Response(
@@ -109,7 +111,7 @@ serve(async (req) => {
       );
     }
 
-    // Send notifications
+    // Send notifications in parallel
     const results = await Promise.all(
       subscriptions.map(async (sub: { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }) => {
         const result = await sendPushNotification(
@@ -117,24 +119,22 @@ serve(async (req) => {
           notification
         );
 
-        // Log notification
-        await supabase.from("notification_logs").insert({
-          user_id: sub.user_id,
-          title: notification.title,
-          body: notification.body,
-          type,
-          data: notification.data,
-          delivered: result.success,
-          error: result.error,
-        });
-
-        // Remove invalid subscriptions (410 Gone)
-        if (!result.success && result.error?.includes("410")) {
-          await supabase
-            .from("push_subscriptions")
-            .delete()
-            .eq("id", sub.id);
-        }
+        // Log and cleanup in parallel
+        await Promise.all([
+          supabase.from("notification_logs").insert({
+            user_id: sub.user_id,
+            title: notification.title,
+            body: notification.body,
+            type,
+            data: notification.data,
+            delivered: result.success,
+            error: result.error,
+          }),
+          // Remove invalid subscriptions (410 Gone)
+          (!result.success && result.error?.includes("410"))
+            ? supabase.from("push_subscriptions").delete().eq("id", sub.id)
+            : Promise.resolve()
+        ]);
 
         return result;
       })
@@ -143,7 +143,7 @@ serve(async (req) => {
     const sent = results.filter((r) => r.success).length;
     const failed = results.filter((r) => !r.success).length;
 
-    console.log(`Push results: ${sent} sent, ${failed} failed`);
+    console.log(`[send-push-notification] Push results: ${sent} sent, ${failed} failed`);
 
     return new Response(
       JSON.stringify({ success: true, sent, failed }),
@@ -151,7 +151,7 @@ serve(async (req) => {
     );
   } catch (err: unknown) {
     const error = err instanceof Error ? err.message : "Unknown error";
-    console.error("Error:", error);
+    console.error("[send-push-notification] Error:", error);
     return new Response(
       JSON.stringify({ error }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }

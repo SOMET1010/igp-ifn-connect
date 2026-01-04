@@ -5,6 +5,15 @@ import type { Database } from '@/integrations/supabase/types';
 import { authLogger } from '@/infra/logger';
 type AppRole = Database['public']['Enums']['app_role'];
 
+// Cache key for localStorage
+const ROLE_CACHE_KEY = 'ifn-user-role-cache';
+
+interface CachedRole {
+  userId: string;
+  role: AppRole;
+  cachedAt: number;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -29,13 +38,62 @@ export const useAuth = () => {
   return context;
 };
 
+/**
+ * Get cached role from localStorage
+ */
+function getCachedRole(userId: string): AppRole | null {
+  try {
+    const cached = localStorage.getItem(ROLE_CACHE_KEY);
+    if (!cached) return null;
+    
+    const parsed: CachedRole = JSON.parse(cached);
+    
+    // Cache valid for 30 minutes
+    const CACHE_TTL = 30 * 60 * 1000;
+    if (parsed.userId === userId && Date.now() - parsed.cachedAt < CACHE_TTL) {
+      return parsed.role;
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Save role to localStorage cache
+ */
+function setCachedRole(userId: string, role: AppRole): void {
+  try {
+    const cached: CachedRole = {
+      userId,
+      role,
+      cachedAt: Date.now()
+    };
+    localStorage.setItem(ROLE_CACHE_KEY, JSON.stringify(cached));
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
+/**
+ * Clear cached role
+ */
+function clearCachedRole(): void {
+  try {
+    localStorage.removeItem(ROLE_CACHE_KEY);
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<AppRole | null>(null);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = useCallback(async (userId: string): Promise<AppRole | null> => {
     try {
       // Récupérer TOUS les rôles de l'utilisateur (sans .single() pour éviter erreur 406)
       const { data, error } = await supabase
@@ -78,42 +136,82 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       authLogger.error('Error in fetchUserRole', err, { userId });
       return null;
     }
-  };
+  }, []);
+
+  /**
+   * Initialize auth with optimized parallel loading and caching
+   */
+  const initializeAuth = useCallback(async (currentSession: Session | null) => {
+    if (!currentSession?.user) {
+      setSession(null);
+      setUser(null);
+      setUserRole(null);
+      setIsLoading(false);
+      return;
+    }
+
+    const userId = currentSession.user.id;
+
+    // Check cached role first (instant)
+    const cachedRole = getCachedRole(userId);
+    
+    if (cachedRole) {
+      // Use cached role immediately
+      setSession(currentSession);
+      setUser(currentSession.user);
+      setUserRole(cachedRole);
+      setIsLoading(false);
+
+      // Refresh role in background (don't await)
+      fetchUserRole(userId).then(freshRole => {
+        if (freshRole && freshRole !== cachedRole) {
+          setUserRole(freshRole);
+          setCachedRole(userId, freshRole);
+        }
+      });
+    } else {
+      // No cache, fetch role
+      setSession(currentSession);
+      setUser(currentSession.user);
+      
+      const role = await fetchUserRole(userId);
+      setUserRole(role);
+      
+      if (role) {
+        setCachedRole(userId, role);
+      }
+      
+      setIsLoading(false);
+    }
+  }, [fetchUserRole]);
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer role fetch with setTimeout to avoid deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserRole(session.user.id).then(setUserRole);
-          }, 0);
-        } else {
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setUserRole(null);
+          clearCachedRole();
+          setIsLoading(false);
+          return;
         }
-        
-        setIsLoading(false);
+
+        // Defer initialization with setTimeout to avoid deadlock
+        setTimeout(() => {
+          initializeAuth(session);
+        }, 0);
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserRole(session.user.id).then(setUserRole);
-      }
-      
-      setIsLoading(false);
+      initializeAuth(session);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initializeAuth]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -169,6 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = useCallback(async () => {
+    clearCachedRole();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

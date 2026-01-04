@@ -5,6 +5,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Singleton pattern: Create client once at module level
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 interface TransferRequest {
   recipient_phone: string;
   amount: number;
@@ -18,10 +23,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     // Get user from auth header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -53,52 +54,33 @@ Deno.serve(async (req) => {
 
     console.log(`[wallet-transfer] User ${user.id} transferring ${amount} XOF to ${recipient_phone}`);
 
-    // Get sender's wallet
-    const { data: senderMerchant, error: senderMerchantError } = await supabase
-      .from("merchants")
-      .select("id, full_name, phone")
-      .eq("user_id", user.id)
-      .single();
+    // Fetch sender and recipient merchants in parallel for better performance
+    const [senderResult, recipientResult] = await Promise.all([
+      supabase
+        .from("merchants")
+        .select("id, full_name, phone")
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("merchants")
+        .select("id, full_name, phone, user_id")
+        .eq("phone", recipient_phone)
+        .single()
+    ]);
 
-    if (senderMerchantError || !senderMerchant) {
-      console.error("[wallet-transfer] Sender merchant not found:", senderMerchantError);
+    const senderMerchant = senderResult.data;
+    const recipientMerchant = recipientResult.data;
+
+    if (senderResult.error || !senderMerchant) {
+      console.error("[wallet-transfer] Sender merchant not found:", senderResult.error);
       return new Response(
         JSON.stringify({ success: false, error: "Marchand non trouvé" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const { data: senderWallet, error: senderWalletError } = await supabase
-      .from("wallets")
-      .select("*")
-      .eq("merchant_id", senderMerchant.id)
-      .single();
-
-    if (senderWalletError || !senderWallet) {
-      console.error("[wallet-transfer] Sender wallet not found:", senderWalletError);
-      return new Response(
-        JSON.stringify({ success: false, error: "Portefeuille expéditeur non trouvé" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Check balance
-    if (senderWallet.balance < amount) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Solde insuffisant" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Find recipient by phone
-    const { data: recipientMerchant, error: recipientMerchantError } = await supabase
-      .from("merchants")
-      .select("id, full_name, phone")
-      .eq("phone", recipient_phone)
-      .single();
-
-    if (recipientMerchantError || !recipientMerchant) {
-      console.error("[wallet-transfer] Recipient not found:", recipientMerchantError);
+    if (recipientResult.error || !recipientMerchant) {
+      console.error("[wallet-transfer] Recipient not found:", recipientResult.error);
       return new Response(
         JSON.stringify({ success: false, error: "Destinataire non trouvé avec ce numéro" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -113,17 +95,44 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { data: recipientWallet, error: recipientWalletError } = await supabase
-      .from("wallets")
-      .select("*")
-      .eq("merchant_id", recipientMerchant.id)
-      .single();
+    // Fetch both wallets in parallel
+    const [senderWalletResult, recipientWalletResult] = await Promise.all([
+      supabase
+        .from("wallets")
+        .select("*")
+        .eq("merchant_id", senderMerchant.id)
+        .single(),
+      supabase
+        .from("wallets")
+        .select("*")
+        .eq("merchant_id", recipientMerchant.id)
+        .single()
+    ]);
 
-    if (recipientWalletError || !recipientWallet) {
-      console.error("[wallet-transfer] Recipient wallet not found:", recipientWalletError);
+    const senderWallet = senderWalletResult.data;
+    const recipientWallet = recipientWalletResult.data;
+
+    if (senderWalletResult.error || !senderWallet) {
+      console.error("[wallet-transfer] Sender wallet not found:", senderWalletResult.error);
+      return new Response(
+        JSON.stringify({ success: false, error: "Portefeuille expéditeur non trouvé" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (recipientWalletResult.error || !recipientWallet) {
+      console.error("[wallet-transfer] Recipient wallet not found:", recipientWalletResult.error);
       return new Response(
         JSON.stringify({ success: false, error: "Portefeuille destinataire non trouvé" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check balance
+    if (senderWallet.balance < amount) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Solde insuffisant" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -168,7 +177,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 3. Create transaction records
+    // 3. Create transaction records, update beneficiary, and notify in parallel
     const sendTx = {
       wallet_id: senderWallet.id,
       type: "transfer_sent",
@@ -193,19 +202,10 @@ Deno.serve(async (req) => {
       status: "completed",
     };
 
-    const { error: txError } = await supabase
-      .from("wallet_transactions")
-      .insert([sendTx, receiveTx]);
-
-    if (txError) {
-      console.error("[wallet-transfer] Transaction record failed:", txError);
-      // Non-critical, transfer still succeeded
-    }
-
-    // 4. Update or create beneficiary
-    const { error: beneficiaryError } = await supabase
-      .from("beneficiaries")
-      .upsert({
+    // Run all post-transfer operations in parallel
+    await Promise.all([
+      supabase.from("wallet_transactions").insert([sendTx, receiveTx]),
+      supabase.from("beneficiaries").upsert({
         owner_wallet_id: senderWallet.id,
         beneficiary_wallet_id: recipientWallet.id,
         nickname: recipientMerchant.full_name,
@@ -213,30 +213,18 @@ Deno.serve(async (req) => {
         last_transfer_at: new Date().toISOString(),
       }, {
         onConflict: "owner_wallet_id,beneficiary_wallet_id",
-      });
-
-    if (beneficiaryError) {
-      console.log("[wallet-transfer] Beneficiary update skipped:", beneficiaryError);
-    }
-
-    // 5. Create notification for recipient
-    const { data: recipientProfile } = await supabase
-      .from("merchants")
-      .select("user_id")
-      .eq("id", recipientMerchant.id)
-      .single();
-
-    if (recipientProfile?.user_id) {
-      await supabase.rpc("create_notification", {
-        p_user_id: recipientProfile.user_id,
+      }),
+      // Notify recipient
+      recipientMerchant.user_id ? supabase.rpc("create_notification", {
+        p_user_id: recipientMerchant.user_id,
         p_type: "success",
         p_category: "wallet",
         p_title: "Transfert reçu",
         p_message: `Vous avez reçu ${amount.toLocaleString()} FCFA de ${senderMerchant.full_name}`,
         p_icon: "💰",
         p_action_url: "/marchand/wallet",
-      });
-    }
+      }) : Promise.resolve()
+    ]);
 
     console.log(`[wallet-transfer] Success: ${reference}, ${amount} XOF from ${senderMerchant.phone} to ${recipientMerchant.phone}`);
 
