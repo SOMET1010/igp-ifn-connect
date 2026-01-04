@@ -31,6 +31,9 @@ import MerchantInvoices from '@/pages/merchant/MerchantInvoices';
 import MerchantWallet from '@/pages/merchant/MerchantWallet';
 import MerchantKyc from '@/pages/merchant/MerchantKyc';
 
+// Module Voice Assistant
+import { VoiceAssistant } from '@/features/voice-assistant';
+
 /**
  * Routes publiques du marchand (login, inscription)
  */
@@ -64,6 +67,7 @@ export const merchantProtectedRoutes = (
     <Route path="/marchand/factures" element={<MerchantInvoices />} />
     <Route path="/marchand/wallet" element={<MerchantWallet />} />
     <Route path="/marchand/kyc" element={<MerchantKyc />} />
+    <Route path="/marchand/assistant-vocal" element={<VoiceAssistant />} />
   </Route>
 );
 
