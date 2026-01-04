@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { adminLogger } from '@/infra/logger';
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
@@ -212,7 +212,7 @@ const AdminVivriers: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Données Vivriers"
         showBack
         backTo="/admin"

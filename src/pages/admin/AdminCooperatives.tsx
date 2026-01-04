@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Wheat, MapPin, Users, Award, UserCog, Store, LayoutDashboard } from 'lucide-react';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
@@ -96,7 +96,7 @@ const AdminCooperatives: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Coopératives"
         showBack
         backTo="/admin"

@@ -24,7 +24,7 @@ import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { TantieMascot } from "@/components/shared/TantieMascot";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { HeroActionCard } from "@/components/shared/HeroActionCard";
-import { DashboardStatCard } from "@/components/merchant/dashboard/DashboardStatCard";
+import { StatCard } from "@/components/shared/StatCard";
 import { VoiceHeroButton } from "@/components/shared/VoiceHeroButton";
 
 import {
@@ -169,18 +169,19 @@ export default function MerchantDashboard() {
 
             {/* 3. STATISTIQUES EN CARTES GLASS - avec masquage solde */}
             <div className="grid grid-cols-3 gap-3">
-              <DashboardStatCard
-                label="Ventes"
+              <StatCard
+                title="Ventes"
                 value={showBalance ? formatCurrency(todayTotal) : "••••••"}
                 emoji="📊"
-                borderColor="orange"
+                cardStyle="merchant"
               />
               <div className="relative">
-                <DashboardStatCard
-                  label="Solde"
+                <StatCard
+                  title="Solde"
                   value={showBalance ? formatCurrency(0) : "••••••"}
                   emoji="🏦"
-                  borderColor="green"
+                  cardStyle="merchant"
+                  variant="success"
                 />
                 {/* Bouton œil pour toggle solde */}
                 <button
@@ -195,11 +196,12 @@ export default function MerchantDashboard() {
                   )}
                 </button>
               </div>
-              <DashboardStatCard
-                label="Alertes"
+              <StatCard
+                title="Alertes"
                 value="0"
                 emoji="🔔"
-                borderColor="gold"
+                cardStyle="merchant"
+                variant="warning"
               />
             </div>
 

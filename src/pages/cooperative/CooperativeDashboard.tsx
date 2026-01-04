@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState, LoadingState } from '@/components/shared/StateComponents';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
@@ -66,7 +66,7 @@ const CooperativeDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
+        <EnhancedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
         <LoadingState message="Chargement du tableau de bord..." />
         <UnifiedBottomNav items={navItems} />
       </div>
@@ -76,7 +76,7 @@ const CooperativeDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
+        <EnhancedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
         <div className="p-4 space-y-4 max-w-2xl mx-auto">
           <ErrorState message={error.message || "Erreur de chargement"} onRetry={refetch} isNetworkError={isNetworkError} />
         </div>
@@ -92,7 +92,7 @@ const CooperativeDashboard: React.FC = () => {
     <div className="min-h-screen bg-background pb-20">
       <AudioButton textToRead={audioText} variant="floating" size="lg" className="bottom-24 right-4 z-50" />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={cooperative?.name ?? t("cooperative")}
         subtitle="Plateforme IFN – Espace Coopérative"
         showSignOut

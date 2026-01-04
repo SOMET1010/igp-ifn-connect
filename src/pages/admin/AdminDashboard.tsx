@@ -8,7 +8,7 @@ import {
   NavigationCards, 
   AdvancedToolsGrid 
 } from '@/features/admin';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 import { ErrorState } from '@/components/shared/StateComponents';
@@ -49,7 +49,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Administration IFN"
         subtitle="Direction Générale des Entreprises"
         showSignOut

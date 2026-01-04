@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, MicOff, Volume2, ArrowLeft, Check, X, Loader2 } from "lucide-react";
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
-import { PnavimCard, PnavimPillButton } from "@/components/pnavim";
+import { GlassCard } from "@/components/shared/GlassCard";
+import { PnavimPillButton } from "@/components/pnavim";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -249,12 +250,12 @@ const MerchantVoiceEntry: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
             >
-              <PnavimCard accent="green" padding="lg" className="text-center">
+              <GlassCard borderColor="green" padding="lg" className="text-center">
                 <p className="text-2xl font-nunito font-bold text-charbon">
                   {spokenText}
                 </p>
                 <p className="text-sm text-charbon/60 mt-1">C'est bien toi ?</p>
-              </PnavimCard>
+              </GlassCard>
 
               {/* Boutons OUI / NON */}
               <div className="flex gap-4 mt-6">

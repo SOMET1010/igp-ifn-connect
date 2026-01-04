@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, LogOut } from 'lucide-react';
 import { NotificationToggle } from '@/components/shared/NotificationToggle';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { cooperativeNavItems } from '@/config/navigation';
 import {
@@ -54,7 +54,7 @@ const CooperativeProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Profil Coopérative"
         subtitle="Informations et paramètres"
         showBack

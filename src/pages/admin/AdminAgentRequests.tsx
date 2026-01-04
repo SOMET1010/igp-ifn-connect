@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips, FilterOption } from '@/components/shared/FilterChips';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -104,7 +104,7 @@ export default function AdminAgentRequests() {
 
   return (
     <div className="min-h-screen bg-background">
-      <UnifiedHeader
+      <EnhancedHeader
         title="Demandes d'agents"
         showBack
         backTo="/admin"

@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { AudioButton } from '@/components/shared/AudioButton';
 import { ErrorState } from '@/components/shared/StateComponents';
-import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
+import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
 import { RetryIndicator } from '@/components/shared/RetryIndicator';
@@ -60,7 +60,7 @@ const AgentDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader
+        <EnhancedHeader
           title={t("agent")}
           subtitle="Plateforme IFN – Espace Agent"
           showSignOut
@@ -82,7 +82,7 @@ const AgentDashboard: React.FC = () => {
   if (!isLoading && !isAgentRegistered) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <UnifiedHeader
+        <EnhancedHeader
           title={t("agent")}
           subtitle="Plateforme IFN – Espace Agent"
           showSignOut
@@ -105,7 +105,7 @@ const AgentDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50"
       />
 
-      <UnifiedHeader
+      <EnhancedHeader
         title={t("agent")}
         subtitle="Plateforme IFN – Espace Agent"
         showSignOut
