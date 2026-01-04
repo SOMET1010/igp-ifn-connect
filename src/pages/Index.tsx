@@ -8,6 +8,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 
+// TTS (voix PNAVIM uniquement)
+import { playPnavimTts } from "@/shared/services/tts/pnavimTtsPlayer";
+import { PNAVIM_VOICES } from "@/shared/config/voiceConfig";
+
 interface RoleCard {
   title: string;
   titleKey: string;
@@ -83,16 +87,9 @@ const triggerHaptic = () => {
   }
 };
 
-// Text-to-Speech pour les cartes
+// Text-to-Speech (ElevenLabs PNAVIM)
 const speakText = (text: string) => {
-  if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "fr-FR";
-    utterance.rate = 0.9;
-    utterance.volume = 0.8;
-    window.speechSynthesis.speak(utterance);
-  }
+  void playPnavimTts(text, { voiceId: PNAVIM_VOICES.DEFAULT });
 };
 
 interface InclusiveRoleCardProps {
