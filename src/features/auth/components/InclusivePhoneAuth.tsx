@@ -9,7 +9,7 @@ import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
 import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
 import { SocialChallenge } from './SocialChallenge';
-
+import { supabase } from '@/integrations/supabase/client';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -475,12 +475,54 @@ export function InclusivePhoneAuth({
     setError(null);
   };
 
-  // Appel vocal pour recevoir l'OTP
+  // Appel vocal pour recevoir l'OTP via Edge Function
   const handleVoiceCallOtp = async () => {
     vibrate(50);
-    toast.info('📞 Appel en cours...');
-    speak(`Ton code est ${devOtp?.split('').join(', ')}. Je répète : ${devOtp?.split('').join(', ')}`, { priority: 'high' });
-    // TODO: Intégrer un vrai service d'appel vocal (Twilio, etc.)
+    setIsLoading(true);
+    toast.info('📞 Préparation de l\'appel vocal...');
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-otp-callback`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            phone: `+225${phone}`,
+            otp: devOtp,
+            language: 'fr'
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.audio) {
+        // Lire l'audio généré par ElevenLabs
+        const audioUrl = `data:audio/mpeg;base64,${data.audio}`;
+        const audio = new Audio(audioUrl);
+        audio.play();
+        toast.success('🔊 Écoute ton code !');
+      } else if (data.message) {
+        // Fallback: utiliser TTS local
+        speak(data.message, { priority: 'high' });
+        toast.info('🔊 Le code va être lu...');
+      } else {
+        // Dernier fallback
+        speak(`Ton code est ${devOtp?.split('').join(', ')}. Je répète : ${devOtp?.split('').join(', ')}`, { priority: 'high' });
+      }
+    } catch (error) {
+      console.error('[handleVoiceCallOtp] Error:', error);
+      // Fallback: lire le code directement avec TTS local
+      speak(`Ton code est ${devOtp?.split('').join(', ')}. Je répète : ${devOtp?.split('').join(', ')}`, { priority: 'high' });
+      toast.info('🔊 Écoute ton code');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Reset complet
@@ -866,15 +908,23 @@ export function InclusivePhoneAuth({
                 
                 <div className="flex justify-center gap-2">
                   {[0, 1, 2, 3, 4, 5].map(i => (
-                    <div
+                    <motion.div
                       key={i}
+                      initial={false}
+                      animate={{
+                        scale: otp[i] ? [1, 1.15, 1] : 1,
+                        borderColor: otp[i] ? '#f59e0b' : '#d1d5db',
+                        backgroundColor: otp[i] ? '#fffbeb' : '#f9fafb',
+                      }}
+                      transition={{ duration: 0.2 }}
                       className={cn(
-                        "w-10 h-12 rounded-lg border-2 flex items-center justify-center text-xl font-bold",
-                        otp[i] ? "border-amber-500 bg-amber-50 text-amber-600" : "border-gray-300 bg-gray-50"
+                        "w-10 h-12 rounded-lg border-2 flex items-center justify-center text-xl font-bold transition-colors",
+                        otp[i] ? "text-amber-600" : "text-gray-400",
+                        !otp[i] && otp.length === i && "animate-pulse border-amber-300"
                       )}
                     >
                       {otp[i] || ''}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
                 {devOtp && (
