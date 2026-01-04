@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete, ShieldCheck, AlertTriangle, PhoneCall } from 'lucide-react';
+import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete, ShieldCheck, AlertTriangle, PhoneCall, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
+import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
 import { SocialChallenge } from './SocialChallenge';
 
 interface InclusivePhoneAuthProps {
@@ -15,20 +16,17 @@ interface InclusivePhoneAuthProps {
   className?: string;
 }
 
-type Step = 'phone' | 'otp' | 'verifying' | 'social_check' | 'blocked' | 'success';
+type Step = 'phone' | 'phone_confirm' | 'otp' | 'verifying' | 'social_check' | 'blocked' | 'success';
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /**
- * InclusivePhoneAuth - SmartAuthGate PNAVIM
+ * InclusivePhoneAuth - SmartAuthGate PNAVIM v2
  * 
- * Flow linéaire visible : Téléphone → OTP → Vérification → Connecté
- * Risk Gate invisible : 🟢 Direct | 🟠 Challenge | 🔴 Agent
- * 
- * Inclusion :
- * - Feedback haptique sur chaque touche
- * - Barre de progression 3 étapes
- * - Clavier contrôlé 10 chiffres
- * - Timeout 12s avec retry
+ * Flow "Zéro Lecture, Zéro Mémoire" :
+ * - 🎤 Bouton micro géant pour dicter le numéro
+ * - 📩 WebOTP API pour auto-remplissage SMS (Android)
+ * - 📞 Callback vocal si SMS échoue
+ * - Risk Gate invisible : 🟢 Direct | 🟠 Challenge | 🔴 Agent
  */
 export function InclusivePhoneAuth({ 
   redirectPath, 
@@ -49,6 +47,7 @@ export function InclusivePhoneAuth({
   
   // Assistance vocale
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [isListeningMic, setIsListeningMic] = useState(false);
   
   // Risk Gate
   const [trustResult, setTrustResult] = useState<any>(null);
@@ -62,6 +61,31 @@ export function InclusivePhoneAuth({
   // Timeout management
   const [isTimeout, setIsTimeout] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const otpAbortRef = useRef<AbortController | null>(null);
+
+  // Transcription vocale pour le numéro
+  const { 
+    startListening, 
+    stopListening, 
+    isConnected: isVoiceConnected, 
+    isConnecting: isVoiceConnecting,
+    transcript 
+  } = useVoiceTranscription({
+    onPhoneDetected: (detectedPhone) => {
+      setPhone(detectedPhone);
+      setIsListeningMic(false);
+      stopListening();
+      // Montrer l'écran de confirmation
+      setStep('phone_confirm');
+      // Lire le numéro détecté
+      const spaced = detectedPhone.split('').join(' ');
+      speak(`J'ai entendu ${spaced}. C'est bon ?`, { priority: 'high' });
+    },
+    onError: (err) => {
+      setIsListeningMic(false);
+      toast.error(err || 'Erreur vocale');
+    }
+  });
 
   // Format visuel du téléphone : "07 01 02 03 04"
   const formatPhoneDisplay = (value: string) => {
@@ -102,10 +126,29 @@ export function InclusivePhoneAuth({
 
   // Message d'aide contextuel
   const getPhoneHelperText = () => {
-    if (phone.length === 0) return 'Tape ton numéro';
+    if (phone.length === 0) return 'Appuie sur le micro et parle';
     if (phone.length < 5) return 'Continue...';
     if (phone.length < 10) return `Encore ${10 - phone.length} chiffres`;
     return '✅ Numéro complet !';
+  };
+
+  // Démarrer l'écoute micro
+  const handleMicClick = async () => {
+    if (isListeningMic || isVoiceConnecting) {
+      stopListening();
+      setIsListeningMic(false);
+      return;
+    }
+
+    try {
+      setIsListeningMic(true);
+      vibrate(50);
+      speak("Je t'écoute, dis ton numéro", { priority: 'high' });
+      await startListening();
+    } catch (err) {
+      setIsListeningMic(false);
+      toast.error('Active le micro pour utiliser la voix');
+    }
   };
 
   // Gérer la saisie téléphone
@@ -140,8 +183,22 @@ export function InclusivePhoneAuth({
       setVoiceEnabled(false);
     } else {
       setVoiceEnabled(true);
-      speak('Assistance vocale activée. Tape ton numéro chiffre par chiffre.', { priority: 'high' });
+      speak('Assistance vocale activée. Appuie sur le gros micro pour parler.', { priority: 'high' });
     }
+  };
+
+  // Confirmer le numéro dicté
+  const handleConfirmPhone = () => {
+    vibrate(50);
+    handleSubmitPhone();
+  };
+
+  // Corriger le numéro dicté
+  const handleRejectPhone = () => {
+    vibrate(30);
+    setPhone('');
+    setStep('phone');
+    speak('D\'accord, réessaye', { priority: 'normal' });
   };
 
   // Étape 1 : Envoyer le numéro et recevoir OTP
@@ -188,6 +245,46 @@ export function InclusivePhoneAuth({
     }
   }, [phone, voiceEnabled, speak]);
 
+  // WebOTP API - Auto-remplissage SMS (Android)
+  useEffect(() => {
+    if (step !== 'otp') return;
+    
+    // Vérifier si WebOTP est supporté
+    if (!('OTPCredential' in window)) {
+      console.log('[WebOTP] Not supported');
+      return;
+    }
+
+    const ac = new AbortController();
+    otpAbortRef.current = ac;
+
+    console.log('[WebOTP] Listening for SMS...');
+
+    (navigator.credentials as any).get({
+      otp: { transport: ['sms'] },
+      signal: ac.signal,
+    })
+    .then((otpCredential: any) => {
+      if (otpCredential?.code) {
+        console.log('[WebOTP] Code detected:', otpCredential.code);
+        setOtp(otpCredential.code);
+        toast.success('Code détecté automatiquement !');
+        vibrate(100);
+        // Auto-submit sera déclenché par l'effet sur otp
+      }
+    })
+    .catch((err: any) => {
+      if (err.name !== 'AbortError') {
+        console.log('[WebOTP] Error:', err.message);
+      }
+    });
+
+    return () => {
+      ac.abort();
+      otpAbortRef.current = null;
+    };
+  }, [step]);
+
   // Déterminer le niveau de risque
   const getRiskLevel = (score: number): RiskLevel => {
     if (score >= 60) return 'LOW';
@@ -208,6 +305,11 @@ export function InclusivePhoneAuth({
       vibrate(100);
       if (voiceEnabled) speak('Code incorrect. Réessaye.', { priority: 'high' });
       return;
+    }
+
+    // Annuler WebOTP
+    if (otpAbortRef.current) {
+      otpAbortRef.current.abort();
     }
 
     // OTP valide - passer à l'écran de vérification
@@ -365,14 +467,6 @@ export function InclusivePhoneAuth({
     setOtp(newOtp);
     setError(null);
     if (voiceEnabled) speakDigit(digit);
-    
-    // Auto-submit quand 6 chiffres
-    if (newOtp.length === 6) {
-      setTimeout(() => {
-        setOtp(newOtp);
-        handleSubmitOtp();
-      }, 300);
-    }
   };
 
   const handleOtpBackspace = () => {
@@ -381,13 +475,25 @@ export function InclusivePhoneAuth({
     setError(null);
   };
 
+  // Appel vocal pour recevoir l'OTP
+  const handleVoiceCallOtp = async () => {
+    vibrate(50);
+    toast.info('📞 Appel en cours...');
+    speak(`Ton code est ${devOtp?.split('').join(', ')}. Je répète : ${devOtp?.split('').join(', ')}`, { priority: 'high' });
+    // TODO: Intégrer un vrai service d'appel vocal (Twilio, etc.)
+  };
+
   // Reset complet
   const handleReset = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (otpAbortRef.current) {
+      otpAbortRef.current.abort();
+    }
     stop();
+    stopListening();
     setStep('phone');
     setPhone('');
     setOtp('');
@@ -397,6 +503,7 @@ export function InclusivePhoneAuth({
     setSocialQuestion(null);
     setIsTimeout(false);
     setRiskLevel('LOW');
+    setIsListeningMic(false);
   };
 
   // Appeler agent
@@ -404,21 +511,21 @@ export function InclusivePhoneAuth({
     window.location.href = 'tel:+2251234';
   };
 
-  // Cleanup timeout on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (otpAbortRef.current) otpAbortRef.current.abort();
+      stopListening();
     };
-  }, []);
+  }, [stopListening]);
 
   // Auto-submit OTP quand complet
   useEffect(() => {
     if (otp.length === 6 && step === 'otp' && !isLoading) {
       handleSubmitOtp();
     }
-  }, [otp, step, isLoading]);
+  }, [otp, step, isLoading, handleSubmitOtp]);
 
   // Couleurs par type
   const colors = {
@@ -435,7 +542,7 @@ export function InclusivePhoneAuth({
 
   // Étape actuelle pour la barre de progression
   const getStepNumber = () => {
-    if (step === 'phone') return 1;
+    if (step === 'phone' || step === 'phone_confirm') return 1;
     if (step === 'otp') return 2;
     return 3;
   };
@@ -557,7 +664,7 @@ export function InclusivePhoneAuth({
         <ProgressBar />
 
         <AnimatePresence mode="wait">
-          {/* Étape 1 : Téléphone */}
+          {/* Étape 1 : Téléphone avec MICRO GÉANT */}
           {step === 'phone' && (
             <motion.div
               key="phone"
@@ -566,15 +673,44 @@ export function InclusivePhoneAuth({
               exit={{ opacity: 0, x: -20 }}
               className="space-y-4"
             >
-              <div className="flex justify-center">
-                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                  <Phone className="w-8 h-8 text-white" />
-                </div>
+              {/* MICRO GÉANT - Centre d'attention */}
+              <div className="flex flex-col items-center gap-2 py-2">
+                <motion.button
+                  onClick={handleMicClick}
+                  disabled={isVoiceConnecting}
+                  className={cn(
+                    "w-24 h-24 rounded-full flex items-center justify-center transition-all shadow-lg",
+                    isListeningMic || isVoiceConnected
+                      ? "bg-red-500 animate-pulse"
+                      : "bg-white/20 hover:bg-white/30"
+                  )}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isVoiceConnecting ? (
+                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                  ) : isListeningMic || isVoiceConnected ? (
+                    <MicOff className="w-10 h-10 text-white" />
+                  ) : (
+                    <Mic className="w-10 h-10 text-white" />
+                  )}
+                </motion.button>
+                <p className="text-white text-sm text-center">
+                  {isVoiceConnecting 
+                    ? 'Connexion...' 
+                    : isListeningMic || isVoiceConnected 
+                      ? "🎙️ Je t'écoute..." 
+                      : "Appuie et parle"}
+                </p>
+                {transcript && (
+                  <p className="text-white/60 text-xs italic">"{transcript}"</p>
+                )}
               </div>
 
-              <div className="text-center">
-                <h2 className="text-xl font-bold text-white">Ton numéro</h2>
-                <p className="text-white/80 text-sm">{getPhoneHelperText()}</p>
+              {/* Séparateur */}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-white/20" />
+                <span className="text-white/60 text-xs">ou tape ton numéro</span>
+                <div className="flex-1 h-px bg-white/20" />
               </div>
 
               {/* Affichage numéro */}
@@ -633,7 +769,65 @@ export function InclusivePhoneAuth({
             </motion.div>
           )}
 
-          {/* Étape 2 : OTP */}
+          {/* Étape 1b : Confirmation du numéro dicté */}
+          {step === 'phone_confirm' && (
+            <motion.div
+              key="phone_confirm"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6 py-4"
+            >
+              <div className="text-center">
+                <h2 className="text-xl font-bold text-white">J'ai entendu :</h2>
+              </div>
+
+              {/* Affichage gros numéro */}
+              <div className="bg-white rounded-2xl p-6">
+                <p className="text-3xl font-mono font-bold tracking-widest text-center text-gray-800">
+                  {formatPhoneDisplay(phone)}
+                </p>
+              </div>
+
+              {/* Boutons de confirmation */}
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  onClick={handleRejectPhone}
+                  variant="outline"
+                  className="h-14 bg-white/10 border-white/30 text-white hover:bg-white/20 font-bold"
+                >
+                  <RotateCcw className="w-5 h-5 mr-2" />
+                  Non, répéter
+                </Button>
+                <Button
+                  onClick={handleConfirmPhone}
+                  disabled={isLoading}
+                  className="h-14 bg-emerald-500 hover:bg-emerald-600 text-white font-bold"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 mr-2" />
+                      Oui, c'est bon
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Bouton écouter */}
+              <Button
+                onClick={repeatPhone}
+                variant="ghost"
+                className="w-full text-white hover:bg-white/10"
+              >
+                <Volume2 className="w-4 h-4 mr-2" />
+                🔊 Écouter le numéro
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Étape 2 : OTP avec WebOTP */}
           {step === 'otp' && (
             <motion.div
               key="otp"
@@ -649,7 +843,27 @@ export function InclusivePhoneAuth({
                 </p>
               </div>
 
+              {/* Message rassurant WebOTP */}
+              <div className="bg-white/10 rounded-xl p-3 text-center">
+                <p className="text-white/90 text-sm">
+                  📩 Ne touche à rien, le code va se remplir tout seul
+                </p>
+              </div>
+
               <div className="bg-white/95 rounded-2xl p-4">
+                {/* Input invisible pour WebOTP */}
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={otp}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setOtp(value);
+                  }}
+                  className="sr-only"
+                />
+                
                 <div className="flex justify-center gap-2">
                   {[0, 1, 2, 3, 4, 5].map(i => (
                     <div
@@ -680,6 +894,21 @@ export function InclusivePhoneAuth({
                   {error}
                 </p>
               )}
+
+              {/* Fallback : Appel vocal */}
+              <div className="border-t border-white/20 pt-4 mt-2">
+                <p className="text-white/60 text-xs text-center mb-2">
+                  Tu ne reçois pas le SMS ?
+                </p>
+                <Button
+                  onClick={handleVoiceCallOtp}
+                  variant="outline"
+                  className="w-full border-white/30 text-white hover:bg-white/10"
+                >
+                  <PhoneCall className="w-4 h-4 mr-2" />
+                  📞 Appelle-moi pour me dire le code
+                </Button>
+              </div>
 
               <Button
                 onClick={handleReset}
