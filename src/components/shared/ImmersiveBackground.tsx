@@ -94,15 +94,15 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
 
   return (
     <div className={`fixed inset-0 -z-10 overflow-hidden ${className}`}>
-      {/* Photo du marché avec overlay solaire (mode PNAVIM 2.0) */}
+      {/* Photo du marché avec overlay solaire (mode PNAVIM 2.0) - Optimisé Android */}
       {showSolarPhoto && (
         <>
-          <div 
-            className="absolute inset-0"
+          <img
+            src={marcheImage}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
             style={{
-              backgroundImage: `url(${marcheImage})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
               filter: `blur(${BLUR_MAP[blurAmount]})`,
               transform: "scale(1.1)",
             }}
