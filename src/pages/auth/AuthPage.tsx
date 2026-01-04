@@ -66,6 +66,14 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     redirectTo: '/cooperative',
     color: 'from-amber-700 to-amber-600',
   },
+  producer: {
+    title: 'Espace Producteur',
+    subtitle: 'Publication de vos récoltes',
+    icon: <Users className="h-8 w-8" />,
+    authMethod: 'phone',
+    redirectTo: '/producteur',
+    color: 'from-emerald-700 to-emerald-600',
+  },
 };
 
 type Step = 'credentials' | 'otp' | 'register';

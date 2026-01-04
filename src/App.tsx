@@ -22,6 +22,8 @@ import {
   agentProtectedRoutes,
   cooperativePublicRoutes,
   cooperativeProtectedRoutes,
+  producerPublicRoutes,
+  producerProtectedRoutes,
   adminPublicRoutes,
   adminProtectedRoutes,
 } from "@/routes";
@@ -127,6 +129,10 @@ const App = () => (
                           {/* Routes Coopérative */}
                           {cooperativePublicRoutes}
                           {cooperativeProtectedRoutes}
+
+                          {/* Routes Producteur */}
+                          {producerPublicRoutes}
+                          {producerProtectedRoutes}
 
                           {/* Routes Admin */}
                           {adminPublicRoutes}

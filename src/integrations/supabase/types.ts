@@ -496,6 +496,89 @@ export type Database = {
           },
         ]
       }
+      cooperative_producer_orders: {
+        Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cooperative_id: string
+          created_at: string | null
+          delivery_date: string | null
+          harvest_id: string | null
+          id: string
+          notes: string | null
+          producer_id: string
+          product_id: string
+          quantity: number
+          status: string | null
+          total_amount: number
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cooperative_id: string
+          created_at?: string | null
+          delivery_date?: string | null
+          harvest_id?: string | null
+          id?: string
+          notes?: string | null
+          producer_id: string
+          product_id: string
+          quantity: number
+          status?: string | null
+          total_amount: number
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cooperative_id?: string
+          created_at?: string | null
+          delivery_date?: string | null
+          harvest_id?: string | null
+          id?: string
+          notes?: string | null
+          producer_id?: string
+          product_id?: string
+          quantity?: number
+          status?: string | null
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cooperative_producer_orders_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_producer_orders_harvest_id_fkey"
+            columns: ["harvest_id"]
+            isOneToOne: false
+            referencedRelation: "producer_harvests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_producer_orders_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cooperative_producer_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cooperatives: {
         Row: {
           address: string | null
@@ -1281,6 +1364,128 @@ export type Database = {
           verified?: boolean | null
         }
         Relationships: []
+      }
+      producer_harvests: {
+        Row: {
+          available_quantity: number
+          created_at: string | null
+          expiry_date: string | null
+          harvest_date: string
+          id: string
+          notes: string | null
+          producer_id: string
+          product_id: string
+          quality_grade: string | null
+          quantity: number
+          status: string | null
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          available_quantity: number
+          created_at?: string | null
+          expiry_date?: string | null
+          harvest_date: string
+          id?: string
+          notes?: string | null
+          producer_id: string
+          product_id: string
+          quality_grade?: string | null
+          quantity: number
+          status?: string | null
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          available_quantity?: number
+          created_at?: string | null
+          expiry_date?: string | null
+          harvest_date?: string
+          id?: string
+          notes?: string | null
+          producer_id?: string
+          product_id?: string
+          quality_grade?: string | null
+          quantity?: number
+          status?: string | null
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producer_harvests_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producer_harvests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producers: {
+        Row: {
+          commune: string
+          cooperative_id: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          igp_certified: boolean | null
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
+          phone: string
+          region: string
+          specialties: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          commune: string
+          cooperative_id?: string | null
+          created_at?: string | null
+          full_name: string
+          id?: string
+          igp_certified?: boolean | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          phone: string
+          region: string
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          commune?: string
+          cooperative_id?: string | null
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          igp_certified?: boolean | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          phone?: string
+          region?: string
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producers_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_categories: {
         Row: {
@@ -2468,6 +2673,7 @@ export type Database = {
         | "cooperative"
         | "user"
         | "client"
+        | "producer"
       kyc_level: "level_0" | "level_1" | "level_2"
       kyc_status:
         | "draft"
@@ -2610,7 +2816,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agent", "merchant", "cooperative", "user", "client"],
+      app_role: [
+        "admin",
+        "agent",
+        "merchant",
+        "cooperative",
+        "user",
+        "client",
+        "producer",
+      ],
       kyc_level: ["level_0", "level_1", "level_2"],
       kyc_status: [
         "draft",

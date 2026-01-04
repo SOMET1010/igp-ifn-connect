@@ -40,6 +40,13 @@ export const ROLE_PAGES = {
     'dashboard',
     'stock',
     'orders',
+    'producers',
+    'profile',
+  ],
+  producer: [
+    'dashboard',
+    'harvests',
+    'orders',
     'profile',
   ],
   admin: [
@@ -48,6 +55,7 @@ export const ROLE_PAGES = {
     'agents',
     'agent-requests',
     'cooperatives',
+    'producers',
     'map',
     'monitoring',
     'analytics',
@@ -89,6 +97,16 @@ export const ROLE_ACTIONS = {
     'create_orders',
     'view_orders',
     'view_merchants',
+    'view_producers',
+    'order_from_producer',
+    'manage_profile',
+  ],
+  producer: [
+    'publish_harvest',
+    'update_harvest',
+    'delete_harvest',
+    'view_orders',
+    'update_order_status',
     'manage_profile',
   ],
   admin: ['*'], // Toutes les actions
@@ -115,6 +133,12 @@ export const ROLE_PERMISSIONS = {
     actions: ROLE_ACTIONS.cooperative,
     redirectTo: '/cooperative/login',
     basePath: '/cooperative',
+  },
+  producer: {
+    pages: ROLE_PAGES.producer,
+    actions: ROLE_ACTIONS.producer,
+    redirectTo: '/producteur/login',
+    basePath: '/producteur',
   },
   admin: {
     pages: ROLE_PAGES.admin,
@@ -174,6 +198,7 @@ export const ROLE_PRIORITY: Record<AppRole, number> = {
   admin: 5,
   agent: 4,
   cooperative: 3,
+  producer: 3,
   merchant: 2,
   client: 1, // Deprecated - hors périmètre PNAVIM
   user: 1,

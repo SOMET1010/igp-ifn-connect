@@ -11,5 +11,6 @@ export { publicRoutes } from './public.routes';
 export { merchantPublicRoutes, merchantProtectedRoutes } from './merchant.routes';
 export { agentPublicRoutes, agentProtectedRoutes } from './agent.routes';
 export { cooperativePublicRoutes, cooperativeProtectedRoutes } from './cooperative.routes';
+export { producerPublicRoutes, producerProtectedRoutes } from './producer.routes';
 export { adminPublicRoutes, adminProtectedRoutes } from './admin.routes';
 
