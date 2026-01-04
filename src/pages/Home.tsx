@@ -404,7 +404,7 @@ const Index: React.FC = () => {
 
         {/* Carte Coopérative (optionnelle - plus petite) */}
         <motion.div
-          className="mt-5 flex justify-center"
+          className="mt-5 flex flex-wrap justify-center gap-3"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
@@ -415,6 +415,13 @@ const Index: React.FC = () => {
           >
             <span>🌾</span>
             <span>{t('i_am_cooperative') || 'Je suis Coopérative'}</span>
+          </button>
+          <button
+            onClick={() => { triggerTap(); navigate('/cooperatives'); }}
+            className="bg-secondary/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-secondary active:bg-secondary/90 transition-colors border border-secondary/40 flex items-center gap-2 min-h-[52px]"
+          >
+            <span>👥</span>
+            <span>{t('view_cooperatives') || 'Voir les Coopératives'}</span>
           </button>
         </motion.div>
 

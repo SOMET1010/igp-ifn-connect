@@ -31,6 +31,7 @@ const AuthPage = React.lazy(() => import("./pages/auth/AuthPage"));
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import MyAccount from "./pages/account/MyAccount";
+import VivriersCooperativesPage from "./pages/public/VivriersCooperativesPage";
 import DemoAccess from "./pages/DemoAccess";
 
 // Pages fallback PRÉ-PROD
@@ -101,6 +102,7 @@ const App = () => (
                           <Route path="/auth" element={<AuthPage />} />
                           <Route path="/demo" element={<DemoAccess />} />
                           <Route path="/compte" element={<MyAccount />} />
+                          <Route path="/cooperatives" element={<VivriersCooperativesPage />} />
                           <Route path="/accueil" element={<Navigate to="/" replace />} />
 
                           {/* Routes fallback PRÉ-PROD */}
