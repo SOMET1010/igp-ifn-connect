@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, Loader2, Phone, ArrowRight, Volume2, Keyboard, Users } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Mic, Loader2, Phone, ArrowRight, Volume2, Keyboard, Users, VolumeX, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
@@ -7,12 +7,14 @@ import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscripti
 import { useTts } from '@/shared/hooks/useTts';
 import { usePersistedPersona } from '@/features/auth/hooks/usePersistedPersona';
 import { AudioBars } from '@/components/merchant/AudioBars';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';
 import { PersonaSelector } from './PersonaSelector';
+import { PhoneNumPad } from '@/components/shared/PhoneNumPad';
+import { AuthErrorBanner, createAuthError } from '@/components/shared/AuthErrorBanner';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
 
 interface VoiceSocialAuthProps {
   redirectPath: string;
@@ -39,6 +41,8 @@ export function VoiceSocialAuth({
   const [hasPlayedWelcome, setHasPlayedWelcome] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [showPersonaSelector, setShowPersonaSelector] = useState(false);
+  const [authError, setAuthError] = useState<{ code: string; message: string; type: 'network' | 'microphone' | 'validation' | 'server' | 'timeout' | 'unknown' } | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hook pour persister le choix de persona
   const { persona: persistedPersona, setPersona: setPersistedPersona, isLoaded, isFirstVisit } = usePersistedPersona();
@@ -334,28 +338,39 @@ export function VoiceSocialAuth({
         {/* Boutons d'action */}
         {!showManualInput ? (
           <div className="space-y-3">
-            {/* Bouton écouter/parler */}
-            <motion.button
-              onClick={handlePlayWelcome}
-              disabled={ttsLoading || isSpeaking}
-              whileTap={{ scale: 0.97 }}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all",
-                (ttsLoading || isSpeaking) && "opacity-50"
-              )}
-            >
-              <Volume2 className={cn("w-5 h-5", isSpeaking && "animate-pulse")} />
-              {isSpeaking ? 'Écoute...' : 'Cliquez pour écouter'}
-            </motion.button>
+            {/* Bouton écouter/STOP */}
+            {isSpeaking ? (
+              <motion.button
+                onClick={stop}
+                whileTap={{ scale: 0.97 }}
+                className="w-full flex items-center justify-center gap-2 bg-red-500/80 hover:bg-red-500 text-white font-semibold py-3 px-6 rounded-xl transition-all"
+              >
+                <VolumeX className="w-5 h-5" />
+                Arrêter la voix
+              </motion.button>
+            ) : (
+              <motion.button
+                onClick={handlePlayWelcome}
+                disabled={ttsLoading}
+                whileTap={{ scale: 0.97 }}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold py-3 px-6 rounded-xl transition-all",
+                  ttsLoading && "opacity-50"
+                )}
+              >
+                <Volume2 className="w-5 h-5" />
+                Cliquez pour écouter
+              </motion.button>
+            )}
 
             {/* Bouton micro principal */}
             <motion.button
               onClick={handleMicClick}
-              disabled={isLoading || isConnecting || ttsLoading}
+              disabled={isLoading || isConnecting || ttsLoading || isSpeaking}
               whileTap={{ scale: 0.95 }}
               className={cn(
                 "w-full flex items-center justify-center gap-3 bg-white text-amber-600 font-bold py-4 px-6 rounded-xl shadow-lg transition-all",
-                (isLoading || isConnecting) && "opacity-50",
+                (isLoading || isConnecting || isSpeaking) && "opacity-50",
                 isConnected && "bg-red-500 text-white"
               )}
             >
@@ -375,21 +390,24 @@ export function VoiceSocialAuth({
             )}
           </div>
         ) : (
-          <form onSubmit={handleManualSubmit} className="space-y-3">
-            <div className="relative">
-              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <Input
-                type="tel"
-                placeholder="07 01 02 03 04"
-                value={manualPhone}
-                onChange={(e) => setManualPhone(e.target.value)}
-                className="pl-12 text-lg h-14 bg-white border-0 rounded-xl"
-                autoFocus
-              />
-            </div>
+          <div className="space-y-3">
+            {/* Clavier numérique amélioré */}
+            <PhoneNumPad
+              value={manualPhone}
+              onChange={setManualPhone}
+              onComplete={(phone) => {
+                processPhoneNumber(phone);
+              }}
+              disabled={isLoading}
+            />
             
             <Button 
-              type="submit" 
+              type="button"
+              onClick={() => {
+                if (manualPhone.length >= 10) {
+                  processPhoneNumber(manualPhone);
+                }
+              }}
               className="w-full h-12 bg-white text-amber-600 hover:bg-white/90 font-bold rounded-xl"
               disabled={manualPhone.length < 10 || isLoading}
             >
@@ -402,11 +420,30 @@ export function VoiceSocialAuth({
                 </>
               )}
             </Button>
-          </form>
+          </div>
         )}
 
-        {/* Error message */}
-        {voiceError && (
+        {/* Erreur structurée avec recovery */}
+        {authError && (
+          <AuthErrorBanner
+            code={authError.code}
+            message={authError.message}
+            type={authError.type}
+            onRetry={() => {
+              setAuthError(null);
+              setVoiceError(null);
+            }}
+            onSwitchToKeyboard={() => {
+              setAuthError(null);
+              setVoiceError(null);
+              setShowManualInput(true);
+            }}
+            className="mt-3"
+          />
+        )}
+
+        {/* Error message simple (legacy) */}
+        {voiceError && !authError && (
           <p className="text-sm text-white/90 text-center mt-3 bg-red-500/30 rounded-lg p-2">
             {voiceError}
           </p>
