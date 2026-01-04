@@ -63,7 +63,7 @@ const roleConfig: Record<AppRole, { label: string; color: string; icon: React.El
   merchant: { label: 'Marchand', color: 'bg-secondary/10 text-secondary border-secondary/30', icon: Store },
   agent: { label: 'Agent', color: 'bg-primary/10 text-primary border-primary/30', icon: UserCog },
   cooperative: { label: 'Coopérative', color: 'bg-accent/10 text-accent border-accent/30', icon: Wheat },
-  client: { label: 'Client', color: 'bg-teal-500/10 text-teal-700 border-teal-500/30', icon: Users },
+  client: { label: 'Client', color: 'bg-muted text-muted-foreground border-muted', icon: Users }, // Deprecated
   user: { label: 'Utilisateur', color: 'bg-muted text-muted-foreground border-muted', icon: Users },
 };
 

@@ -66,14 +66,6 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     redirectTo: '/cooperative',
     color: 'from-amber-700 to-amber-600',
   },
-  client: {
-    title: 'Espace Client',
-    subtitle: 'Accès à vos services financiers',
-    icon: <User className="h-8 w-8" />,
-    authMethod: 'phone',
-    redirectTo: '/client',
-    color: 'from-teal-700 to-teal-600',
-  },
 };
 
 type Step = 'credentials' | 'otp' | 'register';
