@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete, ShieldCheck, AlertTriangle, PhoneCall } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -15,19 +15,20 @@ interface InclusivePhoneAuthProps {
   className?: string;
 }
 
-type Step = 'phone' | 'otp' | 'social_check' | 'success';
+type Step = 'phone' | 'otp' | 'verifying' | 'social_check' | 'blocked' | 'success';
+type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /**
- * InclusivePhoneAuth - Authentification inclusive PNAVIM
+ * InclusivePhoneAuth - SmartAuthGate PNAVIM
  * 
- * Flow linéaire visible : Téléphone → OTP → Connecté
- * Rails sociaux invisibles : Risk Gate après OTP (si doute)
+ * Flow linéaire visible : Téléphone → OTP → Vérification → Connecté
+ * Risk Gate invisible : 🟢 Direct | 🟠 Challenge | 🔴 Agent
  * 
  * Inclusion :
- * - Voix guidée par chiffres (optionnelle)
+ * - Feedback haptique sur chaque touche
+ * - Barre de progression 3 étapes
  * - Clavier contrôlé 10 chiffres
- * - Boutons Répéter/Corriger
- * - Zéro superposition audio
+ * - Timeout 12s avec retry
  */
 export function InclusivePhoneAuth({ 
   redirectPath, 
@@ -49,18 +50,28 @@ export function InclusivePhoneAuth({
   // Assistance vocale
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   
-  // Risk Gate social
+  // Risk Gate
   const [trustResult, setTrustResult] = useState<any>(null);
+  const [riskLevel, setRiskLevel] = useState<RiskLevel>('LOW');
   const [socialQuestion, setSocialQuestion] = useState<{
     question: string;
     options: Array<{ label: string; icon: string; value: string }>;
     correctValue: string;
   } | null>(null);
 
+  // Timeout management
+  const [isTimeout, setIsTimeout] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Format visuel du téléphone : "07 01 02 03 04"
   const formatPhoneDisplay = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, 10);
     return digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+  };
+
+  // Feedback haptique
+  const vibrate = (duration: number = 30) => {
+    if (navigator.vibrate) navigator.vibrate(duration);
   };
 
   // Lecture vocale d'un chiffre
@@ -89,9 +100,18 @@ export function InclusivePhoneAuth({
     speak(`Ton numéro : ${digits.join(', ')}`, { priority: 'high' });
   }, [phone, speak]);
 
+  // Message d'aide contextuel
+  const getPhoneHelperText = () => {
+    if (phone.length === 0) return 'Tape ton numéro';
+    if (phone.length < 5) return 'Continue...';
+    if (phone.length < 10) return `Encore ${10 - phone.length} chiffres`;
+    return '✅ Numéro complet !';
+  };
+
   // Gérer la saisie téléphone
   const handlePhoneChange = (digit: string) => {
     if (phone.length >= 10) return;
+    vibrate(30);
     setPhone(prev => prev + digit);
     setError(null);
     speakDigit(digit);
@@ -99,6 +119,7 @@ export function InclusivePhoneAuth({
 
   const handlePhoneBackspace = () => {
     if (phone.length > 0) {
+      vibrate(20);
       setPhone(prev => prev.slice(0, -1));
       setError(null);
       if (voiceEnabled) speak('Effacé', { priority: 'normal' });
@@ -106,6 +127,7 @@ export function InclusivePhoneAuth({
   };
 
   const handlePhoneClear = () => {
+    vibrate(50);
     setPhone('');
     setError(null);
     if (voiceEnabled) speak('Tout effacé', { priority: 'normal' });
@@ -166,6 +188,13 @@ export function InclusivePhoneAuth({
     }
   }, [phone, voiceEnabled, speak]);
 
+  // Déterminer le niveau de risque
+  const getRiskLevel = (score: number): RiskLevel => {
+    if (score >= 60) return 'LOW';
+    if (score >= 30) return 'MEDIUM';
+    return 'HIGH';
+  };
+
   // Étape 2 : Vérifier l'OTP + Risk Gate
   const handleSubmitOtp = useCallback(async () => {
     if (otp.length !== 6) {
@@ -173,48 +202,102 @@ export function InclusivePhoneAuth({
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    // Vérifier OTP d'abord
+    if (!devOtp || otp !== devOtp) {
+      setError('Code incorrect');
+      vibrate(100);
+      if (voiceEnabled) speak('Code incorrect. Réessaye.', { priority: 'high' });
+      return;
+    }
+
+    // OTP valide - passer à l'écran de vérification
+    setStep('verifying');
+    setIsTimeout(false);
+
+    // Timeout de 12 secondes
+    timeoutRef.current = setTimeout(() => {
+      setIsTimeout(true);
+    }, 12000);
 
     try {
-      // Vérifier OTP
-      if (!devOtp || otp !== devOtp) {
-        setError('Code incorrect');
-        if (voiceEnabled) speak('Code incorrect. Réessaye.', { priority: 'high' });
-        setIsLoading(false);
-        return;
-      }
-
-      // ✅ OTP valide - maintenant Risk Gate silencieux
       const formattedPhone = `+225${phone}`;
       const result = await calculateTrustScore(formattedPhone);
-      setTrustResult(result);
+      
+      // Annuler le timeout si réponse reçue
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
 
-      // Décision basée sur le score
-      if (result.decision === 'direct_access' || result.score >= 60) {
-        // 🟢 Accès direct - contexte normal
+      setTrustResult(result);
+      const level = getRiskLevel(result.score);
+      setRiskLevel(level);
+
+      // Petite pause pour montrer l'animation de vérification
+      await new Promise(r => setTimeout(r, 1500));
+
+      // Décision basée sur le risque
+      if (level === 'LOW') {
+        // 🟢 Accès direct
         await finalizeLogin(result.merchantId);
-      } else if (result.decision === 'challenge' || result.score >= 30) {
-        // 🟡 Risque moyen - 1 question sociale simple
+      } else if (level === 'MEDIUM') {
+        // 🟠 Challenge social
         prepareSocialChallenge(result);
         setStep('social_check');
       } else {
-        // 🔴 Risque élevé ou nouveau - mais on laisse passer pour MVP
-        // En prod : rediriger vers validation agent
+        // 🔴 Risque élevé - pour MVP on laisse passer, en prod: setStep('blocked')
         await finalizeLogin(result.merchantId);
       }
       
     } catch (err) {
       console.error('Erreur vérification:', err);
-      setError('Erreur de vérification');
-    } finally {
-      setIsLoading(false);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      setIsTimeout(true);
     }
   }, [otp, devOtp, phone, calculateTrustScore, voiceEnabled, speak]);
 
+  // Retry après timeout
+  const handleRetryVerification = useCallback(async () => {
+    setIsTimeout(false);
+    setStep('verifying');
+    
+    timeoutRef.current = setTimeout(() => {
+      setIsTimeout(true);
+    }, 12000);
+
+    try {
+      const formattedPhone = `+225${phone}`;
+      const result = await calculateTrustScore(formattedPhone);
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      setTrustResult(result);
+      const level = getRiskLevel(result.score);
+      setRiskLevel(level);
+
+      await new Promise(r => setTimeout(r, 1000));
+
+      if (level === 'LOW') {
+        await finalizeLogin(result.merchantId);
+      } else if (level === 'MEDIUM') {
+        prepareSocialChallenge(result);
+        setStep('social_check');
+      } else {
+        await finalizeLogin(result.merchantId);
+      }
+    } catch (err) {
+      setIsTimeout(true);
+    }
+  }, [phone, calculateTrustScore]);
+
   // Préparer la question sociale
   const prepareSocialChallenge = (result: any) => {
-    // Questions simples avec pictogrammes
     const questions = [
       {
         question: 'Quel est ton marché ?',
@@ -224,7 +307,7 @@ export function InclusivePhoneAuth({
           { label: 'Yopougon', icon: '🏬', value: 'yopougon' },
           { label: 'Autre', icon: '📍', value: 'autre' },
         ],
-        correctValue: 'adjame', // En prod : récupérer du profil
+        correctValue: 'adjame',
       },
       {
         question: 'Tu vends quoi ?',
@@ -238,7 +321,6 @@ export function InclusivePhoneAuth({
       },
     ];
     
-    // Choisir une question au hasard
     const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
     setSocialQuestion(randomQuestion);
 
@@ -250,9 +332,9 @@ export function InclusivePhoneAuth({
   // Valider la réponse sociale
   const handleSocialAnswer = async (value: string) => {
     setIsLoading(true);
+    vibrate(50);
     
     // Pour le MVP, on accepte toutes les réponses
-    // En prod : vérifier contre le profil marchand
     await new Promise(r => setTimeout(r, 500));
     
     await finalizeLogin(trustResult?.merchantId);
@@ -261,6 +343,7 @@ export function InclusivePhoneAuth({
   // Finaliser la connexion
   const finalizeLogin = async (merchantId?: string) => {
     setStep('success');
+    vibrate(100);
     
     if (merchantId) {
       await recordSuccessfulLogin(merchantId);
@@ -277,6 +360,7 @@ export function InclusivePhoneAuth({
   // Gérer la saisie OTP
   const handleOtpChange = (digit: string) => {
     if (otp.length >= 6) return;
+    vibrate(30);
     const newOtp = otp + digit;
     setOtp(newOtp);
     setError(null);
@@ -292,12 +376,17 @@ export function InclusivePhoneAuth({
   };
 
   const handleOtpBackspace = () => {
+    vibrate(20);
     setOtp(prev => prev.slice(0, -1));
     setError(null);
   };
 
   // Reset complet
   const handleReset = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     stop();
     setStep('phone');
     setPhone('');
@@ -306,7 +395,23 @@ export function InclusivePhoneAuth({
     setDevOtp(null);
     setTrustResult(null);
     setSocialQuestion(null);
+    setIsTimeout(false);
+    setRiskLevel('LOW');
   };
+
+  // Appeler agent
+  const handleCallAgent = () => {
+    window.location.href = 'tel:+2251234';
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auto-submit OTP quand complet
   useEffect(() => {
@@ -328,7 +433,52 @@ export function InclusivePhoneAuth({
     cooperative: 'Coopérative',
   }[userType];
 
-  // Clavier numérique inclusif
+  // Étape actuelle pour la barre de progression
+  const getStepNumber = () => {
+    if (step === 'phone') return 1;
+    if (step === 'otp') return 2;
+    return 3;
+  };
+
+  // Barre de progression 3 étapes
+  const ProgressBar = () => (
+    <div className="flex items-center justify-center gap-2 mb-4">
+      {[
+        { num: 1, label: '📱', title: 'Numéro' },
+        { num: 2, label: '🔑', title: 'Code' },
+        { num: 3, label: '✅', title: 'Connecté' },
+      ].map((s, i) => (
+        <React.Fragment key={s.num}>
+          <div className="flex flex-col items-center">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all",
+                getStepNumber() >= s.num
+                  ? "bg-white text-amber-600"
+                  : "bg-white/20 text-white/60"
+              )}
+            >
+              {s.label}
+            </div>
+            <span className={cn(
+              "text-[10px] mt-1",
+              getStepNumber() >= s.num ? "text-white" : "text-white/60"
+            )}>
+              {s.title}
+            </span>
+          </div>
+          {i < 2 && (
+            <div className={cn(
+              "w-8 h-1 rounded-full mb-4",
+              getStepNumber() > s.num ? "bg-white" : "bg-white/20"
+            )} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+
+  // Clavier numérique inclusif avec haptic
   const NumPad = ({ onDigit, onBackspace, onClear, showClear = false }: { 
     onDigit: (d: string) => void;
     onBackspace: () => void;
@@ -387,8 +537,8 @@ export function InclusivePhoneAuth({
       className={cn("w-full max-w-sm mx-auto", className)}
     >
       <div className={cn("rounded-3xl p-6 shadow-xl", colors.bg)}>
-        {/* Badge type + Voice toggle */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header: Badge + Voice + Progress */}
+        <div className="flex items-center justify-between mb-2">
           <span className="bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full">
             Accès {labels}
           </span>
@@ -403,6 +553,8 @@ export function InclusivePhoneAuth({
             {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
           </button>
         </div>
+
+        <ProgressBar />
 
         <AnimatePresence mode="wait">
           {/* Étape 1 : Téléphone */}
@@ -422,16 +574,24 @@ export function InclusivePhoneAuth({
 
               <div className="text-center">
                 <h2 className="text-xl font-bold text-white">Ton numéro</h2>
-                <p className="text-white/80 text-sm">Entre ton numéro de téléphone</p>
+                <p className="text-white/80 text-sm">{getPhoneHelperText()}</p>
               </div>
 
               {/* Affichage numéro */}
               <div className="bg-white/95 rounded-2xl p-4">
-                <p className="text-2xl font-mono font-bold text-gray-800 tracking-wider text-center min-h-[2rem]">
+                <p className={cn(
+                  "text-2xl font-mono font-bold tracking-wider text-center min-h-[2rem] transition-colors",
+                  phone.length === 10 ? "text-emerald-600" : "text-gray-800"
+                )}>
                   {formatPhoneDisplay(phone) || '__ __ __ __ __'}
                 </p>
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-gray-500">{phone.length}/10 chiffres</span>
+                  <span className={cn(
+                    "text-xs font-medium",
+                    phone.length === 10 ? "text-emerald-600" : "text-gray-500"
+                  )}>
+                    {phone.length}/10 chiffres
+                  </span>
                   {phone.length > 0 && voiceEnabled && (
                     <button
                       onClick={repeatPhone}
@@ -532,7 +692,76 @@ export function InclusivePhoneAuth({
             </motion.div>
           )}
 
-          {/* Étape 2.5 : Social Check (Risk Gate) */}
+          {/* Étape 2.5 : Vérification en cours (Risk Gate) */}
+          {step === 'verifying' && (
+            <motion.div
+              key="verifying"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center space-y-6 py-8"
+            >
+              {!isTimeout ? (
+                <>
+                  <div className="flex justify-center">
+                    <motion.div 
+                      className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center"
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                        opacity: [0.8, 1, 0.8]
+                      }}
+                      transition={{ 
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <ShieldCheck className="w-10 h-10 text-white" />
+                    </motion.div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Vérification...</h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      On vérifie que c'est bien toi
+                    </p>
+                  </div>
+                  <Loader2 className="w-6 h-6 animate-spin text-white mx-auto" />
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-center">
+                    <div className="w-20 h-20 rounded-full bg-amber-500/30 flex items-center justify-center">
+                      <AlertTriangle className="w-10 h-10 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Réseau lent</h2>
+                    <p className="text-white/80 text-sm mt-1">
+                      La connexion est difficile
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleRetryVerification}
+                      className="flex-1 bg-white text-amber-600 hover:bg-white/90"
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Réessayer
+                    </Button>
+                    <Button
+                      onClick={handleReset}
+                      variant="outline"
+                      className="flex-1 border-white/50 text-white hover:bg-white/10"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* Étape 2.5b : Social Check (Risk Gate Orange) */}
           {step === 'social_check' && socialQuestion && (
             <motion.div
               key="social"
@@ -551,6 +780,45 @@ export function InclusivePhoneAuth({
             </motion.div>
           )}
 
+          {/* Étape bloquée (Risk Gate Rouge) */}
+          {step === 'blocked' && (
+            <motion.div
+              key="blocked"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center space-y-6 py-8"
+            >
+              <div className="flex justify-center">
+                <div className="w-20 h-20 rounded-full bg-red-500/30 flex items-center justify-center">
+                  <AlertTriangle className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Assistance requise</h2>
+                <p className="text-white/80 text-sm mt-1">
+                  On a besoin de vérifier ton identité
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Button
+                  onClick={handleCallAgent}
+                  className="w-full bg-white text-red-600 hover:bg-white/90"
+                >
+                  <PhoneCall className="w-4 h-4 mr-2" />
+                  Appeler l'agent (1234)
+                </Button>
+                <Button
+                  onClick={handleReset}
+                  variant="ghost"
+                  className="w-full text-white hover:bg-white/10"
+                >
+                  Réessayer plus tard
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Étape 3 : Succès */}
           {step === 'success' && (
             <motion.div
@@ -560,13 +828,21 @@ export function InclusivePhoneAuth({
               className="text-center space-y-4 py-8"
             >
               <div className="flex justify-center">
-                <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+                <motion.div 
+                  className="w-20 h-20 rounded-full bg-white flex items-center justify-center"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                >
                   <CheckCircle2 className="w-12 h-12 text-emerald-500" />
-                </div>
+                </motion.div>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Bienvenue !</h2>
                 <p className="text-white/80 text-sm">Connexion réussie</p>
+                <p className="text-white/60 text-xs mt-2 flex items-center justify-center gap-1">
+                  🟢 Vérifié
+                </p>
               </div>
               <Loader2 className="w-6 h-6 animate-spin text-white mx-auto" />
             </motion.div>

@@ -77,11 +77,11 @@ export const CULTURAL_QUESTIONS = {
   }
 };
 
-// Seuils de confiance
+// Seuils de confiance (ajustés pour être plus inclusifs)
 export const TRUST_THRESHOLDS = {
-  DIRECT_ACCESS: 70,   // Score >= 70 = Accès direct
-  CHALLENGE: 40,       // Score 40-69 = Question culturelle
-  HUMAN_FALLBACK: 0    // Score < 40 = Intervention humaine
+  DIRECT_ACCESS: 60,   // Score >= 60 = Accès direct (🟢)
+  CHALLENGE: 30,       // Score 30-59 = Question sociale simple (🟠)
+  HUMAN_FALLBACK: 0    // Score < 30 = Intervention humaine (🔴)
 };
 
 // Messages d'erreur inclusifs (jamais techniques)
