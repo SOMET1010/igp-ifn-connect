@@ -1,6 +1,6 @@
-// IGP-IFN Service Worker v1.0
-const CACHE_NAME = 'igp-ifn-v1';
-const RUNTIME_CACHE = 'igp-ifn-runtime';
+// PNAVIM-CI Service Worker v1.0
+const CACHE_NAME = 'pnavim-ci-v1';
+const RUNTIME_CACHE = 'pnavim-ci-runtime';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -170,7 +170,7 @@ async function networkFirstWithFallback(request) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Hors ligne - IGP-IFN</title>
+        <title>Hors ligne - PNAVIM-CI</title>
         <style>
           body {
             font-family: system-ui, sans-serif;
@@ -235,7 +235,7 @@ self.addEventListener('push', (event) => {
   console.log('[SW] Push received:', event);
   
   let data = {
-    title: 'IGP-IFN',
+    title: 'PNAVIM-CI',
     body: 'Nouvelle notification',
     icon: '/favicon.ico',
     badge: '/favicon.ico',
