@@ -3,7 +3,7 @@
  * P.NA.VIM
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,7 +45,7 @@ export function useQuickSale(): UseQuickSaleReturn {
   const [merchantId, setMerchantId] = useState<string | null>(null);
 
   // Récupérer le merchant_id au montage
-  useState(() => {
+  useEffect(() => {
     if (user?.id) {
       supabase
         .from('merchants')
@@ -56,7 +56,7 @@ export function useQuickSale(): UseQuickSaleReturn {
           if (data) setMerchantId(data.id);
         });
     }
-  });
+  }, [user?.id]);
 
   // Nettoyer le timeout à la fin
   const clearTimeoutIfExists = useCallback(() => {
