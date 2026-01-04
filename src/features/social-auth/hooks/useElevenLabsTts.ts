@@ -1,20 +1,26 @@
 /**
  * Hook TTS ElevenLabs pour l'authentification sociale PNAVIM
- * Utilise les voix clonées (Tantie Sagesse / Gbairai)
+ * Priorité aux voix pré-enregistrées, fallback vers ElevenLabs TTS
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import type { PersonaType } from '@/features/social-auth/config/personas';
+import { 
+  hasPrerecordedMessage, 
+  playPrerecordedMessage,
+  type MessageKey 
+} from '@/shared/services/audio/prerecordedPersonaAudio';
 
 interface UseElevenLabsTtsOptions {
   voiceId: string;
+  persona?: PersonaType;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: string) => void;
 }
 
 interface UseElevenLabsTtsReturn {
-  speak: (text: string) => Promise<void>;
+  speak: (text: string, messageKey?: MessageKey) => Promise<void>;
   stop: () => void;
   isSpeaking: boolean;
   isLoading: boolean;
@@ -22,6 +28,7 @@ interface UseElevenLabsTtsReturn {
 
 export function useElevenLabsTts({
   voiceId,
+  persona,
   onStart,
   onEnd,
   onError
@@ -45,18 +52,48 @@ export function useElevenLabsTts({
     setIsLoading(false);
   }, []);
 
-  const speak = useCallback(async (text: string) => {
+  const speak = useCallback(async (text: string, messageKey?: MessageKey) => {
     if (!text.trim()) return;
 
     // Arrêter toute lecture en cours
     stop();
 
+    // 1. Essayer d'abord les messages pré-enregistrés si persona et messageKey fournis
+    if (persona && messageKey && hasPrerecordedMessage(persona, messageKey)) {
+      console.log(`[TTS] Using prerecorded audio for ${persona}/${messageKey}`);
+      setIsLoading(true);
+      
+      const result = await playPrerecordedMessage(persona, messageKey, {
+        onStart: () => {
+          setIsLoading(false);
+          setIsSpeaking(true);
+          onStart?.();
+        },
+        onEnd: () => {
+          setIsSpeaking(false);
+          onEnd?.();
+        },
+        onError: (error) => {
+          setIsSpeaking(false);
+          setIsLoading(false);
+          onError?.(error);
+        }
+      });
+
+      if (result.success) {
+        audioRef.current = result.audio || null;
+        return;
+      }
+      // Si échec, continuer vers ElevenLabs TTS
+      console.log('[TTS] Prerecorded failed, falling back to ElevenLabs');
+    }
+
+    // 2. Fallback vers ElevenLabs TTS
     setIsLoading(true);
 
     try {
       console.log(`[ElevenLabs TTS] Speaking with voice: ${voiceId}, text: ${text.substring(0, 50)}...`);
       
-      // Appeler l'Edge Function ElevenLabs TTS avec la voix clonée
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
@@ -104,7 +141,6 @@ export function useElevenLabsTts({
         setIsLoading(false);
         setIsSpeaking(false);
         onError?.('Erreur de lecture audio');
-        // Fallback vers Web Speech API
         fallbackToWebSpeech(text);
       };
 
@@ -113,10 +149,9 @@ export function useElevenLabsTts({
       console.warn('ElevenLabs TTS failed, using fallback:', error);
       setIsLoading(false);
       onError?.('ElevenLabs indisponible, utilisation du fallback');
-      // Fallback vers Web Speech API
       fallbackToWebSpeech(text);
     }
-  }, [voiceId, stop, onStart, onEnd, onError]);
+  }, [voiceId, persona, stop, onStart, onEnd, onError]);
 
   const fallbackToWebSpeech = (text: string) => {
     if ('speechSynthesis' in window) {
