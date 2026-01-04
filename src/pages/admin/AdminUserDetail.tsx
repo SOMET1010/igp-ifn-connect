@@ -42,10 +42,11 @@ const roleConfig: Record<AppRole, { label: string; color: string }> = {
   agent: { label: 'Agent', color: 'bg-blue-500' },
   merchant: { label: 'Marchand', color: 'bg-orange-500' },
   cooperative: { label: 'Coopérative', color: 'bg-green-500' },
+  client: { label: 'Client', color: 'bg-teal-500' },
   user: { label: 'Utilisateur', color: 'bg-gray-500' },
 };
 
-const allRoles: AppRole[] = ['admin', 'agent', 'merchant', 'cooperative', 'user'];
+const allRoles: AppRole[] = ['admin', 'agent', 'merchant', 'cooperative', 'client', 'user'];
 
 const AdminUserDetail = () => {
   const { userId } = useParams<{ userId: string }>();

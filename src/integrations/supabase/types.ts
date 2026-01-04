@@ -380,6 +380,177 @@ export type Database = {
           },
         ]
       }
+      client_services: {
+        Row: {
+          activated_at: string | null
+          client_id: string
+          created_at: string | null
+          id: string
+          service_id: string
+          settings: Json | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activated_at?: string | null
+          client_id: string
+          created_at?: string | null
+          id?: string
+          service_id: string
+          settings?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activated_at?: string | null
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          service_id?: string
+          settings?: Json | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "financial_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          client_id: string
+          counterparty_name: string | null
+          counterparty_phone: string | null
+          created_at: string | null
+          description: string | null
+          fee_amount: number | null
+          id: string
+          metadata: Json | null
+          reference: string | null
+          service_id: string | null
+          status: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          client_id: string
+          counterparty_name?: string | null
+          counterparty_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json | null
+          reference?: string | null
+          service_id?: string | null
+          status?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          client_id?: string
+          counterparty_name?: string | null
+          counterparty_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json | null
+          reference?: string | null
+          service_id?: string | null
+          status?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_transactions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "financial_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address: string | null
+          balance: number | null
+          city: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          kyc_level: string | null
+          phone: string
+          region: string | null
+          registered_by: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          balance?: number | null
+          city?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          id?: string
+          kyc_level?: string | null
+          phone: string
+          region?: string | null
+          registered_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          balance?: number | null
+          city?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          kyc_level?: string | null
+          phone?: string
+          region?: string | null
+          registered_by?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cmu_payments: {
         Row: {
           amount: number
@@ -632,6 +803,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_services: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          eligibility_criteria: Json | null
+          fees: Json | null
+          icon: string | null
+          id: string
+          interest_rate: number | null
+          is_active: boolean | null
+          max_amount: number | null
+          min_amount: number | null
+          min_kyc_level: string | null
+          name: string
+          provider_name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          eligibility_criteria?: Json | null
+          fees?: Json | null
+          icon?: string | null
+          id?: string
+          interest_rate?: number | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          min_kyc_level?: string | null
+          name: string
+          provider_name: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          eligibility_criteria?: Json | null
+          fees?: Json | null
+          icon?: string | null
+          id?: string
+          interest_rate?: number | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          min_amount?: number | null
+          min_kyc_level?: string | null
+          name?: string
+          provider_name?: string
+          type?: string
+        }
+        Relationships: []
       }
       invoices: {
         Row: {
@@ -2461,7 +2686,13 @@ export type Database = {
       is_rbac_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "agent" | "merchant" | "cooperative" | "user"
+      app_role:
+        | "admin"
+        | "agent"
+        | "merchant"
+        | "cooperative"
+        | "user"
+        | "client"
       kyc_level: "level_0" | "level_1" | "level_2"
       kyc_status:
         | "draft"
@@ -2604,7 +2835,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agent", "merchant", "cooperative", "user"],
+      app_role: ["admin", "agent", "merchant", "cooperative", "user", "client"],
       kyc_level: ["level_0", "level_1", "level_2"],
       kyc_status: [
         "draft",
