@@ -24,7 +24,7 @@ export const PERSONAS: Record<PersonaType, Persona> = {
   tantie: {
     name: 'Tantie Sagesse',
     avatar: '/lovable-uploads/tantie-sagesse.png',
-    voiceId: 'zMDaFembtPriQKXI1MGS', // Voix clonée Tantie Sagesse PNAVIM
+    voiceId: 'PWiCgOlgDsq0Da8bhS6a', // Voix clonée PNAVIM
     greetings: {
       welcome: "Bonne arrivée mon enfant ! C'est qui est là ?",
       listen: "Dis-moi ton numéro de téléphone, je t'écoute...",
@@ -38,7 +38,7 @@ export const PERSONAS: Record<PersonaType, Persona> = {
   jeune: {
     name: 'Gbairai',
     avatar: '/lovable-uploads/gbairai.png',
-    voiceId: 'wZM0gfJ4eOdCRsqygbFq', // Voix clonée Gbairai PNAVIM
+    voiceId: 'PWiCgOlgDsq0Da8bhS6a', // Voix clonée PNAVIM (même voix pour l'instant)
     greetings: {
       welcome: "Yo ! C'est qui là ? Dis ton numéro !",
       listen: "Je t'écoute, envoie le numéro !",
