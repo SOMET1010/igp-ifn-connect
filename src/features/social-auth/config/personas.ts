@@ -26,27 +26,27 @@ export const PERSONAS: Record<PersonaType, Persona> = {
     avatar: '/lovable-uploads/tantie-sagesse.png',
     voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Tantie Sagesse
     greetings: {
-      welcome: "Bonjour ! Prêt pour les affaires ?",
-      listen: "Dis-moi ton numéro, je t'écoute...",
-      recognized: "Ah {name} ! Content de te revoir.",
-      doubt: "Je ne te reconnais pas bien...",
-      challenge: "Rappelle-moi le prénom de ta maman ?",
-      error: "On va appeler quelqu'un pour t'aider.",
-      success: "C'est bon, tu peux entrer !"
+      welcome: "Bonne arrivée ma fille ! Que Dieu bénisse ton marché aujourd'hui.",
+      listen: "Je t'écoute. Donne-moi doucement ton numéro de téléphone.",
+      recognized: "Ah {name}, c'est toi ! J'espère que la famille se porte bien.",
+      doubt: "Pardon, je n'ai pas bien vu ton visage. Rapproche-toi un peu mon enfant.",
+      challenge: "Pour être sûre que c'est bien toi, rappelle-moi juste le nom de ta maman ?",
+      error: "Ça ne passe pas, mais ne t'inquiète pas. On appelle l'agent, il arrive tout de suite.",
+      success: "Voilà, c'est ouvert ! Tu peux faire tes opérations."
     }
   },
   jeune: {
     name: 'Gbairai',
     avatar: '/lovable-uploads/gbairai.png',
-    voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Tantie Sagesse
+    voiceId: 'LZZ0J6eX2D30k2TKgBOR', // Voix clonée Gbairai
     greetings: {
-      welcome: "Salut ! On va bosser ?",
-      listen: "Envoie ton numéro !",
-      recognized: "Ehhh {name} ! T'es là !",
-      doubt: "Attends... Je te calcule pas là...",
-      challenge: "C'est quoi ton surnom au quartier ?",
-      error: "Y'a un souci. On appelle le boss.",
-      success: "C'est carré ! Tu peux go !"
+      welcome: "Salut le Boss ! Prêt à faire bouger les choses aujourd'hui ?",
+      listen: "Vas-y, je t'écoute. Donne-moi ton numéro.",
+      recognized: "Ah {name}, te voilà ! Toujours fidèle au poste.",
+      doubt: "Attends une seconde, je ne te reconnais pas bien. Rapproche-toi un peu.",
+      challenge: "Petit contrôle de sécurité rapide. Rappelle-moi ton surnom ?",
+      error: "Il y a un petit souci technique. On appelle l'agent pour régler ça vite fait.",
+      success: "C'est validé ! Tout est propre. On peut avancer."
     }
   }
 };
@@ -54,8 +54,8 @@ export const PERSONAS: Record<PersonaType, Persona> = {
 // Questions culturelles pour le Layer 3
 export const CULTURAL_QUESTIONS = {
   mother_name: {
-    fr: "Rappelle-moi le prénom de ta maman ?",
-    nouchi: "C'est comment ta daronne s'appelle ?",
+    fr: "Pour être sûre que c'est bien toi, rappelle-moi juste le nom de ta maman ?",
+    nouchi: "Petit contrôle rapide. C'est quoi le nom de ta maman ?",
     dioula: "I ba tɔgɔ ye mun ye?"
   },
   market_name: {
@@ -65,7 +65,7 @@ export const CULTURAL_QUESTIONS = {
   },
   neighborhood: {
     fr: "C'est quoi ton surnom au quartier ?",
-    nouchi: "On t'appelle comment au grin ?",
+    nouchi: "Rappelle-moi ton surnom ?",
     dioula: "I tɔgɔ caman ye mun ye?"
   },
   first_product: {
