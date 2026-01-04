@@ -1,11 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HomeHeader } from '@/components/home/HomeHeader';
 import { HeroMerchantCard } from '@/components/home/HeroMerchantCard';
 import { RoleCardSmall } from '@/components/home/RoleCardSmall';
 import { WaxPattern } from '@/components/shared/WaxPattern';
+import { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';
+import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 
 const Home: React.FC = () => {
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('pnavim-tutorial-seen');
+    if (!hasSeenTutorial) {
+      // Delay to let page load
+      const timer = setTimeout(() => setShowTutorial(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleTutorialComplete = () => {
+    localStorage.setItem('pnavim-tutorial-seen', 'true');
+    setShowTutorial(false);
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background with market image and overlay */}
@@ -81,6 +100,16 @@ const Home: React.FC = () => {
       {/* Decorative blobs */}
       <div className="absolute top-1/4 -right-20 w-64 h-64 bg-orange-sanguine/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -left-20 w-48 h-48 bg-vert-manioc/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Floating Accessibility Button */}
+      <FloatingAccessibilityButton />
+
+      {/* Onboarding Tutorial */}
+      <OnboardingTutorial 
+        isOpen={showTutorial} 
+        onClose={() => setShowTutorial(false)}
+        onComplete={handleTutorialComplete}
+      />
     </div>
   );
 };
