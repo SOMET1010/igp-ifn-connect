@@ -1,9 +1,6 @@
-/**
- * Hook TTS simplifié pour les composants généraux
- * Utilise Web Speech API avec fallback
- */
-
 import { useState, useCallback, useRef } from 'react';
+import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
+import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 
 interface UseSpeechTtsReturn {
   speak: (text: string) => void;
@@ -11,47 +8,68 @@ interface UseSpeechTtsReturn {
   isSpeaking: boolean;
 }
 
+/**
+ * TTS simple (voix PNAVIM uniquement)
+ * IMPORTANT: aucun fallback Web Speech (voix par défaut interdites)
+ */
 export function useSpeechTts(): UseSpeechTtsReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
   const stop = useCallback(() => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
     }
     setIsSpeaking(false);
   }, []);
 
-  const speak = useCallback((text: string) => {
-    if (!text.trim() || !('speechSynthesis' in window)) return;
+  const speak = useCallback(
+    (text: string) => {
+      if (!text.trim()) return;
 
-    // Stop any ongoing speech
-    stop();
+      void (async () => {
+        stop();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'fr-FR';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-    };
-    
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
-    
-    utterance.onerror = () => {
-      setIsSpeaking(false);
-    };
+        try {
+          const audioBlob = await generateSpeech(text, { voiceId: PNAVIM_VOICES.DEFAULT });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          audioUrlRef.current = audioUrl;
 
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [stop]);
+          const audio = new Audio(audioUrl);
+          audioRef.current = audio;
+
+          const cleanup = () => {
+            setIsSpeaking(false);
+            if (audioUrlRef.current) {
+              URL.revokeObjectURL(audioUrlRef.current);
+              audioUrlRef.current = null;
+            }
+            audioRef.current = null;
+          };
+
+          audio.onplay = () => setIsSpeaking(true);
+          audio.onended = cleanup;
+          audio.onerror = cleanup;
+
+          await audio.play();
+        } catch (e) {
+          setIsSpeaking(false);
+        }
+      })();
+    },
+    [stop]
+  );
 
   return {
     speak,
     stop,
-    isSpeaking
+    isSpeaking,
   };
 }

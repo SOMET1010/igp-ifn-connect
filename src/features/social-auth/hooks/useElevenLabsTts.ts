@@ -141,37 +141,21 @@ export function useElevenLabsTts({
         setIsLoading(false);
         setIsSpeaking(false);
         onError?.('Erreur de lecture audio');
-        fallbackToWebSpeech(text);
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+          audioUrlRef.current = null;
+        }
+        audioRef.current = null;
       };
 
       await audio.play();
     } catch (error) {
-      console.warn('ElevenLabs TTS failed, using fallback:', error);
+      console.warn('ElevenLabs TTS failed:', error);
       setIsLoading(false);
-      onError?.('ElevenLabs indisponible, utilisation du fallback');
-      fallbackToWebSpeech(text);
+      setIsSpeaking(false);
+      onError?.(error instanceof Error ? error.message : 'Erreur TTS');
     }
   }, [voiceId, persona, stop, onStart, onEnd, onError]);
-
-  const fallbackToWebSpeech = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'fr-FR';
-      utterance.rate = 0.9;
-      
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        onStart?.();
-      };
-      
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        onEnd?.();
-      };
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  };
 
   return {
     speak,
