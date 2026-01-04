@@ -3,8 +3,8 @@
  * Appelle l'edge function elevenlabs-tts (ne jamais exposer l'API key côté client)
  */
 
-// Voice ID ivoirienne (configurable)
-export const VOICE_ID_IVOIRIENNE = "VHZedUiIypNleY1ItL1s";
+// Voice ID clonée Tantie Sagesse
+export const VOICE_ID_IVOIRIENNE = "LZZ0J6eX2D30k2TKgBOR";
 
 // Configuration par défaut
 const DEFAULT_MODEL = "eleven_multilingual_v2";
