@@ -13,6 +13,11 @@ import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
 
+// Logos institutionnels
+import logoDGE from '@/assets/logo-dge.png';
+import logoANSUT from '@/assets/logo-ansut.png';
+import marcheImage from '@/assets/marche-ivoirien.jpg';
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const [showTutorial, setShowTutorial] = useState(false);
@@ -58,8 +63,13 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Fond immersif */}
-      <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
+      {/* Fond immersif avec image du marché */}
+      <ImmersiveBackground 
+        variant="market-blur" 
+        backgroundImageUrl={marcheImage}
+        showWaxPattern 
+        showBlobs 
+      />
 
       {/* Header institutionnel enrichi */}
       <PnavimInstitutionalHeader
@@ -160,16 +170,17 @@ const Home: React.FC = () => {
           <p className="text-xs text-charbon/50 font-medium mb-3">
             Une initiative de
           </p>
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span className="text-xs font-bold text-charbon/60 bg-white/70 px-3 py-1.5 rounded-lg shadow-sm">
-              DGE
-            </span>
-            <span className="text-xs font-bold text-charbon/60 bg-white/70 px-3 py-1.5 rounded-lg shadow-sm">
-              ANSUT
-            </span>
-            <span className="text-xs font-bold text-charbon/60 bg-white/70 px-3 py-1.5 rounded-lg shadow-sm">
-              DGI
-            </span>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            <img 
+              src={logoDGE} 
+              alt="Direction Générale des Entreprises" 
+              className="h-10 w-auto object-contain bg-white/80 rounded-lg px-3 py-1.5 shadow-sm"
+            />
+            <img 
+              src={logoANSUT} 
+              alt="ANSUT" 
+              className="h-10 w-auto object-contain bg-white/80 rounded-lg px-3 py-1.5 shadow-sm"
+            />
           </div>
           <p className="mt-3 text-xs text-charbon/40">
             République de Côte d'Ivoire
