@@ -85,6 +85,7 @@ export function useVoiceTranscription({
   const [isConnecting, setIsConnecting] = useState(false);
   const [extractedDigits, setExtractedDigits] = useState('');
   const [state, setState] = useState<VoiceState>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const detectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -190,6 +191,24 @@ export function useVoiceTranscription({
     commitStrategy: CommitStrategy.VAD,
     onPartialTranscript: (data) => handleTextUpdate(data.text, 'partial'),
     onCommittedTranscript: (data) => handleTextUpdate(data.text, 'committed'),
+    onError: (err) => {
+      console.error('[STT] Scribe error:', err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : (err as any)?.type
+            ? `Erreur micro: ${(err as any).type}`
+            : 'Erreur vocale';
+      setErrorMessage(msg);
+      setIsConnecting(false);
+      setState('error');
+      onError?.(msg);
+
+      // Fallback si aucun handler externe
+      if (!onError) {
+        toast.error(msg);
+      }
+    },
   });
 
   // Garder une référence stable pour les callbacks de timers
@@ -204,6 +223,7 @@ export function useVoiceTranscription({
   const startListening = useCallback(async () => {
     setIsConnecting(true);
     setState('requesting_mic');
+    setErrorMessage(null);
     hasDetectedRef.current = false;
     setTranscript('');
     setExtractedDigits('');
@@ -274,12 +294,19 @@ export function useVoiceTranscription({
       cleanup();
       setState('error');
 
-      if (err?.name === 'NotAllowedError' || err?.message?.includes('Permission')) {
-        onError?.('Autorise le micro pour utiliser la voix');
-        toast.error('Micro non autorisé');
-      } else {
-        onError?.(err?.message || 'Erreur de transcription');
-        toast.error('Erreur vocale, utilise le clavier');
+      const msg =
+        err?.name === 'NotAllowedError' || err?.name === 'SecurityError'
+          ? "Autorise le micro (et teste hors aperçu si besoin)."
+          : err?.name === 'NotFoundError'
+            ? 'Aucun micro détecté sur cet appareil.'
+            : err?.message || 'Erreur vocale';
+
+      setErrorMessage(msg);
+      onError?.(msg);
+
+      // Fallback si aucun handler externe
+      if (!onError) {
+        toast.error(msg);
       }
 
       throw err;
@@ -312,6 +339,9 @@ export function useVoiceTranscription({
     transcript,
     partialTranscript: scribe.partialTranscript || '',
     extractedDigits,
+    errorMessage,
+    scribeStatus: scribe.status,
+    scribeError: scribe.error,
     // Propriétés pour le feedback audio
     audioLevel: audioLevelHook.smoothedLevel,
     isReceivingAudio: audioLevelHook.isReceivingAudio,

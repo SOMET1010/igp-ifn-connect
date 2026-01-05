@@ -26,6 +26,8 @@ interface MicDebugPanelProps {
   isConnecting: boolean;
   transcript: string;
   extractedDigits: string;
+  scribeStatus?: string;
+  scribeError?: string | null;
 }
 
 // Indicateur de niveau audio visuel
@@ -61,8 +63,21 @@ export function MicDebugPanel({
   isConnecting,
   transcript,
   extractedDigits,
+  scribeStatus,
+  scribeError,
 }: MicDebugPanelProps) {
   const [micPermission, setMicPermission] = useState<'checking' | 'granted' | 'denied' | 'prompt'>('checking');
+
+  const isInIframe = (() => {
+    try {
+      return window.self !== window.top;
+    } catch {
+      return true;
+    }
+  })();
+
+  const isSecureContext = typeof window !== 'undefined' ? window.isSecureContext : false;
+  const hasGetUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   
   // Vérifier la permission du micro
   useEffect(() => {
@@ -118,6 +133,14 @@ export function MicDebugPanel({
         🔧 DEBUG MICRO
       </div>
       
+      {/* Contexte */}
+      <div className="flex justify-between items-center">
+        <span className="text-white/60">Contexte:</span>
+        <span className="text-white/80">
+          {isSecureContext ? 'secure' : 'not-secure'} · {isInIframe ? 'iframe' : 'top'} · {hasGetUserMedia ? 'getUserMedia' : 'no-getUserMedia'}
+        </span>
+      </div>
+
       {/* Permission */}
       <div className="flex justify-between items-center">
         <span className="text-white/60">Permission:</span>
@@ -142,6 +165,21 @@ export function MicDebugPanel({
           {isConnected ? '✅ Connecté' : isConnecting ? '⏳ En cours...' : '❌ Déconnecté'}
         </span>
       </div>
+
+      {/* Scribe */}
+      <div className="flex justify-between items-center">
+        <span className="text-white/60">Scribe:</span>
+        <span className="text-white/80">{scribeStatus || '—'}</span>
+      </div>
+
+      {scribeError && (
+        <div className="pt-1 border-t border-white/10">
+          <span className="text-white/60">Erreur:</span>
+          <div className="text-red-200 text-[10px] mt-1 bg-black/20 p-1 rounded max-h-12 overflow-auto">
+            {scribeError}
+          </div>
+        </div>
+      )}
       
       {/* Niveaux audio */}
       <div className="space-y-1 pt-1 border-t border-white/10">
