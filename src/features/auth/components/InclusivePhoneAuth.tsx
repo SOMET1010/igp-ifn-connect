@@ -498,6 +498,78 @@ export function InclusivePhoneAuth({
     return newMerchant?.id ?? null;
   };
 
+  // Helper: S'assurer que le profil coopérative existe
+  const ensureCooperativeProfile = async (userId: string, cleanPhone: string): Promise<string | null> => {
+    // Vérifier si la coopérative existe déjà pour cet user
+    const { data: existing } = await supabase
+      .from('cooperatives')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (existing) return existing.id;
+    
+    // Vérifier si une coopérative sans user_id existe avec ce téléphone
+    const { data: unlinked } = await supabase
+      .from('cooperatives')
+      .select('id')
+      .eq('phone', cleanPhone)
+      .is('user_id', null)
+      .maybeSingle();
+    
+    if (unlinked) {
+      // Lier la coopérative existante à cet utilisateur
+      await supabase
+        .from('cooperatives')
+        .update({ user_id: userId })
+        .eq('id', unlinked.id);
+      return unlinked.id;
+    }
+    
+    // Créer une nouvelle coopérative
+    const { data: newCoop } = await supabase
+      .from('cooperatives')
+      .insert({
+        user_id: userId,
+        name: `Coopérative ${cleanPhone}`,
+        code: `COOP-${Date.now()}`,
+        phone: cleanPhone,
+        region: 'À définir',
+        commune: 'À définir'
+      })
+      .select('id')
+      .single();
+    
+    return newCoop?.id ?? null;
+  };
+
+  // Helper: S'assurer que le profil agent existe
+  const ensureAgentProfile = async (userId: string, cleanPhone: string): Promise<string | null> => {
+    // Vérifier si l'agent existe déjà pour cet user
+    const { data: existing } = await supabase
+      .from('agents')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (existing) return existing.id;
+    
+    // Créer un nouvel agent
+    const { data: newAgent } = await supabase
+      .from('agents')
+      .insert({
+        user_id: userId,
+        employee_id: `AGT-${Date.now()}`,
+        organization: 'DGE',
+        zone: 'À définir',
+        is_active: true
+      })
+      .select('id')
+      .single();
+    
+    return newAgent?.id ?? null;
+  };
+
   // Finaliser la connexion avec création de session Supabase
   const finalizeLogin = async (existingMerchantId?: string) => {
     setStep('success');
@@ -572,6 +644,9 @@ export function InclusivePhoneAuth({
           console.log('[finalizeLogin] Role may already exist:', rpcError);
         }
       } else if (userId && userType === 'agent') {
+        // Créer ou lier le profil agent AVANT d'assigner le rôle
+        await ensureAgentProfile(userId, cleanPhone);
+        
         // Assigner le rôle agent
         try {
           await supabase.rpc('assign_agent_role', { p_user_id: userId });
@@ -579,6 +654,9 @@ export function InclusivePhoneAuth({
           console.log('[finalizeLogin] Role may already exist:', rpcError);
         }
       } else if (userId && userType === 'cooperative') {
+        // Créer ou lier le profil coopérative AVANT d'assigner le rôle
+        await ensureCooperativeProfile(userId, cleanPhone);
+        
         // Assigner le rôle coopérative
         try {
           await supabase.rpc('assign_cooperative_role', { p_user_id: userId });
