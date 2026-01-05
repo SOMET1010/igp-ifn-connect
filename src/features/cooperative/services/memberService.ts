@@ -13,11 +13,11 @@ export async function fetchCooperativeMembers(
   cooperativeName: string
 ): Promise<{ data: CooperativeMember[] | null; error: string | null }> {
   try {
-    // On filtre par cooperative_name car vivriers_members utilise ce champ
+    // Chercher par cooperative_id OU cooperative_name pour couvrir les deux cas
     const { data, error } = await supabase
       .from('vivriers_members')
       .select('*')
-      .eq('cooperative_name', cooperativeName)
+      .or(`cooperative_id.eq.${cooperativeId},cooperative_name.eq.${cooperativeName}`)
       .order('full_name', { ascending: true });
 
     if (error) throw error;
