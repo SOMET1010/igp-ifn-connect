@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import OTPInput from '@/components/auth/OTPInput';
@@ -11,15 +11,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
-  Mail, Lock, Loader2, ArrowLeft, User, Phone, ShieldCheck, 
-  Store, Users, Briefcase 
+  Mail, Lock, Loader2, ArrowLeft, User, ShieldCheck, 
+  Store, Users, Briefcase, Volume2
 } from 'lucide-react';
 import { 
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
 } from '@/lib/validationSchemas';
-import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
-import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
+import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
+import { GlassCard } from '@/components/shared/GlassCard';
+import { PnavimInstitutionalHeader, PnavimPillButton, PnavimWaxCurve } from '@/components/pnavim';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -30,7 +31,8 @@ interface RoleConfig {
   icon: React.ReactNode;
   authMethod: 'email' | 'phone';
   redirectTo: string;
-  color: string;
+  borderColor: 'orange' | 'green' | 'gold' | 'violet';
+  bgGradient: string;
 }
 
 const ROLE_CONFIGS: Record<string, RoleConfig> = {
@@ -40,7 +42,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     icon: <ShieldCheck className="h-8 w-8" />,
     authMethod: 'email',
     redirectTo: '/admin',
-    color: 'from-violet-800 to-violet-700',
+    borderColor: 'violet',
+    bgGradient: 'from-violet-600 to-violet-800',
   },
   agent: {
     title: 'Agent de terrain',
@@ -48,7 +51,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     icon: <Briefcase className="h-8 w-8" />,
     authMethod: 'email',
     redirectTo: '/agent',
-    color: 'from-blue-800 to-blue-700',
+    borderColor: 'green',
+    bgGradient: 'from-emerald-600 to-emerald-800',
   },
   merchant: {
     title: 'Espace Marchand',
@@ -56,7 +60,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     icon: <Store className="h-8 w-8" />,
     authMethod: 'phone',
     redirectTo: '/marchand',
-    color: 'from-emerald-800 to-emerald-700',
+    borderColor: 'orange',
+    bgGradient: 'from-orange-500 to-orange-700',
   },
   cooperative: {
     title: 'Espace Coopérative',
@@ -64,7 +69,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     icon: <Users className="h-8 w-8" />,
     authMethod: 'phone',
     redirectTo: '/cooperative',
-    color: 'from-amber-700 to-amber-600',
+    borderColor: 'gold',
+    bgGradient: 'from-amber-500 to-amber-700',
   },
   producer: {
     title: 'Espace Producteur',
@@ -72,7 +78,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     icon: <Users className="h-8 w-8" />,
     authMethod: 'phone',
     redirectTo: '/producteur',
-    color: 'from-emerald-700 to-emerald-600',
+    borderColor: 'green',
+    bgGradient: 'from-emerald-500 to-emerald-700',
   },
 };
 
@@ -81,10 +88,10 @@ type Step = 'credentials' | 'otp' | 'register';
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const roleParam = searchParams.get('role') || 'merchant';
+  const roleParam = searchParams.get('role') || 'admin';
   const modeParam = searchParams.get('mode') || 'login';
   
-  const { signIn, signUp, signInWithPhone, verifyOtp, isAuthenticated, checkRole } = useAuth();
+  const { signIn, signUp, isAuthenticated, checkRole } = useAuth();
 
   const [step, setStep] = useState<Step>('credentials');
   const [mode, setMode] = useState<'login' | 'signup'>(modeParam as 'login' | 'signup');
@@ -96,7 +103,7 @@ const AuthPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  const config = ROLE_CONFIGS[roleParam] || ROLE_CONFIGS.merchant;
+  const config = ROLE_CONFIGS[roleParam] || ROLE_CONFIGS.admin;
   const isPhoneAuth = config.authMethod === 'phone';
 
   // Check if already authenticated with correct role
@@ -200,7 +207,7 @@ const AuthPage: React.FC = () => {
 
     // Check if user exists
     const tableName = roleParam === 'merchant' ? 'merchants' : 'cooperatives';
-    const phoneField = roleParam === 'merchant' ? 'phone' : 'phone';
+    const phoneField = 'phone';
     
     const { data: existing } = await supabase
       .from(tableName)
@@ -213,8 +220,6 @@ const AuthPage: React.FC = () => {
     // For demo: show OTP in toast (real implementation would use SMS)
     const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
     toast.success(`Code de vérification : ${mockOtp}`, { duration: 15000 });
-
-    // In production, use: await signInWithPhone(phone);
 
     setIsLoading(false);
     setStep('otp');
@@ -235,9 +240,6 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    // For demo: accept any 6-digit code
-    // In production: const { error } = await verifyOtp(phone, otp);
-
     toast.success('Connexion réussie');
     navigate(config.redirectTo);
     setIsLoading(false);
@@ -257,7 +259,6 @@ const AuthPage: React.FC = () => {
       const cleanPhone = phone.replace(/\s/g, '');
       const fakeEmail = `${cleanPhone}@${roleParam}.igp.ci`;
 
-      // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: fakeEmail,
         password: `${roleParam}123`,
@@ -273,13 +274,11 @@ const AuthPage: React.FC = () => {
 
       const userId = authData.user.id;
 
-      // Create role
       await supabase.from('user_roles').insert({
         user_id: userId,
         role: roleParam as AppRole
       });
 
-      // Create entity record
       if (roleParam === 'merchant') {
         await supabase.from('merchants').insert({
           user_id: userId,
@@ -301,7 +300,7 @@ const AuthPage: React.FC = () => {
 
       toast.success('Compte créé avec succès');
       navigate(config.redirectTo);
-    } catch (err) {
+    } catch {
       toast.error('Erreur lors de la création du compte');
     }
 
@@ -318,134 +317,161 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <InstitutionalHeader
-        subtitle={config.subtitle}
-        showBackButton={step !== 'credentials'}
-        onBack={handleBack}
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Fond immersif Afro-Futuriste */}
+      <ImmersiveBackground 
+        variant="solar"
+        showMarketPhoto
+        blurAmount="sm"
+        showWaxPattern={false}
+        showBlobs={false}
       />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-xl border-2">
-          <CardHeader className="text-center pb-4">
-            <div className={`mx-auto mb-4 w-16 h-16 bg-gradient-to-br ${config.color} rounded-full flex items-center justify-center text-white`}>
-              {config.icon}
+      {/* Header institutionnel */}
+      <PnavimInstitutionalHeader
+        showAccessibility={false}
+        showAudioToggle={false}
+        showLanguageSelector={true}
+        showLoginButton={false}
+        variant="compact"
+      />
+
+      {/* Contenu principal */}
+      <main className="relative z-10 pt-24 pb-40 px-4 flex flex-col items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          {/* Carte principale avec GlassCard */}
+          <GlassCard 
+            borderColor={config.borderColor} 
+            padding="lg"
+            className="space-y-6"
+          >
+            {/* Icône et titre */}
+            <div className="text-center">
+              <motion.div 
+                className={`mx-auto mb-4 w-16 h-16 bg-gradient-to-br ${config.bgGradient} rounded-2xl flex items-center justify-center text-white shadow-lg`}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                {config.icon}
+              </motion.div>
+              <h1 className="text-2xl font-bold text-foreground">{config.title}</h1>
+              <p className="text-sm text-muted-foreground mt-1">{config.subtitle}</p>
             </div>
-            <CardTitle className="text-2xl">{config.title}</CardTitle>
-            <CardDescription>{config.subtitle}</CardDescription>
-          </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Email/Password Authentication */}
+            {/* Formulaire Email/Password */}
             {!isPhoneAuth && step === 'credentials' && (
-              <>
-                <Tabs value={mode} onValueChange={(v) => setMode(v as 'login' | 'signup')}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Connexion</TabsTrigger>
-                    <TabsTrigger value="signup">Inscription</TabsTrigger>
-                  </TabsList>
+              <Tabs value={mode} onValueChange={(v) => setMode(v as 'login' | 'signup')}>
+                <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+                  <TabsTrigger value="login">Connexion</TabsTrigger>
+                  <TabsTrigger value="signup">Inscription</TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="login" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Adresse email</Label>
-                      <div className="relative">
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="exemple@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10"
-                        />
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                <TabsContent value="login" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Adresse email</Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="exemple@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 bg-white/80"
+                      />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Mot de passe</Label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10"
-                        />
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Mot de passe</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 bg-white/80"
+                      />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
+                  </div>
 
-                    <Button
-                      onClick={handleEmailLogin}
-                      disabled={!email || !password || isLoading}
-                      className="w-full"
-                    >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Se connecter'}
-                    </Button>
-                  </TabsContent>
+                  <Button
+                    onClick={handleEmailLogin}
+                    disabled={!email || !password || isLoading}
+                    className="w-full h-12 text-base font-semibold"
+                  >
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Se connecter'}
+                  </Button>
+                </TabsContent>
 
-                  <TabsContent value="signup" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName">Nom complet</Label>
-                      <div className="relative">
-                        <Input
-                          id="fullName"
-                          type="text"
-                          placeholder="Votre nom"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="pl-10"
-                        />
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                <TabsContent value="signup" className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Nom complet</Label>
+                    <div className="relative">
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="Votre nom"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="pl-10 bg-white/80"
+                      />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signupEmail">Adresse email</Label>
-                      <div className="relative">
-                        <Input
-                          id="signupEmail"
-                          type="email"
-                          placeholder="exemple@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10"
-                        />
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signupEmail">Adresse email</Label>
+                    <div className="relative">
+                      <Input
+                        id="signupEmail"
+                        type="email"
+                        placeholder="exemple@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 bg-white/80"
+                      />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="signupPassword">Mot de passe</Label>
-                      <div className="relative">
-                        <Input
-                          id="signupPassword"
-                          type="password"
-                          placeholder="Min. 8 caractères"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="pl-10"
-                        />
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signupPassword">Mot de passe</Label>
+                    <div className="relative">
+                      <Input
+                        id="signupPassword"
+                        type="password"
+                        placeholder="Min. 8 caractères"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 bg-white/80"
+                      />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     </div>
+                  </div>
 
-                    <Button
-                      onClick={handleEmailSignup}
-                      disabled={!fullName || !email || !password || isLoading}
-                      className="w-full"
-                    >
-                      {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer un compte'}
-                    </Button>
-                  </TabsContent>
-                </Tabs>
-              </>
+                  <Button
+                    onClick={handleEmailSignup}
+                    disabled={!fullName || !email || !password || isLoading}
+                    className="w-full h-12 text-base font-semibold"
+                  >
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Créer un compte'}
+                  </Button>
+                </TabsContent>
+              </Tabs>
             )}
 
             {/* Phone OTP - Step 1: Phone */}
             {isPhoneAuth && step === 'credentials' && (
-              <>
+              <div className="space-y-4">
                 <PhoneInput
                   value={phone}
                   onChange={setPhone}
@@ -455,16 +481,16 @@ const AuthPage: React.FC = () => {
                 <Button
                   onClick={handlePhoneSubmit}
                   disabled={phone.length < 8 || isLoading}
-                  className="w-full"
+                  className="w-full h-12 text-base font-semibold"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recevoir le code'}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Recevoir le code'}
                 </Button>
-              </>
+              </div>
             )}
 
             {/* Phone OTP - Step 2: Verify */}
             {isPhoneAuth && step === 'otp' && (
-              <>
+              <div className="space-y-4">
                 <div className="space-y-3 text-center">
                   <p className="text-sm text-muted-foreground">
                     Code envoyé au +225 {phone}
@@ -477,24 +503,24 @@ const AuthPage: React.FC = () => {
                 <Button
                   onClick={handleOtpSubmit}
                   disabled={otp.length !== 6 || isLoading}
-                  className="w-full"
+                  className="w-full h-12 text-base font-semibold"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Valider'}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Valider'}
                 </Button>
 
                 <button
                   onClick={handleBack}
-                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground"
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Modifier le numéro
                 </button>
-              </>
+              </div>
             )}
 
             {/* Phone OTP - Step 3: Register */}
             {isPhoneAuth && step === 'register' && (
-              <>
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="registerName">
                     {roleParam === 'cooperative' ? 'Nom de la coopérative' : 'Nom complet'}
@@ -505,50 +531,62 @@ const AuthPage: React.FC = () => {
                     placeholder={roleParam === 'cooperative' ? 'Ex: COOP Vivriers Abidjan' : 'Ex: Kouamé Adjoua'}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    className="bg-white/80"
                   />
                 </div>
 
                 <Button
                   onClick={handlePhoneRegister}
                   disabled={fullName.length < 3 || isLoading}
-                  className="w-full"
+                  className="w-full h-12 text-base font-semibold"
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Créer mon compte'}
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Créer mon compte'}
                 </Button>
 
                 <button
                   onClick={handleBack}
-                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground"
+                  className="w-full flex items-center justify-center gap-2 text-muted-foreground text-sm hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Retour
                 </button>
-              </>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </GlassCard>
 
-        {/* Role selector links */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {Object.entries(ROLE_CONFIGS).map(([role, cfg]) => (
-            <Button
-              key={role}
-              variant={roleParam === role ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => navigate(`/auth?role=${role}`)}
-              className="text-xs"
-            >
-              {cfg.title}
-            </Button>
-          ))}
-        </div>
+          {/* Sélecteur de rôle */}
+          <motion.div 
+            className="mt-6 flex flex-wrap justify-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            {Object.entries(ROLE_CONFIGS).map(([role, cfg]) => (
+              <PnavimPillButton
+                key={role}
+                variant={roleParam === role ? 'primary' : 'secondary'}
+                size="sm"
+                onClick={() => navigate(`/auth?role=${role}`)}
+              >
+                {cfg.title}
+              </PnavimPillButton>
+            ))}
+          </motion.div>
 
-        <p className="text-xs text-muted-foreground text-center mt-4 max-w-sm">
-          Plateforme opérée par l'ANSUT pour le compte de la DGE
-        </p>
+          {/* Footer info */}
+          <motion.p 
+            className="text-xs text-white/70 text-center mt-6 drop-shadow-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Plateforme opérée par l'ANSUT pour le compte de la DGE
+          </motion.p>
+        </motion.div>
       </main>
 
-      <InstitutionalFooter />
+      {/* Courbe décorative Wax */}
+      <PnavimWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
     </div>
   );
 };
