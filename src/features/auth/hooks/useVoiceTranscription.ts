@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { useScribe } from '@elevenlabs/react';
+import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -72,71 +72,126 @@ interface UseVoiceTranscriptionOptions {
   onError?: (error: string) => void;
 }
 
-export function useVoiceTranscription({ 
-  onPhoneDetected, 
-  onError 
+export function useVoiceTranscription({
+  onPhoneDetected,
+  onError,
 }: UseVoiceTranscriptionOptions) {
   const [transcript, setTranscript] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
-  const detectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const detectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTextRef = useRef('');
   const hasDetectedRef = useRef(false);
+  const disconnectRef = useRef<(() => void) | null>(null);
+
+  const clearTimers = () => {
+    if (detectionTimeoutRef.current) {
+      clearTimeout(detectionTimeoutRef.current);
+      detectionTimeoutRef.current = null;
+    }
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
+    }
+  };
+
+  const finalizeFromText = (text: string) => {
+    if (hasDetectedRef.current) return;
+
+    const phone = extractPhoneNumber(text);
+    if (phone && phone.length >= 10) {
+      hasDetectedRef.current = true;
+      onPhoneDetected(phone);
+      return;
+    }
+
+    onError?.("Je n'ai pas compris ton numéro. Réessaie ou tape-le.");
+  };
+
+  // Auto-fin: quand l'utilisateur fait une pause (silence), on finalise
+  // NOTE: délai volontairement long pour laisser des petites pauses naturelles.
+  const scheduleSilenceFinalize = (nextText: string) => {
+    if (hasDetectedRef.current) return;
+
+    // Éviter de couper trop tôt si on n'a pas encore assez de chiffres.
+    const digitCount = nextText.replace(/\D/g, '').length;
+    if (digitCount < 6) return;
+
+    if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+    silenceTimeoutRef.current = setTimeout(() => {
+      if (hasDetectedRef.current) return;
+
+      finalizeFromText(lastTextRef.current);
+      clearTimers();
+      disconnectRef.current?.();
+    }, 2800);
+  };
+
+  const handleTextUpdate = (text: string, source: 'partial' | 'committed') => {
+    console.log(`[STT] ${source}:`, text);
+    setTranscript(text);
+    lastTextRef.current = text;
+
+    if (hasDetectedRef.current) return;
+
+    // Tentative immédiate d'extraction
+    const phone = extractPhoneNumber(text);
+    if (phone && phone.length >= 10) {
+      console.log('[STT] Phone detected:', phone);
+      hasDetectedRef.current = true;
+      clearTimers();
+      onPhoneDetected(phone);
+      disconnectRef.current?.();
+      return;
+    }
+
+    // Sinon, on attend une pause pour finaliser
+    scheduleSilenceFinalize(text);
+  };
 
   const scribe = useScribe({
     modelId: 'scribe_v2_realtime',
-    onPartialTranscript: (data) => {
-      console.log('[STT] Partial:', data.text);
-      setTranscript(data.text);
-      
-      // Essayer d'extraire un numéro à chaque mise à jour
-      if (!hasDetectedRef.current) {
-        const phone = extractPhoneNumber(data.text);
-        if (phone && phone.length >= 10) {
-          console.log('[STT] Phone detected in partial:', phone);
-          hasDetectedRef.current = true;
-          onPhoneDetected(phone);
-        }
-      }
-    },
-    onCommittedTranscript: (data) => {
-      console.log('[STT] Committed:', data.text);
-      setTranscript(data.text);
-      
-      // Dernière tentative d'extraction
-      if (!hasDetectedRef.current) {
-        const phone = extractPhoneNumber(data.text);
-        if (phone && phone.length >= 10) {
-          console.log('[STT] Phone detected in committed:', phone);
-          hasDetectedRef.current = true;
-          onPhoneDetected(phone);
-        }
-      }
-    },
+    commitStrategy: CommitStrategy.VAD,
+    onPartialTranscript: (data) => handleTextUpdate(data.text, 'partial'),
+    onCommittedTranscript: (data) => handleTextUpdate(data.text, 'committed'),
   });
+
+  // Garder une référence stable pour les callbacks de timers
+  disconnectRef.current = () => {
+    try {
+      scribe.disconnect();
+    } catch {
+      // ignore
+    }
+  };
 
   const startListening = useCallback(async () => {
     setIsConnecting(true);
     hasDetectedRef.current = false;
     setTranscript('');
+    lastTextRef.current = '';
+    clearTimers();
 
     try {
       console.log('[STT] Requesting token...');
-      
-      // Obtenir un token depuis l'edge function
+
+      // Obtenir un token depuis la fonction backend
       const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
-      
+
       if (error) {
         console.error('[STT] Token error:', error);
-        throw new Error('Erreur de connexion au service vocal');
+        throw new Error('Service vocal indisponible');
       }
-      
+
       if (!data?.token) {
         console.error('[STT] No token received');
-        throw new Error('Token non reçu');
+        throw new Error('Service vocal indisponible');
       }
 
       console.log('[STT] Token received, connecting...');
 
-      // Connecter au service de transcription
       await scribe.connect({
         token: data.token,
         microphone: {
@@ -145,46 +200,44 @@ export function useVoiceTranscription({
           autoGainControl: true,
         },
       });
-      
+
       console.log('[STT] Connected successfully');
       setIsConnecting(false);
 
-      // Timeout de détection (15 secondes max)
+      // Timeout global (si aucune détection)
       detectionTimeoutRef.current = setTimeout(() => {
         if (!hasDetectedRef.current) {
           console.log('[STT] Detection timeout');
-          onError?.('Je n\'ai pas compris ton numéro. Réessaie ou tape-le.');
-          scribe.disconnect();
+          finalizeFromText(lastTextRef.current);
+          clearTimers();
+          disconnectRef.current?.();
         }
-      }, 15000);
-
+      }, 20000);
     } catch (err: any) {
       console.error('[STT] Error:', err);
       setIsConnecting(false);
-      
-      // Message d'erreur adapté
-      if (err.name === 'NotAllowedError' || err.message?.includes('Permission')) {
+      clearTimers();
+
+      if (err?.name === 'NotAllowedError' || err?.message?.includes('Permission')) {
         onError?.('Autorise le micro pour utiliser la voix');
         toast.error('Micro non autorisé');
       } else {
-        onError?.(err.message || 'Erreur de transcription');
+        onError?.(err?.message || 'Erreur de transcription');
         toast.error('Erreur vocale, utilise le clavier');
       }
-      
+
       throw err;
     }
-  }, [scribe, onPhoneDetected, onError]);
+  }, [scribe, onError]);
 
   const stopListening = useCallback(() => {
     console.log('[STT] Stopping...');
-    
-    if (detectionTimeoutRef.current) {
-      clearTimeout(detectionTimeoutRef.current);
-      detectionTimeoutRef.current = null;
+    clearTimers();
+    try {
+      scribe.disconnect();
+    } finally {
+      setIsConnecting(false);
     }
-    
-    scribe.disconnect();
-    setIsConnecting(false);
   }, [scribe]);
 
   return {
