@@ -21,9 +21,9 @@ export function StepProgress({ steps, currentStep }: StepProgressProps) {
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300",
                     isCompleted 
-                      ? "bg-secondary text-secondary-foreground shadow-forest" 
+                      ? "bg-secondary text-secondary-foreground shadow-pnavim-secondary" 
                       : isCurrent 
-                        ? "bg-primary text-primary-foreground shadow-africa animate-pulse-ring" 
+                        ? "bg-primary text-primary-foreground shadow-pnavim-primary animate-pulse-ring" 
                         : "bg-muted text-muted-foreground"
                   )}
                 >

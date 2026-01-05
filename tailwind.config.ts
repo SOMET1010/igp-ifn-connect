@@ -85,34 +85,6 @@ export default {
           foreground: "hsl(var(--warning-foreground))",
         },
         
-        // ============================================
-        // LEGACY COLORS (À supprimer après Phase 2)
-        // ============================================
-        orange: {
-          DEFAULT: "hsl(var(--orange))",
-          light: "hsl(var(--orange-light))",
-          dark: "hsl(var(--orange-dark))",
-        },
-        green: {
-          DEFAULT: "hsl(var(--green))",
-          light: "hsl(var(--green-light))",
-          dark: "hsl(var(--green-dark))",
-        },
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-          dark: "hsl(var(--gold-dark))",
-        },
-        earth: {
-          DEFAULT: "hsl(var(--earth))",
-          light: "hsl(var(--earth-light))",
-          dark: "hsl(var(--earth-dark))",
-        },
-        "terre-battue": { DEFAULT: "hsl(var(--terre-battue))" },
-        "orange-sanguine": { DEFAULT: "hsl(var(--orange-sanguine))" },
-        sable: { DEFAULT: "hsl(var(--sable))" },
-        charbon: { DEFAULT: "hsl(var(--charbon))" },
-        "vert-manioc": { DEFAULT: "hsl(var(--vert-manioc))" },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -226,21 +198,25 @@ export default {
         "audio-bar": "audio-bar 0.5s ease-in-out infinite",
       },
       boxShadow: {
-        "africa": "0 10px 40px -10px hsl(var(--orange) / 0.3)",
-        "forest": "0 10px 40px -10px hsl(var(--green) / 0.3)",
-        "gold": "0 10px 40px -10px hsl(var(--gold) / 0.3)",
-        "xl-africa": "0 20px 60px -15px hsl(var(--orange) / 0.4)",
-        "xl-forest": "0 20px 60px -15px hsl(var(--green) / 0.4)",
-        "xl-gold": "0 20px 60px -15px hsl(var(--gold) / 0.4)",
-        "xl-muted": "0 20px 40px -15px hsl(var(--muted-foreground) / 0.2)",
+        // ============================================
+        // PNAVIM SHADOWS (Source unique)
+        // ============================================
+        "pnavim-primary": "0 10px 40px -10px hsl(var(--primary) / 0.3)",
+        "pnavim-secondary": "0 10px 40px -10px hsl(var(--secondary) / 0.3)",
+        "pnavim-warning": "0 10px 40px -10px hsl(var(--warning) / 0.3)",
+        "pnavim-muted": "0 20px 40px -15px hsl(var(--muted-foreground) / 0.2)",
+        // XL variants
+        "pnavim-xl-primary": "0 20px 60px -15px hsl(var(--primary) / 0.4)",
+        "pnavim-xl-secondary": "0 20px 60px -15px hsl(var(--secondary) / 0.4)",
         // Effets GLOW avec halo lumineux
-        "glow-green": "0 0 25px hsl(var(--green) / 0.5), 0 0 50px hsl(var(--green) / 0.3), 0 10px 30px -10px hsl(var(--green) / 0.4)",
-        "glow-orange": "0 0 25px hsl(var(--orange) / 0.5), 0 0 50px hsl(var(--orange) / 0.3), 0 10px 30px -10px hsl(var(--orange) / 0.4)",
-        "glow-gold": "0 0 25px hsl(var(--gold) / 0.5), 0 0 50px hsl(var(--gold) / 0.3), 0 10px 30px -10px hsl(var(--gold) / 0.4)",
+        "glow-primary": "0 0 25px hsl(var(--primary) / 0.5), 0 0 50px hsl(var(--primary) / 0.3), 0 10px 30px -10px hsl(var(--primary) / 0.4)",
+        "glow-secondary": "0 0 25px hsl(var(--secondary) / 0.5), 0 0 50px hsl(var(--secondary) / 0.3), 0 10px 30px -10px hsl(var(--secondary) / 0.4)",
+        "glow-warning": "0 0 25px hsl(var(--warning) / 0.5), 0 0 50px hsl(var(--warning) / 0.3), 0 10px 30px -10px hsl(var(--warning) / 0.4)",
         "glow-muted": "0 0 20px hsl(var(--muted-foreground) / 0.25), 0 0 40px hsl(var(--muted-foreground) / 0.15)",
         "glow-destructive": "0 0 15px hsl(var(--destructive) / 0.6), 0 0 30px hsl(var(--destructive) / 0.4), 0 0 45px hsl(var(--destructive) / 0.2)",
-        "glow-warning": "0 0 12px rgba(249, 115, 22, 0.5), 0 0 24px rgba(249, 115, 22, 0.3), 0 0 36px rgba(249, 115, 22, 0.15)",
-        "glow-primary": "0 0 10px hsl(var(--primary) / 0.4), 0 0 20px hsl(var(--primary) / 0.25), 0 0 30px hsl(var(--primary) / 0.1)",
+        // Legacy aliases (pour compatibilité temporaire)
+        "africa": "0 10px 40px -10px hsl(var(--primary) / 0.3)",
+        "forest": "0 10px 40px -10px hsl(var(--secondary) / 0.3)",
       },
     },
   },
