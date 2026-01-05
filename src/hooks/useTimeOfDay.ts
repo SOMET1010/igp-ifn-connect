@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
-import { Sunrise, Sun, Sunset, Moon, CloudMoon, LucideIcon } from 'lucide-react';
+import { Sunrise, Sun, Sunset, Moon, LucideIcon } from 'lucide-react';
 
 export type TimeOfDay = 'dawn' | 'morning' | 'afternoon' | 'evening' | 'night';
 
 interface TimeContext {
   timeOfDay: TimeOfDay;
   hour: number;
+  dayName: string; // "lundi", "mardi", etc.
+  periodName: string; // "matin", "après-midi", "soir"
   greeting: {
     fr: string;
     dioula: string;
@@ -24,7 +26,9 @@ interface TimeContext {
   icon: LucideIcon;
 }
 
-const TIME_CONFIG: Record<TimeOfDay, Omit<TimeContext, 'hour' | 'timeOfDay'>> = {
+const DAYS_FR = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+
+const TIME_CONFIG: Record<TimeOfDay, Omit<TimeContext, 'hour' | 'timeOfDay' | 'dayName' | 'periodName'>> = {
   dawn: {
     greeting: {
       fr: "Le jour se lève !",
@@ -125,16 +129,33 @@ function getTimeOfDay(hour: number): TimeOfDay {
   return 'night';
 }
 
+function getPeriodName(timeOfDay: TimeOfDay): string {
+  switch (timeOfDay) {
+    case 'dawn':
+    case 'morning':
+      return 'matin';
+    case 'afternoon':
+      return 'après-midi';
+    case 'evening':
+      return 'soir';
+    case 'night':
+      return 'nuit';
+  }
+}
+
 export function useTimeOfDay(): TimeContext {
   return useMemo(() => {
     const now = new Date();
     const hour = now.getHours();
+    const dayOfWeek = now.getDay();
     const timeOfDay = getTimeOfDay(hour);
     const config = TIME_CONFIG[timeOfDay];
 
     return {
       timeOfDay,
       hour,
+      dayName: DAYS_FR[dayOfWeek],
+      periodName: getPeriodName(timeOfDay),
       ...config
     };
   }, []);

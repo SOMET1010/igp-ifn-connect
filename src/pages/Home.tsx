@@ -40,19 +40,20 @@ const PARTNERS: InstitutionalPartner[] = [
   { id: 'ansut', name: 'ANSUT', logo: logoANSUT },
 ];
 
-// Scripts audio SUTA complets (français ivoirien simple)
+// Scripts audio PNAVIM chaleureux (français ivoirien simple)
+// {day} et {period} seront remplacés dynamiquement
 const AUDIO_SCRIPTS = {
   welcome: {
-    fr: "Bonjour ! Bienvenue sur PNAVIM. Ici, on t'aide au marché. Choisis ta case.",
-    dioula: "I ni sɔgɔma! Aw ni sɔgɔma PNAVIM. An bɛ i dɛmɛ julayɔrɔ la. I ka ɲɛnama sugandi.",
+    fr: "Bon {period} ma sœur ! On est {day} {period}. Le marché est ouvert. On est ensemble aujourd'hui.",
+    dioula: "I ni sɔgɔma ! An bɛ {day}. Sugu bɛ dayɛlɛn. An bɛ ɲɔgɔn fɛ bi.",
   },
   marchand: {
-    fr: "Marchand. Tu veux encaisser, vendre, épargner. Touche ici.",
-    dioula: "Julakɛla. I bɛ wari ta, feere, mara. A digi yan.",
+    fr: "Je vends au marché. Tu veux encaisser ton argent ? Touche ici.",
+    dioula: "N bɛ feere julayɔrɔ la. I bɛ wari ta? A digi yan.",
   },
   agent: {
-    fr: "Agent terrain. Tu veux accompagner les marchands. Touche ici.",
-    dioula: "Ajan. I bɛ julakɛlaw dɛmɛ. A digi yan.",
+    fr: "J'accompagne les marchands. Tu veux aider les vendeuses ? Touche ici.",
+    dioula: "N bɛ julakɛlaw dɛmɛ. I bɛ feerekɛlaw dɛmɛ? A digi yan.",
   },
   micro: {
     fr: "D'accord. Parle. Dis ton numéro doucement.",
@@ -78,7 +79,7 @@ const Index: React.FC = () => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const { triggerTap } = useSensoryFeedback();
-  const { timeOfDay } = useTimeOfDay();
+  const { timeOfDay, dayName, periodName, greeting, marketStatus, hour } = useTimeOfDay();
 
   // State
   const [showTutorial, setShowTutorial] = useState(false);
@@ -219,16 +220,21 @@ const Index: React.FC = () => {
     });
   }, [stopTtsAudio, triggerTap]);
 
-  // Script audio complet SUTA
+  // Script audio complet PNAVIM avec contexte dynamique
   const playWelcomeAudio = useCallback(() => {
     if (!audioEnabled) return;
     triggerTap();
 
     const langKey = language === 'dioula' ? 'dioula' : 'fr';
-    const message = AUDIO_SCRIPTS.welcome[langKey];
+    let message = AUDIO_SCRIPTS.welcome[langKey];
+    
+    // Remplacer les variables dynamiques
+    message = message
+      .replace(/{day}/g, dayName)
+      .replace(/{period}/g, periodName);
 
     void playTtsAudio(message, PNAVIM_VOICES.DEFAULT);
-  }, [audioEnabled, language, playTtsAudio, triggerTap]);
+  }, [audioEnabled, language, playTtsAudio, triggerTap, dayName, periodName]);
 
   // Handler FAB Micro -> navigation vers social-login
   const handleMicClick = useCallback(() => {
@@ -245,17 +251,32 @@ const Index: React.FC = () => {
     navigate('/social-login');
   }, [navigate, triggerTap, audioEnabled, language, playTtsAudio]);
 
-  // Dynamic badge based on time
+  // Dynamic badge based on time - plus chaleureux
   const getTimeBadge = useCallback(() => {
     switch (timeOfDay) {
-      case 'dawn': return 'Debout tôt !';
-      case 'morning': return 'Bon matin !';
-      case 'afternoon': return 'Bon après-midi';
-      case 'evening': return 'Bonsoir !';
-      case 'night': return 'Bonne nuit';
+      case 'dawn': return '🌅 Debout tôt !';
+      case 'morning': return '☀️ Bon courage !';
+      case 'afternoon': return '🛒 On gère !';
+      case 'evening': return '🌇 Bonne fin de journée';
+      case 'night': return '🌙 À demain !';
       default: return 'Accès principal';
     }
   }, [timeOfDay]);
+
+  // Message contextuel dynamique (jour + période + statut marché)
+  const getContextualSubtitle = useCallback(() => {
+    const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+    return `On est ${capitalizedDay} ${periodName}. ${marketStatus.message}.`;
+  }, [dayName, periodName, marketStatus.message]);
+
+  // Greeting dynamique selon langue
+  const getDynamicGreeting = useCallback(() => {
+    if (language === 'dioula') return greeting.dioula;
+    if (language === 'baoule' || language === 'bete' || language === 'senoufo' || language === 'malinke') {
+      return greeting.nouchi; // Fallback nouchi pour autres langues
+    }
+    return greeting.fr;
+  }, [language, greeting]);
 
   // Scripts audio par rôle
   const getMerchantAudio = () => {
@@ -293,47 +314,55 @@ const Index: React.FC = () => {
 
       {/* Contenu principal */}
       <main className="relative z-10 pt-20 pb-40 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-        {/* Titres géants */}
+        {/* Message d'accueil social et chaleureux */}
         <motion.div
-          className="text-center mb-6 sm:mb-10"
+          className="text-center mb-6 sm:mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {/* Greeting dynamique avec emoji */}
           <motion.h1 
-            className="text-4xl sm:text-5xl lg:text-6xl font-nunito font-extrabold text-white drop-shadow-lg mb-2"
+            className="text-4xl sm:text-5xl lg:text-6xl font-nunito font-extrabold text-white drop-shadow-lg mb-3"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
           >
-            {t('welcome') || 'Bienvenue'}
+            {getDynamicGreeting()} 👋
           </motion.h1>
+          
+          {/* Sous-titre contextuel : jour + période + statut marché */}
           <motion.p 
-            className="text-xl sm:text-2xl lg:text-3xl font-bold text-jaune-sahel drop-shadow-md"
+            className="text-lg sm:text-xl lg:text-2xl font-semibold text-white/90 drop-shadow-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.4 }}
           >
-            {t('who_are_you') || "C'est toi qui est là ?"}
+            {getContextualSubtitle()}
           </motion.p>
         </motion.div>
 
-        {/* Bouton Audio central */}
+        {/* Bouton ÉCOUTER proéminent - jaune, grand, animé */}
         <motion.div
-          className="flex justify-center mb-6"
+          className="flex justify-center mb-8"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4, duration: 0.3 }}
         >
-          <PnavimPillButton
-            variant="secondary"
-            size="md"
-            leftIcon={<Volume2 className="w-5 h-5" />}
-            onClick={playWelcomeAudio}
-            className="bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl min-h-[52px]"
+          <motion.div
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            {t('click_to_listen') || 'Écouter'}
-          </PnavimPillButton>
+            <PnavimPillButton
+              variant="primary"
+              size="lg"
+              leftIcon={<Volume2 className="w-6 h-6" />}
+              onClick={playWelcomeAudio}
+              className="bg-jaune-sahel text-charbon font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 border-2 border-jaune-sahel/50"
+            >
+              {t('click_to_listen') || '🔊 Écouter'}
+            </PnavimPillButton>
+          </motion.div>
         </motion.div>
 
         {/* Mobile: Scroll Horizontal | Desktop: Grille 2 colonnes */}
