@@ -3,7 +3,7 @@
  * Affiche les coopératives et leurs membres producteurs
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -16,7 +16,12 @@ import {
   Search,
   ArrowLeft,
   Wheat,
-  Shield
+  Shield,
+  MoreVertical,
+  FileDown,
+  SortAsc,
+  Filter,
+  ArrowUpDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +36,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ExportCooperativesPDF } from '@/components/public/ExportCooperativesPDF';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface VivriersCooperative {
   id: string;
@@ -58,11 +81,21 @@ interface VivriersMember {
   identifier_code: string | null;
 }
 
+type SortOption = 'name' | 'members' | 'cmu';
+type CmuFilter = 'all' | 'with' | 'without';
+type SizeFilter = 'all' | 'small' | 'medium' | 'large';
+
 const VivriersCooperativesPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCooperative, setSelectedCooperative] = useState<VivriersCooperative | null>(null);
   const [showMembersDialog, setShowMembersDialog] = useState(false);
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  
+  // Filtres et tri
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [filterCmu, setFilterCmu] = useState<CmuFilter>('all');
+  const [filterSize, setFilterSize] = useState<SizeFilter>('all');
 
   // Fetch cooperatives
   const { data: cooperatives = [], isLoading: loadingCoops } = useQuery({
@@ -84,7 +117,6 @@ const VivriersCooperativesPage: React.FC = () => {
     queryFn: async () => {
       if (!selectedCooperative) return [];
       
-      // Chercher par cooperative_id OU cooperative_name pour couvrir les deux cas
       const { data, error } = await supabase
         .from('vivriers_members')
         .select('*')
@@ -97,12 +129,52 @@ const VivriersCooperativesPage: React.FC = () => {
     enabled: !!selectedCooperative,
   });
 
-  // Filter cooperatives
-  const filteredCoops = cooperatives.filter(coop =>
-    coop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    coop.region?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    coop.commune?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and sort cooperatives
+  const filteredAndSortedCoops = useMemo(() => {
+    let result = cooperatives.filter(coop =>
+      coop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coop.region?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coop.commune?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Filtre CMU
+    if (filterCmu === 'with') {
+      result = result.filter(c => (c.effectif_cmu || 0) > 0);
+    } else if (filterCmu === 'without') {
+      result = result.filter(c => (c.effectif_cmu || 0) === 0);
+    }
+
+    // Filtre taille
+    if (filterSize === 'small') {
+      result = result.filter(c => (c.effectif_total || 0) < 50);
+    } else if (filterSize === 'medium') {
+      result = result.filter(c => (c.effectif_total || 0) >= 50 && (c.effectif_total || 0) < 200);
+    } else if (filterSize === 'large') {
+      result = result.filter(c => (c.effectif_total || 0) >= 200);
+    }
+
+    // Tri
+    return result.sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'members') {
+        return (b.effectif_total || 0) - (a.effectif_total || 0);
+      } else if (sortBy === 'cmu') {
+        return (b.effectif_cmu || 0) - (a.effectif_cmu || 0);
+      }
+      return 0;
+    });
+  }, [cooperatives, searchTerm, sortBy, filterCmu, filterSize]);
+
+  // Filter members in dialog
+  const filteredMembers = useMemo(() => {
+    if (!memberSearchTerm) return members;
+    return members.filter(m =>
+      m.full_name.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
+      m.phone?.includes(memberSearchTerm) ||
+      m.identifier_code?.toLowerCase().includes(memberSearchTerm.toLowerCase())
+    );
+  }, [members, memberSearchTerm]);
 
   // Stats totales
   const totalMembers = cooperatives.reduce((acc, c) => acc + (c.effectif_total || 0), 0);
@@ -111,14 +183,63 @@ const VivriersCooperativesPage: React.FC = () => {
 
   const handleViewMembers = (coop: VivriersCooperative) => {
     setSelectedCooperative(coop);
+    setMemberSearchTerm('');
     setShowMembersDialog(true);
   };
+
+  // Export PDF des membres de la coopérative sélectionnée
+  const exportMembersPDF = () => {
+    if (!selectedCooperative || members.length === 0) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    doc.setFontSize(16);
+    doc.setTextColor(34, 139, 34);
+    doc.text(selectedCooperative.name, pageWidth / 2, 20, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`${members.length} membres • Généré le ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, 28, { align: 'center' });
+
+    const cmuCount = members.filter(m => m.cmu_status === 'actif').length;
+    const cnpsCount = members.filter(m => m.cnps_status === 'actif').length;
+
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    doc.text(`CMU: ${cmuCount} | CNPS: ${cnpsCount}`, 14, 40);
+
+    autoTable(doc, {
+      startY: 48,
+      head: [['Nom', 'Téléphone', 'Code', 'CMU', 'CNPS']],
+      body: members.map(m => [
+        m.full_name,
+        m.phone || '-',
+        m.identifier_code || '-',
+        m.cmu_status === 'actif' ? 'Oui' : 'Non',
+        m.cnps_status === 'actif' ? 'Oui' : 'Non',
+      ]),
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [34, 139, 34], textColor: 255 },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+    });
+
+    doc.save(`membres-${selectedCooperative.name.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+  };
+
+  // Stats cards config
+  const statsConfig = [
+    { icon: Building2, value: cooperatives.length, label: 'Coopératives', colorClass: 'text-primary', bgClass: 'bg-primary/10', borderClass: 'border-primary/20' },
+    { icon: Users, value: totalMembers, label: 'Producteurs', colorClass: 'text-secondary', bgClass: 'bg-secondary/10', borderClass: 'border-secondary/20' },
+    { icon: Shield, value: totalCmu, label: 'Affiliés CMU', colorClass: 'text-blue-600', bgClass: 'bg-blue-500/10', borderClass: 'border-blue-500/20' },
+    { icon: Users, value: totalCnps, label: 'Affiliés CNPS', colorClass: 'text-amber-600', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-500/20' },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-secondary/10 via-background to-accent/10">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="icon"
@@ -126,59 +247,82 @@ const VivriersCooperativesPage: React.FC = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-foreground">Coopératives Vivriers</h1>
-            <p className="text-sm text-muted-foreground">Producteurs agricoles de Côte d'Ivoire</p>
+          
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-foreground truncate">Coopératives Vivriers</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">Producteurs agricoles de Côte d'Ivoire</p>
           </div>
-          <Badge variant="secondary" className="hidden sm:flex">
+          
+          <Badge variant="secondary" className="hidden md:flex shrink-0">
             <Wheat className="h-3 w-3 mr-1" />
             PNAVIM
           </Badge>
+
+          {/* Menu d'actions */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <div className="w-full">
+                  <ExportCooperativesPDF
+                    cooperatives={filteredAndSortedCoops}
+                    stats={{
+                      total: cooperatives.length,
+                      members: totalMembers,
+                      cmu: totalCmu,
+                      cnps: totalCnps,
+                    }}
+                  />
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setSortBy('name')}>
+                <SortAsc className="h-4 w-4 mr-2" />
+                Nom (A-Z) {sortBy === 'name' && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('members')}>
+                <ArrowUpDown className="h-4 w-4 mr-2" />
+                Effectif (desc) {sortBy === 'members' && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('cmu')}>
+                <Shield className="h-4 w-4 mr-2" />
+                Affiliés CMU {sortBy === 'cmu' && '✓'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Stats Cards */}
+        {/* Stats Cards - Design uniformisé */}
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="bg-primary/10 border-primary/20">
-            <CardContent className="p-4 text-center">
-              <Building2 className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="text-2xl font-bold text-primary">{cooperatives.length}</p>
-              <p className="text-xs text-muted-foreground">Coopératives</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-secondary/10 border-secondary/20">
-            <CardContent className="p-4 text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-secondary" />
-              <p className="text-2xl font-bold text-secondary">{totalMembers.toLocaleString('fr-FR')}</p>
-              <p className="text-xs text-muted-foreground">Producteurs</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-blue-500/10 border-blue-500/20">
-            <CardContent className="p-4 text-center">
-              <Shield className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-              <p className="text-2xl font-bold text-blue-500">{totalCmu.toLocaleString('fr-FR')}</p>
-              <p className="text-xs text-muted-foreground">Affiliés CMU</p>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-accent/10 border-accent/20">
-            <CardContent className="p-4 text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-accent" />
-              <p className="text-2xl font-bold text-amber-600">{totalCnps.toLocaleString('fr-FR')}</p>
-              <p className="text-xs text-muted-foreground">Affiliés CNPS</p>
-            </CardContent>
-          </Card>
+          {statsConfig.map((stat) => (
+            <Card key={stat.label} className={`${stat.bgClass} ${stat.borderClass}`}>
+              <CardContent className="p-4 flex flex-col items-center justify-center h-24">
+                <stat.icon className={`h-6 w-6 ${stat.colorClass} mb-1`} />
+                <p className={`text-xl font-bold ${stat.colorClass}`}>
+                  {stat.value.toLocaleString('fr-FR')}
+                </p>
+                <p className="text-xs text-muted-foreground text-center">{stat.label}</p>
+              </CardContent>
+            </Card>
+          ))}
         </motion.div>
 
-        {/* Search */}
+        {/* Search & Filters */}
         <motion.div
+          className="space-y-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
@@ -191,6 +335,51 @@ const VivriersCooperativesPage: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
+          </div>
+          
+          {/* Filtres */}
+          <div className="flex flex-wrap gap-2">
+            <Select value={filterCmu} onValueChange={(v) => setFilterCmu(v as CmuFilter)}>
+              <SelectTrigger className="w-[130px] h-9">
+                <Shield className="h-3 w-3 mr-1 text-blue-600" />
+                <SelectValue placeholder="CMU" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous (CMU)</SelectItem>
+                <SelectItem value="with">Avec CMU</SelectItem>
+                <SelectItem value="without">Sans CMU</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterSize} onValueChange={(v) => setFilterSize(v as SizeFilter)}>
+              <SelectTrigger className="w-[130px] h-9">
+                <Filter className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Taille" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes tailles</SelectItem>
+                <SelectItem value="small">&lt; 50 membres</SelectItem>
+                <SelectItem value="medium">50-200 membres</SelectItem>
+                <SelectItem value="large">&gt; 200 membres</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <SelectTrigger className="w-[140px] h-9">
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Trier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Nom (A-Z)</SelectItem>
+                <SelectItem value="members">Effectif</SelectItem>
+                <SelectItem value="cmu">Affiliés CMU</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Compteur résultats */}
+            <Badge variant="outline" className="h-9 px-3 flex items-center">
+              {filteredAndSortedCoops.length} coopérative{filteredAndSortedCoops.length > 1 ? 's' : ''}
+            </Badge>
           </div>
         </motion.div>
 
@@ -214,15 +403,15 @@ const VivriersCooperativesPage: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {filteredCoops.map((coop, index) => (
+            {filteredAndSortedCoops.map((coop, index) => (
               <motion.div
                 key={coop.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * index }}
+                transition={{ delay: Math.min(0.05 * index, 0.3) }}
               >
                 <Card 
-                  className="hover:shadow-lg transition-all cursor-pointer group border-l-4 border-l-secondary"
+                  className="hover:shadow-lg transition-all cursor-pointer group border-l-4 border-l-secondary h-full"
                   onClick={() => handleViewMembers(coop)}
                 >
                   <CardHeader className="pb-2">
@@ -253,16 +442,18 @@ const VivriersCooperativesPage: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="flex items-center gap-3 pt-2 border-t">
+                    {/* Badges alignés */}
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t">
                       <Badge variant="secondary" className="text-xs">
                         <Users className="h-3 w-3 mr-1" />
                         {coop.effectif_total || 0} membres
                       </Badge>
-                      {coop.effectif_cmu && coop.effectif_cmu > 0 && (
-                        <Badge variant="outline" className="text-xs text-blue-600">
-                          CMU: {coop.effectif_cmu}
-                        </Badge>
-                      )}
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${(coop.effectif_cmu || 0) > 0 ? 'text-blue-600 border-blue-200 bg-blue-50' : 'text-muted-foreground'}`}
+                      >
+                        CMU: {coop.effectif_cmu || 0}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -271,45 +462,67 @@ const VivriersCooperativesPage: React.FC = () => {
           </motion.div>
         )}
 
-        {filteredCoops.length === 0 && !loadingCoops && (
+        {filteredAndSortedCoops.length === 0 && !loadingCoops && (
           <div className="text-center py-12">
             <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium">Aucune coopérative trouvée</p>
-            <p className="text-sm text-muted-foreground">Essayez une autre recherche</p>
+            <p className="text-sm text-muted-foreground">Essayez une autre recherche ou modifiez les filtres</p>
           </div>
         )}
       </main>
 
-      {/* Members Dialog */}
+      {/* Members Dialog - Amélioré */}
       <Dialog open={showMembersDialog} onOpenChange={setShowMembersDialog}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-2xl max-h-[85vh]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-secondary" />
-              {selectedCooperative?.name}
-            </DialogTitle>
-            {selectedCooperative && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {selectedCooperative.region && (
-                  <Badge variant="outline">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {selectedCooperative.region}
-                  </Badge>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-secondary shrink-0" />
+                  <span className="truncate">{selectedCooperative?.name}</span>
+                </DialogTitle>
+                {selectedCooperative && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedCooperative.region && (
+                      <Badge variant="outline">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {selectedCooperative.region}
+                      </Badge>
+                    )}
+                    <Badge variant="secondary">
+                      <Users className="h-3 w-3 mr-1" />
+                      {selectedCooperative.effectif_total || 0} membres
+                    </Badge>
+                    <Badge variant="outline" className="text-blue-600 border-blue-200">
+                      CMU: {selectedCooperative.effectif_cmu || 0}
+                    </Badge>
+                    <Badge variant="outline" className="text-amber-600 border-amber-200">
+                      CNPS: {selectedCooperative.effectif_cnps || 0}
+                    </Badge>
+                  </div>
                 )}
-                {selectedCooperative.commune && (
-                  <Badge variant="outline">{selectedCooperative.commune}</Badge>
-                )}
-                <Badge variant="secondary">
-                  <Users className="h-3 w-3 mr-1" />
-                  {selectedCooperative.effectif_total || 0} membres
-                </Badge>
               </div>
-            )}
+              <Button variant="outline" size="sm" onClick={exportMembersPDF} disabled={members.length === 0}>
+                <FileDown className="h-4 w-4 mr-1" />
+                PDF
+              </Button>
+            </div>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[50vh]">
+          {/* Recherche locale */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un membre..."
+              value={memberSearchTerm}
+              onChange={(e) => setMemberSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <ScrollArea className="max-h-[45vh]">
             {loadingMembers ? (
-              <div className="space-y-2 p-4">
+              <div className="space-y-2 p-2">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="animate-pulse flex gap-4 p-3 bg-muted rounded-lg">
                     <div className="h-10 w-10 bg-muted-foreground/20 rounded-full" />
@@ -320,14 +533,14 @@ const VivriersCooperativesPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : members.length > 0 ? (
-              <div className="space-y-2 p-4">
-                {members.map((member) => (
+            ) : filteredMembers.length > 0 ? (
+              <div className="space-y-2 p-2">
+                {filteredMembers.map((member) => (
                   <div
                     key={member.id}
                     className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                   >
-                    <div className="h-10 w-10 bg-secondary/20 rounded-full flex items-center justify-center">
+                    <div className="h-10 w-10 bg-secondary/20 rounded-full flex items-center justify-center shrink-0">
                       <Users className="h-5 w-5 text-secondary" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -346,12 +559,12 @@ const VivriersCooperativesPage: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1">
+                    <div className="flex gap-1 shrink-0">
                       {member.cmu_status === 'actif' && (
-                        <Badge className="text-xs bg-blue-500">CMU</Badge>
+                        <Badge className="text-xs bg-blue-500 hover:bg-blue-600">CMU</Badge>
                       )}
                       {member.cnps_status === 'actif' && (
-                        <Badge className="text-xs bg-amber-500">CNPS</Badge>
+                        <Badge className="text-xs bg-amber-500 hover:bg-amber-600">CNPS</Badge>
                       )}
                     </div>
                   </div>
@@ -360,13 +573,15 @@ const VivriersCooperativesPage: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">Aucun membre enregistré</p>
+                <p className="text-muted-foreground">
+                  {memberSearchTerm ? 'Aucun membre correspondant' : 'Aucun membre enregistré'}
+                </p>
               </div>
             )}
           </ScrollArea>
 
-          {selectedCooperative && (
-            <div className="border-t pt-4 space-y-2">
+          {selectedCooperative && (selectedCooperative.phone || selectedCooperative.email) && (
+            <div className="border-t pt-4 flex flex-wrap gap-4">
               {selectedCooperative.phone && (
                 <a 
                   href={`tel:${selectedCooperative.phone}`}
