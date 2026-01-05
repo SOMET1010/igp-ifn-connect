@@ -180,13 +180,26 @@ export function useSimpleVoiceTranscription({
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'fr-FR';
+      recognition.maxAlternatives = 1;
 
       recognition.onstart = () => {
-        console.log('[SimpleSTT] Recognition started');
+        console.log('[SimpleSTT] 🎤 Recognition started - PARLE MAINTENANT');
         setState('listening');
       };
 
-      recognition.onresult = (event) => {
+      recognition.onaudiostart = () => {
+        console.log('[SimpleSTT] 🔊 Audio capture started');
+      };
+
+      recognition.onsoundstart = () => {
+        console.log('[SimpleSTT] 🔈 Sound detected');
+      };
+
+      recognition.onspeechstart = () => {
+        console.log('[SimpleSTT] 🗣️ Speech detected!');
+      };
+
+      recognition.onresult = (event: any) => {
         let finalTranscript = '';
         let interimTranscript = '';
 
@@ -199,26 +212,50 @@ export function useSimpleVoiceTranscription({
           }
         }
 
-        handleResult(finalTranscript || interimTranscript);
+        const text = finalTranscript || interimTranscript;
+        console.log('[SimpleSTT] 📝 Result:', text, '(final:', !!finalTranscript, ')');
+        handleResult(text);
       };
 
-      recognition.onerror = (event) => {
-        console.error('[SimpleSTT] Error:', event.error);
+      recognition.onerror = (event: any) => {
+        console.error('[SimpleSTT] ❌ Error:', event.error, event.message);
         
+        // no-speech = l'utilisateur n'a pas parlé assez fort ou assez vite
+        // On relance automatiquement au lieu d'afficher une erreur
+        if (event.error === 'no-speech') {
+          console.log('[SimpleSTT] 🔄 No speech detected, restarting...');
+          try {
+            recognition.stop();
+            setTimeout(() => {
+              if (!hasDetectedRef.current && !hasErroredRef.current && recognitionRef.current) {
+                recognitionRef.current.start();
+              }
+            }, 100);
+          } catch {
+            // ignore
+          }
+          return;
+        }
+
+        if (event.error === 'aborted') {
+          // Arrêt volontaire - ignorer
+          return;
+        }
+
         let msg = 'Erreur vocale';
         switch (event.error) {
           case 'not-allowed':
             msg = 'Autorise le micro dans les paramètres du navigateur.';
             break;
-          case 'no-speech':
-            msg = "Je n'ai rien entendu. Réessaie.";
-            break;
           case 'network':
             msg = 'Problème de connexion. Vérifie ton internet.';
             break;
-          case 'aborted':
-            // Ignore - arrêt volontaire
-            return;
+          case 'audio-capture':
+            msg = 'Problème de capture audio. Vérifie ton micro.';
+            break;
+          case 'service-not-allowed':
+            msg = 'Service vocal non autorisé sur ce navigateur.';
+            break;
         }
         
         cleanup();
@@ -226,34 +263,31 @@ export function useSimpleVoiceTranscription({
       };
 
       recognition.onend = () => {
-        console.log('[SimpleSTT] Recognition ended');
-        if (state === 'listening' && !hasDetectedRef.current && !hasErroredRef.current) {
-          // Finalize avec ce qu'on a
-          if (transcript) {
-            const phone = extractPhoneNumber(transcript);
-            if (phone && phone.length >= 10) {
-              hasDetectedRef.current = true;
-              onPhoneDetected(phone);
-            } else {
-              onError?.("Je n'ai pas compris ton numéro. Réessaie ou tape-le.");
-            }
-          }
-          setState('idle');
+        console.log('[SimpleSTT] 🔚 Recognition ended, detected:', hasDetectedRef.current, 'errored:', hasErroredRef.current);
+        
+        // Si on a détecté un numéro ou eu une erreur, c'est géré ailleurs
+        if (hasDetectedRef.current || hasErroredRef.current) {
+          setState(hasDetectedRef.current ? 'processing' : 'error');
+          return;
         }
+        
+        // Si toujours en écoute et pas fini, c'est probablement une fin normale
+        setState('idle');
       };
 
       recognitionRef.current = recognition;
       recognition.start();
+      console.log('[SimpleSTT] ▶️ Recognition.start() called');
 
-      // Timeout global
+      // Timeout global de 30s
       timeoutRef.current = setTimeout(() => {
         if (!hasDetectedRef.current && !hasErroredRef.current) {
-          console.log('[SimpleSTT] Timeout');
+          console.log('[SimpleSTT] ⏰ Timeout after 30s');
           cleanup();
           onError?.("Temps écoulé. Réessaie ou tape ton numéro.");
           setState('idle');
         }
-      }, 20000);
+      }, 30000);
 
     } catch (err: any) {
       console.error('[SimpleSTT] Setup error:', err);
