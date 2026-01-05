@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Users, Building2, RefreshCw, FileText, Wheat, MapPin, Phone, HeartPulse, Shield, ChevronDown, LayoutDashboard, BarChart3, Settings } from 'lucide-react';
+import { Upload, Users, Building2, RefreshCw, FileText, Wheat, MapPin, Phone, HeartPulse, Shield, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,8 @@ import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { adminSecondaryNavItems } from '@/config/navigation';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -50,14 +51,6 @@ interface ImportResult {
   errors: Array<{ row: number; error: string }>;
 }
 
-// Navigation items pour admin
-const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-  { icon: Users, label: 'Utilisateurs', path: '/admin/users' },
-  { icon: Wheat, label: 'Vivriers', path: '/admin/vivriers' },
-  { icon: BarChart3, label: 'Rapports', path: '/admin/reports' },
-  { icon: Settings, label: 'Paramètres', path: '/admin/monitoring' },
-];
 
 const AdminVivriers: React.FC = () => {
   const navigate = useNavigate();
@@ -443,7 +436,7 @@ const AdminVivriers: React.FC = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <UnifiedBottomNav items={adminNavItems} />
+      <UnifiedBottomNav items={adminSecondaryNavItems} />
     </div>
   );
 };
