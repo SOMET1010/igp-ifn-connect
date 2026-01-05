@@ -240,53 +240,80 @@ export function useDigitByDigitVoice({
       // Configurer la reconnaissance vocale
       const recognition = new SpeechRecognitionClass();
       recognition.lang = language;
-      recognition.continuous = true; // Écoute continue pour mieux capter
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 5; // Plus d'alternatives pour meilleure précision
+      recognition.continuous = false; // Un résultat à la fois pour plus de contrôle
+      recognition.interimResults = false; // Seulement les résultats finaux
+      recognition.maxAlternatives = 5;
       
       recognitionRef.current = recognition;
       
-      let lastProcessedTranscript = '';
-      let detectionTimeout: NodeJS.Timeout | null = null;
+      let lastDetectedDigit: string | null = null;
+      let lastDetectionTime = 0;
+      const MIN_DETECTION_INTERVAL = 800; // Minimum 800ms entre deux détections
       
       recognition.onresult = (event: any) => {
-        // Parcourir tous les résultats
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          const transcript = result[0].transcript.trim();
+        const result = event.results[0];
+        const transcript = result[0].transcript.trim();
+        const confidence = result[0].confidence;
+        
+        // Afficher ce qu'on entend
+        setLastHeard(transcript);
+        console.log(`[DigitVoice] Heard: "${transcript}" (confidence: ${(confidence * 100).toFixed(0)}%)`);
+        
+        // Vérifier la confiance minimale (60%)
+        if (confidence < 0.6) {
+          console.log('[DigitVoice] Confidence too low, asking to repeat');
+          setErrorMessage('Répète plus fort');
+          shouldRestartRef.current = true;
+          return;
+        }
+        
+        // Essayer toutes les alternatives pour trouver un chiffre
+        let detectedDigit: string | null = null;
+        let bestConfidence = 0;
+        
+        for (let alt = 0; alt < result.length; alt++) {
+          const altTranscript = result[alt].transcript;
+          const altConfidence = result[alt].confidence || 0;
+          const digit = extractSingleDigit(altTranscript);
           
-          // Afficher ce qu'on entend
-          setLastHeard(transcript);
-          
-          // Essayer toutes les alternatives pour trouver un chiffre
-          let detectedDigit: string | null = null;
-          
-          for (let alt = 0; alt < result.length; alt++) {
-            const altTranscript = result[alt].transcript;
-            const digit = extractSingleDigit(altTranscript);
-            if (digit) {
-              detectedDigit = digit;
-              console.log(`[DigitVoice] Found digit "${digit}" in alternative ${alt}: "${altTranscript}"`);
-              break;
-            }
+          if (digit && altConfidence > bestConfidence) {
+            detectedDigit = digit;
+            bestConfidence = altConfidence;
+            console.log(`[DigitVoice] Found digit "${digit}" in alt ${alt}: "${altTranscript}" (${(altConfidence * 100).toFixed(0)}%)`);
+          }
+        }
+        
+        const now = Date.now();
+        
+        if (detectedDigit) {
+          // Éviter les doublons rapides du même chiffre
+          if (detectedDigit === lastDetectedDigit && (now - lastDetectionTime) < MIN_DETECTION_INTERVAL) {
+            console.log('[DigitVoice] Duplicate detection ignored');
+            shouldRestartRef.current = true;
+            return;
           }
           
-          if (detectedDigit && (result.isFinal || transcript !== lastProcessedTranscript)) {
-            lastProcessedTranscript = transcript;
-            
-            // Débounce pour éviter les doublons rapides
-            if (detectionTimeout) {
-              clearTimeout(detectionTimeout);
+          lastDetectedDigit = detectedDigit;
+          lastDetectionTime = now;
+          
+          console.log('[DigitVoice] ✓ Digit confirmed:', detectedDigit);
+          onDigitDetected(detectedDigit);
+          
+          // Pause avant de reprendre l'écoute
+          setTimeout(() => {
+            shouldRestartRef.current = true;
+            // Trigger restart manually since continuous is false
+            if (isActiveRef.current && recognitionRef.current) {
+              try {
+                recognitionRef.current.start();
+              } catch (e) {
+                console.log('[DigitVoice] Restart after digit failed:', e);
+              }
             }
-            
-            detectionTimeout = setTimeout(() => {
-              console.log('[DigitVoice] Digit confirmed:', detectedDigit);
-              onDigitDetected(detectedDigit!);
-              lastProcessedTranscript = ''; // Reset pour le prochain chiffre
-            }, 200);
-          } else if (result.isFinal && !detectedDigit) {
-            setErrorMessage('Répète le chiffre');
-          }
+          }, 500);
+        } else {
+          setErrorMessage('Chiffre non compris');
+          shouldRestartRef.current = true;
         }
       };
       
