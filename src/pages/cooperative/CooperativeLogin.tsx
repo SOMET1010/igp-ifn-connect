@@ -10,7 +10,7 @@ const CooperativeLogin = () => {
   return (
     <SimpleLoginPage
       userType="cooperative"
-      redirectPath="/cooperative/dashboard"
+      redirectPath="/cooperative"
     >
       <div className="mt-4 text-center">
         <p className="text-sm text-muted-foreground">

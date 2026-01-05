@@ -868,6 +868,100 @@ export type Database = {
           },
         ]
       }
+      marketplace_cart_items: {
+        Row: {
+          cart_id: string
+          cooperative_id: string
+          created_at: string | null
+          id: string
+          product_id: string
+          quantity: number
+          stock_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          cart_id: string
+          cooperative_id: string
+          created_at?: string | null
+          id?: string
+          product_id: string
+          quantity: number
+          stock_id?: string | null
+          unit_price: number
+        }
+        Update: {
+          cart_id?: string
+          cooperative_id?: string
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          quantity?: number
+          stock_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_cart_items_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_carts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_cart_items_cooperative_id_fkey"
+            columns: ["cooperative_id"]
+            isOneToOne: false
+            referencedRelation: "cooperatives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_cart_items_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_carts: {
+        Row: {
+          created_at: string | null
+          id: string
+          merchant_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          merchant_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          merchant_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_carts_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       markets: {
         Row: {
           commune: string
@@ -1519,6 +1613,8 @@ export type Database = {
           image_url: string | null
           is_igp: boolean | null
           name: string
+          origin_region: string | null
+          producer_id: string | null
           unit: string
         }
         Insert: {
@@ -1528,6 +1624,8 @@ export type Database = {
           image_url?: string | null
           is_igp?: boolean | null
           name: string
+          origin_region?: string | null
+          producer_id?: string | null
           unit?: string
         }
         Update: {
@@ -1537,6 +1635,8 @@ export type Database = {
           image_url?: string | null
           is_igp?: boolean | null
           name?: string
+          origin_region?: string | null
+          producer_id?: string | null
           unit?: string
         }
         Relationships: [
@@ -1545,6 +1645,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
             referencedColumns: ["id"]
           },
         ]
