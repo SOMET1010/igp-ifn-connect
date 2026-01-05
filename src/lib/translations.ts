@@ -1,5 +1,8 @@
-// Dictionnaire de traductions pour 6 langues ivoiriennes
-// fr: Français, dioula: Dioula, baoule: Baoulé, bete: Bété, senoufo: Sénoufo, malinke: Malinké
+/**
+ * Traductions PNAVIM - Version Sociale
+ * Ton chaleureux, ivoirien, respectueux, inclusif
+ * "PNAVIM parle comme une personne du marché qui veut t'aider"
+ */
 
 export type LanguageCode = 'fr' | 'dioula' | 'baoule' | 'bete' | 'senoufo' | 'malinke';
 
@@ -22,1189 +25,1188 @@ export const LANGUAGES: LanguageInfo[] = [
 
 export const translations: Record<LanguageCode, Record<string, string>> = {
   fr: {
-    // Page d'accueil - Messages sociaux et chaleureux
-    "welcome": "Bienvenue",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Plateforme Nationale des Acteurs du Vivrier Marchand",
-    "who_are_you": "On est ensemble au marché",
-    "market_open": "Le marché est ouvert",
-    "market_closed": "Le marché est fermé",
-    "choose_access": "Choisis ta case pour commencer",
-    "click_to_listen": "🔊 Écouter",
-    "speak": "Parler",
-    "listening": "J'écoute...",
-    "help_text": "Tu hésites ? Demande à ton agent ou ta coopérative.",
-    "country": "République de Côte d'Ivoire",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "Bon {period} 👋",
+    welcome_subtitle: "On est {day}. Il est {hour}. Le marché est ouvert.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "On est ensemble au marché",
+    who_are_you: "On est ensemble au marché",
+    market_open: "Le marché est ouvert",
+    market_closed: "Le marché est fermé",
+    choose_access: "Choisis ta case pour commencer",
+    click_to_listen: "🔊 Écouter",
+    speak: "Parler",
+    listening: "J'écoute...",
+    help_text: "Tu hésites ? Demande à ton agent.",
+    country: "République de Côte d'Ivoire",
     
-    // Rôles - Textes humains et parlants
-    "i_am_merchant": "Je vends au marché",
-    "merchant": "Je suis Marchand",
-    "merchant_subtitle": "Encaisser ton argent",
-    "merchant_desc": "Encaisser et vendre sans souci",
-    "field_agent": "J'accompagne les marchands",
-    "agent": "Agent terrain",
-    "agent_subtitle": "Aider les vendeuses",
-    "agent_desc": "Aider les marchands",
-    "i_am_cooperative": "Je suis Coopérative",
-    "cooperative": "Coopérative",
-    "view_cooperatives": "Voir les Coopératives",
-    "view_map": "Voir la Carte",
-    "initiative_by": "Une initiative de",
-    "cooperative_desc": "Gérer stock et livraisons",
-    "admin": "Admin",
-    "admin_desc": "Statistiques",
-    "main_access": "Accès principal",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "Je vends ici",
+    merchant_subtitle: "Encaisser l'argent des clients",
+    merchant_desc: "Vendre sans souci",
+    i_am_merchant: "Je vends ici",
+    agent: "J'aide les vendeuses",
+    agent_subtitle: "Inscrire et accompagner",
+    agent_desc: "Être aux côtés des marchands",
+    field_agent: "J'aide les vendeuses",
+    cooperative: "Coopérative",
+    cooperative_desc: "Livrer et gérer les produits",
+    i_am_cooperative: "Coopérative",
+    admin: "Administration",
+    admin_desc: "Voir les chiffres",
+    view_cooperatives: "Voir les coopératives",
+    view_map: "Voir la carte",
     
-    // Dashboard Marchand
-    "daily_sales": "Ventes du jour",
-    "transactions": "transactions",
-    "view_history": "Voir l'historique",
-    "collect_payment": "Encaisser un paiement",
-    "sales_evolution": "Évolution des ventes",
-    "stock_alerts": "Alertes de stock",
-    "products_restock": "produits à réapprovisionner",
-    "my_stock": "Mon Stock",
-    "manage_products": "Gérer mes produits",
-    "manage": "Gérer",
-    "rsti_balance": "Solde RSTI",
-    "available": "disponibles",
-    "credits": "Crédits",
-    "customers": "Clients",
-    "scanner": "Scanner",
-    "barcode": "Code-barres",
-    "promotions": "Promos",
-    "campaigns": "Campagnes",
-    "suppliers": "Fournisseurs",
-    "ifn_cooperatives": "Coopératives PNAVIM",
-    "cmu_protection": "Protection CMU",
-    "contribution_benefits": "Cotisation & avantages",
-    "cmu_number": "Numéro CMU",
-    "active": "Actif",
-    "daily_tip": "Astuce du jour",
-    "tip_text": "Chaque vente que vous enregistrez contribue à votre protection sociale CMU. Plus vous vendez, plus vous êtes protégé !",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "Accueil",
+    sell: "Vendre",
+    profile: "Moi",
+    back: "Retour",
+    next: "Suivant",
+    close: "Fermer",
+    today: "Aujourd'hui",
     
-    // Actions
-    "confirm": "Confirmer",
-    "cancel": "Annuler",
-    "save": "Enregistrer",
-    "add": "Ajouter",
-    "delete": "Supprimer",
-    "edit": "Modifier",
-    "back": "Retour",
-    "next": "Suivant",
-    "close": "Fermer",
-    "search": "Rechercher",
-    "loading": "Chargement...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "Ma sœur, appuie sur le micro et parle doucement.",
+    auth_listen: "Dis ton numéro tranquillement.",
+    auth_confirm: "J'ai entendu {phone}. C'est bien ça ?",
+    auth_success: "C'est bon. Tu es dedans.",
+    auth_error: "Ce n'est pas grave. On recommence ensemble.",
+    auth_fallback: "Tu peux aussi utiliser le clavier.",
+    enter_phone: "Dis ton numéro",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "On vérifie que c'est bien toi",
     
-    // Paiement
-    "cash": "Espèces",
-    "mobile_money": "Mobile Money",
-    "transfer": "Virement",
-    "amount": "Montant",
-    "fcfa": "FCFA",
-    "payment_success": "Paiement réussi",
-    "payment_recorded": "Paiement enregistré avec succès",
+    /* ======================
+       DASHBOARD MARCHAND
+    ====================== */
+    dashboard_welcome: "Ma sœur, voilà ta journée.",
+    dashboard_today_amount: "Aujourd'hui tu as encaissé {amount} francs.",
+    dashboard_first_sale: "Première vente du jour. Courage !",
+    dashboard_tip: "Chaque vente t'aide pour ta santé et ton avenir.",
+    my_sales: "Mes ventes",
+    sales_today: "Ventes du jour",
+    open_day: "Ouvrir ma journée",
+    close_day: "Fermer ma journée",
+    day_opened: "Ta journée est ouverte. Tu peux encaisser.",
+    day_closed: "Ta journée est fermée.",
     
-    // Audio
-    "listen": "Écouter",
-    "audio_play": "Appuyez pour écouter",
-    "choose_language": "Choisissez votre langue",
+    /* ======================
+       CAISSE / VENTE
+    ====================== */
+    cashier_title: "Encaisser",
+    cashier_prompt: "Tu prends combien ?",
+    cashier_listening: "Parle, je t'écoute.",
+    cashier_confirm: "On confirme ?",
+    cashier_success: "C'est fait. L'argent est noté.",
+    cashier_error: "Y'a un petit souci. Essaie encore.",
+    cashier_minimum: "Il faut au moins cent francs.",
+    cashier_cash: "C'est en espèces.",
+    cashier_mobile: "C'est Mobile Money.",
+    enter_amount: "Tu prends combien ?",
+    enter_amount_instruction: "Appuie sur les billets ou dis le montant.",
+    amount: "Montant",
+    confirm: "Confirmer",
+    cancel: "Annuler",
+    validate: "Valider",
     
-    // Caisse Marchand
-    "my_cashier": "Ma Caisse",
-    "record_sale": "Encaisser une vente",
-    "confirm_payment": "Confirmer le paiement",
-    "transaction_success": "Transaction réussie",
-    "amount_to_collect": "Montant à encaisser",
-    "new_sale": "Nouvelle vente",
-    "history": "Historique",
-    "return_home": "Retour à l'accueil",
-    "enter_amount_instruction": "Entrez le montant puis choisissez Espèces ou Mobile Money",
-    "confirm_payment_instruction": "Confirmez le paiement de",
-    "min_amount_error": "Montant minimum: 100 FCFA",
-    "cmu_contribution": "Cotisation CMU",
-    "rsti_savings": "Épargne RSTI",
-    "processing": "Traitement en cours...",
-    "home": "Accueil",
-    "stock": "Stock",
-    "collect": "Encaisser",
-    "profile": "Profil",
-    "commerce": "Commerce",
-    "audio_dashboard": "Bienvenue sur votre tableau de bord. Ventes du jour",
-    "audio_cashier_input": "Entrez le montant à encaisser puis choisissez votre mode de paiement",
-    "audio_cashier_confirm": "Confirmez votre paiement de",
-    "audio_cashier_success": "Félicitations! Votre transaction a été enregistrée avec succès",
+    /* ======================
+       ARGENT / RÉSUMÉ
+    ====================== */
+    your_money: "Ton argent",
+    your_sales_today: "Tes ventes aujourd'hui",
+    view_history: "Voir ce que tu as déjà fait",
+    view_receipt: "Voir le reçu",
+    total: "Total",
+    balance: "Solde",
     
-    // Agent Dashboard
-    "online": "En ligne",
-    "offline": "Hors ligne",
-    "sync": "Synchroniser",
-    "ready_to_sync": "Prêt à synchroniser",
-    "waiting_connection": "En attente de connexion",
-    "today": "Aujourd'hui",
-    "this_week": "Cette semaine",
-    "total": "Total",
-    "validated": "Validés",
-    "pending": "En attente",
-    "validation_rate": "Taux validation",
-    "weekly_enrollments": "Enrôlements - 7 jours",
-    "merchants_pending_validation": "marchand(s) en attente de validation",
-    "no_enrollments_today": "Pas encore d'enrôlement aujourd'hui",
-    "new_enrollment": "Nouvel Enrôlement",
-    "pending_enrollments": "enrôlement(s) en attente",
-    "my_merchants": "Mes Marchands",
-    "view_list": "Voir la liste",
-    "my_profile": "Mon Profil",
-    "settings": "Paramètres",
-    "merchants": "Marchands",
-    "quick_guide": "Guide rapide",
-    "guide_agent_1": "Cliquez sur 'Nouvel Enrôlement' pour inscrire un marchand",
-    "guide_agent_2": "Remplissez les 5 étapes du formulaire",
-    "guide_agent_3": "Les données sont sauvegardées même hors-ligne",
-    "guide_merchant_1": "Appuyez sur \"Encaisser\" pour recevoir un paiement",
-    "guide_merchant_2": "Saisissez le montant en chiffres ou avec les billets",
-    "guide_merchant_3": "Partagez le reçu avec votre client",
-    "audio_agent_dashboard": "Bienvenue agent. Enrôlements aujourd'hui",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "Tes marchandises",
+    stock_empty: "Ton stock est vide.",
+    stock_add: "Ajouter un produit",
+    stock_low: "Attention, ça va bientôt finir.",
+    stock_ok: "Tout est bon.",
+    my_stock: "Mes marchandises",
     
-    // Cooperative Dashboard
-    "members": "Membres",
-    "products": "Produits",
-    "pending_orders": "commande(s) en attente",
-    "to_confirm_or_process": "À confirmer ou traiter",
-    "view": "Voir",
-    "manage_my_stock": "Gérer mon stock",
-    "orders": "Commandes",
-    "manage_requests": "Gérer les demandes",
-    "guide_coop_1": "Ajoutez vos produits dans la section Stock",
-    "guide_coop_2": "Recevez les commandes des marchands",
-    "guide_coop_3": "Confirmez et livrez les commandes",
-    "audio_coop_dashboard": "Bienvenue coopérative. Vous avez",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "Ta santé et ton avenir",
+    understand_intro: "Chaque vente t'aide. Regarde comment.",
+    cmu_title: "Santé",
+    cmu_simple: "Comme une tontine pour ta santé",
+    cmu_description: "Quand tu vends, une petite partie va pour ta santé. Si tu tombes malade, c'est payé.",
+    rsti_title: "Épargne",
+    rsti_simple: "Un peu d'argent mis de côté pour toi",
+    rsti_description: "Chaque vente met un peu de côté pour ton avenir. C'est ton argent.",
+    understand_reassure: "Ton argent travaille pour toi.",
+    your_protection: "Ta protection",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "Tu prends combien ?",
-    "collect_title": "Encaisser",
-    "offline_message": "Réseau lent ? On garde tout.",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Pas de réseau. Mais je note quand même.",
+    offline_saved: "C'est noté. On enverra après.",
+    offline_synced: "Tout est parti. C'est bon.",
+    no_connection: "Pas de réseau",
+    connection_restored: "Le réseau est revenu",
     
-    // UX Inclusion - Nouvelles traductions
-    "your_sales_today": "Tes ventes aujourd'hui",
-    "your_money": "Ton argent",
-    "your_sales": "Tes ventes",
-    "its_done": "C'est fait !",
-    "saved_offline": "Tout est sauvegardé",
-    "call_agent": "Appeler ton agent",
-    "listen_dioula": "Écouter en Dioula",
-    "how_to_collect": "Comment encaisser ?",
-    "view_more": "Voir plus",
-    "my_help": "Aide",
-    "health_contribution": "Santé",
-    "savings": "Épargne",
-    "your_health_protection": "Ta protection santé est OK",
-    "this_month": "ce mois",
-    "view_receipt": "Voir le reçu",
+    /* ======================
+       AIDE & MESSAGES
+    ====================== */
+    need_help: "Besoin d'aide ?",
+    call_agent: "Appeler ton agent",
+    its_done: "C'est fait !",
+    congratulations: "Bravo !",
+    loading: "Ça charge...",
+    please_wait: "Attends un peu...",
+    error: "Y'a un souci",
+    success: "C'est bon !",
+    warning: "Attention",
+    info: "Info",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Comprendre",
-    "understand_intro": "Chaque vente t'aide. Voici comment.",
-    "understand_audio": "Cette page t'explique ce que sont la CMU et le RSTI. La CMU c'est pour ta santé. Le RSTI c'est ton épargne pour quand tu seras vieux.",
-    "cmu_simple_title": "Santé",
-    "cmu_analogy": "Comme une tontine pour ta santé",
-    "cmu_percent": "1% de chaque vente",
-    "cmu_benefit_1": "Soins moins chers à l'hôpital",
-    "cmu_benefit_2": "Médicaments moins chers",
-    "cmu_benefit_3": "Accouchement gratuit",
-    "rsti_simple_title": "Épargne",
-    "rsti_analogy": "Ton argent pour quand tu seras vieux",
-    "rsti_percent": "0.5% mis de côté pour toi",
-    "rsti_benefit_1": "Gardé à la CNPS",
-    "rsti_benefit_2": "Tu récupères à 60 ans",
-    "rsti_yours": "à toi",
-    "example_title": "Exemple concret",
-    "example_sale": "Tu vends",
-    "you_keep": "Tu gardes",
-    "what_is_cmu_rsti": "C'est quoi CMU et RSTI ?",
-    "understand_simple": "On t'explique simplement",
-    "understand_cmu_rsti": "Comprendre CMU et RSTI",
-    "understand_reassure": "Ton argent travaille pour toi !",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "matin",
+    afternoon: "après-midi",
+    evening: "soir",
+    monday: "Lundi",
+    tuesday: "Mardi",
+    wednesday: "Mercredi",
+    thursday: "Jeudi",
+    friday: "Vendredi",
+    saturday: "Samedi",
+    sunday: "Dimanche",
     
-    // Soft POS - Billets et Pièces CFA
-    "quick_bills": "Billets rapides",
-    "add_coins": "+ Pièces",
-    "hide_coins": "Masquer pièces",
-    "bill_500": "Cinq cents francs",
-    "bill_1000": "Mille francs",
-    "bill_2000": "Deux mille francs",
-    "bill_5000": "Cinq mille francs",
-    "bill_10000": "Dix mille francs",
-    "coin_25": "Vingt-cinq francs",
-    "coin_50": "Cinquante francs",
-    "coin_100": "Cent francs",
-    "coin_200": "Deux cents francs",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "Mon profil",
+    my_info: "Mes infos",
+    my_phone: "Mon numéro",
+    my_market: "Mon marché",
+    settings: "Réglages",
+    language: "Langue",
+    sound: "Son",
+    notifications: "Notifications",
+    logout: "Me déconnecter",
+    logout_confirm: "Tu veux vraiment partir ?",
+    logout_success: "À bientôt !",
     
-    // Toast première vente
-    "congratulations": "Félicitations !",
-    "first_sale_today": "Première vente du jour",
+    /* ======================
+       AGENT TERRAIN
+    ====================== */
+    enrollment: "Inscription",
+    enroll_merchant: "Inscrire une vendeuse",
+    merchant_list: "Mes marchands",
+    pending_validation: "En attente",
+    validated: "Validé",
+    rejected: "Refusé",
     
-    // Aide
-    "need_help": "Besoin d'aide ?",
-    "ask_your_agent": "Demande à ton agent",
+    /* ======================
+       COOPÉRATIVE
+    ====================== */
+    my_orders: "Mes commandes",
+    new_order: "Commander",
+    delivery: "Livraison",
+    products: "Produits",
+    order_confirmed: "Commande notée",
+    order_delivered: "C'est livré",
   },
-  
+
   dioula: {
-    // Page d'accueil
-    "welcome": "Aw ni sɔgɔma",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Julakɛlaw ka fɛɛrɛ",
-    "who_are_you": "I ye jon ye?",
-    "choose_access": "I ka ɲɛnama sugandi",
-    "help_text": "I ma dɔn? I ka i ka ajan wele.",
-    "country": "Kotidiwar Jamanaden",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "I ni sogoma 👋",
+    welcome_subtitle: "An bɛ {day}. Sugu bɛ dayɛlɛn.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "An bɛ ɲɔgɔn fɛ sugu la",
+    who_are_you: "An bɛ ɲɔgɔn fɛ sugu la",
+    market_open: "Sugu bɛ dayɛlɛn",
+    market_closed: "Sugu datugura",
+    choose_access: "Sugandi i ka kɛlɛ",
+    click_to_listen: "🔊 Lamɛn",
+    speak: "Kuma",
+    listening: "N bɛ i lamɛn...",
+    help_text: "I bɛ dɔɔni tɛmɛ? Fɔ i ka agent ye.",
+    country: "Kɔti d'Iwɔri",
     
-    // Rôles
-    "merchant": "Ne ye Julakɛla ye",
-    "merchant_desc": "Wari ta ani jula kɛ",
-    "agent": "Ajan",
-    "agent_desc": "Ka julakɛlaw dɛmɛ",
-    "cooperative": "Jɛkulu",
-    "cooperative_desc": "Nafolo ɲɛnabɔ",
-    "view_cooperatives": "Jɛkuluw lajɛ",
-    "view_map": "Karte lajɛ",
-    "initiative_by": "Fɛɛrɛ bɔra",
-    "admin": "Ɲɛmɔgɔ",
-    "admin_desc": "Jateminɛ",
-    "main_access": "Sira kunba",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "N bɛ feere",
+    merchant_subtitle: "Wari ta feerekɛlaw fɛ",
+    merchant_desc: "Feere ka hɛrɛya",
+    i_am_merchant: "N bɛ feere",
+    agent: "N bɛ feerekɛlaw dɛmɛ",
+    agent_subtitle: "Sɛbɛn ni dɛmɛ",
+    agent_desc: "Kɛ walasa feere bɛ kɛ",
+    field_agent: "N bɛ feerekɛlaw dɛmɛ",
+    cooperative: "Kooperatif",
+    cooperative_desc: "Don ni sigi feere",
+    i_am_cooperative: "Kooperatif",
+    admin: "Administratiɔn",
+    admin_desc: "Jatew lajɛ",
+    view_cooperatives: "Kooperatifw lajɛ",
+    view_map: "Kart lajɛ",
     
-    // Dashboard
-    "daily_sales": "Bi jula",
-    "transactions": "jula",
-    "view_history": "Taamashyɛn lajɛ",
-    "collect_payment": "Wari ta",
-    "stock_alerts": "Nafolo kɔlɔsi",
-    "products_restock": "nafolo ka fara a kan",
-    "my_stock": "Ne ka nafolo",
-    "manage_products": "Nafolo ɲɛnabɔ",
-    "manage": "Ɲɛnabɔ",
-    "rsti_balance": "RSTI wari",
-    "available": "bɛ yen",
-    "credits": "Juruw",
-    "customers": "Jigifɛlaw",
-    "scanner": "Kalan",
-    "barcode": "Taamasiɲɛ",
-    "promotions": "Sɔngɔ jigin",
-    "campaigns": "Lakana",
-    "suppliers": "Nafolo difaw",
-    "ifn_cooperatives": "PNAVIM Jɛkuluw",
-    "cmu_protection": "CMU Lakana",
-    "contribution_benefits": "Sara ani nafaw",
-    "cmu_number": "CMU nimɔrɔ",
-    "active": "A bɛ baara la",
-    "daily_tip": "Bi ladili",
-    "tip_text": "Jula o jula i bɛ kɛ, a bɛ i ka CMU lakana fara.",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "Sigi",
+    sell: "Feere",
+    profile: "N tan",
+    back: "Kɔsegi",
+    next: "Nata",
+    close: "Datugu",
+    today: "Bi",
     
-    // Actions
-    "confirm": "Sɛbɛn",
-    "cancel": "A dabila",
-    "save": "A mara",
-    "add": "A fara",
-    "delete": "A bɔ",
-    "edit": "A sɛmɛntiya",
-    "back": "Kɔsɛbɛ",
-    "next": "Nata",
-    "close": "A datugu",
-    "search": "Ɲini",
-    "loading": "A bɛ donna...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "N bɛ i dɛmɛ. Digi mikro la, kuma cɛ.",
+    auth_listen: "Fɔ i ka nimɔrɔ cɛ.",
+    auth_confirm: "N ka a lamɛn {phone}. A ye tuma?",
+    auth_success: "A ka kɛ. I bɛ kɔnɔ.",
+    auth_error: "A tɛ foyi. An bɛ segin ka fɔ.",
+    auth_fallback: "I bɛ se ka klavye kɛ.",
+    enter_phone: "Fɔ i ka nimɔrɔ",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "An bɛ a lajɛ ko i yɛrɛ don",
     
-    // Paiement
-    "cash": "Wari",
-    "mobile_money": "Telefɔni wari",
-    "transfer": "Wari bila",
-    "amount": "Hakɛ",
-    "fcfa": "FCFA",
-    "payment_success": "Wari tara",
-    "payment_recorded": "Wari taara ka ɲɛ",
+    /* ======================
+       DASHBOARD
+    ====================== */
+    dashboard_welcome: "N balima, i ka don filɛ.",
+    dashboard_today_amount: "Bi i ye {amount} faransi sɔrɔ.",
+    dashboard_first_sale: "Feere fɔlɔ. Jigi bɛ!",
+    dashboard_tip: "Feere kelen kelen bɛ i dɛmɛ.",
+    my_sales: "N ka feereli",
+    sales_today: "Bi feereli",
+    open_day: "Don dayɛlɛ",
+    close_day: "Don datugu",
+    day_opened: "I ka don dayɛlɛnna. I bɛ se ka wari ta.",
+    day_closed: "I ka don datugura.",
     
-    // Audio
-    "listen": "A lamɛn",
-    "audio_play": "A digi ka lamɛn",
-    "choose_language": "I ka kan sugandi",
+    /* ======================
+       CAISSE / VENTE
+    ====================== */
+    cashier_title: "Wari ta",
+    cashier_prompt: "Wari joli?",
+    cashier_listening: "Kuma, n bɛ i lamɛn.",
+    cashier_confirm: "An bɛ a kɛ?",
+    cashier_success: "A ka kɛ. Wari bɛ sɛbɛn.",
+    cashier_error: "Dɔɔni tɛna. Segin ka kɛ.",
+    cashier_minimum: "A ka kan ka kɛ kɛmɛ ye dɔrɔn.",
+    cashier_cash: "A ye kasi ye.",
+    cashier_mobile: "A ye Mobile Money ye.",
+    enter_amount: "Wari joli?",
+    enter_amount_instruction: "Digi biyɛw kan walima fɔ hakɛ.",
+    amount: "Hakɛ",
+    confirm: "Dafa",
+    cancel: "Bɔ",
+    validate: "Sɛbɛn",
     
-    // Caisse
-    "my_cashier": "Ne ka Kɛsu",
-    "record_sale": "Wari ta jula kɔnɔ",
-    "confirm_payment": "Wari ta sɛbɛn",
-    "transaction_success": "Jula ɲɛ",
-    "amount_to_collect": "Wari min bɛ ta",
-    "new_sale": "Jula kura",
-    "history": "Taamashyɛn",
-    "return_home": "Ka segin so",
-    "enter_amount_instruction": "Hakɛ sɛbɛn ani wari sugandi",
-    "confirm_payment_instruction": "Wari ta sɛbɛn",
-    "min_amount_error": "Hakɛ fitini: 100 FCFA",
-    "cmu_contribution": "CMU sara",
-    "rsti_savings": "RSTI mara",
-    "processing": "A bɛ kɛ...",
-    "home": "So",
-    "stock": "Nafolo",
-    "collect": "Wari ta",
-    "profile": "Ɲɛfɔli",
-    "commerce": "Jula",
-    "audio_dashboard": "I ni sɔgɔma. Bi jula ye",
-    "audio_cashier_input": "Hakɛ sɛbɛn ani wari cogo sugandi",
-    "audio_cashier_confirm": "I ka wari ta sɛbɛn",
-    "audio_cashier_success": "Baara kɛra! Jula marala",
+    /* ======================
+       ARGENT
+    ====================== */
+    your_money: "I ka wari",
+    your_sales_today: "I ka bi feereli",
+    view_history: "I ye min kɛ kɔrɔ lajɛ",
+    view_receipt: "Reçu lajɛ",
+    total: "Bɛɛ",
+    balance: "Tɔ",
     
-    // Agent Dashboard
-    "online": "Kan na",
-    "offline": "Kan tɛ",
-    "sync": "A bila",
-    "ready_to_sync": "A bɛ sɛ ka bila",
-    "waiting_connection": "A bɛ kan makɔnɔ",
-    "today": "Bi",
-    "this_week": "Dɔgɔkun nin",
-    "total": "Bɛɛ",
-    "new_enrollment": "Sɛbɛn Kura",
-    "pending_enrollments": "sɛbɛn bɛ makɔnɔ",
-    "my_merchants": "Ne Julakɛlaw",
-    "view_list": "Lisite lajɛ",
-    "my_profile": "Ne Ɲɛfɔli",
-    "settings": "Labɛn",
-    "merchants": "Julakɛlaw",
-    "quick_guide": "Ladili",
-    "guide_agent_1": "Digi 'Sɛbɛn Kura' ka julakɛla sɛbɛn",
-    "guide_agent_2": "Fɔli 5 dan fa",
-    "guide_agent_3": "Kunnafoni marala hali ni kan tɛ",
-    "guide_merchant_1": "Digi \"Wari ta\" ka wari sɔrɔ",
-    "guide_merchant_2": "Hakɛ sɛbɛn wala wari bilɛ don",
-    "guide_merchant_3": "Resu tila ni i jigifɛla",
-    "audio_agent_dashboard": "I ni sɔgɔma ajan. Bi sɛbɛn ye",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "I ka fɛn",
+    stock_empty: "I ka stɔk bɛ gan.",
+    stock_add: "Fɛn dɔ fara a kan",
+    stock_low: "A tɛ caya. Fɛn dɔ fara a kan.",
+    stock_ok: "A bɛɛ ka ɲi.",
+    my_stock: "N ka fɛn",
     
-    // Cooperative Dashboard
-    "members": "Jɛkuludenw",
-    "products": "Nafolo",
-    "pending": "Makɔnɔ",
-    "pending_orders": "ciyɛn bɛ makɔnɔ",
-    "to_confirm_or_process": "Ka sɛbɛn wala ka kɛ",
-    "view": "A lajɛ",
-    "manage_my_stock": "Ne ka nafolo ɲɛnabɔ",
-    "orders": "Ciyɛnw",
-    "manage_requests": "Ɲininkaliw ɲɛnabɔ",
-    "guide_coop_1": "I ka nafolo fara Nafolo yɔrɔ la",
-    "guide_coop_2": "Julakɛlaw ka ciyɛn sɔrɔ",
-    "guide_coop_3": "Ciyɛn sɛbɛn ka di",
-    "audio_coop_dashboard": "I ni sɔgɔma jɛkulu. I ka",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "I ka kɛnɛya ni sini",
+    understand_intro: "Feere kelen kelen bɛ i dɛmɛ.",
+    cmu_title: "Kɛnɛya",
+    cmu_simple: "I ko tɔntini i ka kɛnɛya kama",
+    cmu_description: "Ni i ye feere kɛ, dɔɔni bɛ taa i ka kɛnɛya kama. Ni bana ye i sɔrɔ, a bɛ sara.",
+    rsti_title: "Wari mara",
+    rsti_simple: "Wari dɔɔni bɛ mara i ye",
+    rsti_description: "Feere kelen kelen bɛ wari dɔɔni mara i ye. O ye i yɛrɛ ka wari ye.",
+    understand_reassure: "I ka wari bɛ baara kɛ i ye.",
+    your_protection: "I ka lakana",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "I bɛ hakɛ jumen ta?",
-    "collect_title": "Wari ta",
-    "offline_message": "Kan ka gɛlɛn? A marala.",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Rɛzɔ tɛ. N bɛ a sɛbɛn.",
+    offline_saved: "A ka sɛbɛn. An bɛ sɔrɔ kɔfɛ.",
+    offline_synced: "A bɛ taa. A ka kɛ.",
+    no_connection: "Rɛzɔ tɛ",
+    connection_restored: "Rɛzɔ seginna",
     
-    // UX Inclusion - Nouvelles traductions
-    "your_sales_today": "Bi jula",
-    "your_money": "I ka wari",
-    "your_sales": "I ka jula",
-    "its_done": "A kɛra!",
-    "saved_offline": "A bɛɛ marala",
-    "call_agent": "I ka ajan wele",
-    "listen_dioula": "A lamɛn Julakan na",
-    "how_to_collect": "Wari ta cogo?",
-    "view_more": "A tɔ lajɛ",
-    "my_help": "Dɛmɛ",
-    "health_contribution": "Kɛnɛya",
-    "savings": "Mara",
-    "your_health_protection": "I ka kɛnɛya lakana bɛ yen",
-    "this_month": "kalo nin",
-    "view_receipt": "Resu lajɛ",
+    /* ======================
+       AIDE & MESSAGES
+    ====================== */
+    need_help: "I mago bɛ dɛmɛ la?",
+    call_agent: "I ka agent wele",
+    its_done: "A ka kɛ!",
+    congratulations: "A ni cɛ!",
+    loading: "A bɛ don...",
+    please_wait: "Mako dɔɔni...",
+    error: "Gɛlɛya dɔ",
+    success: "A ka kɛ!",
+    warning: "Kɔlɔsi",
+    info: "Kunnafoni",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Ka faamu",
-    "understand_intro": "Jula kelen kelen bɛ i dɛmɛ. A cogo filɛ.",
-    "understand_audio": "Nin ɲɛ bɛ CMU ni RSTI ɲɛfɔ i ye. CMU ye i ka kɛnɛya ye. RSTI ye i ka wari ye i kɔrɔba waati.",
-    "cmu_simple_title": "Kɛnɛya",
-    "cmu_analogy": "I n'a fɔ tɔntɔn i ka kɛnɛya kama",
-    "cmu_percent": "1% jula kelen kelen",
-    "cmu_benefit_1": "Lakɔdɔnba sɔngɔ dɔgɔ",
-    "cmu_benefit_2": "Fura sɔngɔ dɔgɔ",
-    "cmu_benefit_3": "Denmisɛn wololi gansan",
-    "rsti_simple_title": "Wari mara",
-    "rsti_analogy": "I ka wari i kɔrɔba waati",
-    "rsti_percent": "0.5% marala i ye",
-    "rsti_benefit_1": "Marala CNPS la",
-    "rsti_benefit_2": "I bɛ a sɔrɔ san 60",
-    "rsti_yours": "i ta",
-    "example_title": "Misali",
-    "example_sale": "I bɛ feere",
-    "you_keep": "I bɛ to ni",
-    "what_is_cmu_rsti": "CMU ni RSTI ye mun ye?",
-    "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
-    "understand_cmu_rsti": "CMU ni RSTI faamu",
-    "understand_reassure": "I ka wari bɛ baara kɛ i ye!",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "sogoma",
+    afternoon: "tilefɛ",
+    evening: "wula",
+    monday: "Tɛnɛn",
+    tuesday: "Tarata",
+    wednesday: "Araba",
+    thursday: "Alamisa",
+    friday: "Juma",
+    saturday: "Sibiri",
+    sunday: "Kari",
     
-    // Soft POS - Billets et Pièces CFA (Dioula)
-    "quick_bills": "Wari joona",
-    "add_coins": "+ Wari dɔgɔw",
-    "hide_coins": "Wari dɔgɔw datugu",
-    "bill_500": "Wuli kɛmɛ",
-    "bill_1000": "Wuli kelen",
-    "bill_2000": "Wuli fila",
-    "bill_5000": "Wuli duuru",
-    "bill_10000": "Wuli tan",
-    "coin_25": "Mugan ni duuru",
-    "coin_50": "Bi duuru",
-    "coin_100": "Kɛmɛ",
-    "coin_200": "Kɛmɛ fila",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "N ka kun",
+    my_info: "N ka kunnafoni",
+    my_phone: "N ka nimɔrɔ",
+    my_market: "N ka sugu",
+    settings: "Labɛn",
+    language: "Kan",
+    sound: "Mankan",
+    notifications: "Lasigiden",
+    logout: "Bɔ",
+    logout_confirm: "I bɛ taa tiɲɛn na?",
+    logout_success: "Ka ben!",
     
-    // Toast première vente
-    "congratulations": "I ni cɛ !",
-    "first_sale_today": "Tile in ka fɔlɔ feere",
+    /* ======================
+       AGENT TERRAIN
+    ====================== */
+    enrollment: "Sɛbɛnni",
+    enroll_merchant: "Feerekɛla sɛbɛn",
+    merchant_list: "N ka feerekɛlaw",
+    pending_validation: "A bɛ mako la",
+    validated: "A dafara",
+    rejected: "A banna",
     
-    // Aide
-    "need_help": "I bε dεmεni fε wa?",
-    "ask_your_agent": "I ka i ka ajan wele",
+    /* ======================
+       COOPÉRATIVE
+    ====================== */
+    my_orders: "N ka ciyaaruw",
+    new_order: "Ciyaaru kura",
+    delivery: "Jolili",
+    products: "Fɛnw",
+    order_confirmed: "Ciyaaru sɛbɛnna",
+    order_delivered: "A jolila",
   },
-  
+
   baoule: {
-    // Page d'accueil
-    "welcome": "Afuɛ",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Atonvuɛfuɛ mun'n be junman",
-    "who_are_you": "A ti wan?",
-    "choose_access": "Fa ɔ akpasua",
-    "help_text": "A siman? Usa ɔ ajan'n annzɛ ɔ akpɔ'n.",
-    "country": "Kote Divwa Nvle",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "Mo aba 👋",
+    welcome_subtitle: "Andɛ yɛ {day}. Gwa'n su ti kpa.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "É ti nun gwa'n su",
+    who_are_you: "É ti nun gwa'n su",
+    market_open: "Gwa'n su ti kpa",
+    market_closed: "Gwa'n su tannin",
+    choose_access: "Fa wɔ akpasua",
+    click_to_listen: "🔊 Tie",
+    speak: "Kan",
+    listening: "N ti'n tie...",
+    help_text: "A wunman sran? Flɛ ɔ agent.",
+    country: "Kɔtdivwa",
     
-    // Rôles
-    "merchant": "N ti Atonvuɛfuɛ",
-    "merchant_desc": "De sika yɛ yo atɔn",
-    "agent": "Ajan",
-    "agent_desc": "Uka atonvuɛfuɛ mun",
-    "cooperative": "Akpɔ",
-    "cooperative_desc": "Ninnge'm be su kpɛn",
-    "view_cooperatives": "Nian akpɔ mun",
-    "view_map": "Nian karte'n",
-    "initiative_by": "Junman nin fin",
-    "admin": "Kpɛnngbɛn",
-    "admin_desc": "Be nuan ndɛ",
-    "main_access": "Atin dan'n",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "N yo atɔ",
+    merchant_subtitle: "Sika'n sɔ kliɛn'm be sa nun",
+    merchant_desc: "Yo atɔ ndɛndɛ",
+    i_am_merchant: "N yo atɔ",
+    agent: "N uka atɔyofuɛ'm be",
+    agent_subtitle: "Klɛ be nin uka be",
+    agent_desc: "Jran atɔyofuɛ'm be bo",
+    field_agent: "N uka atɔyofuɛ'm be",
+    cooperative: "Kooperatif",
+    cooperative_desc: "Fa ninnge'm be ba",
+    i_am_cooperative: "Kooperatif",
+    admin: "Administratiɔn",
+    admin_desc: "Nian nɔmbrɛ'm be su",
+    view_cooperatives: "Nian kooperatif'm be su",
+    view_map: "Nian kart su",
     
-    // Dashboard
-    "daily_sales": "Andɛ atɔn",
-    "transactions": "atɔn",
-    "view_history": "Nian laa liɛ mun",
-    "collect_payment": "De sika",
-    "stock_alerts": "Ninnge kle ɔ",
-    "products_restock": "ninnge'm be wie",
-    "my_stock": "Min ninnge",
-    "manage_products": "Nian ninnge'm be su",
-    "manage": "Sie",
-    "rsti_balance": "RSTI sika",
-    "available": "o lɛ",
-    "credits": "Kalɛ",
-    "customers": "Jue difuɛ mun",
-    "scanner": "Kanngan",
-    "barcode": "Nzɔliɛ",
-    "promotions": "Sran ngua",
-    "campaigns": "Junman",
-    "suppliers": "Be nga be fa ninnge'm be ba'n",
-    "ifn_cooperatives": "PNAVIM akpɔ mun",
-    "cmu_protection": "CMU Sasafuɛ",
-    "contribution_benefits": "Kle nin ye",
-    "cmu_number": "CMU numeru",
-    "active": "Ɔ ti kpa",
-    "daily_tip": "Andɛ afɔtuɛ",
-    "tip_text": "Atɔn kwlaa nga a yo'n, ɔ yo ɔ CMU sasafuɛ liɛ dan.",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "Awlo",
+    sell: "Yo atɔ",
+    profile: "Min",
+    back: "Sa sin",
+    next: "Kɔ",
+    close: "Tannin",
+    today: "Andɛ",
     
-    // Actions
-    "confirm": "Ɔ ti su",
-    "cancel": "A kpalo",
-    "save": "Sie",
-    "add": "Ukɛ",
-    "delete": "Nunnun",
-    "edit": "Kaci",
-    "back": "Sa sin",
-    "next": "Kɔ",
-    "close": "Tannin",
-    "search": "Kunndɛ",
-    "loading": "Ɔ su...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "Min niaan, miɛn mikro'n su, kan blɛblɛ.",
+    auth_listen: "Bo ɔ nimero'n blɛblɛ.",
+    auth_confirm: "N ti'n {phone}. I sɔ'n yɛ?",
+    auth_success: "Ɔ ti kpa. A wo nun.",
+    auth_error: "Ndɛ fi o-man. É sa i bo ɔ.",
+    auth_fallback: "A kwla fa klavye'n di junman.",
+    enter_phone: "Bo ɔ nimero",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "É nian sɛ ɔ bɔbɔ",
     
-    // Paiement
-    "cash": "Sika mma",
-    "mobile_money": "Telefɔni sika",
-    "transfer": "Sika kɔ",
-    "amount": "Be nuan",
-    "fcfa": "FCFA",
-    "payment_success": "Sika deli",
-    "payment_recorded": "Sika liɛ'n kɔli",
+    /* ======================
+       DASHBOARD
+    ====================== */
+    dashboard_welcome: "Min niaan, nian ɔ cɛn'n nga.",
+    dashboard_today_amount: "Andɛ a ɲan sika {amount}.",
+    dashboard_first_sale: "Atɔ klikli. Jran kekle!",
+    dashboard_tip: "Atɔ kun kun bɛ ɔ uka.",
+    my_sales: "Min atɔ'm",
+    sales_today: "Andɛ atɔ'm",
+    open_day: "Tike min cɛn",
+    close_day: "Tan min cɛn",
+    day_opened: "Ɔ cɛn'n tike. A kwla sika sɔ.",
+    day_closed: "Ɔ cɛn'n tannin.",
     
-    // Audio
-    "listen": "Tie",
-    "audio_play": "Tin su naan tie",
-    "choose_language": "Fa ɔ aniɛn",
+    /* ======================
+       CAISSE / VENTE
+    ====================== */
+    cashier_title: "Sika sɔ",
+    cashier_prompt: "Sika'n ti nɲɛ?",
+    cashier_listening: "Kan, n ti'n tie.",
+    cashier_confirm: "É yo?",
+    cashier_success: "Ɔ ti kpa. Sika'n ti klɛ.",
+    cashier_error: "Sa kaan kun o. Bɔ i ekun.",
+    cashier_minimum: "Saan kaan sika ya.",
+    cashier_cash: "Ɔ ti sika ngbɛn.",
+    cashier_mobile: "Ɔ ti Mobile Money.",
+    enter_amount: "Sika'n ti nɲɛ?",
+    enter_amount_instruction: "Miɛn biyɛ'm be su annzɛ bo hakɛ'n.",
+    amount: "Sika",
+    confirm: "Siesie",
+    cancel: "Yaci",
+    validate: "Klɛ",
     
-    // Caisse
-    "my_cashier": "Min Kɛsu",
-    "record_sale": "De sika atɔn nun",
-    "confirm_payment": "Sika'n i kle",
-    "transaction_success": "Atɔn kɔli",
-    "amount_to_collect": "Sika nga a de",
-    "new_sale": "Atɔn uflɛ",
-    "history": "Laa liɛ mun",
-    "return_home": "Sa sin awlo",
-    "enter_amount_instruction": "Klɛ sika nuan'n yɛ fa ɔ sika wafa",
-    "confirm_payment_instruction": "Kle sika liɛ'n",
-    "min_amount_error": "Sika kaan: 100 FCFA",
-    "cmu_contribution": "CMU kle",
-    "rsti_savings": "RSTI sie",
-    "processing": "Ɔ su kɔ...",
-    "home": "Awlo",
-    "stock": "Ninnge",
-    "collect": "De sika",
-    "profile": "Min su",
-    "commerce": "Atɔn",
-    "audio_dashboard": "Afuɛ. Andɛ atɔn ti",
-    "audio_cashier_input": "Klɛ sika nuan'n kpɛkuun fa ɔ sika wafa",
-    "audio_cashier_confirm": "Kle ɔ sika liɛ'n",
-    "audio_cashier_success": "Ye! Atɔn liɛ'n kɔli",
+    /* ======================
+       ARGENT
+    ====================== */
+    your_money: "Ɔ sika",
+    your_sales_today: "Ɔ andɛ atɔ'm",
+    view_history: "Nian like nga a yo i wɔ",
+    view_receipt: "Nian reçu",
+    total: "I kwlaa",
+    balance: "Tɔ",
     
-    // Agent Dashboard
-    "online": "Ɔ ti nun",
-    "offline": "Ɔ nunman nun",
-    "sync": "Yia",
-    "ready_to_sync": "Ɔ ti yialɛ nun",
-    "waiting_connection": "Ɔ su minndɛ",
-    "today": "Andɛ",
-    "this_week": "Lemɔcuɛ nga nun",
-    "total": "I kwlaa",
-    "new_enrollment": "Sɛbɛnlɛ Uflɛ",
-    "pending_enrollments": "sɛbɛnlɛ su minndɛ",
-    "my_merchants": "Min Atonvuɛfuɛ mun",
-    "view_list": "Nian lisite'n",
-    "my_profile": "Min su ndɛ",
-    "settings": "Siesie",
-    "merchants": "Atonvuɛfuɛ mun",
-    "quick_guide": "Afɔtuɛ",
-    "guide_agent_1": "Tin 'Sɛbɛnlɛ Uflɛ' su naan sɛ atonvuɛfuɛ kun klɛ",
-    "guide_agent_2": "Fa junman 5 mun'n be kwlaa",
-    "guide_agent_3": "Ndɛ'm be sie sɛ internet o lɛ annzɛ o lɛ man",
-    "guide_merchant_1": "Tin \"De sika\" su ka sika sɔ",
-    "guide_merchant_2": "Klɛ sika nuan annzɛ fa sika",
-    "guide_merchant_3": "Fa resu'n kle ɔ jue difuɛ",
-    "audio_agent_dashboard": "Afuɛ ajan. Andɛ sɛbɛnlɛ ti",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "Ɔ ninnge'm",
+    stock_empty: "Ɔ stɔk'n ti ngbɛn.",
+    stock_add: "Fa ninnge kun fara su",
+    stock_low: "Nian, a su wie.",
+    stock_ok: "I kwlaa ti kpa.",
+    my_stock: "Min ninnge'm",
     
-    // Cooperative Dashboard
-    "members": "Akpɔ sufuɛ mun",
-    "products": "Ninnge mun",
-    "pending": "Su minndɛ",
-    "pending_orders": "atɔnlɛ su minndɛ",
-    "to_confirm_or_process": "Nian su annzɛ yo",
-    "view": "Nian",
-    "manage_my_stock": "Sie min ninnge mun",
-    "orders": "Atɔnlɛ mun",
-    "manage_requests": "Srɛlɛ'm be su sie",
-    "guide_coop_1": "Fa ɔ ninnge mun'n sie Ninnge nun",
-    "guide_coop_2": "De atonvuɛfuɛ'm be atɔnlɛ",
-    "guide_coop_3": "Kle su yɛ fa kɔ",
-    "audio_coop_dashboard": "Afuɛ akpɔ. A lɛ",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "Ɔ juejue nin ɔ ainman",
+    understand_intro: "Atɔ kun kun bɛ ɔ uka. Nian wafa.",
+    cmu_title: "Juejue",
+    cmu_simple: "Ɔ ti kɛ tɔntini ɔ juejue ti",
+    cmu_description: "Sɛ a yo atɔ, sika kaan kun kɔ ɔ juejue ti. Sɛ tukpacɛ trɔ ɔ, bé tua.",
+    rsti_title: "Sika sie",
+    rsti_simple: "Sika kaan bɔ a sie ɔ ti",
+    rsti_description: "Atɔ kun kun bɛ sika kaan sie ɔ ti. Ɔ bɔbɔ sika ɔ.",
+    understand_reassure: "Ɔ sika'n su di junman ɔ ti.",
+    your_protection: "Ɔ sasalɛ",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "Sika sɛ a de?",
-    "collect_title": "De sika",
-    "offline_message": "Internet timan? Ɔ sie.",
-    "your_sales_today": "Andɛ atɔn",
-    "your_money": "Ɔ sika",
-    "your_sales": "Ɔ atɔn mun",
-    "its_done": "Ɔ yoli!",
-    "saved_offline": "Be kwlaa sie",
-    "call_agent": "Flɛ ɔ ajan",
-    "listen_dioula": "Tie Julakan nun",
-    "how_to_collect": "Sika de wafa?",
-    "view_more": "Nian ekun",
-    "my_help": "Ukalɛ",
-    "health_contribution": "Kɛnkɛn",
-    "savings": "Sie",
-    "your_health_protection": "Ɔ kɛnkɛn lakana o lɛ",
-    "this_month": "anglo nga",
-    "view_receipt": "Nian resu",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Rezo fi nun. Sanngɛ n klɛ i.",
+    offline_saved: "Ɔ ti klɛ. É fa kɔ.",
+    offline_synced: "I kwlaa kɔ. Ɔ ti kpa.",
+    no_connection: "Rezo fi nun",
+    connection_restored: "Rezo'n ba ekun",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Ti",
-    "understand_intro": "Atɔn kelen kelen su i. A wafa yé.",
-    "understand_audio": "Ɲɛ nga bɛ CMU nin RSTI kle i. CMU ye i kɛnkɛn. RSTI ye i sika i kpɛnngbɛn nun.",
-    "cmu_simple_title": "Kɛnkɛn",
-    "cmu_analogy": "Kɛ tontine i kɛnkɛn ti",
-    "cmu_percent": "1% atɔn kelen kelen",
-    "cmu_benefit_1": "Hôpital sɔnkɔ kaankaann",
-    "cmu_benefit_2": "Ayre sɔnkɔ kaankaann",
-    "cmu_benefit_3": "Ba wu sika nman",
-    "rsti_simple_title": "Sika sie",
-    "rsti_analogy": "Ɔ sika ɔ kpɛnngbɛn nun",
-    "rsti_percent": "0.5% sie man ɔ ti",
-    "rsti_benefit_1": "Sie CNPS nun",
-    "rsti_benefit_2": "A de afuɛ 60",
-    "rsti_yours": "ɔ liɛ",
-    "example_title": "Misali",
-    "example_sale": "A yo atɔn",
-    "you_keep": "A de",
-    "what_is_cmu_rsti": "CMU nin RSTI ti ngue?",
-    "understand_simple": "E kle i kpa",
-    "understand_cmu_rsti": "Ti CMU nin RSTI",
-    "understand_reassure": "Ɔ sika su junman man ɔ!",
+    /* ======================
+       AIDE
+    ====================== */
+    need_help: "A mian ukalɛ?",
+    call_agent: "Flɛ ɔ agent",
+    its_done: "Ɔ ti kpa!",
+    congratulations: "Mo aba!",
+    loading: "Ɔ su ba...",
+    please_wait: "Minndɛ kaan...",
+    error: "Sa kun o",
+    success: "Ɔ ti kpa!",
+    warning: "Nian",
+    info: "Ndɛ",
     
-    // Toast première vente
-    "congratulations": "Mo ti ɔ !",
-    "first_sale_today": "Andɛ jue klikli",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "nglɛmun",
+    afternoon: "nnɔsua",
+    evening: "afiɛn",
+    monday: "Mɔnnin",
+    tuesday: "Jue",
+    wednesday: "Mlan",
+    thursday: "Wue",
+    friday: "Ya",
+    saturday: "Fɔɛ",
+    sunday: "Mɔnmɔn",
     
-    // Aide
-    "need_help": "A kunndε uka?",
-    "ask_your_agent": "Bo wɔ ajan",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "Min wun",
+    my_info: "Min su ndɛ",
+    my_phone: "Min nimero",
+    my_market: "Min gwa",
+    settings: "Siesielɛ",
+    language: "Anwuanman",
+    sound: "Nɛn",
+    notifications: "Kannganndɛ",
+    logout: "Fite",
+    logout_confirm: "A klo kɔlɛ sakpa?",
+    logout_success: "Yaci!",
+    
+    /* ======================
+       AGENT TERRAIN
+    ====================== */
+    enrollment: "Klɛlɛ",
+    enroll_merchant: "Klɛ atɔyofuɛ",
+    merchant_list: "Min atɔyofuɛ'm",
+    pending_validation: "Ɔ su minndɛ",
+    validated: "Ɔ ti kpa",
+    rejected: "Bé kpali",
+    
+    /* ======================
+       COOPÉRATIVE
+    ====================== */
+    my_orders: "Min ciyaaru'm",
+    new_order: "Ciyaaru uflɛ",
+    delivery: "Falɛ balɛ",
+    products: "Ninnge'm",
+    order_confirmed: "Ciyaaru'n ti klɛ",
+    order_delivered: "Bé fali ba",
   },
-  
+
   bete: {
-    // Page d'accueil
-    "welcome": "Woué",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Gbogbo yéré nya djré",
-    "who_are_you": "A yi wè?",
-    "choose_access": "Wla ni da",
-    "help_text": "A yi né? Gbli agent nu.",
-    "country": "Côte d'Ivoire Zé",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "A za gba 👋",
+    welcome_subtitle: "A yɛ {day}. Zikɛ mlɛ ti.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "A lɛ nyɛ zikɛ",
+    who_are_you: "A lɛ nyɛ zikɛ",
+    market_open: "Zikɛ mlɛ ti",
+    market_closed: "Zikɛ nɔ ti",
+    choose_access: "Kpa wɔ ya",
+    click_to_listen: "🔊 Nuru",
+    speak: "Gba",
+    listening: "Ń nuru...",
+    help_text: "A yɛ sro wɔ? Frɛ wɔ agent.",
+    country: "Kɔtdivwa",
     
-    // Rôles
-    "merchant": "Gbogbo",
-    "merchant_desc": "Gbogbo nu djré",
-    "agent": "Agent",
-    "agent_desc": "Kpalo gbogbo la",
-    "cooperative": "Klou",
-    "cooperative_desc": "Zégbé djré",
-    "view_cooperatives": "Yé klou la",
-    "view_map": "Yé kart",
-    "initiative_by": "Djré yi bɔ",
-    "admin": "Kponin",
-    "admin_desc": "Kpalo djré",
-    "main_access": "Wla bé",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "Ń yra fɛ",
+    merchant_subtitle: "Sika sɔ kliɛnw bɛ",
+    merchant_desc: "Yra fɛ pɛpɛɛ",
+    i_am_merchant: "Ń yra fɛ",
+    agent: "Ń gba yrafuɛw",
+    agent_subtitle: "Klɛ bɛ, gba bɛ",
+    agent_desc: "Zra yrafuɛw gbɛ",
+    field_agent: "Ń gba yrafuɛw",
+    cooperative: "Kooperatif",
+    cooperative_desc: "Ba fɛ, nɔ fɛ",
+    i_am_cooperative: "Kooperatif",
+    admin: "Administratiɔn",
+    admin_desc: "Nuru nɔmbrɛw",
+    view_cooperatives: "Nuru kooperatifw",
+    view_map: "Nuru kart",
     
-    // Dashboard - version simplifiée
-    "daily_sales": "Djré andé",
-    "transactions": "djré",
-    "view_history": "Yé djré",
-    "collect_payment": "Wali ta",
-    "stock_alerts": "Zégbé nu",
-    "products_restock": "zégbé flon",
-    "my_stock": "Mi zégbé",
-    "manage_products": "Zégbé djré",
-    "manage": "Djré",
-    "rsti_balance": "RSTI wali",
-    "available": "yi lé",
-    "credits": "Yoho",
-    "customers": "Nou gbogbo",
-    "scanner": "Kla",
-    "barcode": "Signon",
-    "promotions": "Djré klou",
-    "campaigns": "Djré",
-    "suppliers": "Zégbé nou",
-    "ifn_cooperatives": "PNAVIM klou la",
-    "cmu_protection": "CMU Kpalo",
-    "contribution_benefits": "Kplo nu bé",
-    "cmu_number": "CMU numéro",
-    "active": "Yi djré",
-    "daily_tip": "Andé djré",
-    "tip_text": "Djré wèwè a djré, CMU a kpalo bé.",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "Mlɛ",
+    sell: "Yra",
+    profile: "Mu",
+    back: "Sɛ",
+    next: "Glɔ",
+    close: "Nɔ",
+    today: "Yɛni",
     
-    // Actions
-    "confirm": "Oui",
-    "cancel": "Non",
-    "save": "Mla",
-    "add": "Pli",
-    "delete": "Klou",
-    "edit": "Tchè",
-    "back": "Wla",
-    "next": "Gba",
-    "close": "Pli",
-    "search": "Nya",
-    "loading": "Gba...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "Ń niɔ, miɛn mikro, gba lɛlɛ.",
+    auth_listen: "Gba wɔ nimero lɛlɛ.",
+    auth_confirm: "Ń nuru {phone}. Yɛ kɔ?",
+    auth_success: "A ti. Wɔ lɛ kɔnɔ.",
+    auth_error: "Sro yili. A lɛ sɛ a gba.",
+    auth_fallback: "Wɔ sɛ kɛ klavye.",
+    enter_phone: "Gba wɔ nimero",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "A lɛ nuru ka wɔ yɛ",
     
-    // Paiement
-    "cash": "Wali",
-    "mobile_money": "Telefon wali",
-    "transfer": "Wali gba",
-    "amount": "Kplo",
-    "fcfa": "FCFA",
-    "payment_success": "Wali yi",
-    "payment_recorded": "Wali gba",
+    /* ======================
+       DASHBOARD
+    ====================== */
+    dashboard_welcome: "Ń niɔ, na wɔ cɛ.",
+    dashboard_today_amount: "Yɛni wɔ sɔ sika {amount}.",
+    dashboard_first_sale: "Yra fɔlɔ. Zra kekle!",
+    dashboard_tip: "Yra kɔ kɔ bɛ wɔ gba.",
+    my_sales: "Ń yra",
+    sales_today: "Yɛni yra",
+    open_day: "Plɛ ń cɛ",
+    close_day: "Nɔ ń cɛ",
+    day_opened: "Wɔ cɛ plɛ ti. Wɔ sɛ sika sɔ.",
+    day_closed: "Wɔ cɛ nɔ ti.",
     
-    // Audio
-    "listen": "Nou",
-    "audio_play": "Dré nou",
-    "choose_language": "Wla ni gba",
+    /* ======================
+       CAISSE
+    ====================== */
+    cashier_title: "Sika sɔ",
+    cashier_prompt: "Sika yɛ?",
+    cashier_listening: "Gba, ń nuru.",
+    cashier_confirm: "A kɔ?",
+    cashier_success: "A ti. Sika klɛ.",
+    cashier_error: "Sro kaan. Sɛ a gba.",
+    cashier_minimum: "Saan kɛmɛ sika.",
+    cashier_cash: "A yɛ kasi.",
+    cashier_mobile: "A yɛ Mobile Money.",
+    enter_amount: "Sika yɛ?",
+    enter_amount_instruction: "Miɛn biyɛw annzɛ gba hakɛ.",
+    amount: "Hakɛ",
+    confirm: "Ti",
+    cancel: "Nɔ",
+    validate: "Klɛ",
     
-    // Caisse
-    "my_cashier": "Mi Kés",
-    "record_sale": "Wali ta djré",
-    "confirm_payment": "Wali kpli",
-    "transaction_success": "Djré yi",
-    "amount_to_collect": "Wali kplo",
-    "new_sale": "Djré flon",
-    "history": "Djré laa",
-    "return_home": "Wla zé",
-    "enter_amount_instruction": "Klé wali kplo nu wla wali gba",
-    "confirm_payment_instruction": "Kpli wali",
-    "min_amount_error": "Wali bé: 100 FCFA",
-    "cmu_contribution": "CMU kplo",
-    "rsti_savings": "RSTI mla",
-    "processing": "Gba djré...",
-    "home": "Zé",
-    "stock": "Zégbé",
-    "collect": "Wali ta",
-    "profile": "Mi",
-    "commerce": "Djré",
-    "audio_dashboard": "Woué. Andé djré yi",
-    "audio_cashier_input": "Klé wali nu wla wali gba",
-    "audio_cashier_confirm": "Kpli wali liɛ",
-    "audio_cashier_success": "Yé! Djré yi kpa",
+    /* ======================
+       ARGENT
+    ====================== */
+    your_money: "Wɔ sika",
+    your_sales_today: "Wɔ yɛni yra",
+    view_history: "Nuru fɛ wɔ kɛ",
+    view_receipt: "Nuru reçu",
+    total: "Bɛ lajɛ",
+    balance: "Tɔ",
     
-    // Agent Dashboard
-    "online": "Nlin",
-    "offline": "Nlin non",
-    "sync": "Pli",
-    "ready_to_sync": "Yi pli",
-    "waiting_connection": "Gba nlin",
-    "today": "Andé",
-    "this_week": "Sémon nu",
-    "total": "Bé kpla",
-    "new_enrollment": "Sébén Flon",
-    "pending_enrollments": "sébén gba",
-    "my_merchants": "Mi Gbogbo la",
-    "view_list": "Yé lis",
-    "my_profile": "Mi",
-    "settings": "Djré",
-    "merchants": "Gbogbo la",
-    "quick_guide": "Kpalo",
-    "guide_agent_1": "Dré 'Sébén Flon' gbogbo sébén",
-    "guide_agent_2": "Pli djré 5 la",
-    "guide_agent_3": "Djré mla nlin o lé non o",
-    "guide_merchant_1": "Dré \"Wali ta\" wali ta",
-    "guide_merchant_2": "Klé wali kplo o wali la",
-    "guide_merchant_3": "Tila rési nu i gbogbo",
-    "audio_agent_dashboard": "Woué ajan. Andé sébén yi",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "Wɔ fɛ",
+    stock_empty: "Wɔ stɔk ti pɛ.",
+    stock_add: "Fra fɛ kɔ kan",
+    stock_low: "Nuru, a lɛ wie.",
+    stock_ok: "Bɛ lajɛ ti kpa.",
+    my_stock: "Ń fɛ",
     
-    // Cooperative Dashboard
-    "members": "Klou nou",
-    "products": "Zégbé",
-    "pending": "Gba",
-    "pending_orders": "djré gba",
-    "to_confirm_or_process": "Kpli o djré",
-    "view": "Yé",
-    "manage_my_stock": "Mi zégbé djré",
-    "orders": "Djré la",
-    "manage_requests": "Nya djré",
-    "guide_coop_1": "Pli zégbé Zégbé nu",
-    "guide_coop_2": "Gbogbo djré ta",
-    "guide_coop_3": "Kpli nu gba",
-    "audio_coop_dashboard": "Woué klou. A yi",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "Wɔ gblɔ nin wɔ sini",
+    understand_intro: "Yra kɔ kɔ bɛ wɔ gba. Nuru ya.",
+    cmu_title: "Gblɔ",
+    cmu_simple: "A yɛ tɔntini wɔ gblɔ bɛ",
+    cmu_description: "Ka wɔ yra, sika kaan kɔ wɔ gblɔ bɛ. Ka bana sɔ wɔ, bɛ tua.",
+    rsti_title: "Sika mla",
+    rsti_simple: "Sika kaan mla wɔ bɛ",
+    rsti_description: "Yra kɔ kɔ bɛ sika kaan mla wɔ bɛ. Wɔ sika yɛ.",
+    understand_reassure: "Wɔ sika lɛ di junman wɔ bɛ.",
+    your_protection: "Wɔ lakana",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "A ta wali flɛ?",
-    "collect_title": "Wali ta",
-    "offline_message": "Réseau gblé? A mla.",
-    "view_receipt": "Yé rési",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Rezo yili. Ń klɛ i.",
+    offline_saved: "A klɛ. A lɛ glɔ.",
+    offline_synced: "Bɛ lajɛ glɔ. A ti.",
+    no_connection: "Rezo yili",
+    connection_restored: "Rezo sɛ",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Nya nu",
-    "understand_intro": "Djré wèwè kpalo i. A gba.",
-    "understand_audio": "Ɲɛ nu bɛ CMU nu RSTI kle i. CMU ye i kɛnkɛn. RSTI ye i wali i kponin nu.",
-    "cmu_simple_title": "Kɛnkɛn",
-    "cmu_analogy": "Kɛ tontine i kɛnkɛn ti",
-    "cmu_percent": "1% djré wèwè",
-    "cmu_benefit_1": "Hôpital sɔnkɔ bébé",
-    "cmu_benefit_2": "Fura sɔnkɔ bébé",
-    "cmu_benefit_3": "Dé wu gratis",
-    "rsti_simple_title": "Wali mla",
-    "rsti_analogy": "I wali i kponin nu",
-    "rsti_percent": "0.5% mla i ti",
-    "rsti_benefit_1": "Mla CNPS nu",
-    "rsti_benefit_2": "I ta yi wla 60",
-    "rsti_yours": "i liɛ",
-    "example_title": "Misali",
-    "example_sale": "I djré",
-    "you_keep": "I ta",
-    "what_is_cmu_rsti": "CMU nu RSTI yi wè?",
-    "understand_simple": "A kle i kpa",
-    "understand_cmu_rsti": "Nya CMU nu RSTI",
-    "understand_reassure": "I wali djré i ti!",
+    /* ======================
+       AIDE
+    ====================== */
+    need_help: "Wɔ sro gba?",
+    call_agent: "Frɛ wɔ agent",
+    its_done: "A ti!",
+    congratulations: "A za!",
+    loading: "A lɛ ba...",
+    please_wait: "Minndɛ kaan...",
+    error: "Sro kɔ",
+    success: "A ti!",
+    warning: "Nuru",
+    info: "Kunnafoni",
     
-    // Toast première vente
-    "congratulations": "O dré !",
-    "first_sale_today": "Dré tile la gbu",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "bɔtrɔ",
+    afternoon: "zani",
+    evening: "nɔlu",
     
-    // Aide
-    "need_help": "A lagbé déhi?",
-    "ask_your_agent": "Sé wɔ agent",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "Ń wun",
+    my_info: "Ń kunnafoni",
+    my_phone: "Ń nimero",
+    my_market: "Ń zikɛ",
+    settings: "Siesielɛ",
+    language: "Anwuanman",
+    sound: "Nɛn",
+    notifications: "Lasigiden",
+    logout: "Glɔ",
+    logout_confirm: "Wɔ sro glɔ sakpa?",
+    logout_success: "A lɛ nuru nyɛ!",
   },
-  
+
   senoufo: {
-    // Page d'accueil
-    "welcome": "I ni cɛ",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Julaw ka baara",
-    "who_are_you": "E ye jɔn ye?",
-    "choose_access": "I ka sira sugandi",
-    "help_text": "E ma dɔn? Ajan weele.",
-    "country": "Kotidiwari Jamana",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "I ni tié 👋",
+    welcome_subtitle: "A yé {day}. Katiè bé sɔ.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "An bé nyɔgɔ fé katiè la",
+    who_are_you: "An bé nyɔgɔ fé katiè la",
+    market_open: "Katiè bé sɔ",
+    market_closed: "Katiè datugu",
+    choose_access: "Sugandi i ka ya",
+    click_to_listen: "🔊 Lamɛn",
+    speak: "Fɔ",
+    listening: "N bé i lamɛn...",
+    help_text: "I yé gɛlɛya? Fɔ i agent ma.",
+    country: "Kɔtdivwa",
     
-    // Rôles
-    "merchant": "Ne ye Jula ye",
-    "merchant_desc": "Wari ta",
-    "agent": "Ajan",
-    "agent_desc": "Dɛmɛ",
-    "cooperative": "Ton",
-    "cooperative_desc": "Fɛn ɲɛfɔ",
-    "view_cooperatives": "Tonw kunni",
-    "view_map": "Duguba kunni",
-    "initiative_by": "Kumɔ̃gɔ",
-    "admin": "Ɲɛmaa",
-    "admin_desc": "Jate",
-    "main_access": "Sira ba",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "N bé feere",
+    merchant_subtitle: "Wari ta kliɛnw fɛ",
+    merchant_desc: "Feere ka hɛrɛ",
+    i_am_merchant: "N bé feere",
+    agent: "N bé feerekɛlaw dɛmɛ",
+    agent_subtitle: "Sɛbɛn ani dɛmɛ",
+    agent_desc: "Jran feerekɛlaw bo",
+    field_agent: "N bé feerekɛlaw dɛmɛ",
+    cooperative: "Kooperatif",
+    cooperative_desc: "Don ani sɔrɔ feere",
+    i_am_cooperative: "Kooperatif",
+    admin: "Administratiɔn",
+    admin_desc: "Nɔmbrɛw lajɛ",
+    view_cooperatives: "Kooperatifw lajɛ",
+    view_map: "Kart lajɛ",
     
-    // Dashboard
-    "daily_sales": "Bi jula",
-    "transactions": "jula",
-    "view_history": "A lajɛ",
-    "collect_payment": "Wari ta",
-    "stock_alerts": "Fɛn kɔrɔsi",
-    "products_restock": "fɛn ka fara",
-    "my_stock": "Ne fɛn",
-    "manage_products": "Fɛn ɲɛfɔ",
-    "manage": "Ɲɛfɔ",
-    "rsti_balance": "RSTI wari",
-    "available": "bɛ",
-    "credits": "Juru",
-    "customers": "Mɔgɔw",
-    "scanner": "Kalan",
-    "barcode": "Taamasiyɛn",
-    "promotions": "Sɔngɔ dɔgɔya",
-    "campaigns": "Baara",
-    "suppliers": "Fɛn dilaw",
-    "ifn_cooperatives": "PNAVIM Tonw",
-    "cmu_protection": "CMU Lakana",
-    "contribution_benefits": "Sara ni nafa",
-    "cmu_number": "CMU nimɛrɔ",
-    "active": "A bɛ",
-    "daily_tip": "Bi ladili",
-    "tip_text": "Jula kelen kelen bɛ i ka CMU lakana fara.",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "Soo",
+    sell: "Feere",
+    profile: "N yɛrɛ",
+    back: "Sɛgi",
+    next: "Taa",
+    close: "Datugu",
+    today: "Bi",
     
-    // Actions
-    "confirm": "Ɔwɔ",
-    "cancel": "Ayi",
-    "save": "A mara",
-    "add": "A fara",
-    "delete": "A bɔ",
-    "edit": "A yɛlɛma",
-    "back": "Kɔsegi",
-    "next": "A nɔfɛ",
-    "close": "A datugu",
-    "search": "A ɲini",
-    "loading": "A bɛ don...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "N balima, digi mikro, fɔ dɔɔni.",
+    auth_listen: "Fɔ i nimɔrɔ dɔɔni.",
+    auth_confirm: "N yé {phone} lamɛn. A yé tien?",
+    auth_success: "A ka kɛ. I bé kɔnɔ.",
+    auth_error: "A man fosi. An bé sɛgi ka fɔ.",
+    auth_fallback: "I bé se ka klavye kɛ.",
+    enter_phone: "Fɔ i nimɔrɔ",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "An bé lajɛ ka i yɛrɛ don",
     
-    // Paiement
-    "cash": "Wariden",
-    "mobile_money": "Telefɔn wari",
-    "transfer": "Wari bila",
-    "amount": "Songo",
-    "fcfa": "FCFA",
-    "payment_success": "Wari tara",
-    "payment_recorded": "Wari marali",
+    /* ======================
+       DASHBOARD
+    ====================== */
+    dashboard_welcome: "N balima, i ka don filɛ.",
+    dashboard_today_amount: "Bi i yé sika {amount} sɔrɔ.",
+    dashboard_first_sale: "Feere fɔlɔ. Jija!",
+    dashboard_tip: "Feere kelen kelen bé i dɛmɛ.",
+    my_sales: "N ka feereli",
+    sales_today: "Bi feereli",
+    open_day: "Don dayɛlɛ",
+    close_day: "Don datugu",
+    day_opened: "I ka don dayɛlɛnna. I bé se ka wari ta.",
+    day_closed: "I ka don datugura.",
     
-    // Audio
-    "listen": "A lamɛn",
-    "audio_play": "Digi k'a lamɛn",
-    "choose_language": "Kan sugandi",
+    /* ======================
+       CAISSE
+    ====================== */
+    cashier_title: "Wari ta",
+    cashier_prompt: "Wari bé joli?",
+    cashier_listening: "Fɔ, n bé i lamɛn.",
+    cashier_confirm: "An bé a kɛ?",
+    cashier_success: "A ka kɛ. Wari sɛbɛnna.",
+    cashier_error: "Gɛlɛya dɔɔni. Sɛgi ka kɛ.",
+    cashier_minimum: "A ka kan ka kɛ kɛmɛ ye.",
+    cashier_cash: "A yé kasi ye.",
+    cashier_mobile: "A yé Mobile Money ye.",
+    enter_amount: "Wari bé joli?",
+    enter_amount_instruction: "Digi biyɛw kan annzɛ fɔ hakɛ.",
+    amount: "Hakɛ",
+    confirm: "Dafa",
+    cancel: "Bɔ",
+    validate: "Sɛbɛn",
     
-    // Caisse
-    "my_cashier": "Ne Kɛsu",
-    "record_sale": "Wari ta feere la",
-    "confirm_payment": "Wari sɛbɛn",
-    "transaction_success": "Feere ɲɛ",
-    "amount_to_collect": "Wari hakɛ",
-    "new_sale": "Feere kura",
-    "history": "Taamasiyɛ",
-    "return_home": "Segin so",
-    "enter_amount_instruction": "Hakɛ sɛbɛn ka wari cogo suben",
-    "confirm_payment_instruction": "Wari ta sɛbɛn",
-    "min_amount_error": "Hakɛ dɔgɔ: 100 FCFA",
-    "cmu_contribution": "CMU sara",
-    "rsti_savings": "RSTI mara",
-    "processing": "A bɛ kɛ...",
-    "home": "So",
-    "stock": "Fɛn",
-    "collect": "Wari ta",
-    "profile": "Ne yɛrɛ",
-    "commerce": "Feere",
-    "audio_dashboard": "I ni cɛ. Bi feere ye",
-    "audio_cashier_input": "Hakɛ sɛbɛn ka wari cogo suben",
-    "audio_cashier_confirm": "I ka wari sɛbɛn",
-    "audio_cashier_success": "A ɲɛ! Feere marala",
+    /* ======================
+       ARGENT
+    ====================== */
+    your_money: "I ka wari",
+    your_sales_today: "I ka bi feereli",
+    view_history: "I yé min kɛ kɔrɔ lajɛ",
+    view_receipt: "Reçu lajɛ",
+    total: "Bɛɛ lajɛ",
+    balance: "Tɔ",
     
-    // Agent Dashboard
-    "online": "Kan na",
-    "offline": "Kan t'yen",
-    "sync": "A bila",
-    "ready_to_sync": "A bɛ sɛ bila",
-    "waiting_connection": "Kan makɔnɔ",
-    "today": "Bi",
-    "this_week": "Dɔgɔkun",
-    "total": "Bɛɛ",
-    "new_enrollment": "Sɛbɛn Kura",
-    "pending_enrollments": "sɛbɛn makɔnɔ",
-    "my_merchants": "Ne Julaw",
-    "view_list": "Lisite filɛ",
-    "my_profile": "Ne yɛrɛ",
-    "settings": "Labɛn",
-    "merchants": "Julaw",
-    "quick_guide": "Ladili",
-    "guide_agent_1": "Digi 'Sɛbɛn Kura' jula sɛbɛn",
-    "guide_agent_2": "Fɔli 5 dan fa",
-    "guide_agent_3": "Kunnafoni mara hali kan t'yen",
-    "guide_merchant_1": "Digi \"Wari ta\" wari sɔrɔ",
-    "guide_merchant_2": "Hakɛ sɛbɛn wala wari bilɛ",
-    "guide_merchant_3": "Resu tila i mɔgɔ la",
-    "audio_agent_dashboard": "I ni cɛ ajan. Bi sɛbɛn ye",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "I ka fɛn",
+    stock_empty: "I stɔk bé gan.",
+    stock_add: "Fɛn dɔ fara a kan",
+    stock_low: "Nian, a bé wie.",
+    stock_ok: "A bɛɛ ka ɲi.",
+    my_stock: "N ka fɛn",
     
-    // Cooperative Dashboard
-    "members": "Ton denw",
-    "products": "Fɛn",
-    "pending": "Makɔnɔ",
-    "pending_orders": "ciyɛn makɔnɔ",
-    "to_confirm_or_process": "Ka sɛbɛn wala kɛ",
-    "view": "A filɛ",
-    "manage_my_stock": "Ne fɛn ɲɛfɔ",
-    "orders": "Ciyɛn",
-    "manage_requests": "Ɲininkali ɲɛfɔ",
-    "guide_coop_1": "I ka fɛn fara Fɛn yɔrɔ",
-    "guide_coop_2": "Jula ciyɛn sɔrɔ",
-    "guide_coop_3": "Ciyɛn sɛbɛn ka di",
-    "audio_coop_dashboard": "I ni cɛ ton. I ka",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "I kɛnɛya ani i sini",
+    understand_intro: "Feere kelen kelen bé i dɛmɛ. Nian wafa.",
+    cmu_title: "Kɛnɛya",
+    cmu_simple: "I ko tɔntini i kɛnɛya kama",
+    cmu_description: "Ni i yé feere kɛ, dɔɔni bé taa i kɛnɛya kama. Ni bana yé i sɔrɔ, a bé sara.",
+    rsti_title: "Wari mara",
+    rsti_simple: "Wari dɔɔni bé mara i ye",
+    rsti_description: "Feere kelen kelen bé wari dɔɔni mara i ye. O yé i yɛrɛ ka wari ye.",
+    understand_reassure: "I ka wari bé baara kɛ i ye.",
+    your_protection: "I ka lakana",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "E bɛ jɔli ta?",
-    "collect_title": "Wari ta",
-    "offline_message": "Kan gɛlɛn? A marala.",
-    "view_receipt": "Resu filɛ",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Rezo tɛ. N bé a sɛbɛn.",
+    offline_saved: "A sɛbɛnna. An bé a ci.",
+    offline_synced: "A bɛɛ tagara. A ka kɛ.",
+    no_connection: "Rezo tɛ",
+    connection_restored: "Rezo seginna",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Ka faamu",
-    "understand_intro": "Feere kelen kelen bɛ i dɛmɛ. A cogo filɛ.",
-    "understand_audio": "Nin ɲɛ bɛ CMU ni RSTI ɲɛfɔ i ye. CMU ye i kɛnɛya. RSTI ye i wari i kɔrɔba waati.",
-    "cmu_simple_title": "Kɛnɛya",
-    "cmu_analogy": "I n'a fɔ tɔntɔn i kɛnɛya kama",
-    "cmu_percent": "1% feere kelen kelen",
-    "cmu_benefit_1": "Dɔkɔtɔrɔso sɔngɔ dɔgɔ",
-    "cmu_benefit_2": "Fura sɔngɔ dɔgɔ",
-    "cmu_benefit_3": "Denmisɛn wololi gansan",
-    "rsti_simple_title": "Wari mara",
-    "rsti_analogy": "I wari i kɔrɔba waati",
-    "rsti_percent": "0.5% marala i ye",
-    "rsti_benefit_1": "Marala CNPS la",
-    "rsti_benefit_2": "I bɛ a sɔrɔ san 60",
-    "rsti_yours": "i ta",
-    "example_title": "Misali",
-    "example_sale": "I bɛ feere",
-    "you_keep": "I bɛ to ni",
-    "what_is_cmu_rsti": "CMU ni RSTI ye mun ye?",
-    "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
-    "understand_cmu_rsti": "CMU ni RSTI faamu",
-    "understand_reassure": "I wari bɛ baara kɛ i ye!",
+    /* ======================
+       AIDE
+    ====================== */
+    need_help: "I mago bé dɛmɛ la?",
+    call_agent: "I ka agent wele",
+    its_done: "A ka kɛ!",
+    congratulations: "A ni tié!",
+    loading: "A bé don...",
+    please_wait: "Mako dɔɔni...",
+    error: "Gɛlɛya dɔ",
+    success: "A ka kɛ!",
+    warning: "Kɔlɔsi",
+    info: "Kunnafoni",
     
-    // Toast première vente
-    "congratulations": "I ni cɛ !",
-    "first_sale_today": "Tile in feere fɔlɔ",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "sogoma",
+    afternoon: "tilefɛ",
+    evening: "wula",
+    monday: "Tɛnɛn",
+    tuesday: "Tarata",
+    wednesday: "Araba",
+    thursday: "Alamisa",
+    friday: "Juma",
+    saturday: "Sibiri",
+    sunday: "Kari",
     
-    // Aide
-    "need_help": "A pií dembélé?",
-    "ask_your_agent": "Yi ajan segue",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "N yɛrɛ",
+    my_info: "N ka kunnafoni",
+    my_phone: "N ka nimɔrɔ",
+    my_market: "N ka katiè",
+    settings: "Labɛn",
+    language: "Kan",
+    sound: "Mankan",
+    notifications: "Lasigiden",
+    logout: "Bɔ",
+    logout_confirm: "I bé taa tiɲɛn na?",
+    logout_success: "An bé ɲɔgɔn yé!",
+    
+    /* ======================
+       AGENT TERRAIN
+    ====================== */
+    enrollment: "Sɛbɛnni",
+    enroll_merchant: "Feerekɛla sɛbɛn",
+    merchant_list: "N ka feerekɛlaw",
+    pending_validation: "A bé mako la",
+    validated: "A dafara",
+    rejected: "A banna",
+    
+    /* ======================
+       COOPÉRATIVE
+    ====================== */
+    my_orders: "N ka ciyaaruw",
+    new_order: "Ciyaaru kura",
+    delivery: "Jolili",
+    products: "Fɛnw",
+    order_confirmed: "Ciyaaru sɛbɛnna",
+    order_delivered: "A jolila",
   },
-  
+
   malinke: {
-    // Page d'accueil
-    "welcome": "I ni kɛnɛ",
-    "platform_title": "PNAVIM-CI",
-    "platform_subtitle": "Julakɛla baro",
-    "who_are_you": "I ye mun ye?",
-    "choose_access": "I ka sira suben",
-    "help_text": "I ma faamu? Ajan weele.",
-    "country": "Kotidiwari",
+    /* ======================
+       ACCUEIL & GÉNÉRAL
+    ====================== */
+    welcome: "I ni sogoma 👋",
+    welcome_subtitle: "An bɛ {day}. Sugu bɛ da yɛlɛn.",
+    platform_title: "PNAVIM",
+    platform_subtitle: "An bɛ ɲɔgɔn fɛ sugu kɔnɔ",
+    who_are_you: "An bɛ ɲɔgɔn fɛ sugu kɔnɔ",
+    market_open: "Sugu bɛ da yɛlɛn",
+    market_closed: "Sugu da tugura",
+    choose_access: "I ka bolo sugandi",
+    click_to_listen: "🔊 Lamɛn",
+    speak: "Kuma",
+    listening: "N bɛ i lamɛn...",
+    help_text: "I bɛ hakili la? I ka agent wele.",
+    country: "Kɔtdiwari Jamana",
     
-    // Rôles
-    "merchant": "Julakɛla",
-    "merchant_desc": "Wari minɛ",
-    "agent": "Ajan",
-    "agent_desc": "Dɛmɛni",
-    "cooperative": "Jɛkulu",
-    "cooperative_desc": "Nafolo baro",
-    "view_cooperatives": "Jɛkuluw ye",
-    "view_map": "Karte ye",
-    "initiative_by": "Fɛɛrɛ ye",
-    "admin": "Kuntigui",
-    "admin_desc": "Jatebɔ",
-    "main_access": "Sira ba",
+    /* ======================
+       RÔLES
+    ====================== */
+    merchant: "N bɛ feere kɛ",
+    merchant_subtitle: "Wari minɛ julakɛlaw fɛ",
+    merchant_desc: "Feere ni hɛrɛ ye",
+    i_am_merchant: "N bɛ feere kɛ",
+    agent: "N bɛ feerekɛlaw dɛmɛ",
+    agent_subtitle: "Sɛbɛnni ani dɛmɛ",
+    agent_desc: "Jran feerekɛlaw bo",
+    field_agent: "N bɛ feerekɛlaw dɛmɛ",
+    cooperative: "Kooperatif",
+    cooperative_desc: "Fɛn nani ani jolili",
+    i_am_cooperative: "Kooperatif",
+    admin: "Administratiɔn",
+    admin_desc: "Nɔmbrɛw lajɛ",
+    view_cooperatives: "Kooperatifw lajɛ",
+    view_map: "Kart lajɛ",
     
-    // Dashboard
-    "daily_sales": "Bi feere",
-    "transactions": "feere",
-    "view_history": "A filɛ",
-    "collect_payment": "Wari minɛ",
-    "stock_alerts": "Nafolo kɔrɔsi",
-    "products_restock": "nafolo wuli",
-    "my_stock": "N nafolo",
-    "manage_products": "Nafolo baro",
-    "manage": "Baro",
-    "rsti_balance": "RSTI wari",
-    "available": "bɛ yan",
-    "credits": "Juru",
-    "customers": "Feeredela",
-    "scanner": "Kalan",
-    "barcode": "Taamasiyɛ",
-    "promotions": "Sɔnkɔ dɔkɔya",
-    "campaigns": "Baro",
-    "suppliers": "Nafolo dila",
-    "ifn_cooperatives": "PNAVIM Jɛkulu",
-    "cmu_protection": "CMU Takabi",
-    "contribution_benefits": "Sara ní nafa",
-    "cmu_number": "CMU nimɔrɔ",
-    "active": "A ka di",
-    "daily_tip": "Bi hakilinan",
-    "tip_text": "Feere kelen kelen bɛ i CMU takabi wuli.",
+    /* ======================
+       NAVIGATION
+    ====================== */
+    home: "So",
+    sell: "Feere",
+    profile: "Ne yɛrɛ",
+    back: "Kɔsɛgi",
+    next: "Taa ɲɛ",
+    close: "Da tugu",
+    today: "Bi",
     
-    // Actions
-    "confirm": "Ɔn-ɔn",
-    "cancel": "A dabila",
-    "save": "A mara",
-    "add": "A fara",
-    "delete": "A bɔ",
-    "edit": "A lakodi",
-    "back": "Ka segin",
-    "next": "Ka taa",
-    "close": "A datugu",
-    "search": "A ɲininka",
-    "loading": "A bɛ don...",
+    /* ======================
+       AUTHENTIFICATION
+    ====================== */
+    auth_welcome: "N tɛrɛmuso, digi mikoro kan, kuma dɔɔni.",
+    auth_listen: "I ka nimɔrɔ fɔ dɔɔni dɔɔni.",
+    auth_confirm: "N ye {phone} lamɛn. O de wa?",
+    auth_success: "A kɛra. I donna.",
+    auth_error: "Fosi tɛ. An bɛ a damina kokura.",
+    auth_fallback: "I bɛ se ka klaviye baara.",
+    enter_phone: "I ka nimɔrɔ fɔ",
+    phone_placeholder: "07 XX XX XX XX",
+    verify_identity: "An bɛ a lajɛ ko i yɛrɛ don",
     
-    // Paiement
-    "cash": "Wari",
-    "mobile_money": "Telefɔn wari",
-    "transfer": "Wari ci",
-    "amount": "Jate",
-    "fcfa": "FCFA",
-    "payment_success": "Wari sera",
-    "payment_recorded": "Wari marala",
+    /* ======================
+       DASHBOARD
+    ====================== */
+    dashboard_welcome: "N tɛrɛmuso, i ka don nan filɛ.",
+    dashboard_today_amount: "Bi i ye warigwɛ {amount} sɔrɔ.",
+    dashboard_first_sale: "Feere fɔlɔ. Jija!",
+    dashboard_tip: "Feere kelen kelen bɛ i dɛmɛ.",
+    my_sales: "Ne ka feereli",
+    sales_today: "Bi feereli",
+    open_day: "Don da yɛlɛ",
+    close_day: "Don da tugu",
+    day_opened: "I ka don yɛlɛnna. I bɛ se ka wari ta.",
+    day_closed: "I ka don tugura.",
     
-    // Audio
-    "listen": "A lamɛn",
-    "audio_play": "Digi ka lamɛn",
-    "choose_language": "Kan suben",
+    /* ======================
+       CAISSE / VENTE
+    ====================== */
+    cashier_title: "Wari minɛ",
+    cashier_prompt: "Wari joli?",
+    cashier_listening: "Kuma, n bɛ i lamɛn.",
+    cashier_confirm: "An bɛ a kɛ wa?",
+    cashier_success: "A kɛra. Wari sɛbɛnna.",
+    cashier_error: "Gɛlɛya dɔɔni. A lasegin.",
+    cashier_minimum: "A ka kan ka kɛ kɛmɛ ye dɔrɔn.",
+    cashier_cash: "A ye kasi ye.",
+    cashier_mobile: "A ye Mobile Money ye.",
+    enter_amount: "Wari joli?",
+    enter_amount_instruction: "Digi biyɛw kan walima fɔ hakɛ.",
+    amount: "Hakɛ",
+    confirm: "Latigɛ",
+    cancel: "A to yen",
+    validate: "Sɛbɛn",
     
-    // Caisse
-    "my_cashier": "N Kɛsu",
-    "record_sale": "Wari minɛ feere",
-    "confirm_payment": "Wari maraka",
-    "transaction_success": "Feere sera",
-    "amount_to_collect": "Wari jate",
-    "new_sale": "Feere kura",
-    "history": "Taamasiyɛ",
-    "return_home": "Segin so",
-    "enter_amount_instruction": "Jate sɛbɛn ka wari cogo suben",
-    "confirm_payment_instruction": "Wari maraka",
-    "min_amount_error": "Jate fitini: 100 FCFA",
-    "cmu_contribution": "CMU sara",
-    "rsti_savings": "RSTI mara",
-    "processing": "A bɛ kɛ...",
-    "home": "So",
-    "stock": "Nafolo",
-    "collect": "Wari minɛ",
-    "profile": "Ne yɛrɛ",
-    "commerce": "Feere",
-    "audio_dashboard": "I ni kɛnɛ. Bi feere ye",
-    "audio_cashier_input": "Jate sɛbɛn ka wari cogo suben",
-    "audio_cashier_confirm": "I ka wari maraka",
-    "audio_cashier_success": "Baara kɛra! Feere marala",
+    /* ======================
+       ARGENT
+    ====================== */
+    your_money: "I ka wari",
+    your_sales_today: "I ka bi feereli",
+    view_history: "I ye min kɛ kɔrɔ lajɛ",
+    view_receipt: "Reçu lajɛ",
+    total: "Bɛɛ lajɛlen",
+    balance: "Tɔ",
     
-    // Agent Dashboard
-    "online": "Kan na",
-    "offline": "Kan tɛ",
-    "sync": "A bila",
-    "ready_to_sync": "A bɛ sɛ bila",
-    "waiting_connection": "Kan makɔnɔ",
-    "today": "Bi",
-    "this_week": "Dɔgɔkun",
-    "total": "Bɛɛ",
-    "new_enrollment": "Sɛbɛn Kura",
-    "pending_enrollments": "sɛbɛn makɔnɔ",
-    "my_merchants": "N Julakɛlaw",
-    "view_list": "Lisite filɛ",
-    "my_profile": "N yɛrɛ",
-    "settings": "Labɛn",
-    "merchants": "Julakɛlaw",
-    "quick_guide": "Hakilinan",
-    "guide_agent_1": "Digi 'Sɛbɛn Kura' julakɛla sɛbɛn",
-    "guide_agent_2": "Fɔli 5 dan fa",
-    "guide_agent_3": "Kunnafoni mara hali kan tɛ",
-    "guide_merchant_1": "Digi \"Wari minɛ\" wari sɔrɔ",
-    "guide_merchant_2": "Jate sɛbɛn wala wari bilɛ",
-    "guide_merchant_3": "Resu tila i feeredela",
-    "audio_agent_dashboard": "I ni kɛnɛ ajan. Bi sɛbɛn ye",
+    /* ======================
+       STOCK
+    ====================== */
+    stock_title: "I ka fɛnw",
+    stock_empty: "I ka magazɛn bɛ bɔn.",
+    stock_add: "Fɛn dɔ fara a kan",
+    stock_low: "A hakɛ dɔgɔyara. Fɛn dɔ fara a kan.",
+    stock_ok: "A bɛɛ ɲi.",
+    my_stock: "Ne ka fɛnw",
     
-    // Cooperative Dashboard
-    "members": "Jɛkuludenw",
-    "products": "Nafolo",
-    "pending": "Makɔnɔ",
-    "pending_orders": "ciyɛn makɔnɔ",
-    "to_confirm_or_process": "Ka sɛbɛn wala kɛ",
-    "view": "A filɛ",
-    "manage_my_stock": "N nafolo baro",
-    "orders": "Ciyɛn",
-    "manage_requests": "Ɲininkali baro",
-    "guide_coop_1": "Nafolo fara Nafolo yɔrɔ",
-    "guide_coop_2": "Julakɛlaw ciyɛn sɔrɔ",
-    "guide_coop_3": "Ciyɛn sɛbɛn ka di",
-    "audio_coop_dashboard": "I ni kɛnɛ jɛkulu. I ka",
+    /* ======================
+       CMU / RSTI
+    ====================== */
+    understand_title: "I ka kɛnɛya ani i ka sini",
+    understand_intro: "Feere kelen kelen bɛ i dɛmɛ.",
+    cmu_title: "Kɛnɛya",
+    cmu_simple: "A bɛ i ko tɔntini i ka kɛnɛya kama",
+    cmu_description: "Ni i ye feere kɛ, dɔɔni bɛ taa i ka kɛnɛya kama. Ni bana ye i sɔrɔ, a bɛ sara.",
+    rsti_title: "Wari marayɔrɔ",
+    rsti_simple: "Wari dɔɔni bɛ mara i ye",
+    rsti_description: "Feere kelen kelen bɛ wari dɔɔni mara i ye. O ye i yɛrɛ ka wari ye.",
+    understand_reassure: "I ka wari bɛ baara kɛ i ye.",
+    your_protection: "I ka lakana",
     
-    // UX Inclusion - Écran Encaisser
-    "how_much": "I bɛ hakɛ jumen minɛ?",
-    "collect_title": "Wari minɛ",
-    "offline_message": "Kan gɛlɛn? A marala.",
-    "view_receipt": "Resu lajɛ",
+    /* ======================
+       HORS LIGNE
+    ====================== */
+    offline_detected: "Rezo tɛ. Nka n bɛ a sɛbɛn.",
+    offline_saved: "A sɛbɛnna. An bɛ a ci kɔfɛ.",
+    offline_synced: "A bɛɛ tagara. A kɛra.",
+    no_connection: "Rezo tɛ",
+    connection_restored: "Rezo seginna",
     
-    // Page Comprendre CMU/RSTI
-    "understand_title": "Ka faamu",
-    "understand_intro": "Feere kelen kelen bɛ i dɛmɛ. A cogo filɛ.",
-    "understand_audio": "Nin ɲɛ bɛ CMU ni RSTI ɲɛfɔ i ye. CMU ye i kɛnɛya. RSTI ye i wari i kɔrɔba waati.",
-    "cmu_simple_title": "Kɛnɛya",
-    "cmu_analogy": "I n'a fɔ tɔntɔn i kɛnɛya kama",
-    "cmu_percent": "1% feere kelen kelen",
-    "cmu_benefit_1": "Dɔkɔtɔrɔso sɔngɔ dɔgɔ",
-    "cmu_benefit_2": "Fura sɔngɔ dɔgɔ",
-    "cmu_benefit_3": "Denmisɛn wololi gansan",
-    "rsti_simple_title": "Wari mara",
-    "rsti_analogy": "I wari i kɔrɔba waati",
-    "rsti_percent": "0.5% marala i ye",
-    "rsti_benefit_1": "Marala CNPS la",
-    "rsti_benefit_2": "I bɛ a sɔrɔ san 60",
-    "rsti_yours": "i ta",
-    "example_title": "Misali",
-    "example_sale": "I bɛ feere",
-    "you_keep": "I bɛ to ni",
-    "what_is_cmu_rsti": "CMU ni RSTI ye mun ye?",
-    "understand_simple": "An bɛ a ɲɛfɔ i ye nɔgɔya la",
-    "understand_cmu_rsti": "CMU ni RSTI faamu",
-    "understand_reassure": "I wari bɛ baara kɛ i ye!",
+    /* ======================
+       AIDE & MESSAGES
+    ====================== */
+    need_help: "I mago bɛ dɛmɛ la wa?",
+    call_agent: "I ka agent wele",
+    its_done: "A kɛra!",
+    congratulations: "A ni cɛ!",
+    loading: "A bɛ don...",
+    please_wait: "Mako dɔɔni...",
+    error: "Gɛlɛya dɔ",
+    success: "A kɛra!",
+    warning: "Kɔlɔsi",
+    info: "Kunnafoni",
     
-    // Toast première vente
-    "congratulations": "I ni cɛ !",
-    "first_sale_today": "Tile in feere fɔlɔ",
+    /* ======================
+       TEMPS
+    ====================== */
+    morning: "sogoma",
+    afternoon: "tile kɔfɛ",
+    evening: "wula",
+    monday: "Tɛnɛn",
+    tuesday: "Tarata",
+    wednesday: "Araba",
+    thursday: "Alamisa",
+    friday: "Juma",
+    saturday: "Sibiri",
+    sunday: "Kari",
     
-    // Aide
-    "need_help": "I bε dεmεni fε wa?",
-    "ask_your_agent": "I ka i ka ajan wele",
+    /* ======================
+       PROFIL
+    ====================== */
+    my_profile: "Ne ka kun",
+    my_info: "Ne ka kunnafoni",
+    my_phone: "Ne ka nimɔrɔ",
+    my_market: "Ne ka sugu",
+    settings: "Labɛnni",
+    language: "Kan",
+    sound: "Mankan",
+    notifications: "Lasigiden",
+    logout: "Bɔ",
+    logout_confirm: "I bɛ taa tiɲɛn na wa?",
+    logout_success: "An bɛ ɲɔgɔn ye!",
+    
+    /* ======================
+       AGENT TERRAIN
+    ====================== */
+    enrollment: "Sɛbɛnni",
+    enroll_merchant: "Feerekɛla sɛbɛn",
+    merchant_list: "Ne ka feerekɛlaw",
+    pending_validation: "A bɛ mako la",
+    validated: "A dafara",
+    rejected: "A banna",
+    
+    /* ======================
+       COOPÉRATIVE
+    ====================== */
+    my_orders: "Ne ka ciyaaruw",
+    new_order: "Ciyaaru kura",
+    delivery: "Jolili",
+    products: "Fɛnw",
+    order_confirmed: "Ciyaaru sɛbɛnna",
+    order_delivered: "A jolila",
   },
 };
 
-// Fonction utilitaire pour obtenir une traduction
+/**
+ * Récupère une traduction avec fallback vers le français
+ */
 export function getTranslation(language: LanguageCode, key: string): string {
   return translations[language]?.[key] || translations.fr[key] || key;
 }
