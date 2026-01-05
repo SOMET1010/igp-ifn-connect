@@ -102,7 +102,10 @@ export function useVoiceTranscriptionV2({
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const globalTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
-  const cleanup = useCallback(() => {
+  // Cleanup stable ref pattern (évite boucles infinies)
+  const cleanupRef = useRef<() => void>(() => {});
+  
+  const cleanupImpl = () => {
     console.log('[VoiceV2] Cleanup');
     
     if (silenceTimeoutRef.current) {
@@ -136,12 +139,15 @@ export function useVoiceTranscriptionV2({
     }
     
     stopAnalyzing();
-  }, [stopAnalyzing]);
+  };
   
-  // Cleanup on unmount
+  // Toujours garder cleanupRef à jour
+  cleanupRef.current = cleanupImpl;
+  
+  // Cleanup on unmount - pas de dépendance pour éviter re-renders
   useEffect(() => {
-    return () => cleanup();
-  }, [cleanup]);
+    return () => cleanupRef.current();
+  }, []);
   
   const handleTranscriptUpdate = useCallback((text: string, isFinal: boolean) => {
     console.log(`[VoiceV2] Transcript (${isFinal ? 'final' : 'partial'}):`, text);
@@ -166,7 +172,7 @@ export function useVoiceTranscriptionV2({
       hasDetectedRef.current = true;
       setState('processing');
       onPhoneDetected(phone);
-      cleanup();
+      cleanupRef.current();
       return;
     }
     
@@ -182,11 +188,11 @@ export function useVoiceTranscriptionV2({
           } else {
             onError?.("Je n'ai pas compris ton numéro. Réessaie ou tape-le.");
           }
-          cleanup();
+          cleanupRef.current();
         }
       }, 2000);
     }
-  }, [onPhoneDetected, onDigitsProgress, onError, cleanup]);
+  }, [onPhoneDetected, onDigitsProgress, onError]);
   
   const startListening = useCallback(async () => {
     if (state !== 'idle' && state !== 'error') {
@@ -247,7 +253,7 @@ export function useVoiceTranscriptionV2({
           if (!hasDetectedRef.current) {
             console.log('[VoiceV2] Global timeout');
             onError?.("Temps écoulé. Réessaie ou tape ton numéro.");
-            cleanup();
+            cleanupRef.current();
             setState('error');
           }
         }, 20000);
@@ -274,7 +280,7 @@ export function useVoiceTranscriptionV2({
         console.error('[VoiceV2] WebSocket error:', event);
         setErrorMessage('Erreur de connexion');
         setState('error');
-        cleanup();
+        cleanupRef.current();
       };
       
       ws.onclose = () => {
@@ -296,9 +302,9 @@ export function useVoiceTranscriptionV2({
       
       setState('error');
       onError?.(err?.message || 'Erreur de transcription');
-      cleanup();
+      cleanupRef.current();
     }
-  }, [state, startAnalyzing, handleTranscriptUpdate, onError, cleanup]);
+  }, [state, startAnalyzing, handleTranscriptUpdate, onError]);
   
   const setupAudioSending = (stream: MediaStream, ws: WebSocket) => {
     try {
@@ -347,9 +353,9 @@ export function useVoiceTranscriptionV2({
   
   const stopListening = useCallback(() => {
     console.log('[VoiceV2] Stop listening');
-    cleanup();
+    cleanupRef.current();
     setState('idle');
-  }, [cleanup]);
+  }, []);
   
   return {
     // État
