@@ -7,10 +7,11 @@
 import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages publiques (connexion vocale)
+// Pages publiques (connexion vocale + login simplifié)
 import MerchantVoiceEntry from '@/pages/merchant/MerchantVoiceEntry';
 import MerchantSecurityFallback from '@/pages/merchant/MerchantSecurityFallback';
 import MerchantVoiceRegister from '@/pages/merchant/MerchantVoiceRegister';
+import MerchantLogin from '@/pages/merchant/MerchantLogin';
 
 // Pages principales unifiées
 import MerchantDashboard from '@/pages/merchant/MerchantDashboard';
@@ -33,6 +34,7 @@ import { VoiceAssistant } from '@/features/voice-assistant';
 export const merchantPublicRoutes = (
   <>
     <Route path="/marchand/connexion" element={<MerchantVoiceEntry />} />
+    <Route path="/marchand/login" element={<MerchantLogin />} />
     <Route path="/marchand/securite" element={<MerchantSecurityFallback />} />
     <Route path="/marchand/inscription-vocale" element={<MerchantVoiceRegister />} />
   </>
