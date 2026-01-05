@@ -20,13 +20,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { 
-  Home, 
-  Package, 
-  ClipboardList, 
-  User,
-  ShoppingCart,
-} from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useCooperativeDashboard } from '@/features/cooperative';
 import { useCooperativeProducerOrders } from '@/features/cooperative/hooks/useCooperativeProducerOrders';
 import { useCooperativeProducers } from '@/features/cooperative/hooks/useCooperativeProducers';
@@ -34,6 +28,7 @@ import {
   ProducerOrdersList, 
   CreateOrderDialog 
 } from '@/features/cooperative/components/producerOrders';
+import { cooperativeNavItems } from '@/config/navigation';
 
 const CooperativeProducerOrders: React.FC = () => {
   const navigate = useNavigate();
@@ -44,12 +39,7 @@ const CooperativeProducerOrders: React.FC = () => {
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
 
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/cooperative' },
-    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
-    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
-    { icon: User, label: t("profile"), path: '/cooperative/profil' },
-  ];
+  const navItems = cooperativeNavItems;
 
   const { cooperative, isLoading: isLoadingCoop, error: errorCoop } = useCooperativeDashboard();
   const { producers } = useCooperativeProducers(cooperative?.id);

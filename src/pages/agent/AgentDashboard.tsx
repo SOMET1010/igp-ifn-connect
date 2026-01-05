@@ -19,12 +19,12 @@ import {
   AgentQuickGuide,
   AgentRegistrationSection,
 } from '@/features/agent';
+import { agentNavItems } from '@/config/navigation';
 import { 
   UserPlus, 
   Users, 
   Wifi, 
   WifiOff,
-  Home,
   User,
 } from 'lucide-react';
 
@@ -44,11 +44,7 @@ const AgentDashboard: React.FC = () => {
     retryCount,
   } = useAgentDashboard();
 
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/agent' },
-    { icon: Users, label: t("merchants"), path: '/agent/marchands' },
-    { icon: User, label: t("profile"), path: '/agent/profil' },
-  ];
+  const navItems = agentNavItems;
 
   const handleSignOut = async () => {
     await signOut();

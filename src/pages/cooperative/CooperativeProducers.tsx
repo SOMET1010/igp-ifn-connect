@@ -9,13 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { LoadingState, ErrorState } from '@/components/shared/StateComponents';
-import { 
-  Home, 
-  Package, 
-  ClipboardList, 
-  User,
-  Tractor,
-} from 'lucide-react';
+import { Tractor } from 'lucide-react';
 import { useCooperativeDashboard } from '@/features/cooperative';
 import { useCooperativeProducers } from '@/features/cooperative/hooks/useCooperativeProducers';
 import { 
@@ -23,18 +17,14 @@ import {
   ProducersList, 
   AddProducerDialog 
 } from '@/features/cooperative/components/producers';
+import { cooperativeNavItems } from '@/config/navigation';
 
 const CooperativeProducers: React.FC = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { t } = useLanguage();
 
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/cooperative' },
-    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
-    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
-    { icon: User, label: t("profile"), path: '/cooperative/profil' },
-  ];
+  const navItems = cooperativeNavItems;
 
   const { cooperative, isLoading: isLoadingCoop, error: errorCoop } = useCooperativeDashboard();
 
