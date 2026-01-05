@@ -70,7 +70,8 @@ export function InclusivePhoneAuth({
     stopListening, 
     isConnected: isVoiceConnected, 
     isConnecting: isVoiceConnecting,
-    transcript 
+    transcript,
+    extractedDigits 
   } = useVoiceTranscription({
     onPhoneDetected: (detectedPhone) => {
       setPhone(detectedPhone);
@@ -80,16 +81,56 @@ export function InclusivePhoneAuth({
       setStep('phone_confirm');
       // Lire le numéro détecté
       const spaced = detectedPhone.split('').join(' ');
+      vibrate(100);
       speak(`J'ai entendu ${spaced}. C'est bon ?`, { priority: 'high' });
+    },
+    onDigitsProgress: (digits, count) => {
+      // Feedback progressif pendant la dictée
+      vibrate(20);
+      if (count === 4) {
+        speak('Continue...', { priority: 'normal' });
+      } else if (count === 8) {
+        speak('Presque fini...', { priority: 'normal' });
+      }
     },
     onError: (err) => {
       const msg = err || 'Erreur vocale';
       setIsListeningMic(false);
       toast.error(msg);
-      // Feedback vocal pour éviter l'effet "dans le vide"
       speak(msg, { priority: 'high' });
     }
   });
+
+  // Message d'accueil au chargement pour les marchands
+  const hasPlayedWelcomeRef = useRef(false);
+  useEffect(() => {
+    if (userType === 'merchant' && !hasPlayedWelcomeRef.current) {
+      hasPlayedWelcomeRef.current = true;
+      setVoiceEnabled(true);
+      // Petit délai pour laisser la page charger
+      const timer = setTimeout(() => {
+        speak("Bienvenue ! Appuie sur le gros bouton micro et dis ton numéro de téléphone. Je t'aide.", { priority: 'high' });
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [userType, speak]);
+
+  // Timeout si aucune détection après 10 secondes d'écoute
+  const noDetectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (isListeningMic && isVoiceConnected) {
+      noDetectionTimeoutRef.current = setTimeout(() => {
+        if (!extractedDigits || extractedDigits.length < 4) {
+          speak("Je n'entends rien. Tu peux aussi taper ton numéro sur le clavier.", { priority: 'high' });
+        }
+      }, 10000);
+    }
+    return () => {
+      if (noDetectionTimeoutRef.current) {
+        clearTimeout(noDetectionTimeoutRef.current);
+      }
+    };
+  }, [isListeningMic, isVoiceConnected, extractedDigits, speak]);
 
   // Format visuel du téléphone : "07 01 02 03 04"
   const formatPhoneDisplay = (value: string) => {
@@ -151,12 +192,10 @@ export function InclusivePhoneAuth({
       setIsListeningMic(true);
       vibrate(50);
 
-      // Important: ne pas dire "parle" tant que la connexion n'est pas prête
-      speak('Connexion au micro...', { priority: 'high' });
       await startListening();
 
       vibrate(30);
-      speak('Parle maintenant. Fais une pause quand tu as fini.', { priority: 'high' });
+      speak("C'est bon, je t'écoute. Dis ton numéro lentement.", { priority: 'high' });
     } catch (err) {
       setIsListeningMic(false);
       toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
@@ -1006,52 +1045,101 @@ export function InclusivePhoneAuth({
               className="space-y-4"
             >
               {/* MICRO GÉANT - Centre d'attention */}
-              <div className="flex flex-col items-center gap-2 py-2">
-                <motion.button
-                  onClick={handleMicClick}
-                  disabled={isVoiceConnecting}
-                  className={cn(
-                    "w-24 h-24 rounded-full flex items-center justify-center transition-all shadow-lg",
-                    isListeningMic || isVoiceConnected
-                      ? "bg-red-500 animate-pulse"
-                      : "bg-white/20 hover:bg-white/30"
+              <div className="flex flex-col items-center gap-3 py-2">
+                {/* Barres audio animées autour du micro */}
+                <div className="relative">
+                  {(isListeningMic || isVoiceConnected) && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-end gap-1 h-28 w-28">
+                        {[...Array(5)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="w-2 bg-white/60 rounded-full"
+                            animate={{
+                              height: [8, 20 + Math.random() * 20, 8],
+                            }}
+                            transition={{
+                              duration: 0.4 + Math.random() * 0.3,
+                              repeat: Infinity,
+                              repeatType: 'reverse',
+                              delay: i * 0.1,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {isVoiceConnecting ? (
-                    <Loader2 className="w-10 h-10 text-white animate-spin" />
-                  ) : isListeningMic || isVoiceConnected ? (
-                    <MicOff className="w-10 h-10 text-white" />
-                  ) : (
-                    <Mic className="w-10 h-10 text-white" />
+                  
+                  <motion.button
+                    onClick={handleMicClick}
+                    disabled={isVoiceConnecting}
+                    className={cn(
+                      "relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all shadow-lg",
+                      isListeningMic || isVoiceConnected
+                        ? "bg-red-500 ring-4 ring-red-400/50 animate-pulse"
+                        : "bg-white/20 hover:bg-white/30 hover:scale-105"
+                    )}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {isVoiceConnecting ? (
+                      <Loader2 className="w-10 h-10 text-white animate-spin" />
+                    ) : isListeningMic || isVoiceConnected ? (
+                      <MicOff className="w-10 h-10 text-white" />
+                    ) : (
+                      <Mic className="w-10 h-10 text-white" />
+                    )}
+                  </motion.button>
+                </div>
+
+                {/* État et feedback */}
+                <div className="text-center space-y-1">
+                  <p className="text-white text-sm font-medium">
+                    {isVoiceConnecting
+                      ? '⏳ Connexion...'
+                      : isListeningMic || isVoiceConnected
+                        ? '🎙️ Je t\'écoute !'
+                        : '👆 Appuie et parle'}
+                  </p>
+
+                  {/* Affichage des chiffres détectés en temps réel */}
+                  {(isListeningMic || isVoiceConnected) && extractedDigits && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white/90 rounded-xl px-4 py-2"
+                    >
+                      <p className="text-xl font-mono font-bold text-emerald-600 tracking-wider">
+                        {formatPhoneDisplay(extractedDigits)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {extractedDigits.length}/10 chiffres
+                      </p>
+                    </motion.div>
                   )}
-                </motion.button>
 
-                <p className="text-white text-sm text-center">
-                  {isVoiceConnecting
-                    ? 'Connexion...'
-                    : isListeningMic || isVoiceConnected
-                      ? '🎙️ Parle maintenant'
-                      : 'Appuie et parle'}
-                </p>
+                  {/* Message d'attente si rien détecté */}
+                  {(isListeningMic || isVoiceConnected) && !extractedDigits && (
+                    <p className="text-white/60 text-xs italic animate-pulse">
+                      Dis ton numéro... zéro sept...
+                    </p>
+                  )}
 
-                <p className="text-white/70 text-xs text-center">
+                  {/* Transcript brut (debug/feedback) */}
+                  {transcript && !extractedDigits && (
+                    <div className="max-w-xs rounded-xl bg-white/15 px-3 py-2">
+                      <p className="text-white/70 text-xs italic">"{transcript}"</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Instructions contextuelles */}
+                <p className="text-white/70 text-xs text-center max-w-xs">
                   {isVoiceConnecting
-                    ? 'Attends…'
+                    ? 'Préparation du micro...'
                     : isListeningMic || isVoiceConnected
-                      ? 'Fais une pause quand tu as fini (auto-détection).'
+                      ? 'Fais une pause quand tu as fini. Je détecte automatiquement.'
                       : 'Ou utilise le clavier ci-dessous.'}
                 </p>
-
-                {(isListeningMic || isVoiceConnected) && !transcript && (
-                  <p className="text-white/60 text-xs italic">Je suis prêt…</p>
-                )}
-
-                {transcript && (
-                  <div className="max-w-xs rounded-xl bg-white/15 px-3 py-2">
-                    <p className="text-white/80 text-xs italic">"{transcript}"</p>
-                  </div>
-                )}
               </div>
 
               {/* Séparateur */}
