@@ -69,8 +69,8 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
   
   // Cleanup stable - ne pas utiliser useCallback pour éviter les dépendances instables
   const cleanupImpl = () => {
-    if (isCleanedUpRef.current) return;
-    
+    // Toujours nettoyer (même si déjà "clean") pour éviter les intervalles orphelins
+
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
