@@ -2706,6 +2706,7 @@ export type Database = {
         Args: { _action_code: string; _resource_code: string; _user_id: string }
         Returns: boolean
       }
+      claim_merchant_by_phone: { Args: { p_phone: string }; Returns: Json }
       create_notification: {
         Args: {
           p_action_url?: string
