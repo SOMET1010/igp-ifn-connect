@@ -256,13 +256,9 @@ export function InclusivePhoneAuth({
       setTimeout(() => {
         speak("C'est bon, je t'écoute. Dis ton numéro lentement.", { priority: 'high' });
       }, 300);
-    } catch (err) {
+    } catch {
       setIsListeningMic(false);
-      // Ne pas toaster d'erreur si en iframe - le bandeau suffit
-      if (!isInIframe) {
-        toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
-      }
-      speak('Tape ton numéro sur le clavier', { priority: 'normal' });
+      // startListening() gère déjà l'erreur via onError (toast + message vocal) hors iframe.
     }
   };
 

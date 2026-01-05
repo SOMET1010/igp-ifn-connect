@@ -94,6 +94,10 @@ export function useVoiceTranscription({
   const disconnectRef = useRef<(() => void) | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
 
+  // Empêche les notifications d'erreur dupliquées (ex: scribe.onError + catch)
+  const lastNotifiedErrorRef = useRef<{ msg: string; at: number } | null>(null);
+
+
   // Hook pour l'analyse du niveau audio
   const audioLevelHook = useAudioLevel({
     silenceThreshold: 0.03,
@@ -228,6 +232,27 @@ export function useVoiceTranscription({
     return 'Erreur vocale';
   }, []);
 
+  const notifyErrorOnce = useCallback((msg: string) => {
+    setErrorMessage(msg);
+    setIsConnecting(false);
+    setState('error');
+
+    const now = Date.now();
+    const prev = lastNotifiedErrorRef.current;
+    if (prev && prev.msg === msg && now - prev.at < 1500) return;
+    lastNotifiedErrorRef.current = { msg, at: now };
+
+    onError?.(msg);
+
+    // Fallback toast si aucun handler externe et hors iframe
+    const isInIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+    if (!onError && !isInIframe) {
+      toast.error(msg);
+    }
+  }, [onError]);
+
   const scribe = useScribe({
     modelId: 'scribe_v2_realtime',
     commitStrategy: CommitStrategy.VAD,
@@ -236,18 +261,9 @@ export function useVoiceTranscription({
     onError: (err) => {
       console.error('[STT] Scribe error:', err);
       const msg = normalizeVoiceError(err);
-      setErrorMessage(msg);
-      setIsConnecting(false);
-      setState('error');
-      onError?.(msg);
-
-      // Fallback toast si aucun handler externe et hors iframe
-      const isInIframe = (() => {
-        try { return window.self !== window.top; } catch { return true; }
-      })();
-      if (!onError && !isInIframe) {
-        toast.error(msg);
-      }
+      notifyErrorOnce(msg);
+      cleanupRef.current();
+      disconnectRef.current?.();
     },
   });
 
@@ -261,6 +277,9 @@ export function useVoiceTranscription({
   };
 
   const startListening = useCallback(async () => {
+    // Réinitialiser la déduplication d'erreurs pour cette tentative
+    lastNotifiedErrorRef.current = null;
+
     setIsConnecting(true);
     setState('requesting_mic');
     setErrorMessage(null);
@@ -330,34 +349,14 @@ export function useVoiceTranscription({
       }, 20000);
     } catch (err: any) {
       console.error('[STT] Error:', err);
-      setIsConnecting(false);
       cleanupRef.current();
-      setState('error');
 
-      // Détection iframe bloqué (permissions policy)
-      const isPermissionPolicy = 
-        err?.message?.toLowerCase().includes('permission') ||
-        err?.message?.toLowerCase().includes('policy') ||
-        err?.message?.toLowerCase().includes('feature');
-
-      const isInIframe = (() => {
-        try { return window.self !== window.top; } catch { return true; }
-      })();
-
-      // Utiliser la normalisation centralisée
       const msg = normalizeVoiceError(err);
-
-      setErrorMessage(msg);
-      onError?.(msg);
-
-      // En iframe, ne jamais afficher de toast (le bandeau guide l'utilisateur)
-      if (!onError && !isInIframe) {
-        toast.error(msg);
-      }
+      notifyErrorOnce(msg);
 
       throw err;
     }
-  }, [scribe, onError, normalizeVoiceError]);
+  }, [scribe, normalizeVoiceError, notifyErrorOnce]);
 
   const stopListening = useCallback(() => {
     console.log('[STT] Stopping...');
