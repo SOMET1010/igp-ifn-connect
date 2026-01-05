@@ -1048,8 +1048,17 @@ export function InclusivePhoneAuth({
             >
               {/* MICRO GÉANT - Centre d'attention */}
               <div className="flex flex-col items-center gap-4 py-2">
-                {/* Zone micro avec anneau de progression */}
+                {/* Zone micro avec anneau de progression et barres audio */}
                 <div className="relative">
+                  {/* Pulse d'appel à l'action quand inactif */}
+                  {!(isListeningMic || isVoiceConnected || isVoiceConnecting) && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-white/30"
+                      animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+
                   {/* Anneau de progression des chiffres */}
                   {(isListeningMic || isVoiceConnected) && (
                     <svg className="absolute inset-0 w-32 h-32 -m-4" viewBox="0 0 120 120">
@@ -1078,6 +1087,48 @@ export function InclusivePhoneAuth({
                     </svg>
                   )}
                   
+                  {/* Barres audio animées autour du micro */}
+                  {(isListeningMic || isVoiceConnected) && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      {/* Barres à gauche */}
+                      <div className="absolute left-[-30px] flex gap-1 items-center">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={`left-${i}`}
+                            className="w-1.5 bg-white rounded-full"
+                            animate={{
+                              height: [8, 24, 12, 28, 8],
+                            }}
+                            transition={{
+                              duration: 0.7,
+                              repeat: Infinity,
+                              delay: i * 0.15,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        ))}
+                      </div>
+                      {/* Barres à droite */}
+                      <div className="absolute right-[-30px] flex gap-1 items-center">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={`right-${i}`}
+                            className="w-1.5 bg-white rounded-full"
+                            animate={{
+                              height: [12, 28, 8, 24, 12],
+                            }}
+                            transition={{
+                              duration: 0.7,
+                              repeat: Infinity,
+                              delay: i * 0.15,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <motion.button
                     onClick={handleMicClick}
                     disabled={isVoiceConnecting}
