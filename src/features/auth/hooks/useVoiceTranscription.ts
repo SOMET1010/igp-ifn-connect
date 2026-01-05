@@ -101,6 +101,10 @@ export function useVoiceTranscription({
     smoothingFactor: 0.3,
   });
 
+  // Ref stable pour éviter les dépendances instables dans les callbacks
+  const audioLevelHookRef = useRef(audioLevelHook);
+  audioLevelHookRef.current = audioLevelHook;
+
   const clearTimers = () => {
     if (detectionTimeoutRef.current) {
       clearTimeout(detectionTimeoutRef.current);
@@ -112,14 +116,18 @@ export function useVoiceTranscription({
     }
   };
 
-  const cleanup = useCallback(() => {
+  // Cleanup stable - pas de useCallback pour éviter les dépendances instables
+  const cleanupImpl = () => {
     clearTimers();
-    audioLevelHook.stopAnalyzing();
+    audioLevelHookRef.current.stopAnalyzing();
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach(track => track.stop());
       mediaStreamRef.current = null;
     }
-  }, [audioLevelHook]);
+  };
+  
+  const cleanupRef = useRef(cleanupImpl);
+  cleanupRef.current = cleanupImpl;
 
   const finalizeFromText = (text: string) => {
     if (hasDetectedRef.current) return;
@@ -147,7 +155,7 @@ export function useVoiceTranscription({
       if (hasDetectedRef.current) return;
 
       finalizeFromText(lastTextRef.current);
-      cleanup();
+      cleanupRef.current();
       disconnectRef.current?.();
       setState('idle');
     }, 2800);
@@ -175,7 +183,7 @@ export function useVoiceTranscription({
     if (phone && phone.length >= 10) {
       console.log('[STT] Phone detected:', phone);
       hasDetectedRef.current = true;
-      cleanup();
+      cleanupRef.current();
       onPhoneDetected(phone);
       disconnectRef.current?.();
       setState('processing');
@@ -260,7 +268,7 @@ export function useVoiceTranscription({
     setTranscript('');
     setExtractedDigits('');
     lastTextRef.current = '';
-    cleanup();
+    cleanupRef.current();
 
     try {
       console.log('[STT] Requesting microphone...');
@@ -276,7 +284,7 @@ export function useVoiceTranscription({
       mediaStreamRef.current = stream;
       
       // Démarrer l'analyse du niveau audio IMMÉDIATEMENT
-      audioLevelHook.startAnalyzing(stream);
+      audioLevelHookRef.current.startAnalyzing(stream);
       console.log('[STT] Audio level analysis started');
 
       setState('connecting');
@@ -315,7 +323,7 @@ export function useVoiceTranscription({
         if (!hasDetectedRef.current) {
           console.log('[STT] Detection timeout');
           finalizeFromText(lastTextRef.current);
-          cleanup();
+          cleanupRef.current();
           disconnectRef.current?.();
           setState('idle');
         }
@@ -323,7 +331,7 @@ export function useVoiceTranscription({
     } catch (err: any) {
       console.error('[STT] Error:', err);
       setIsConnecting(false);
-      cleanup();
+      cleanupRef.current();
       setState('error');
 
       // Détection iframe bloqué (permissions policy)
@@ -349,25 +357,25 @@ export function useVoiceTranscription({
 
       throw err;
     }
-  }, [scribe, onError, cleanup, audioLevelHook]);
+  }, [scribe, onError, normalizeVoiceError]);
 
   const stopListening = useCallback(() => {
     console.log('[STT] Stopping...');
-    cleanup();
+    cleanupRef.current();
     try {
       scribe.disconnect();
     } finally {
       setIsConnecting(false);
       setState('idle');
     }
-  }, [scribe, cleanup]);
+  }, [scribe]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - pas de dépendance pour éviter la boucle
   useEffect(() => {
     return () => {
-      cleanup();
+      cleanupRef.current();
     };
-  }, [cleanup]);
+  }, []);
 
   return {
     startListening,
