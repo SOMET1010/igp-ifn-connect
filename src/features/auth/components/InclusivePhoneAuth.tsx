@@ -75,10 +75,12 @@ export function InclusivePhoneAuth({
     isConnecting: isVoiceConnecting,
     transcript,
     extractedDigits,
-    // Nouveaux : métriques audio pour feedback visuel
+    // Métriques audio pour feedback visuel
     audioLevel,
     isReceivingAudio,
     levelHistory,
+    audioStatus,
+    silenceDuration,
     state: voiceState,
   } = useVoiceTranscription({
     onPhoneDetected: (detectedPhone) => {
@@ -108,25 +110,6 @@ export function InclusivePhoneAuth({
       speak(msg, { priority: 'high' });
     }
   });
-  
-  // Calculer le statut audio et la durée de silence pour le feedback
-  const [silenceDuration, setSilenceDuration] = useState(0);
-  const lastSoundTimeRef = useRef<number>(Date.now());
-  
-  useEffect(() => {
-    if (isVoiceConnected && isReceivingAudio) {
-      lastSoundTimeRef.current = Date.now();
-      setSilenceDuration(0);
-    } else if (isVoiceConnected) {
-      const interval = setInterval(() => {
-        setSilenceDuration(Date.now() - lastSoundTimeRef.current);
-      }, 200);
-      return () => clearInterval(interval);
-    }
-  }, [isVoiceConnected, isReceivingAudio]);
-  
-  // Dériver audioStatus à partir du niveau
-  const audioStatus = audioLevel >= 0.08 ? 'ok' : audioLevel >= 0.03 ? 'weak' : 'silence' as const;
 
   // Message d'accueil au chargement pour les marchands
   const hasPlayedWelcomeRef = useRef(false);

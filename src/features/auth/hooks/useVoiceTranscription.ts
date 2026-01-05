@@ -312,10 +312,12 @@ export function useVoiceTranscription({
     transcript,
     partialTranscript: scribe.partialTranscript || '',
     extractedDigits,
-    // Nouvelles propriétés pour le feedback audio
+    // Propriétés pour le feedback audio
     audioLevel: audioLevelHook.smoothedLevel,
     isReceivingAudio: audioLevelHook.isReceivingAudio,
     levelHistory: audioLevelHook.levelHistory,
+    audioStatus: audioLevelHook.audioStatus,
+    silenceDuration: audioLevelHook.silenceDuration,
     state,
   };
 }
