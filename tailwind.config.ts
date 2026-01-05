@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { PNAVIM_HSL } from "./src/styles/design-tokens";
 
 export default {
   darkMode: ["class"],
@@ -14,6 +15,24 @@ export default {
     },
     extend: {
       colors: {
+        // ============================================
+        // PNAVIM DESIGN SYSTEM (Source unique)
+        // ============================================
+        pnavim: {
+          primary: `hsl(${PNAVIM_HSL.primary})`,
+          secondary: `hsl(${PNAVIM_HSL.secondary})`,
+          background: `hsl(${PNAVIM_HSL.background})`,
+          surface: `hsl(${PNAVIM_HSL.surface})`,
+          foreground: `hsl(${PNAVIM_HSL.foreground})`,
+          muted: `hsl(${PNAVIM_HSL.muted})`,
+          destructive: `hsl(${PNAVIM_HSL.destructive})`,
+          warning: `hsl(${PNAVIM_HSL.warning})`,
+          border: `hsl(${PNAVIM_HSL.border})`,
+        },
+        
+        // ============================================
+        // SHADCN/UI VARIABLES (Requis pour les composants)
+        // ============================================
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -57,7 +76,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Couleurs africaines personnalisées
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        
+        // ============================================
+        // LEGACY COLORS (À supprimer après Phase 2)
+        // ============================================
         orange: {
           DEFAULT: "hsl(var(--orange))",
           light: "hsl(var(--orange-light))",
@@ -78,30 +108,11 @@ export default {
           light: "hsl(var(--earth-light))",
           dark: "hsl(var(--earth-dark))",
         },
-        // Palette "L'Âme du Marché"
-        "terre-battue": {
-          DEFAULT: "hsl(var(--terre-battue))",
-        },
-        "orange-sanguine": {
-          DEFAULT: "hsl(var(--orange-sanguine))",
-        },
-        sable: {
-          DEFAULT: "hsl(var(--sable))",
-        },
-        charbon: {
-          DEFAULT: "hsl(var(--charbon))",
-        },
-        "vert-manioc": {
-          DEFAULT: "hsl(var(--vert-manioc))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
+        "terre-battue": { DEFAULT: "hsl(var(--terre-battue))" },
+        "orange-sanguine": { DEFAULT: "hsl(var(--orange-sanguine))" },
+        sable: { DEFAULT: "hsl(var(--sable))" },
+        charbon: { DEFAULT: "hsl(var(--charbon))" },
+        "vert-manioc": { DEFAULT: "hsl(var(--vert-manioc))" },
       },
       borderRadius: {
         lg: "var(--radius)",
