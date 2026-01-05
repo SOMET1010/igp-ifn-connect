@@ -14,6 +14,7 @@ import {
   Mail, Lock, Loader2, ArrowLeft, User, ShieldCheck, 
   Store, Users, Briefcase, Volume2
 } from 'lucide-react';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { 
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
@@ -410,6 +411,17 @@ const AuthPage: React.FC = () => {
                   >
                     {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Se connecter'}
                   </Button>
+
+                  <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-muted-foreground/20" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">ou</span>
+                    </div>
+                  </div>
+
+                  <GoogleSignInButton disabled={isLoading} className="w-full h-12" />
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4 mt-4">
