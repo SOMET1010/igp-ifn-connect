@@ -22,26 +22,28 @@ export const LANGUAGES: LanguageInfo[] = [
 
 export const translations: Record<LanguageCode, Record<string, string>> = {
   fr: {
-    // Page d'accueil
+    // Page d'accueil - Messages sociaux et chaleureux
     "welcome": "Bienvenue",
     "platform_title": "PNAVIM-CI",
     "platform_subtitle": "Plateforme Nationale des Acteurs du Vivrier Marchand",
-    "who_are_you": "C'est toi qui est là ?",
+    "who_are_you": "On est ensemble au marché",
+    "market_open": "Le marché est ouvert",
+    "market_closed": "Le marché est fermé",
     "choose_access": "Choisis ta case pour commencer",
-    "click_to_listen": "Écouter",
+    "click_to_listen": "🔊 Écouter",
     "speak": "Parler",
     "listening": "J'écoute...",
     "help_text": "Tu hésites ? Demande à ton agent ou ta coopérative.",
     "country": "République de Côte d'Ivoire",
     
-    // Rôles
-    "i_am_merchant": "Marchand",
+    // Rôles - Textes humains et parlants
+    "i_am_merchant": "Je vends au marché",
     "merchant": "Je suis Marchand",
-    "merchant_subtitle": "Encaisser, vendre, épargner",
+    "merchant_subtitle": "Encaisser ton argent",
     "merchant_desc": "Encaisser et vendre sans souci",
-    "field_agent": "Agent terrain",
+    "field_agent": "J'accompagne les marchands",
     "agent": "Agent terrain",
-    "agent_subtitle": "Accompagner les marchands",
+    "agent_subtitle": "Aider les vendeuses",
     "agent_desc": "Aider les marchands",
     "i_am_cooperative": "Je suis Coopérative",
     "cooperative": "Coopérative",

@@ -15,6 +15,8 @@ interface PnavimHeroCardProps {
   subtitle: string;
   accentColor: AccentColor;
   mascotImage?: string;
+  /** URL d'une photo réelle de marché pour le fond */
+  photoUrl?: string;
   showBadge?: boolean;
   badgeText?: string;
   audioMessage?: string;
@@ -53,6 +55,7 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
   subtitle,
   accentColor,
   mascotImage,
+  photoUrl,
   showBadge = false,
   badgeText = 'Accès principal',
   audioMessage,
@@ -158,19 +161,29 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
     >
-      {/* Fond Dégradé Glassmorphism */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} backdrop-blur-sm`} />
-      <div className="absolute inset-0 bg-white/5" />
+      {/* Photo de fond réelle (si fournie) */}
+      {photoUrl && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center rounded-[2rem]"
+          style={{ backgroundImage: `url(${photoUrl})` }}
+        />
+      )}
+      
+      {/* Fond Dégradé Glassmorphism - plus opaque si photo */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} ${photoUrl ? 'opacity-80' : ''} backdrop-blur-sm`} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 rounded-[2rem]" />
       <div className="absolute inset-0 border border-white/20 rounded-[2rem]" />
       
-      {/* Motif Wax Digital (filigrane 6% opacity) */}
-      <div 
-        className="absolute inset-0 opacity-[0.06] pointer-events-none rounded-[2rem]"
-        style={{
-          backgroundImage: WAX_PATTERN_SVG,
-          backgroundSize: '40px 40px',
-        }}
-      />
+      {/* Motif Wax Digital (filigrane - masqué si photo) */}
+      {!photoUrl && (
+        <div 
+          className="absolute inset-0 opacity-[0.06] pointer-events-none rounded-[2rem]"
+          style={{
+            backgroundImage: WAX_PATTERN_SVG,
+            backgroundSize: '40px 40px',
+          }}
+        />
+      )}
 
       {/* Badge */}
       {showBadge && (
