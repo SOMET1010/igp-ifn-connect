@@ -133,6 +133,9 @@ const CooperativeDashboard: React.FC = () => {
         <div className="space-y-3">
           <UnifiedActionCard title={t("my_stock")} description={`${stats.products} ${t("products")}`} icon={Package} onClick={() => navigate('/cooperative/stock')} />
           <UnifiedActionCard title={t("orders")} description={t("manage_requests")} icon={ClipboardList} onClick={() => navigate('/cooperative/commandes')} badge={stats.pendingOrders} badgeVariant="warning" />
+          <UnifiedActionCard title="Producteurs" description="Gérer les producteurs affiliés" icon={Package} onClick={() => navigate('/cooperative/producteurs')} />
+          <UnifiedActionCard title="Membres" description={`${cooperative?.total_members ?? 0} membres`} icon={ClipboardList} onClick={() => navigate('/cooperative/membres')} />
+          <UnifiedActionCard title="Commandes Producteurs" description="Commander des récoltes" icon={ClipboardList} onClick={() => navigate('/cooperative/commandes-producteurs')} />
         </div>
 
         <QuickGuide />
