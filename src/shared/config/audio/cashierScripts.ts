@@ -1,6 +1,10 @@
 /**
- * Scripts vocaux SUTA - Écran Encaissement
- * Français Ivoirien courant : chaleureux, accessible, respectueux
+ * CASHIER - Action immédiate
+ * Rôle : Encaissement uniquement
+ * 
+ * RÈGLE PNAVIM : Une seule voix active par écran
+ * CASHIER parle uniquement sur l'écran d'encaissement
+ * Ton : Rapide, direct, sans discussion
  */
 
 // Import global LanguageCode from translations
@@ -52,17 +56,17 @@ export interface CashierAudioScript {
  * Scripts en Français Ivoirien - ton chaleureux et accessible
  */
 export const cashierScripts: Record<CashierScriptKey, CashierAudioScript> = {
-  // Accueil et navigation
+  // Accueil encaissement - direct et clair
   cashier_welcome: {
     key: 'cashier_welcome',
-    fr: 'Dis le montant ou bien appuie sur un billet.',
-    dioula: 'Wari joli bɛ se? Billet dɔ bila.',
-    nouchi: 'Dis le montant ou bien appuie sur un billet.',
+    fr: 'Dis le montant ou appuie sur un billet.',
+    dioula: 'Wari joli? Walima billet dɔ digi.',
+    nouchi: 'Dis le montant ou appuie sur un billet.',
   },
   cashier_listening: {
     key: 'cashier_listening',
     fr: "Je t'écoute. C'est combien ?",
-    dioula: 'N bɛ i lamɛn. Wari joli?',
+    dioula: 'N bɛ i lamɛn. Joli?',
     nouchi: "Je t'écoute. C'est combien ?",
   },
 
@@ -173,18 +177,18 @@ export const cashierScripts: Record<CashierScriptKey, CashierAudioScript> = {
     nouchi: 'On confirme ?',
   },
 
-  // Nouveaux scripts contextuels
+  // Confirmation et résultats - direct
   cashier_success: {
     key: 'cashier_success',
-    fr: "C'est bon ! Le paiement est fait.",
-    dioula: 'A bɛnnin! Sara kɛra.',
-    nouchi: "C'est bon ! Le paiement est fait.",
+    fr: "C'est fait. Le paiement est enregistré.",
+    dioula: 'A kɛra. Sara sɛbɛnna.',
+    nouchi: "C'est fait. Le paiement est enregistré.",
   },
   cashier_error: {
     key: 'cashier_error',
-    fr: "Y'a un souci. Essaie encore.",
-    dioula: 'Fɛn dɔ ma ɲi. A segin.',
-    nouchi: "Y'a un souci. Essaie encore.",
+    fr: "Il y a un souci. Essaie encore.",
+    dioula: 'Gɛlɛya dɔ bɛ yen. Segin ka kɛ.',
+    nouchi: "Il y a un souci. Essaie encore.",
   },
   cashier_amount_zero: {
     key: 'cashier_amount_zero',

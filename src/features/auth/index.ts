@@ -46,7 +46,7 @@ export {
   formatPhoneForSpeech,
   type VoiceAuthLang,
   type VoiceScriptKey
-} from './config/audioScripts';
+} from '@/shared/config/audio/suta';
 
 // === Types ===
 export type {
