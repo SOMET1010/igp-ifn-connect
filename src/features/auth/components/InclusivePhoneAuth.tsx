@@ -85,6 +85,9 @@ export function InclusivePhoneAuth({
   const debugTapCountRef = useRef(0);
   const debugTapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Ref pour le timer d'annonce "C'est bon, je t'écoute" (pour pouvoir l'annuler si erreur)
+  const listeningAnnouncementRef = useRef<NodeJS.Timeout | null>(null);
+
   // Transcription vocale pour le numéro (avec audioLevel pour feedback visuel)
   const { 
     startListening, 
@@ -105,6 +108,11 @@ export function InclusivePhoneAuth({
     state: voiceState,
   } = useVoiceTranscription({
     onPhoneDetected: (detectedPhone) => {
+      // Annuler l'annonce en cours si elle existe
+      if (listeningAnnouncementRef.current) {
+        clearTimeout(listeningAnnouncementRef.current);
+        listeningAnnouncementRef.current = null;
+      }
       setPhone(detectedPhone);
       setIsListeningMic(false);
       stopListening();
@@ -125,16 +133,32 @@ export function InclusivePhoneAuth({
       }
     },
     onError: (err) => {
-      const msg = err || 'Erreur vocale';
-      setIsListeningMic(false);
-      // Ne pas afficher de toast d'erreur dans l'iframe - le bandeau AudioFeedbackBanner suffit
-      if (!isInIframe) {
-        toast.error(msg);
-        speak(msg, { priority: 'high' });
+      // Annuler l'annonce "C'est bon, je t'écoute" si erreur
+      if (listeningAnnouncementRef.current) {
+        clearTimeout(listeningAnnouncementRef.current);
+        listeningAnnouncementRef.current = null;
       }
-      // Dans l'iframe, on ne parle pas non plus pour éviter confusion (le bandeau guide vers plein écran)
+      setIsListeningMic(false);
+      // Le hook useVoiceTranscription gère déjà le toast et l'appel speak via notifyErrorOnce
+      // On ajoute juste le message vocal ici si pas en iframe
+      if (!isInIframe && err) {
+        speak(err, { priority: 'high' });
+      }
     }
   });
+
+  // Ref stable pour stopListening (évite re-render loop sur cleanup)
+  const stopListeningRef = useRef(stopListening);
+  useEffect(() => {
+    stopListeningRef.current = stopListening;
+  }, [stopListening]);
+
+  // Cleanup au démontage uniquement (pas de dépendance = stable)
+  useEffect(() => {
+    return () => {
+      stopListeningRef.current();
+    };
+  }, []);
 
   // Message d'accueil au chargement pour les marchands
   const hasPlayedWelcomeRef = useRef(false);
@@ -222,8 +246,19 @@ export function InclusivePhoneAuth({
   // Détecter si le micro est indisponible ici (iframe, non sécurisé, ou pas de getUserMedia)
   const micUnavailableHere = isInIframe || !isSecureContext || !hasGetUserMedia;
 
+  // Annuler l'annonce vocale en attente
+  const cancelListeningAnnouncement = () => {
+    if (listeningAnnouncementRef.current) {
+      clearTimeout(listeningAnnouncementRef.current);
+      listeningAnnouncementRef.current = null;
+    }
+  };
+
   // Démarrer l'écoute micro (avec indication claire + auto-fin sur pause)
   const handleMicClick = async () => {
+    // Annuler toute annonce en attente
+    cancelListeningAnnouncement();
+
     // Si le micro est bloqué dans cet environnement, ouvrir en plein écran
     if (micUnavailableHere) {
       stop(); // Arrêter TTS
@@ -252,12 +287,14 @@ export function InclusivePhoneAuth({
       await startListening();
 
       vibrate(30);
-      // Délai court avant annonce pour éviter interférence
-      setTimeout(() => {
+      // Délai court avant annonce pour éviter interférence - AVEC ANNULATION POSSIBLE
+      listeningAnnouncementRef.current = setTimeout(() => {
+        listeningAnnouncementRef.current = null;
         speak("C'est bon, je t'écoute. Dis ton numéro lentement.", { priority: 'high' });
       }, 300);
     } catch {
       setIsListeningMic(false);
+      cancelListeningAnnouncement();
       // startListening() gère déjà l'erreur via onError (toast + message vocal) hors iframe.
     }
   };

@@ -95,8 +95,8 @@ export function useVoiceTranscription({
   const mediaStreamRef = useRef<MediaStream | null>(null);
 
   // Empêche les notifications d'erreur dupliquées (ex: scribe.onError + catch)
-  const lastNotifiedErrorRef = useRef<{ msg: string; at: number } | null>(null);
-
+  // On déduplique par CODE d'erreur pour éviter que Event et Error déclenchent 2 toasts
+  const hasErroredThisAttemptRef = useRef(false);
 
   // Hook pour l'analyse du niveau audio
   const audioLevelHook = useAudioLevel({
@@ -199,6 +199,7 @@ export function useVoiceTranscription({
   };
 
   // Fonction utilitaire pour normaliser les erreurs vocales
+  // Retourne un message UNIQUE quel que soit le type d'erreur (Event ou Error)
   const normalizeVoiceError = useCallback((err: unknown): string => {
     const isInIframe = (() => {
       try { return window.self !== window.top; } catch { return true; }
@@ -212,8 +213,18 @@ export function useVoiceTranscription({
     // Erreur string directe
     if (typeof err === 'string') return err;
 
+    // WebSocket Event ou Error sans message = erreur connexion
+    // Les deux doivent retourner le MÊME message pour éviter double notification
+    if (err instanceof Event) {
+      return 'Connexion vocale interrompue. Réessaie.';
+    }
+
     // Erreur standard avec message
-    if (err instanceof Error && err.message) {
+    if (err instanceof Error) {
+      // WebSocket close/error = même message que Event
+      if (err.message === '' || err.message.includes('WebSocket') || err.message.includes('1006')) {
+        return 'Connexion vocale interrompue. Réessaie.';
+      }
       if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
         return 'Autorise le micro dans les paramètres du navigateur.';
       }
@@ -224,6 +235,9 @@ export function useVoiceTranscription({
     }
 
     // Objet avec type (erreur ElevenLabs)
+    if ((err as any)?.type === 'error') {
+      return 'Connexion vocale interrompue. Réessaie.';
+    }
     if ((err as any)?.type) {
       return `Erreur micro: ${(err as any).type}`;
     }
@@ -232,15 +246,18 @@ export function useVoiceTranscription({
     return 'Erreur vocale';
   }, []);
 
+  // Notifie une erreur UNE SEULE FOIS par tentative d'écoute
   const notifyErrorOnce = useCallback((msg: string) => {
+    // Si on a déjà notifié une erreur pour cette tentative, ignorer
+    if (hasErroredThisAttemptRef.current) {
+      console.log('[STT] Error already notified, skipping:', msg);
+      return;
+    }
+    hasErroredThisAttemptRef.current = true;
+
     setErrorMessage(msg);
     setIsConnecting(false);
     setState('error');
-
-    const now = Date.now();
-    const prev = lastNotifiedErrorRef.current;
-    if (prev && prev.msg === msg && now - prev.at < 1500) return;
-    lastNotifiedErrorRef.current = { msg, at: now };
 
     onError?.(msg);
 
@@ -277,8 +294,8 @@ export function useVoiceTranscription({
   };
 
   const startListening = useCallback(async () => {
-    // Réinitialiser la déduplication d'erreurs pour cette tentative
-    lastNotifiedErrorRef.current = null;
+    // Réinitialiser le flag d'erreur pour cette nouvelle tentative
+    hasErroredThisAttemptRef.current = false;
 
     setIsConnecting(true);
     setState('requesting_mic');
