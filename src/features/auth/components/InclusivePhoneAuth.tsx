@@ -107,6 +107,7 @@ export function InclusivePhoneAuth({
         const newPhone = prev + digit;
         
         // Confirmation vocale courte du chiffre
+        console.log('[InclusiveAuth] Digit detected:', digit, '- speaking...');
         vibrate(30);
         speak(digit, { priority: 'high' });
         

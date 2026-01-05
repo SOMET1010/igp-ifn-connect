@@ -33,7 +33,7 @@ class VoiceQueueService {
   private currentSpeakCancel: (() => void) | null = null;
   private speakFn: SpeakFunction | null = null;
   
-  private readonly DEBOUNCE_MS = 700;
+  private readonly DEBOUNCE_MS = 200; // Réduit pour permettre confirmations rapides
   
   // État public
   public isSpeaking = false;
@@ -113,20 +113,24 @@ class VoiceQueueService {
       return;
     }
 
-    // Debounce: ignorer si trop proche du dernier appel
+    // Priorité haute: bypass debounce, parler immédiatement (sans cancel qui coupe le micro)
     const now = Date.now();
-    if (now - this.lastSpeakTime < this.DEBOUNCE_MS) {
-      console.log('[VoiceQueue] Debounced:', text.slice(0, 30));
-      return;
-    }
-    this.lastSpeakTime = now;
-
-    // Priorité haute: annuler tout et parler immédiatement
+    const timeSinceLastSpeak = now - this.lastSpeakTime;
+    
     if (priority === 'high') {
-      this.cancel();
+      console.log('[VoiceQueue] HIGH priority - bypass debounce:', text.slice(0, 30));
+      this.lastSpeakTime = now;
       await this.executeSpeak(text);
       return;
     }
+
+    // Debounce: ignorer si trop proche du dernier appel
+    if (timeSinceLastSpeak < this.DEBOUNCE_MS) {
+      console.log('[VoiceQueue] Debounced:', text.slice(0, 30), `(${timeSinceLastSpeak}ms)`);
+      return;
+    }
+    console.log('[VoiceQueue] Accepted:', text.slice(0, 30), `(${timeSinceLastSpeak}ms since last)`);
+    this.lastSpeakTime = now;
 
     // Ajouter à la queue
     return new Promise((resolve, reject) => {
