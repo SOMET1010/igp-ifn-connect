@@ -36,8 +36,8 @@ export function RequireRole({ requiredRole, redirectTo }: RequireRoleProps) {
     }
   }, [isLoading, isAuthenticated]);
 
-  // Loading state with explicit UI
-  if (isLoading) {
+  // Loading state with explicit UI - aussi quand on est authentifié mais le rôle pas encore chargé
+  if (isLoading || (isAuthenticated && userRole === null)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
