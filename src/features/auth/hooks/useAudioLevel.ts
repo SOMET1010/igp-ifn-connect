@@ -65,8 +65,12 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const smoothedLevelRef = useRef(0);
   const lastSoundTimeRef = useRef<number>(Date.now());
+  const isCleanedUpRef = useRef(false);
   
-  const cleanup = useCallback(() => {
+  // Cleanup stable - ne pas utiliser useCallback pour éviter les dépendances instables
+  const cleanupImpl = () => {
+    if (isCleanedUpRef.current) return;
+    
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -103,10 +107,15 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
     setIsReceivingAudio(false);
     setLevelHistory([]);
     smoothedLevelRef.current = 0;
-  }, []);
+  };
+  
+  // Ref stable pour cleanup
+  const cleanupRef = useRef(cleanupImpl);
+  cleanupRef.current = cleanupImpl;
   
   const startAnalyzing = useCallback((stream: MediaStream) => {
-    cleanup();
+    cleanupRef.current();
+    isCleanedUpRef.current = false;
     
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -129,7 +138,7 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
       lastSoundTimeRef.current = Date.now();
       
       const analyze = () => {
-        if (!analyserRef.current) return;
+        if (!analyserRef.current || isCleanedUpRef.current) return;
         
         analyserRef.current.getByteFrequencyData(dataArray);
         
@@ -181,21 +190,24 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
       console.log('[AudioLevel] Started analyzing with smoothing');
     } catch (err) {
       console.error('[AudioLevel] Failed to start:', err);
-      cleanup();
+      cleanupRef.current();
     }
-  }, [cleanup, silenceThreshold, weakThreshold, updateInterval, smoothingFactor]);
+  }, [silenceThreshold, weakThreshold, updateInterval, smoothingFactor]);
   
   const stopAnalyzing = useCallback(() => {
+    if (isCleanedUpRef.current) return;
+    isCleanedUpRef.current = true;
     console.log('[AudioLevel] Stopping');
-    cleanup();
-  }, [cleanup]);
+    cleanupRef.current();
+  }, []);
   
-  // Cleanup on unmount
+  // Cleanup on unmount - pas de dépendance pour éviter la boucle
   useEffect(() => {
     return () => {
-      cleanup();
+      isCleanedUpRef.current = true;
+      cleanupRef.current();
     };
-  }, [cleanup]);
+  }, []);
   
   return {
     level,
