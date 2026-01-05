@@ -124,6 +124,9 @@ export function InclusivePhoneAuth({
       speak(`J'ai entendu ${spaced}. C'est bon ?`, { priority: 'high' });
     },
     onDigitsProgress: (digits, count) => {
+      // Montrer la progression en direct dans le champ (sinon l'utilisateur a l'impression que ça "écoute dans le vide")
+      setPhone(prev => (digits.length >= prev.length ? digits : prev));
+
       // Feedback progressif pendant la dictée
       vibrate(20);
       if (count === 4) {
@@ -281,12 +284,18 @@ export function InclusivePhoneAuth({
     stop();
 
     try {
-      setIsListeningMic(true);
       vibrate(50);
 
-      await startListening();
+      const ok = await startListening();
+      if (!ok) {
+        setIsListeningMic(false);
+        cancelListeningAnnouncement();
+        return;
+      }
 
+      setIsListeningMic(true);
       vibrate(30);
+
       // Délai court avant annonce pour éviter interférence - AVEC ANNULATION POSSIBLE
       listeningAnnouncementRef.current = setTimeout(() => {
         listeningAnnouncementRef.current = null;
