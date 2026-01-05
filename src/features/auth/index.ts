@@ -29,6 +29,10 @@ export { usePersistedPersona } from './hooks/usePersistedPersona';
 
 // === Audio Feedback Components ===
 export { AudioLevelIndicator, AudioPulse, AudioWaveform } from './components/AudioLevelIndicator';
+export { AudioFeedbackBanner } from './components/AudioFeedbackBanner';
+
+// === Audio Types ===
+export type { AudioStatus } from './hooks/useAudioLevel';
 
 // === Configs ===
 export {

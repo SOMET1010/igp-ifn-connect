@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAudioLevel } from './useAudioLevel';
 
 // Regex pour extraire les numéros ivoiriens (formats: 07..., 05..., 01..., +225...)
 const PHONE_REGEX = /(?:\+?225\s?)?(?:0?[1579])\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}/g;
@@ -67,6 +68,8 @@ function extractPhoneNumber(text: string): string | null {
   return null;
 }
 
+type VoiceState = 'idle' | 'requesting_mic' | 'connecting' | 'listening' | 'processing' | 'error';
+
 interface UseVoiceTranscriptionOptions {
   onPhoneDetected: (phone: string) => void;
   onError?: (error: string) => void;
@@ -81,12 +84,21 @@ export function useVoiceTranscription({
   const [transcript, setTranscript] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [extractedDigits, setExtractedDigits] = useState('');
+  const [state, setState] = useState<VoiceState>('idle');
 
   const detectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTextRef = useRef('');
   const hasDetectedRef = useRef(false);
   const disconnectRef = useRef<(() => void) | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+
+  // Hook pour l'analyse du niveau audio
+  const audioLevelHook = useAudioLevel({
+    silenceThreshold: 0.03,
+    weakThreshold: 0.08,
+    smoothingFactor: 0.3,
+  });
 
   const clearTimers = () => {
     if (detectionTimeoutRef.current) {
@@ -98,6 +110,15 @@ export function useVoiceTranscription({
       silenceTimeoutRef.current = null;
     }
   };
+
+  const cleanup = useCallback(() => {
+    clearTimers();
+    audioLevelHook.stopAnalyzing();
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => track.stop());
+      mediaStreamRef.current = null;
+    }
+  }, [audioLevelHook]);
 
   const finalizeFromText = (text: string) => {
     if (hasDetectedRef.current) return;
@@ -113,11 +134,9 @@ export function useVoiceTranscription({
   };
 
   // Auto-fin: quand l'utilisateur fait une pause (silence), on finalise
-  // NOTE: délai volontairement long pour laisser des petites pauses naturelles.
   const scheduleSilenceFinalize = (nextText: string) => {
     if (hasDetectedRef.current) return;
 
-    // Éviter de couper trop tôt si on n'a pas encore assez de chiffres.
     const digitCount = nextText.replace(/\D/g, '').length;
     if (digitCount < 6) return;
 
@@ -127,8 +146,9 @@ export function useVoiceTranscription({
       if (hasDetectedRef.current) return;
 
       finalizeFromText(lastTextRef.current);
-      clearTimers();
+      cleanup();
       disconnectRef.current?.();
+      setState('idle');
     }, 2800);
   };
 
@@ -154,9 +174,10 @@ export function useVoiceTranscription({
     if (phone && phone.length >= 10) {
       console.log('[STT] Phone detected:', phone);
       hasDetectedRef.current = true;
-      clearTimers();
+      cleanup();
       onPhoneDetected(phone);
       disconnectRef.current?.();
+      setState('processing');
       return;
     }
 
@@ -182,13 +203,31 @@ export function useVoiceTranscription({
 
   const startListening = useCallback(async () => {
     setIsConnecting(true);
+    setState('requesting_mic');
     hasDetectedRef.current = false;
     setTranscript('');
     setExtractedDigits('');
     lastTextRef.current = '';
-    clearTimers();
+    cleanup();
 
     try {
+      console.log('[STT] Requesting microphone...');
+
+      // D'abord, demander l'accès au micro pour l'analyse audio
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      mediaStreamRef.current = stream;
+      
+      // Démarrer l'analyse du niveau audio IMMÉDIATEMENT
+      audioLevelHook.startAnalyzing(stream);
+      console.log('[STT] Audio level analysis started');
+
+      setState('connecting');
       console.log('[STT] Requesting token...');
 
       // Obtenir un token depuis la fonction backend
@@ -217,20 +256,23 @@ export function useVoiceTranscription({
 
       console.log('[STT] Connected successfully');
       setIsConnecting(false);
+      setState('listening');
 
       // Timeout global (si aucune détection)
       detectionTimeoutRef.current = setTimeout(() => {
         if (!hasDetectedRef.current) {
           console.log('[STT] Detection timeout');
           finalizeFromText(lastTextRef.current);
-          clearTimers();
+          cleanup();
           disconnectRef.current?.();
+          setState('idle');
         }
       }, 20000);
     } catch (err: any) {
       console.error('[STT] Error:', err);
       setIsConnecting(false);
-      clearTimers();
+      cleanup();
+      setState('error');
 
       if (err?.name === 'NotAllowedError' || err?.message?.includes('Permission')) {
         onError?.('Autorise le micro pour utiliser la voix');
@@ -242,17 +284,25 @@ export function useVoiceTranscription({
 
       throw err;
     }
-  }, [scribe, onError]);
+  }, [scribe, onError, cleanup, audioLevelHook]);
 
   const stopListening = useCallback(() => {
     console.log('[STT] Stopping...');
-    clearTimers();
+    cleanup();
     try {
       scribe.disconnect();
     } finally {
       setIsConnecting(false);
+      setState('idle');
     }
-  }, [scribe]);
+  }, [scribe, cleanup]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
 
   return {
     startListening,
@@ -262,5 +312,10 @@ export function useVoiceTranscription({
     transcript,
     partialTranscript: scribe.partialTranscript || '',
     extractedDigits,
+    // Nouvelles propriétés pour le feedback audio
+    audioLevel: audioLevelHook.smoothedLevel,
+    isReceivingAudio: audioLevelHook.isReceivingAudio,
+    levelHistory: audioLevelHook.levelHistory,
+    state,
   };
 }

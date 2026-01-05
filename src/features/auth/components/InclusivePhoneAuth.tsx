@@ -12,6 +12,8 @@ import { SocialChallenge } from './SocialChallenge';
 import { SimpleRegistrationForm } from './SimpleRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@/features/auth/config/loginConfigs';
+import { AudioLevelIndicator } from './AudioLevelIndicator';
+import { AudioFeedbackBanner } from './AudioFeedbackBanner';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -65,14 +67,19 @@ export function InclusivePhoneAuth({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const otpAbortRef = useRef<AbortController | null>(null);
 
-  // Transcription vocale pour le numéro
+  // Transcription vocale pour le numéro (avec audioLevel pour feedback visuel)
   const { 
     startListening, 
     stopListening, 
     isConnected: isVoiceConnected, 
     isConnecting: isVoiceConnecting,
     transcript,
-    extractedDigits 
+    extractedDigits,
+    // Nouveaux : métriques audio pour feedback visuel
+    audioLevel,
+    isReceivingAudio,
+    levelHistory,
+    state: voiceState,
   } = useVoiceTranscription({
     onPhoneDetected: (detectedPhone) => {
       setPhone(detectedPhone);
@@ -101,6 +108,25 @@ export function InclusivePhoneAuth({
       speak(msg, { priority: 'high' });
     }
   });
+  
+  // Calculer le statut audio et la durée de silence pour le feedback
+  const [silenceDuration, setSilenceDuration] = useState(0);
+  const lastSoundTimeRef = useRef<number>(Date.now());
+  
+  useEffect(() => {
+    if (isVoiceConnected && isReceivingAudio) {
+      lastSoundTimeRef.current = Date.now();
+      setSilenceDuration(0);
+    } else if (isVoiceConnected) {
+      const interval = setInterval(() => {
+        setSilenceDuration(Date.now() - lastSoundTimeRef.current);
+      }, 200);
+      return () => clearInterval(interval);
+    }
+  }, [isVoiceConnected, isReceivingAudio]);
+  
+  // Dériver audioStatus à partir du niveau
+  const audioStatus = audioLevel >= 0.08 ? 'ok' : audioLevel >= 0.03 ? 'weak' : 'silence' as const;
 
   // Message d'accueil au chargement pour les marchands
   const hasPlayedWelcomeRef = useRef(false);
@@ -1181,14 +1207,36 @@ export function InclusivePhoneAuth({
                   </motion.button>
                 </div>
 
-                {/* État textuel */}
-                <p className="text-white text-sm font-medium">
-                  {isVoiceConnecting
-                    ? '⏳ Connexion...'
-                    : isListeningMic || isVoiceConnected
-                      ? '🎙️ Je t\'écoute...'
+                {/* Feedback audio temps réel - TRÈS VISIBLE */}
+                {(isListeningMic || isVoiceConnected) && (
+                  <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+                    {/* Indicateur de niveau audio - barres */}
+                    <AudioLevelIndicator
+                      level={audioLevel}
+                      levelHistory={levelHistory}
+                      isReceivingAudio={isReceivingAudio}
+                      size="lg"
+                      barCount={7}
+                    />
+                    
+                    {/* Message contextuel (Je t'écoute / Je n'entends rien...) */}
+                    <AudioFeedbackBanner
+                      state={voiceState === 'listening' ? 'listening' : voiceState === 'connecting' ? 'connecting' : 'requesting_mic'}
+                      audioStatus={audioStatus}
+                      silenceDuration={silenceDuration}
+                      onRetry={handleMicClick}
+                    />
+                  </div>
+                )}
+                
+                {/* État textuel quand pas en écoute */}
+                {!(isListeningMic || isVoiceConnected) && (
+                  <p className="text-white text-sm font-medium">
+                    {isVoiceConnecting
+                      ? '⏳ Connexion...'
                       : '👆 Appuie et parle'}
-                </p>
+                  </p>
+                )}
 
                 {/* AFFICHAGE CHIFFRES DÉTECTÉS - TRÈS VISIBLE */}
                 {(isListeningMic || isVoiceConnected) && (
