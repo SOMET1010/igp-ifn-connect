@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { MapPin, Loader2, CheckCircle, RefreshCw } from "lucide-react";
+import { useState, useRef } from "react";
+import { MapPin, Loader2, CheckCircle, RefreshCw, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -12,44 +13,88 @@ interface GPSCaptureProps {
 
 export function GPSCapture({ onCapture, coords, className }: GPSCaptureProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualLat, setManualLat] = useState('');
+  const [manualLng, setManualLng] = useState('');
+  const [failCount, setFailCount] = useState(0);
+  const attemptRef = useRef(0);
 
   const captureLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("La géolocalisation n'est pas supportée par ce navigateur");
+      toast.error("La géolocalisation n'est pas supportée");
+      setShowManualInput(true);
       return;
     }
 
     setIsLoading(true);
+    attemptRef.current += 1;
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         onCapture({ latitude, longitude });
         setIsLoading(false);
+        setFailCount(0);
         toast.success("Position capturée avec succès");
       },
       (error) => {
         setIsLoading(false);
+        const newFailCount = failCount + 1;
+        setFailCount(newFailCount);
+
+        let message = "Erreur de géolocalisation";
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            toast.error("Accès à la localisation refusé. Veuillez autoriser l'accès.");
+            message = "Accès refusé. Autorisez la localisation dans les paramètres.";
             break;
           case error.POSITION_UNAVAILABLE:
-            toast.error("Position non disponible");
+            message = "Position non disponible. Essayez dehors.";
             break;
           case error.TIMEOUT:
-            toast.error("Délai de localisation dépassé");
+            message = "Délai dépassé. Réessayez.";
             break;
-          default:
-            toast.error("Erreur de géolocalisation");
+        }
+        
+        toast.error(message);
+
+        // Après 2 échecs, proposer la saisie manuelle
+        if (newFailCount >= 2) {
+          setShowManualInput(true);
+          toast.info("Vous pouvez saisir les coordonnées manuellement");
         }
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0
       }
     );
+  };
+
+  const handleManualSubmit = () => {
+    const lat = parseFloat(manualLat.replace(',', '.'));
+    const lng = parseFloat(manualLng.replace(',', '.'));
+
+    if (isNaN(lat) || isNaN(lng)) {
+      toast.error("Coordonnées invalides");
+      return;
+    }
+
+    // Validation basique des plages
+    if (lat < -90 || lat > 90) {
+      toast.error("Latitude doit être entre -90 et 90");
+      return;
+    }
+    if (lng < -180 || lng > 180) {
+      toast.error("Longitude doit être entre -180 et 180");
+      return;
+    }
+
+    onCapture({ latitude: lat, longitude: lng });
+    setShowManualInput(false);
+    setManualLat('');
+    setManualLng('');
+    toast.success("Position enregistrée");
   };
 
   return (
@@ -85,25 +130,95 @@ export function GPSCapture({ onCapture, coords, className }: GPSCaptureProps) {
             </div>
           </div>
         </div>
+      ) : showManualInput ? (
+        <div className="rounded-2xl border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/20 p-4 space-y-4">
+          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+            <Edit3 className="w-5 h-5" />
+            <span className="font-medium">Saisie manuelle des coordonnées</span>
+          </div>
+          
+          <p className="text-sm text-muted-foreground">
+            Entrez les coordonnées GPS (ex: depuis Google Maps)
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Latitude</label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder="5.345678"
+                value={manualLat}
+                onChange={(e) => setManualLat(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Longitude</label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder="-3.987654"
+                value={manualLng}
+                onChange={(e) => setManualLng(e.target.value)}
+                className="font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={handleManualSubmit}
+              className="flex-1 bg-secondary hover:bg-secondary/90"
+              disabled={!manualLat || !manualLng}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Valider
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowManualInput(false);
+                captureLocation();
+              }}
+            >
+              <MapPin className="w-4 h-4 mr-1" />
+              Réessayer GPS
+            </Button>
+          </div>
+        </div>
       ) : (
-        <Button
-          type="button"
-          onClick={captureLocation}
-          disabled={isLoading}
-          className="w-full btn-xxl bg-gradient-forest hover:opacity-90"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-6 h-6 animate-spin mr-2" />
-              Localisation en cours...
-            </>
-          ) : (
-            <>
-              <MapPin className="w-6 h-6 mr-2" />
-              Capturer ma position
-            </>
-          )}
-        </Button>
+        <div className="space-y-2">
+          <Button
+            type="button"
+            onClick={captureLocation}
+            disabled={isLoading}
+            className="w-full btn-xxl bg-gradient-forest hover:opacity-90"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                Localisation en cours...
+              </>
+            ) : (
+              <>
+                <MapPin className="w-6 h-6 mr-2" />
+                Capturer ma position
+              </>
+            )}
+          </Button>
+          
+          {/* Lien pour saisie manuelle */}
+          <button
+            type="button"
+            onClick={() => setShowManualInput(true)}
+            className="text-sm text-muted-foreground hover:text-foreground underline w-full text-center"
+          >
+            Ou saisir manuellement
+          </button>
+        </div>
       )}
     </div>
   );

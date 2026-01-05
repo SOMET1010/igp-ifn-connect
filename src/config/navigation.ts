@@ -46,7 +46,7 @@ export const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
   { icon: Store, label: 'Marchands', path: '/admin/marchands' },
   { icon: UserCog, label: 'Agents', path: '/admin/agents' },
-  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
+  { icon: Leaf, label: 'Producteurs', path: '/admin/producteurs' },
 ];
 
 // Admin secondary navigation (for specialized pages like vivriers, studio, etc.)
