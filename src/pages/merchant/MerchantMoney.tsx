@@ -1,16 +1,25 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Send, Wallet } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Send, Wallet, FileText, History, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { BigNumber, CardLarge, StatusBanner } from "@/components/ifn";
+import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/components/ifn";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { format } from "date-fns";
 import { 
   WalletBalance, 
   TransactionList, 
@@ -21,6 +30,18 @@ import {
 } from "@/features/wallet";
 import type { Beneficiary } from "@/features/wallet";
 import { toast } from "sonner";
+import { useTransactions, type ExportPeriod } from "@/features/merchant/hooks/useTransactions";
+import { useInvoices } from "@/features/merchant/hooks/useInvoices";
+import {
+  InvoiceCard,
+  CreateInvoiceDialog,
+  CancelInvoiceDialog,
+  InvoicesSummary,
+  InvoicesFilters,
+} from "@/features/merchant/components/invoices";
+import { Invoice } from "@/features/merchant/types/invoices.types";
+import { FNEInvoice } from "@/components/merchant/FNEInvoice";
+import { LoadingState, EmptyState } from "@/components/shared/StateComponents";
 
 interface MoneyData {
   totalSales: number;
@@ -31,6 +52,7 @@ interface MoneyData {
 
 export default function MerchantMoney() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { t } = useLanguage();
   const { isOnline } = useOnlineStatus();
@@ -41,7 +63,10 @@ export default function MerchantMoney() {
     netAmount: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("resume");
+  
+  // Tab from URL or default
+  const initialTab = searchParams.get("tab") || "resume";
+  const [activeTab, setActiveTab] = useState(initialTab);
   
   // Wallet integration
   const { 
@@ -143,16 +168,24 @@ export default function MerchantMoney() {
       />
 
       <main className="p-4 space-y-4">
-        {/* Tabs: Résumé / Portefeuille */}
+        {/* Tabs: Résumé / Portefeuille / Historique / Factures */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-14">
-            <TabsTrigger value="resume" className="text-base gap-2">
-              <ArrowUpCircle className="w-5 h-5" />
+          <TabsList className="grid w-full grid-cols-4 h-14">
+            <TabsTrigger value="resume" className="text-sm gap-1 px-2">
+              <ArrowUpCircle className="w-4 h-4" />
               Résumé
             </TabsTrigger>
-            <TabsTrigger value="wallet" className="text-base gap-2">
-              <Wallet className="w-5 h-5" />
-              Portefeuille
+            <TabsTrigger value="wallet" className="text-sm gap-1 px-2">
+              <Wallet className="w-4 h-4" />
+              Porte.
+            </TabsTrigger>
+            <TabsTrigger value="historique" className="text-sm gap-1 px-2">
+              <History className="w-4 h-4" />
+              Ventes
+            </TabsTrigger>
+            <TabsTrigger value="factures" className="text-sm gap-1 px-2">
+              <FileText className="w-4 h-4" />
+              Factures
             </TabsTrigger>
           </TabsList>
 
@@ -235,7 +268,7 @@ export default function MerchantMoney() {
                 <QuickActions 
                   onSend={handleSend}
                   onDeposit={handleDeposit}
-                  onHistory={() => navigate("/marchand/historique")}
+                  onHistory={() => setActiveTab("historique")}
                 />
 
                 {/* Beneficiaries */}
@@ -260,6 +293,16 @@ export default function MerchantMoney() {
               </CardLarge>
             )}
           </TabsContent>
+
+          {/* TAB: Historique des ventes */}
+          <TabsContent value="historique" className="space-y-4 mt-4">
+            <HistoriqueTabContent />
+          </TabsContent>
+
+          {/* TAB: Factures */}
+          <TabsContent value="factures" className="space-y-4 mt-4">
+            <FacturesTabContent />
+          </TabsContent>
         </Tabs>
 
         {/* Status Banner */}
@@ -277,6 +320,211 @@ export default function MerchantMoney() {
       />
 
       <UnifiedBottomNav items={merchantNavItems} />
+    </div>
+  );
+}
+
+// ============================
+// Sous-composant Historique
+// ============================
+function HistoriqueTabContent() {
+  const { t } = useLanguage();
+  const {
+    groupedTransactions,
+    isLoading,
+    isExporting,
+    hasMore,
+    totalCount,
+    exportPeriod,
+    setExportPeriod,
+    loadMore,
+    exportToPDF,
+  } = useTransactions();
+
+  if (isLoading) {
+    return <LoadingState message="Chargement..." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Export PDF */}
+      {totalCount > 0 && (
+        <CardLarge className="space-y-4">
+          <div className="flex items-center gap-2">
+            <FileDown className="w-5 h-5 text-primary" />
+            <span className="font-bold text-foreground">Exporter PDF</span>
+          </div>
+          <div className="flex gap-3">
+            <Select 
+              value={exportPeriod} 
+              onValueChange={(v) => setExportPeriod(v as ExportPeriod)}
+            >
+              <SelectTrigger className="flex-1 h-12">
+                <Calendar className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="today">Aujourd'hui</SelectItem>
+                <SelectItem value="week">Cette semaine</SelectItem>
+                <SelectItem value="month">Ce mois</SelectItem>
+                <SelectItem value="last30">30 derniers jours</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={exportToPDF}
+              disabled={isExporting}
+              className="h-12 px-6"
+            >
+              {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileDown className="w-5 h-5" />}
+            </Button>
+          </div>
+        </CardLarge>
+      )}
+
+      {/* Empty State */}
+      {totalCount === 0 ? (
+        <CardLarge className="text-center py-12">
+          <div className="text-6xl mb-4">📜</div>
+          <p className="text-xl text-muted-foreground">Pas encore de ventes</p>
+        </CardLarge>
+      ) : (
+        <>
+          {groupedTransactions.map((group) => (
+            <div key={group.label}>
+              <h2 className="text-lg font-bold text-foreground mb-3 capitalize">
+                {group.label}
+              </h2>
+              <div className="space-y-3">
+                {group.transactions.map((tx) => (
+                  <CardLarge key={tx.id} className="flex items-center gap-4 py-4">
+                    <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
+                      {tx.transaction_type === "cash" ? (
+                        <Banknote className="w-7 h-7 text-[hsl(142,76%,36%)]" />
+                      ) : (
+                        <Smartphone className="w-7 h-7 text-secondary" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-2xl font-black text-foreground">
+                        {Number(tx.amount).toLocaleString()}{" "}
+                        <span className="text-base font-bold">FCFA</span>
+                      </p>
+                      <p className="text-muted-foreground">
+                        {tx.transaction_type === "cash" ? "💵 Espèces" : "📱 Mobile Money"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-muted-foreground">
+                        {format(new Date(tx.created_at), "HH:mm")}
+                      </p>
+                    </div>
+                  </CardLarge>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {hasMore && (
+            <ButtonSecondary onClick={loadMore} className="mt-4">
+              <ChevronDown className="w-5 h-5 mr-2" />
+              {t("view_more")}
+            </ButtonSecondary>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================
+// Sous-composant Factures
+// ============================
+function FacturesTabContent() {
+  const {
+    filteredInvoices,
+    isLoading,
+    merchantData,
+    filter,
+    setFilter,
+    issuedCount,
+    cancelledCount,
+    totalAmount,
+    createInvoice,
+    cancelInvoice,
+    generatedInvoice,
+    clearGeneratedInvoice,
+  } = useInvoices();
+
+  const [showNewInvoice, setShowNewInvoice] = useState(false);
+  const [invoiceToCancel, setInvoiceToCancel] = useState<Invoice | null>(null);
+
+  // Show generated invoice preview
+  if (generatedInvoice) {
+    return (
+      <div className="p-2">
+        <FNEInvoice
+          invoice={generatedInvoice}
+          onClose={clearGeneratedInvoice}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <InvoicesSummary
+        issuedCount={issuedCount}
+        cancelledCount={cancelledCount}
+        totalAmount={totalAmount}
+      />
+
+      {/* Create New Invoice Button */}
+      <Button
+        className="w-full h-14 rounded-2xl text-lg shadow-lg"
+        onClick={() => setShowNewInvoice(true)}
+      >
+        <FileText className="w-5 h-5 mr-2" />
+        Nouvelle facture
+      </Button>
+
+      {/* Filters */}
+      <InvoicesFilters filter={filter} onFilterChange={setFilter} />
+
+      {/* Invoices List */}
+      <div className="space-y-3">
+        {isLoading ? (
+          <LoadingState message="Chargement..." />
+        ) : filteredInvoices.length === 0 ? (
+          <EmptyState
+            Icon={FileText}
+            title="Aucune facture"
+            message="Créez votre première facture"
+          />
+        ) : (
+          filteredInvoices.map((invoice) => (
+            <InvoiceCard
+              key={invoice.id}
+              invoice={invoice}
+              onCancel={() => setInvoiceToCancel(invoice)}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Dialogs */}
+      <CreateInvoiceDialog
+        open={showNewInvoice}
+        onOpenChange={setShowNewInvoice}
+        merchantData={merchantData}
+        onSubmit={createInvoice}
+      />
+
+      <CancelInvoiceDialog
+        invoice={invoiceToCancel}
+        onConfirm={cancelInvoice}
+        onClose={() => setInvoiceToCancel(null)}
+      />
     </div>
   );
 }

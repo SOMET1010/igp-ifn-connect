@@ -1,10 +1,10 @@
 /**
- * Routes Marchand
+ * Routes Marchand - Architecture unifiée (Phase 2)
  * 
- * Routes protégées pour les marchands
+ * 7 écrans principaux au lieu de 14
  */
 
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
 // Pages publiques (connexion vocale)
@@ -12,27 +12,23 @@ import MerchantVoiceEntry from '@/pages/merchant/MerchantVoiceEntry';
 import MerchantSecurityFallback from '@/pages/merchant/MerchantSecurityFallback';
 import MerchantVoiceRegister from '@/pages/merchant/MerchantVoiceRegister';
 
-// Pages protégées
+// Pages principales unifiées
 import MerchantDashboard from '@/pages/merchant/MerchantDashboard';
-import MerchantCashier from '@/pages/merchant/MerchantCashier';
-import MerchantCMU from '@/pages/merchant/MerchantCMU';
+import MerchantSell from '@/pages/merchant/MerchantSell';
+import MerchantMoney from '@/pages/merchant/MerchantMoney';
 import MerchantProfile from '@/pages/merchant/MerchantProfile';
-import MerchantTransactions from '@/pages/merchant/MerchantTransactions';
 import MerchantStock from '@/pages/merchant/MerchantStock';
 import MerchantCredits from '@/pages/merchant/MerchantCredits';
-import MerchantScanner from '@/pages/merchant/MerchantScanner';
-import MerchantMoney from '@/pages/merchant/MerchantMoney';
-import MerchantHelp from '@/pages/merchant/MerchantHelp';
-import MerchantInvoices from '@/pages/merchant/MerchantInvoices';
+import MerchantClose from '@/pages/merchant/MerchantClose';
+
+// Page KYC (accessible depuis profil mais aussi directement)
 import MerchantKyc from '@/pages/merchant/MerchantKyc';
-import SalesQuick from '@/pages/merchant/SalesQuick';
 
 // Module Voice Assistant
 import { VoiceAssistant } from '@/features/voice-assistant';
 
 /**
  * Routes publiques du marchand (connexion vocale uniquement)
- * MerchantLogin supprimé - redirigé vers MerchantVoiceEntry dans App.tsx
  */
 export const merchantPublicRoutes = (
   <>
@@ -43,24 +39,33 @@ export const merchantPublicRoutes = (
 );
 
 /**
- * Routes protégées du marchand
+ * Routes protégées du marchand - Architecture 7 écrans
  */
 export const merchantProtectedRoutes = (
   <Route element={<RequireRole requiredRole="merchant" />}>
+    {/* === ROUTES PRINCIPALES (7) === */}
     <Route path="/marchand" element={<MerchantDashboard />} />
-    <Route path="/marchand/encaisser" element={<MerchantCashier />} />
-    <Route path="/marchand/historique" element={<MerchantTransactions />} />
+    <Route path="/marchand/vendre" element={<MerchantSell />} />
     <Route path="/marchand/argent" element={<MerchantMoney />} />
-    <Route path="/marchand/aide" element={<MerchantHelp />} />
     <Route path="/marchand/profil" element={<MerchantProfile />} />
     <Route path="/marchand/stock" element={<MerchantStock />} />
-    <Route path="/marchand/cmu" element={<MerchantCMU />} />
     <Route path="/marchand/credits" element={<MerchantCredits />} />
-    <Route path="/marchand/scanner" element={<MerchantScanner />} />
-    <Route path="/marchand/factures" element={<MerchantInvoices />} />
+    <Route path="/marchand/cloture" element={<MerchantClose />} />
+    
+    {/* KYC standalone (wizard complet) */}
     <Route path="/marchand/kyc" element={<MerchantKyc />} />
-    <Route path="/marchand/vente-rapide" element={<SalesQuick />} />
+    
+    {/* Assistant vocal */}
     <Route path="/marchand/assistant-vocal" element={<VoiceAssistant />} />
+
+    {/* === REDIRECTIONS LEGACY (compatibilité) === */}
+    <Route path="/marchand/encaisser" element={<Navigate to="/marchand/vendre" replace />} />
+    <Route path="/marchand/scanner" element={<Navigate to="/marchand/vendre?mode=scanner" replace />} />
+    <Route path="/marchand/vente-rapide" element={<Navigate to="/marchand/vendre?mode=rapide" replace />} />
+    <Route path="/marchand/historique" element={<Navigate to="/marchand/argent?tab=historique" replace />} />
+    <Route path="/marchand/factures" element={<Navigate to="/marchand/argent?tab=factures" replace />} />
+    <Route path="/marchand/aide" element={<Navigate to="/marchand/profil?section=aide" replace />} />
+    <Route path="/marchand/cmu" element={<Navigate to="/marchand/profil?section=cmu" replace />} />
   </Route>
 );
 

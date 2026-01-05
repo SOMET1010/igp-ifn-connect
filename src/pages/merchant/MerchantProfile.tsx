@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { LogOut, Volume2, VolumeX, Loader2, Bell, Mic, DoorOpen } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { LogOut, Volume2, VolumeX, Loader2, Bell, Mic, DoorOpen, Phone, Shield, HelpCircle, ChevronRight, Package, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -26,14 +26,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+// Sous-composants des sections fusionnées
+import { HelpSectionContent } from "./components/HelpSectionContent";
+import { CMUSectionContent } from "./components/CMUSectionContent";
+import { KYCSectionContent } from "./components/KYCSectionContent";
 
 export default function MerchantProfile() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signOut } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { isSupported, isSubscribed, isLoading: notifLoading, subscribe, unsubscribe } = usePushNotifications();
+  
+  // Section ouverte depuis URL
+  const initialSection = searchParams.get("section") || "";
+  const [openSection, setOpenSection] = useState<string>(initialSection);
   
   const {
     profile,
@@ -206,7 +222,94 @@ export default function MerchantProfile() {
           </CardContent>
         </Card>
 
-        {/* Bouton Déconnexion - Neutre avec confirmation */}
+        {/* Sections intégrées: Aide, CMU, KYC */}
+        <Accordion 
+          type="single" 
+          collapsible 
+          value={openSection}
+          onValueChange={setOpenSection}
+          className="space-y-2"
+        >
+          {/* Section Aide */}
+          <AccordionItem value="aide" className="border rounded-xl bg-white overflow-hidden">
+            <AccordionTrigger className="px-4 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <HelpCircle className="w-5 h-5 text-amber-600" />
+                </div>
+                <span className="font-semibold text-foreground">Aide & Tutoriels</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <HelpSectionContent />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section CMU */}
+          <AccordionItem value="cmu" className="border rounded-xl bg-white overflow-hidden">
+            <AccordionTrigger className="px-4 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-pnavim-secondary/10 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-pnavim-secondary" />
+                </div>
+                <span className="font-semibold text-foreground">Ma Protection Santé (CMU)</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <CMUSectionContent />
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Section KYC */}
+          <AccordionItem value="kyc" className="border rounded-xl bg-white overflow-hidden">
+            <AccordionTrigger className="px-4 py-4 hover:no-underline">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-blue-600" />
+                </div>
+                <span className="font-semibold text-foreground">Vérification Identité</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <KYCSectionContent />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        {/* Liens secondaires: Stock et Crédits */}
+        <div className="space-y-2">
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => navigate("/marchand/stock")}
+          >
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-orange-600" />
+                </div>
+                <span className="font-medium text-foreground">Mon Stock</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => navigate("/marchand/credits")}
+          >
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-purple-600" />
+                </div>
+                <span className="font-medium text-foreground">Mes Crédits Clients</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bouton Déconnexion */}
         <Button
           onClick={() => setShowLogoutDialog(true)}
           variant="outline"

@@ -91,11 +91,11 @@ export default function MerchantDashboard() {
 
   const handleVendre = () => {
     triggerMoney();
-    navigate("/marchand/encaisser");
+    navigate("/marchand/vendre");
   };
 
   const handleMesVentes = () => {
-    navigate("/marchand/historique");
+    navigate("/marchand/argent?tab=historique");
   };
 
   const handleVoiceCommand = () => {
