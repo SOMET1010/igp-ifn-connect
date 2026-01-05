@@ -9,7 +9,8 @@ import {
   PublicMapFilters, 
   PublicMapFiltersState, 
   PublicMapLegend, 
-  getPublicMapIcon 
+  getPublicMapIcon,
+  initLeafletIcons
 } from '@/components/public/map';
 
 const TYPE_LABELS: Record<PublicMapEntity['type'], string> = {
@@ -34,6 +35,11 @@ const PublicMapPage: React.FC = () => {
     markets: true,
     cooperatives: true,
   });
+
+  // Initialize Leaflet icons on mount
+  useEffect(() => {
+    initLeafletIcons();
+  }, []);
 
   // Fetch data on mount
   useEffect(() => {

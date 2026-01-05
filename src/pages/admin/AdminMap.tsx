@@ -5,7 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useAdminMapData } from '@/features/admin';
-import { MapFilters, MapLegend, getIcon, TYPE_LABELS } from '@/components/admin/map';
+import { MapFilters, MapLegend, getIcon, TYPE_LABELS, initLeafletIcons } from '@/components/admin/map';
 
 // Component to set map view
 const SetViewOnLoad: React.FC<{ center: [number, number] }> = ({ center }) => {
@@ -19,6 +19,11 @@ const SetViewOnLoad: React.FC<{ center: [number, number] }> = ({ center }) => {
 const AdminMap: React.FC = () => {
   const navigate = useNavigate();
   const { filteredEntities, isLoading, filters, toggleFilter } = useAdminMapData();
+
+  // Initialize Leaflet icons on mount
+  useEffect(() => {
+    initLeafletIcons();
+  }, []);
 
   // Center on Côte d'Ivoire
   const defaultCenter: [number, number] = [7.54, -5.55];
