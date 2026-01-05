@@ -198,6 +198,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
+        // IMPORTANT: éviter la course navigation vs. contexte auth.
+        // Dès qu'un event arrive, on passe en "loading" pour que les guards n'auto-redirigent pas.
+        setIsLoading(true);
+
+        // Mettre à jour session/user immédiatement (sync), le rôle sera (re)chargé par initializeAuth.
+        setSession(session ?? null);
+        setUser(session?.user ?? null);
+
         // Defer initialization with setTimeout to avoid deadlock
         setTimeout(() => {
           initializeAuth(session);
