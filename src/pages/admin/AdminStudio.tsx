@@ -10,8 +10,9 @@ import { StudioSessionComplete } from '@/components/studio/StudioSessionComplete
 import { translations, LANGUAGES, LanguageCode } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle, Home, Activity, BarChart3, Map as MapIcon } from 'lucide-react';
 import { adminLogger } from '@/infra/logger';
+import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 
 interface RecordingStatus {
   [key: string]: boolean;
@@ -321,8 +322,15 @@ export default function AdminStudio() {
 
   const currentLanguageInfo = LANGUAGES.find(l => l.code === selectedLanguage);
 
+  const navItems = useMemo(() => [
+    { icon: Home, label: 'Dashboard', path: '/admin' },
+    { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
+    { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
+    { icon: MapIcon, label: 'Carte', path: '/admin/carte' },
+  ], []);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -498,6 +506,8 @@ export default function AdminStudio() {
           </div>
         )}
       </div>
+
+      <UnifiedBottomNav items={navItems} />
     </div>
   );
 }
