@@ -183,8 +183,16 @@ class VoiceQueueService {
    * Exécuter la synthèse vocale
    */
   private async executeSpeak(text: string): Promise<void> {
-    // Toujours annuler l'audio précédent
-    this.cancel();
+    console.log('[VoiceQueue] executeSpeak:', text);
+    
+    // Annuler audio précédent (SANS cancel() complet qui reset isSpeaking)
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
 
     this.isLoading = true;
     this.onStart?.();
@@ -192,11 +200,13 @@ class VoiceQueueService {
     try {
       if (this.speakFn) {
         // Utiliser la fonction enregistrée (ElevenLabs)
+        console.log('[VoiceQueue] Using custom speakFn');
         this.isSpeaking = true;
         this.isLoading = false;
         await this.speakFn(text);
       } else {
         // Fallback Web Speech API
+        console.log('[VoiceQueue] Using Web Speech API fallback');
         await this.webSpeechSpeak(text);
       }
     } catch (error) {
@@ -215,36 +225,74 @@ class VoiceQueueService {
    */
   private webSpeechSpeak(text: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!window.speechSynthesis) {
+      if (typeof window === 'undefined' || !window.speechSynthesis) {
+        console.error('[VoiceQueue] Web Speech API non supportée');
         reject(new Error('Web Speech API non supportée'));
         return;
       }
 
+      console.log('[VoiceQueue] Creating utterance for:', text);
+      
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'fr-FR';
-      utterance.rate = 0.95;
+      utterance.rate = 0.9;
       utterance.pitch = 1;
+      utterance.volume = 1;
+
+      // Obtenir les voix disponibles (async sur certains navigateurs)
+      const setVoice = () => {
+        const voices = window.speechSynthesis.getVoices();
+        console.log('[VoiceQueue] Available voices:', voices.length);
+        
+        // Chercher une voix française
+        const frenchVoice = voices.find(v => v.lang.startsWith('fr')) 
+          || voices.find(v => v.lang.includes('FR'))
+          || voices[0];
+        
+        if (frenchVoice) {
+          console.log('[VoiceQueue] Using voice:', frenchVoice.name);
+          utterance.voice = frenchVoice;
+        }
+      };
+
+      // Charger les voix si pas encore disponibles
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = setVoice;
+      } else {
+        setVoice();
+      }
 
       utterance.onstart = () => {
+        console.log('[VoiceQueue] Speech started');
         this.isSpeaking = true;
         this.isLoading = false;
       };
 
       utterance.onend = () => {
+        console.log('[VoiceQueue] Speech ended');
         this.isSpeaking = false;
         resolve();
       };
 
       utterance.onerror = (event) => {
+        console.error('[VoiceQueue] Speech error:', event.error);
         this.isSpeaking = false;
-        if (event.error !== 'canceled') {
+        if (event.error !== 'canceled' && event.error !== 'interrupted') {
           reject(new Error(`Speech error: ${event.error}`));
         } else {
-          resolve(); // Cancelled is not an error
+          resolve(); // Cancelled/interrupted is not a real error
         }
       };
 
+      // Chrome bug: parfois speechSynthesis reste "stuck"
+      // Workaround: resume si pausé
+      if (window.speechSynthesis.paused) {
+        console.log('[VoiceQueue] Resuming paused speechSynthesis');
+        window.speechSynthesis.resume();
+      }
+
       window.speechSynthesis.speak(utterance);
+      console.log('[VoiceQueue] speak() called');
     });
   }
 
