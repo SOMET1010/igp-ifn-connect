@@ -1,11 +1,17 @@
+/**
+ * useSimpleVoiceTranscription - Hook simplifié pour transcription vocale
+ * 
+ * Utilise Web Speech API native avec analyse audio intégrée directement.
+ * Structure de hooks 100% stable pour éviter les erreurs React.
+ */
+
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { toast } from 'sonner';
-import { useAudioLevel, type AudioStatus } from './useAudioLevel';
 
-// Regex pour extraire les numéros ivoiriens
-const PHONE_REGEX = /(?:\+?225\s?)?(?:0?[1579])\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}/g;
+// === TYPES ===
+export type VoiceState = 'idle' | 'connecting' | 'listening' | 'processing' | 'error';
+export type AudioStatus = 'silence' | 'weak' | 'ok';
 
-// Mapping des mots en chiffres
+// === HELPERS ===
 const WORD_TO_DIGIT: Record<string, string> = {
   'zéro': '0', 'zero': '0',
   'un': '1', 'une': '1',
@@ -32,80 +38,78 @@ function extractPhoneNumber(text: string): string | null {
   const converted = convertWordsToDigits(text);
   const digitsOnly = converted.replace(/\D/g, '');
   
-  if (digitsOnly.length >= 8 && digitsOnly.length <= 12) {
-    if (digitsOnly.length === 8 && /^[1579]/.test(digitsOnly)) {
-      return '0' + digitsOnly;
-    }
-    if (digitsOnly.length === 10 && digitsOnly.startsWith('0')) {
-      return digitsOnly;
-    }
-    if (digitsOnly.startsWith('225')) {
-      const withoutCode = digitsOnly.slice(3);
-      if (withoutCode.length === 10) return withoutCode;
-      if (withoutCode.length === 8) return '0' + withoutCode;
+  // Numéro ivoirien : 10 chiffres commençant par 0
+  if (digitsOnly.length >= 10) {
+    const last10 = digitsOnly.slice(-10);
+    if (last10.startsWith('0')) {
+      return last10;
     }
   }
   
-  const matches = converted.match(PHONE_REGEX);
-  if (matches && matches.length > 0) {
-    return matches[0].replace(/[\s.-]/g, '').replace(/^\+?225/, '0');
+  // 8 chiffres sans le 0 initial
+  if (digitsOnly.length === 8 && /^[1579]/.test(digitsOnly)) {
+    return '0' + digitsOnly;
   }
   
-  return null;
+  // Retourner les chiffres extraits (même incomplets)
+  return digitsOnly.length > 0 ? digitsOnly : null;
 }
 
-type VoiceState = 'idle' | 'requesting_mic' | 'listening' | 'processing' | 'error';
+function getSpeechRecognition(): (new () => any) | null {
+  if (typeof window === 'undefined') return null;
+  return (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null;
+}
 
+// === INTERFACE ===
 interface UseSimpleVoiceTranscriptionOptions {
   onPhoneDetected: (phone: string) => void;
   onError?: (error: string) => void;
   onDigitsProgress?: (digits: string, count: number) => void;
 }
 
-// Récupérer la classe SpeechRecognition de manière cross-browser
-function getSpeechRecognition(): (new () => any) | null {
-  if (typeof window === 'undefined') return null;
-  return (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null;
-}
-
+// === HOOK PRINCIPAL ===
 export function useSimpleVoiceTranscription({
   onPhoneDetected,
   onError,
   onDigitsProgress,
 }: UseSimpleVoiceTranscriptionOptions) {
+  // === ÉTATS (ordre fixe - 6 états) ===
   const [transcript, setTranscript] = useState('');
   const [extractedDigits, setExtractedDigits] = useState('');
   const [state, setState] = useState<VoiceState>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [isReceivingAudio, setIsReceivingAudio] = useState(false);
 
-  const { smoothedLevel, audioStatus, silenceDuration, isReceivingAudio, levelHistory, startAnalyzing, stopAnalyzing } = useAudioLevel();
-  const streamRef = useRef<MediaStream | null>(null);
-
+  // === REFS (ordre fixe - 10 refs) ===
   const recognitionRef = useRef<any>(null);
-  const hasDetectedRef = useRef(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const audioIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasDetectedRef = useRef(false);
   const hasErroredRef = useRef(false);
-
-  // "L'utilisateur veut écouter" (sert à éviter les fins silencieuses)
   const wantsToListenRef = useRef(false);
-  // Restart propre après no-speech (il faut attendre onend)
-  const restartOnEndRef = useRef(false);
-
   const transcriptRef = useRef('');
 
+  // === CLEANUP (1 useCallback) ===
   const cleanup = useCallback(() => {
+    console.log('[SimpleSTT] 🧹 Cleanup');
+
+    // Stop audio interval
+    if (audioIntervalRef.current) {
+      clearInterval(audioIntervalRef.current);
+      audioIntervalRef.current = null;
+    }
+
+    // Stop timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
 
-    // Stop analyser d'abord, puis couper le stream
-    stopAnalyzing();
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-
+    // Stop recognition
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -114,10 +118,31 @@ export function useSimpleVoiceTranscription({
       }
       recognitionRef.current = null;
     }
-  }, [stopAnalyzing]);
 
+    // Stop audio context
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch {
+        // ignore
+      }
+      audioContextRef.current = null;
+    }
+
+    // Stop media stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    analyserRef.current = null;
+    setAudioLevel(0);
+    setIsReceivingAudio(false);
+  }, []);
+
+  // === HANDLE RESULT (1 useCallback) ===
   const handleResult = useCallback((text: string) => {
-    console.log('[SimpleSTT] Result:', text);
+    console.log('[SimpleSTT] 📝 Result:', text);
     transcriptRef.current = text;
     setTranscript(text);
 
@@ -133,7 +158,7 @@ export function useSimpleVoiceTranscription({
 
     const phone = extractPhoneNumber(text);
     if (phone && phone.length >= 10) {
-      console.log('[SimpleSTT] Phone detected:', phone);
+      console.log('[SimpleSTT] 📱 Phone detected:', phone);
       hasDetectedRef.current = true;
       wantsToListenRef.current = false;
       cleanup();
@@ -142,6 +167,7 @@ export function useSimpleVoiceTranscription({
     }
   }, [onPhoneDetected, onDigitsProgress, cleanup]);
 
+  // === NOTIFY ERROR (1 useCallback) ===
   const notifyError = useCallback((msg: string) => {
     if (hasErroredRef.current) return;
     hasErroredRef.current = true;
@@ -149,31 +175,25 @@ export function useSimpleVoiceTranscription({
     setErrorMessage(msg);
     setState('error');
     onError?.(msg);
-    
-    // Fallback toast hors iframe
-    try {
-      if (window.self === window.top && !onError) {
-        toast.error(msg);
-      }
-    } catch {
-      // ignore iframe check errors
-    }
   }, [onError]);
 
+  // === START LISTENING (1 useCallback) ===
   const startListening = useCallback(async (): Promise<boolean> => {
-    // Reset
+    console.log('[SimpleSTT] 🎬 Starting...');
+    
+    // Reset flags
     hasErroredRef.current = false;
     hasDetectedRef.current = false;
     wantsToListenRef.current = true;
-    restartOnEndRef.current = false;
 
+    // Reset state
     setTranscript('');
     transcriptRef.current = '';
     setExtractedDigits('');
     setErrorMessage(null);
     cleanup();
 
-    // Vérifier iframe
+    // Check iframe
     try {
       if (window.self !== window.top) {
         notifyError("Le micro ne fonctionne pas dans l'aperçu. Ouvre en plein écran.");
@@ -186,7 +206,7 @@ export function useSimpleVoiceTranscription({
       return false;
     }
 
-    // Vérifier support Web Speech API
+    // Check browser support
     const SpeechRecognitionClass = getSpeechRecognition();
     if (!SpeechRecognitionClass) {
       notifyError("Ton navigateur ne supporte pas la reconnaissance vocale.");
@@ -194,21 +214,60 @@ export function useSimpleVoiceTranscription({
       return false;
     }
 
-    setState('requesting_mic');
+    setState('connecting');
 
     try {
-      // Ouvrir le micro (permissions + device) + mesurer le niveau audio
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Get microphone access
+      console.log('[SimpleSTT] 🎤 Requesting microphone...');
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
       streamRef.current = stream;
-      startAnalyzing(stream);
+      console.log('[SimpleSTT] ✅ Microphone granted');
 
-      console.log('[SimpleSTT] Microphone OK, starting recognition...');
+      // Setup audio analysis (inline, no separate hook)
+      try {
+        const audioContext = new AudioContext();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+        
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        
+        audioContextRef.current = audioContext;
+        analyserRef.current = analyser;
 
+        // Start audio level monitoring
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        audioIntervalRef.current = setInterval(() => {
+          if (analyserRef.current) {
+            analyserRef.current.getByteFrequencyData(dataArray);
+            const sum = dataArray.reduce((a, b) => a + b, 0);
+            const avg = sum / dataArray.length / 255;
+            setAudioLevel(avg);
+            setIsReceivingAudio(avg > 0.02);
+          }
+        }, 50);
+        
+        console.log('[SimpleSTT] 📊 Audio analysis started');
+      } catch (audioError) {
+        console.warn('[SimpleSTT] ⚠️ Audio analysis failed:', audioError);
+        // Continue without audio analysis
+      }
+
+      // Setup speech recognition
       const recognition = new SpeechRecognitionClass();
-      recognition.continuous = false; // plus fiable (on relance via onend)
+      recognition.continuous = false;
       recognition.interimResults = true;
       recognition.lang = 'fr-FR';
       recognition.maxAlternatives = 1;
+      recognitionRef.current = recognition;
 
       recognition.onstart = () => {
         console.log('[SimpleSTT] 🎤 Recognition started - PARLE MAINTENANT');
@@ -217,10 +276,6 @@ export function useSimpleVoiceTranscription({
 
       recognition.onaudiostart = () => {
         console.log('[SimpleSTT] 🔊 Audio capture started');
-      };
-
-      recognition.onsoundstart = () => {
-        console.log('[SimpleSTT] 🔈 Sound detected');
       };
 
       recognition.onspeechstart = () => {
@@ -241,27 +296,19 @@ export function useSimpleVoiceTranscription({
         }
 
         const text = finalTranscript || interimTranscript;
-        console.log('[SimpleSTT] 📝 Result:', text, '(final:', !!finalTranscript, ')');
         handleResult(text);
       };
 
       recognition.onerror = (event: any) => {
-        console.error('[SimpleSTT] ❌ Error:', event.error, event.message);
+        console.warn('[SimpleSTT] ⚠️ Error:', event.error);
 
         if (event.error === 'aborted') {
-          // Arrêt volontaire - ignorer
           return;
         }
 
-        // no-speech: on relance proprement via onend
+        // no-speech: auto-restart
         if (event.error === 'no-speech') {
-          console.log('[SimpleSTT] 🔄 No speech detected, restarting on end...');
-          restartOnEndRef.current = true;
-          try {
-            recognition.stop();
-          } catch {
-            // ignore
-          }
+          console.log('[SimpleSTT] 🔄 No speech, will restart on end...');
           return;
         }
 
@@ -276,9 +323,6 @@ export function useSimpleVoiceTranscription({
           case 'audio-capture':
             msg = 'Problème de capture audio. Vérifie ton micro.';
             break;
-          case 'service-not-allowed':
-            msg = 'Service vocal non autorisé sur ce navigateur.';
-            break;
         }
 
         wantsToListenRef.current = false;
@@ -287,14 +331,14 @@ export function useSimpleVoiceTranscription({
       };
 
       recognition.onend = () => {
-        console.log('[SimpleSTT] 🔚 Recognition ended, restartOnEnd:', restartOnEndRef.current);
+        console.log('[SimpleSTT] 🔚 Recognition ended');
 
         if (!wantsToListenRef.current || hasDetectedRef.current || hasErroredRef.current) {
           setState(hasDetectedRef.current ? 'processing' : (hasErroredRef.current ? 'error' : 'idle'));
           return;
         }
 
-        // Tentative de déduction à la fin (si on a un bout de transcript)
+        // Try to extract phone from last transcript
         const last = transcriptRef.current;
         if (last) {
           const phone = extractPhoneNumber(last);
@@ -308,22 +352,21 @@ export function useSimpleVoiceTranscription({
           }
         }
 
-        // Relance automatique (no-speech ou fin normale)
-        restartOnEndRef.current = false;
+        // Auto-restart
         try {
           recognition.start();
-          console.log('[SimpleSTT] ▶️ Restart recognition.start()');
+          console.log('[SimpleSTT] ▶️ Restarted recognition');
         } catch (e) {
           console.warn('[SimpleSTT] Restart failed:', e);
           setState('idle');
         }
       };
 
-      recognitionRef.current = recognition;
+      // Start recognition
       recognition.start();
-      console.log('[SimpleSTT] ▶️ Recognition.start() called');
+      console.log('[SimpleSTT] ▶️ Recognition started');
 
-      // Timeout global de 30s
+      // Set timeout (30 seconds)
       timeoutRef.current = setTimeout(() => {
         if (!hasDetectedRef.current && !hasErroredRef.current) {
           console.log('[SimpleSTT] ⏰ Timeout after 30s');
@@ -335,8 +378,9 @@ export function useSimpleVoiceTranscription({
       }, 30000);
 
       return true;
+
     } catch (err: any) {
-      console.error('[SimpleSTT] Setup error:', err);
+      console.error('[SimpleSTT] ❌ Start failed:', err);
 
       let msg = 'Erreur vocale';
       if (err.name === 'NotAllowedError') {
@@ -351,37 +395,43 @@ export function useSimpleVoiceTranscription({
     }
   }, [cleanup, handleResult, notifyError, onPhoneDetected, onError]);
 
+  // === STOP LISTENING (1 useCallback) ===
   const stopListening = useCallback(() => {
-    console.log('[SimpleSTT] Stopping...');
+    console.log('[SimpleSTT] ⏹️ Stop requested');
     wantsToListenRef.current = false;
-    restartOnEndRef.current = false;
     cleanup();
     setState('idle');
   }, [cleanup]);
 
-  // Cleanup on unmount
+  // === CLEANUP ON UNMOUNT (1 useEffect) ===
   useEffect(() => {
     return () => {
       cleanup();
     };
   }, [cleanup]);
 
+  // === RETURN ===
   return {
-    startListening,
-    stopListening,
+    // State
     isConnected: state === 'listening',
-    isConnecting: state === 'requesting_mic',
+    isConnecting: state === 'connecting',
     transcript,
     partialTranscript: transcript,
     extractedDigits,
     errorMessage,
     state,
-    // Vrais feedbacks micro
-    audioLevel: smoothedLevel,
+    
+    // Audio feedback
+    audioLevel,
     isReceivingAudio,
-    levelHistory,
-    audioStatus,
-    silenceDuration,
+    audioStatus: (isReceivingAudio ? 'ok' : 'silence') as AudioStatus,
+    silenceDuration: 0,
+    levelHistory: [] as number[],
+    
+    // Actions
+    startListening,
+    stopListening,
+    
     // Compat
     scribeStatus: state,
     scribeError: errorMessage,
