@@ -110,6 +110,10 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
     
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Sur iOS/Safari, l'AudioContext peut démarrer "suspended"
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
+      }
       audioContextRef.current = audioContext;
       
       const analyser = audioContext.createAnalyser();

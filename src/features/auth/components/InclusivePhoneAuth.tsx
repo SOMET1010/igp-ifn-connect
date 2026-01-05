@@ -81,6 +81,9 @@ export function InclusivePhoneAuth({
     isConnecting: isVoiceConnecting,
     transcript,
     extractedDigits,
+    errorMessage: voiceError,
+    scribeStatus,
+    scribeError,
     // Métriques audio pour feedback visuel
     audioLevel,
     isReceivingAudio,
@@ -1220,7 +1223,7 @@ export function InclusivePhoneAuth({
                 </div>
 
                 {/* Feedback audio temps réel - TRÈS VISIBLE */}
-                {(isListeningMic || isVoiceConnected) && (
+                {(isListeningMic || isVoiceConnected || voiceState !== 'idle') && (
                   <div className="flex flex-col items-center gap-2 w-full max-w-xs">
                     {/* Indicateur de niveau audio - barres */}
                     <AudioLevelIndicator
@@ -1233,9 +1236,10 @@ export function InclusivePhoneAuth({
                     
                     {/* Message contextuel (Je t'écoute / Je n'entends rien...) */}
                     <AudioFeedbackBanner
-                      state={voiceState === 'listening' ? 'listening' : voiceState === 'connecting' ? 'connecting' : 'requesting_mic'}
+                      state={voiceState}
                       audioStatus={audioStatus}
                       silenceDuration={silenceDuration}
+                      errorMessage={voiceError ?? scribeError}
                       onRetry={handleMicClick}
                     />
                     
@@ -1251,6 +1255,8 @@ export function InclusivePhoneAuth({
                         isConnecting={isVoiceConnecting}
                         transcript={transcript}
                         extractedDigits={extractedDigits}
+                        scribeStatus={scribeStatus}
+                        scribeError={scribeError}
                       />
                     )}
                   </div>
