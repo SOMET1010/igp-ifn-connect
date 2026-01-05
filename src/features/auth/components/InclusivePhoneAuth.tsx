@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
-import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
+import { useSimpleVoiceTranscription } from '@/features/auth/hooks/useSimpleVoiceTranscription';
 import { SocialChallenge } from './SocialChallenge';
 import { SimpleRegistrationForm } from './SimpleRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,7 +106,7 @@ export function InclusivePhoneAuth({
     audioStatus,
     silenceDuration,
     state: voiceState,
-  } = useVoiceTranscription({
+  } = useSimpleVoiceTranscription({
     onPhoneDetected: (detectedPhone) => {
       // Annuler l'annonce en cours si elle existe
       if (listeningAnnouncementRef.current) {
