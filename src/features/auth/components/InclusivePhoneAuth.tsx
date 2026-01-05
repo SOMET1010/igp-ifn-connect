@@ -133,7 +133,7 @@ export function InclusivePhoneAuth({
     return '✅ Numéro complet !';
   };
 
-  // Démarrer l'écoute micro
+  // Démarrer l'écoute micro avec fallback automatique
   const handleMicClick = async () => {
     if (isListeningMic || isVoiceConnecting) {
       stopListening();
@@ -141,14 +141,28 @@ export function InclusivePhoneAuth({
       return;
     }
 
+    // Timeout fallback: si rien après 5s, afficher le clavier
+    const fallbackTimeout = setTimeout(() => {
+      if (isListeningMic) {
+        stopListening();
+        setIsListeningMic(false);
+        toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
+        speak('Tape ton numéro sur le clavier', { priority: 'normal' });
+      }
+    }, 5000);
+
     try {
       setIsListeningMic(true);
       vibrate(50);
       speak("Je t'écoute, dis ton numéro", { priority: 'high' });
       await startListening();
+      clearTimeout(fallbackTimeout);
     } catch (err) {
+      clearTimeout(fallbackTimeout);
       setIsListeningMic(false);
-      toast.error('Active le micro pour utiliser la voix');
+      // Fallback silencieux vers clavier
+      toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
+      speak('Tape ton numéro sur le clavier', { priority: 'normal' });
     }
   };
 
