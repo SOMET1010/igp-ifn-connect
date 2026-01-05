@@ -544,13 +544,16 @@ export function InclusivePhoneAuth({
         
         // Se connecter après l'inscription
         if (userId) {
-          const { error: retrySignIn } = await supabase.auth.signInWithPassword({
+          const { error: retrySignIn, data: retryData } = await supabase.auth.signInWithPassword({
             email,
             password
           });
           if (retrySignIn) {
             console.error('[finalizeLogin] Retry sign in failed:', retrySignIn);
+            throw retrySignIn;
           }
+          // Mettre à jour userId avec les données de la nouvelle session
+          userId = retryData?.user?.id;
         }
       } else if (signInError) {
         throw signInError;
@@ -592,9 +595,30 @@ export function InclusivePhoneAuth({
       toast.success('Connexion réussie !');
       if (voiceEnabled) speak('Bienvenue ! Tu es connecté.', { priority: 'high' });
       
-      setTimeout(() => {
-        navigate(redirectPath);
-      }, 1500);
+      // Attendre que la session soit bien établie avant de naviguer
+      // Vérifier que la session est active avant de rediriger
+      const checkSession = async (): Promise<boolean> => {
+        const { data } = await supabase.auth.getSession();
+        return !!data.session;
+      };
+      
+      // Attendre jusqu'à 3 secondes que la session soit prête
+      let attempts = 0;
+      const maxAttempts = 6;
+      while (attempts < maxAttempts) {
+        const hasSession = await checkSession();
+        if (hasSession) {
+          console.log('[finalizeLogin] Session confirmed, navigating...');
+          navigate(redirectPath);
+          return;
+        }
+        await new Promise(r => setTimeout(r, 500));
+        attempts++;
+      }
+      
+      // Si on arrive ici, forcer la navigation quand même
+      console.warn('[finalizeLogin] Session check timed out, navigating anyway');
+      navigate(redirectPath);
       
     } catch (error: any) {
       console.error('[finalizeLogin] Error:', error);
