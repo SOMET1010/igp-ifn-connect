@@ -34,6 +34,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import MyAccount from "./pages/account/MyAccount";
 import VivriersCooperativesPage from "./pages/public/VivriersCooperativesPage";
+const PublicMapPage = React.lazy(() => import("./pages/public/PublicMapPage"));
 import DemoAccess from "./pages/DemoAccess";
 
 // Pages fallback PRÉ-PROD
@@ -106,6 +107,7 @@ const App = () => (
                           <Route path="/demo" element={<DemoAccess />} />
                           <Route path="/compte" element={<MyAccount />} />
                           <Route path="/cooperatives" element={<VivriersCooperativesPage />} />
+                          <Route path="/carte" element={<PublicMapPage />} />
                           <Route path="/accueil" element={<Navigate to="/" replace />} />
 
                           {/* Routes fallback PRÉ-PROD */}

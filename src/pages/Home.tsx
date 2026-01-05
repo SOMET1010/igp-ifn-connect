@@ -423,6 +423,13 @@ const Index: React.FC = () => {
             <span>👥</span>
             <span>{t('view_cooperatives') || 'Voir les Coopératives'}</span>
           </button>
+          <button
+            onClick={() => { triggerTap(); navigate('/carte'); }}
+            className="bg-blue-600/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors border border-blue-500/40 flex items-center gap-2 min-h-[52px]"
+          >
+            <span>🗺️</span>
+            <span>{t('view_map') || 'Voir la Carte'}</span>
+          </button>
         </motion.div>
 
         {/* Footer logos institutionnels avec fond dégradé */}
