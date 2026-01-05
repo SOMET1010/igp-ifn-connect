@@ -1047,29 +1047,35 @@ export function InclusivePhoneAuth({
               className="space-y-4"
             >
               {/* MICRO GÉANT - Centre d'attention */}
-              <div className="flex flex-col items-center gap-3 py-2">
-                {/* Barres audio animées autour du micro */}
+              <div className="flex flex-col items-center gap-4 py-2">
+                {/* Zone micro avec anneau de progression */}
                 <div className="relative">
+                  {/* Anneau de progression des chiffres */}
                   {(isListeningMic || isVoiceConnected) && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="flex items-end gap-1 h-28 w-28">
-                        {[...Array(5)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className="w-2 bg-white/60 rounded-full"
-                            animate={{
-                              height: [8, 20 + Math.random() * 20, 8],
-                            }}
-                            transition={{
-                              duration: 0.4 + Math.random() * 0.3,
-                              repeat: Infinity,
-                              repeatType: 'reverse',
-                              delay: i * 0.1,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                    <svg className="absolute inset-0 w-32 h-32 -m-4" viewBox="0 0 120 120">
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="54"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.2)"
+                        strokeWidth="6"
+                      />
+                      <motion.circle
+                        cx="60"
+                        cy="60"
+                        r="54"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={339.3}
+                        initial={{ strokeDashoffset: 339.3 }}
+                        animate={{ strokeDashoffset: 339.3 - (339.3 * (extractedDigits.length / 10)) }}
+                        transition={{ duration: 0.3 }}
+                        transform="rotate(-90 60 60)"
+                      />
+                    </svg>
                   )}
                   
                   <motion.button
@@ -1078,10 +1084,12 @@ export function InclusivePhoneAuth({
                     className={cn(
                       "relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all shadow-lg",
                       isListeningMic || isVoiceConnected
-                        ? "bg-red-500 ring-4 ring-red-400/50 animate-pulse"
+                        ? "bg-red-500 ring-4 ring-red-400/50"
                         : "bg-white/20 hover:bg-white/30 hover:scale-105"
                     )}
                     whileTap={{ scale: 0.95 }}
+                    animate={isListeningMic || isVoiceConnected ? { scale: [1, 1.05, 1] } : {}}
+                    transition={isListeningMic || isVoiceConnected ? { duration: 1.5, repeat: Infinity } : {}}
                   >
                     {isVoiceConnecting ? (
                       <Loader2 className="w-10 h-10 text-white animate-spin" />
@@ -1093,55 +1101,78 @@ export function InclusivePhoneAuth({
                   </motion.button>
                 </div>
 
-                {/* État et feedback */}
-                <div className="text-center space-y-1">
-                  <p className="text-white text-sm font-medium">
-                    {isVoiceConnecting
-                      ? '⏳ Connexion...'
-                      : isListeningMic || isVoiceConnected
-                        ? '🎙️ Je t\'écoute !'
-                        : '👆 Appuie et parle'}
-                  </p>
-
-                  {/* Affichage des chiffres détectés en temps réel */}
-                  {(isListeningMic || isVoiceConnected) && extractedDigits && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white/90 rounded-xl px-4 py-2"
-                    >
-                      <p className="text-xl font-mono font-bold text-emerald-600 tracking-wider">
-                        {formatPhoneDisplay(extractedDigits)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {extractedDigits.length}/10 chiffres
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {/* Message d'attente si rien détecté */}
-                  {(isListeningMic || isVoiceConnected) && !extractedDigits && (
-                    <p className="text-white/60 text-xs italic animate-pulse">
-                      Dis ton numéro... zéro sept...
-                    </p>
-                  )}
-
-                  {/* Transcript brut (debug/feedback) */}
-                  {transcript && !extractedDigits && (
-                    <div className="max-w-xs rounded-xl bg-white/15 px-3 py-2">
-                      <p className="text-white/70 text-xs italic">"{transcript}"</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Instructions contextuelles */}
-                <p className="text-white/70 text-xs text-center max-w-xs">
+                {/* État textuel */}
+                <p className="text-white text-sm font-medium">
                   {isVoiceConnecting
-                    ? 'Préparation du micro...'
+                    ? '⏳ Connexion...'
                     : isListeningMic || isVoiceConnected
-                      ? 'Fais une pause quand tu as fini. Je détecte automatiquement.'
-                      : 'Ou utilise le clavier ci-dessous.'}
+                      ? '🎙️ Je t\'écoute...'
+                      : '👆 Appuie et parle'}
                 </p>
+
+                {/* AFFICHAGE CHIFFRES DÉTECTÉS - TRÈS VISIBLE */}
+                {(isListeningMic || isVoiceConnected) && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="w-full max-w-xs"
+                  >
+                    <div className="bg-white rounded-2xl px-5 py-4 shadow-lg">
+                      {/* Chiffres détectés */}
+                      <div className="flex justify-center items-center gap-1 min-h-[48px]">
+                        {[...Array(10)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className={cn(
+                              "w-6 h-12 rounded-lg flex items-center justify-center text-xl font-bold",
+                              extractedDigits[i] 
+                                ? "bg-emerald-500 text-white" 
+                                : "bg-gray-100 text-gray-300"
+                            )}
+                            initial={extractedDigits[i] ? { scale: 0 } : {}}
+                            animate={extractedDigits[i] ? { scale: 1 } : {}}
+                            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                          >
+                            {extractedDigits[i] || '–'}
+                          </motion.div>
+                        ))}
+                      </div>
+                      
+                      {/* Barre de progression */}
+                      <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-emerald-500 rounded-full"
+                          initial={{ width: '0%' }}
+                          animate={{ width: `${(extractedDigits.length / 10) * 100}%` }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      </div>
+                      
+                      {/* Compteur */}
+                      <p className="text-center text-sm text-gray-500 mt-2">
+                        {extractedDigits.length === 0 
+                          ? 'Dis ton numéro... "zéro sept..."' 
+                          : extractedDigits.length < 10 
+                            ? `${extractedDigits.length}/10 chiffres - continue !`
+                            : '✓ Numéro complet !'}
+                      </p>
+                    </div>
+                    
+                    {/* Transcript brut pour debug */}
+                    {transcript && (
+                      <p className="text-white/50 text-xs text-center mt-2 italic">
+                        "{transcript}"
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Instructions quand pas en écoute */}
+                {!(isListeningMic || isVoiceConnected) && (
+                  <p className="text-white/70 text-xs text-center max-w-xs">
+                    Ou utilise le clavier ci-dessous
+                  </p>
+                )}
               </div>
 
               {/* Séparateur */}
