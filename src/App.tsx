@@ -30,6 +30,7 @@ import {
 
 // Pages publiques
 const AuthPage = React.lazy(() => import("./pages/auth/AuthPage"));
+const AuthCallback = React.lazy(() => import("./pages/auth/AuthCallback"));
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import MyAccount from "./pages/account/MyAccount";
@@ -104,6 +105,7 @@ const App = () => (
                           {/* Routes publiques */}
                           <Route path="/" element={<Home />} />
                           <Route path="/auth" element={<AuthPage />} />
+                          <Route path="/auth/callback" element={<AuthCallback />} />
                           <Route path="/demo" element={<DemoAccess />} />
                           <Route path="/compte" element={<MyAccount />} />
                           <Route path="/cooperatives" element={<VivriersCooperativesPage />} />
