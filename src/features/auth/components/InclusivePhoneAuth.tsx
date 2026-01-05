@@ -140,7 +140,9 @@ export function InclusivePhoneAuth({
 
   // Feedback haptique
   const vibrate = (duration: number = 30) => {
-    if (navigator.vibrate) navigator.vibrate(duration);
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(duration);
+    }
   };
 
   // Lecture vocale d'un chiffre
