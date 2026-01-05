@@ -1,5 +1,6 @@
 /**
  * Composant de statistiques enrichies du dashboard coopérative
+ * Design unifié avec le système institutionnel
  */
 import React from 'react';
 import { StatCard } from '@/components/shared/StatCard';
@@ -13,10 +14,12 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { DashboardStats } from '../../types/cooperative.types';
+import { cn } from '@/lib/utils';
 
 interface CooperativeStatsProps {
   stats: DashboardStats;
   membersCount: number | null;
+  className?: string;
 }
 
 const formatCurrency = (value: number): string => {
@@ -25,18 +28,20 @@ const formatCurrency = (value: number): string => {
 
 export const CooperativeStats: React.FC<CooperativeStatsProps> = ({ 
   stats, 
-  membersCount 
+  membersCount,
+  className
 }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-4", className)}>
       {/* Première ligne - Membres et Stock */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <StatCard
           title={t("members")}
           value={membersCount ?? 0}
           icon={Users}
+          variant="primary"
         />
         <StatCard
           title={t("products")}
@@ -46,7 +51,7 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
       </div>
 
       {/* Deuxième ligne - Valeur stock et quantité */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <StatCard
           title="Valeur stock"
           value={`${formatCurrency(stats.stockValue)} F`}
@@ -59,7 +64,7 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
         />
       </div>
 
-      {/* Troisième ligne - Commandes */}
+      {/* Troisième ligne - Commandes (3 colonnes) */}
       <div className="grid grid-cols-3 gap-3">
         <StatCard
           title={t("pending")}
@@ -81,9 +86,9 @@ export const CooperativeStats: React.FC<CooperativeStatsProps> = ({
         />
       </div>
 
-      {/* Chiffre d'affaires */}
+      {/* Chiffre d'affaires - Affichage conditionnel */}
       {stats.totalRevenue > 0 && (
-        <div className="bg-primary/10 rounded-xl p-4 text-center">
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
           <p className="text-sm text-muted-foreground mb-1">Chiffre d'affaires</p>
           <p className="text-2xl font-bold text-primary">
             {formatCurrency(stats.totalRevenue)} FCFA

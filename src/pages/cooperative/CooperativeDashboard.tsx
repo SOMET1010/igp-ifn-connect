@@ -9,7 +9,6 @@ import { ErrorState, LoadingState } from '@/components/shared/StateComponents';
 import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
 import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
-import { RetryIndicator } from '@/components/shared/RetryIndicator';
 import { 
   useCooperativeDashboard,
   useCooperativeNotifications,
@@ -26,6 +25,8 @@ import {
   Award,
   Home,
   User,
+  Users,
+  ShoppingCart,
 } from 'lucide-react';
 
 const CooperativeDashboard: React.FC = () => {
@@ -50,8 +51,6 @@ const CooperativeDashboard: React.FC = () => {
     error,
     isNetworkError,
     refetch,
-    nextRetryIn,
-    retryCount,
   } = useCooperativeDashboard();
 
   const notifications = useCooperativeNotifications();
@@ -104,7 +103,8 @@ const CooperativeDashboard: React.FC = () => {
         )}
       />
 
-      <div className="p-4 space-y-5 max-w-2xl mx-auto">
+      <main className="p-4 space-y-6 max-w-2xl mx-auto">
+        {/* Localisation */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">{cooperative?.commune}, {cooperative?.region}</p>
         </div>
@@ -115,31 +115,69 @@ const CooperativeDashboard: React.FC = () => {
         {/* Alertes stock */}
         <CooperativeAlerts notifications={notifications} />
 
-        {/* Statistiques enrichies */}
-        <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
+        {/* Statistiques */}
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Statistiques</h2>
+          <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
+        </section>
 
-        {/* Graphique CA hebdomadaire */}
-        <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
-
-        {/* Graphique des commandes */}
-        <CooperativeOrdersChart stats={stats} />
+        {/* Graphiques */}
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Analyse</h2>
+          <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
+          <CooperativeOrdersChart stats={stats} />
+        </section>
 
         {/* Action principale */}
-        <Button onClick={() => navigate('/cooperative/stock')} className="btn-institutional w-full h-14 text-lg">
-          <Package className="h-5 w-5 mr-2" />{t("manage_my_stock")}
+        <Button 
+          onClick={() => navigate('/cooperative/stock')} 
+          className="w-full h-12 text-base font-medium"
+        >
+          <Package className="h-5 w-5 mr-2" />
+          {t("manage_my_stock")}
         </Button>
 
         {/* Actions rapides */}
-        <div className="space-y-3">
-          <UnifiedActionCard title={t("my_stock")} description={`${stats.products} ${t("products")}`} icon={Package} onClick={() => navigate('/cooperative/stock')} />
-          <UnifiedActionCard title={t("orders")} description={t("manage_requests")} icon={ClipboardList} onClick={() => navigate('/cooperative/commandes')} badge={stats.pendingOrders} badgeVariant="warning" />
-          <UnifiedActionCard title="Producteurs" description="Gérer les producteurs affiliés" icon={Package} onClick={() => navigate('/cooperative/producteurs')} />
-          <UnifiedActionCard title="Membres" description={`${cooperative?.total_members ?? 0} membres`} icon={ClipboardList} onClick={() => navigate('/cooperative/membres')} />
-          <UnifiedActionCard title="Commandes Producteurs" description="Commander des récoltes" icon={ClipboardList} onClick={() => navigate('/cooperative/commandes-producteurs')} />
-        </div>
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Actions rapides</h2>
+          <div className="space-y-2">
+            <UnifiedActionCard 
+              title={t("my_stock")} 
+              description={`${stats.products} ${t("products")}`} 
+              icon={Package} 
+              onClick={() => navigate('/cooperative/stock')} 
+            />
+            <UnifiedActionCard 
+              title={t("orders")} 
+              description={t("manage_requests")} 
+              icon={ClipboardList} 
+              onClick={() => navigate('/cooperative/commandes')} 
+              badge={stats.pendingOrders} 
+              badgeVariant="warning" 
+            />
+            <UnifiedActionCard 
+              title="Producteurs" 
+              description="Gérer les producteurs affiliés" 
+              icon={Users} 
+              onClick={() => navigate('/cooperative/producteurs')} 
+            />
+            <UnifiedActionCard 
+              title="Membres" 
+              description={`${cooperative?.total_members ?? 0} membres`} 
+              icon={Users} 
+              onClick={() => navigate('/cooperative/membres')} 
+            />
+            <UnifiedActionCard 
+              title="Commandes Producteurs" 
+              description="Commander des récoltes" 
+              icon={ShoppingCart} 
+              onClick={() => navigate('/cooperative/commandes-producteurs')} 
+            />
+          </div>
+        </section>
 
         <QuickGuide />
-      </div>
+      </main>
 
       <UnifiedBottomNav items={navItems} />
     </div>

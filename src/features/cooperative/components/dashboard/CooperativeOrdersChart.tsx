@@ -1,92 +1,84 @@
 /**
  * Graphique des commandes par statut pour le dashboard coopérative
+ * Design unifié avec le système institutionnel
  */
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
-import { ChartContainer } from '@/components/ui/chart';
+import { ClipboardList } from 'lucide-react';
 import type { DashboardStats } from '../../types/cooperative.types';
+import { cn } from '@/lib/utils';
 
 interface CooperativeOrdersChartProps {
   stats: DashboardStats;
+  className?: string;
 }
 
-const chartConfig = {
-  pending: {
-    label: "En attente",
-    color: "hsl(var(--chart-3))",
-  },
-  confirmed: {
-    label: "Confirmées",
-    color: "hsl(var(--chart-2))",
-  },
-  inTransit: {
-    label: "En transit",
-    color: "hsl(var(--chart-1))",
-  },
-  delivered: {
-    label: "Livrées",
-    color: "hsl(var(--chart-4))",
-  },
+const chartColors = {
+  pending: 'hsl(var(--warning))',
+  confirmed: 'hsl(var(--primary))',
+  inTransit: 'hsl(var(--secondary))',
+  delivered: 'hsl(var(--success))',
 };
 
 export const CooperativeOrdersChart: React.FC<CooperativeOrdersChartProps> = ({ 
-  stats 
+  stats,
+  className
 }) => {
   const data = [
-    { name: 'Attente', value: stats.pendingOrders, color: chartConfig.pending.color },
-    { name: 'Confirmées', value: stats.confirmedOrders, color: chartConfig.confirmed.color },
-    { name: 'Transit', value: stats.inTransitOrders, color: chartConfig.inTransit.color },
-    { name: 'Livrées', value: stats.deliveredOrders, color: chartConfig.delivered.color },
+    { name: 'Attente', value: stats.pendingOrders, color: chartColors.pending },
+    { name: 'Confirmées', value: stats.confirmedOrders, color: chartColors.confirmed },
+    { name: 'Transit', value: stats.inTransitOrders, color: chartColors.inTransit },
+    { name: 'Livrées', value: stats.deliveredOrders, color: chartColors.delivered },
   ];
 
   const totalOrders = stats.pendingOrders + stats.confirmedOrders + stats.inTransitOrders + stats.deliveredOrders;
 
-  if (totalOrders === 0) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Commandes par statut</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm text-center py-6">
-            Aucune commande pour le moment
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Commandes par statut</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[160px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ left: 0, right: 0 }}>
-              <XAxis type="number" hide />
-              <YAxis 
-                type="category" 
-                dataKey="name" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12 }}
-                width={70}
-              />
-              <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={24}>
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-        <div className="flex justify-center gap-4 mt-3 text-xs text-muted-foreground">
-          <span>Total: <strong>{totalOrders}</strong> commandes</span>
+    <section className={cn("rounded-xl border border-border bg-card", className)}>
+      {/* Header unifié */}
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center gap-2 text-foreground font-medium">
+          <ClipboardList className="h-4 w-4 text-primary" />
+          <span>Commandes par statut</span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Contenu */}
+      <div className="p-4">
+        {totalOrders === 0 ? (
+          <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">
+            Aucune commande pour le moment
+          </div>
+        ) : (
+          <>
+            <div className="h-[140px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data} layout="vertical" margin={{ left: 0, right: 10 }}>
+                  <XAxis type="number" hide />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    width={70}
+                  />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={20}>
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center pt-2 border-t border-border mt-2">
+              <span className="text-xs text-muted-foreground">
+                Total: <strong className="text-foreground">{totalOrders}</strong> commandes
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 };
