@@ -294,17 +294,30 @@ export function useVoiceTranscription({
       cleanup();
       setState('error');
 
-      const msg =
-        err?.name === 'NotAllowedError' || err?.name === 'SecurityError'
-          ? "Autorise le micro (et teste hors aperçu si besoin)."
-          : err?.name === 'NotFoundError'
-            ? 'Aucun micro détecté sur cet appareil.'
-            : err?.message || 'Erreur vocale';
+      // Détection iframe bloqué (permissions policy)
+      const isPermissionPolicy = 
+        err?.message?.toLowerCase().includes('permission') ||
+        err?.message?.toLowerCase().includes('policy') ||
+        err?.message?.toLowerCase().includes('feature');
+
+      const isInIframe = (() => {
+        try { return window.self !== window.top; } catch { return true; }
+      })();
+
+      let msg: string;
+      if ((err?.name === 'NotAllowedError' || err?.name === 'SecurityError') && (isPermissionPolicy || isInIframe)) {
+        msg = "Le micro est bloqué dans l'aperçu. Ouvre en plein écran.";
+      } else if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
+        msg = "Autorise le micro dans les paramètres du navigateur.";
+      } else if (err?.name === 'NotFoundError') {
+        msg = 'Aucun micro détecté sur cet appareil.';
+      } else {
+        msg = err?.message || 'Erreur vocale';
+      }
 
       setErrorMessage(msg);
       onError?.(msg);
 
-      // Fallback si aucun handler externe
       if (!onError) {
         toast.error(msg);
       }

@@ -122,6 +122,9 @@ export function MicDebugPanel({
     prompt: 'text-yellow-400',
   };
 
+  // Détection si iframe bloqué
+  const isIframeBlocked = isInIframe && (micPermission === 'denied' || state === 'error');
+
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -131,13 +134,18 @@ export function MicDebugPanel({
     >
       <div className="text-white/80 font-bold text-center border-b border-white/20 pb-1 mb-2">
         🔧 DEBUG MICRO
+        {isIframeBlocked && (
+          <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded text-[10px]">
+            IFRAME BLOQUÉ
+          </span>
+        )}
       </div>
       
       {/* Contexte */}
       <div className="flex justify-between items-center">
         <span className="text-white/60">Contexte:</span>
-        <span className="text-white/80">
-          {isSecureContext ? 'secure' : 'not-secure'} · {isInIframe ? 'iframe' : 'top'} · {hasGetUserMedia ? 'getUserMedia' : 'no-getUserMedia'}
+        <span className={cn("text-white/80", isInIframe && "text-yellow-400")}>
+          {isSecureContext ? 'secure' : 'not-secure'} · {isInIframe ? '⚠️ iframe' : 'top'} · {hasGetUserMedia ? 'getUserMedia' : 'no-getUserMedia'}
         </span>
       </div>
 

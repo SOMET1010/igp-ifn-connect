@@ -33,6 +33,16 @@ type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
  * - 📞 Callback vocal si SMS échoue
  * - Risk Gate invisible : 🟢 Direct | 🟠 Challenge | 🔴 Agent
  */
+// Détection iframe
+const useIframeDetection = () => {
+  const isInIframe = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+  const isSecureContext = typeof window !== 'undefined' ? window.isSecureContext : false;
+  const hasGetUserMedia = !!(navigator.mediaDevices?.getUserMedia);
+  return { isInIframe, isSecureContext, hasGetUserMedia };
+};
+
 export function InclusivePhoneAuth({ 
   redirectPath, 
   userType,
@@ -41,6 +51,7 @@ export function InclusivePhoneAuth({
   const navigate = useNavigate();
   const { calculateTrustScore, recordSuccessfulLogin } = useTrustScore();
   const { speak, stop, isSpeaking } = useVoiceQueue();
+  const { isInIframe, isSecureContext, hasGetUserMedia } = useIframeDetection();
   
   // État principal
   const [step, setStep] = useState<Step>('phone');
@@ -198,6 +209,11 @@ export function InclusivePhoneAuth({
     return '✅ Numéro complet !';
   };
 
+  // Ouvrir en plein écran (hors iframe)
+  const handleOpenFullscreen = () => {
+    window.open(window.location.href, '_blank');
+  };
+
   // Démarrer l'écoute micro (avec indication claire + auto-fin sur pause)
   const handleMicClick = async () => {
     // 2e tap = arrêter
@@ -209,6 +225,9 @@ export function InclusivePhoneAuth({
       return;
     }
 
+    // Stopper TTS avant de démarrer le micro (anti-interférence)
+    stop();
+
     try {
       setIsListeningMic(true);
       vibrate(50);
@@ -216,7 +235,10 @@ export function InclusivePhoneAuth({
       await startListening();
 
       vibrate(30);
-      speak("C'est bon, je t'écoute. Dis ton numéro lentement.", { priority: 'high' });
+      // Délai court avant annonce pour éviter interférence
+      setTimeout(() => {
+        speak("C'est bon, je t'écoute. Dis ton numéro lentement.", { priority: 'high' });
+      }, 300);
     } catch (err) {
       setIsListeningMic(false);
       toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
@@ -1116,6 +1138,26 @@ export function InclusivePhoneAuth({
               exit={{ opacity: 0, x: -20 }}
               className="space-y-4"
             >
+              {/* Bandeau iframe - avertissement micro bloqué */}
+              {isInIframe && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-amber-500/90 text-white rounded-xl p-4 shadow-lg"
+                >
+                  <p className="text-sm font-medium text-center mb-3">
+                    ⚠️ Le micro ne marche pas dans l'aperçu.<br />
+                    <span className="text-xs opacity-90">Ouvre en plein écran pour parler.</span>
+                  </p>
+                  <Button
+                    onClick={handleOpenFullscreen}
+                    className="w-full bg-white text-amber-700 hover:bg-amber-50 font-bold"
+                  >
+                    🔗 Ouvrir en plein écran
+                  </Button>
+                </motion.div>
+              )}
+              
               {/* MICRO GÉANT - Centre d'attention */}
               <div className="flex flex-col items-center gap-4 py-2">
                 {/* Zone micro avec anneau de progression et barres audio */}
