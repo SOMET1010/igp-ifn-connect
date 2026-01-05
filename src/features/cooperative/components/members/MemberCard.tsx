@@ -7,18 +7,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { User, Phone, Shield, Building2, Trash2 } from 'lucide-react';
-import type { CooperativeMember } from '../../types/member.types';
+import { EditMemberDialog } from './EditMemberDialog';
+import type { CooperativeMember, AddMemberFormData } from '../../types/member.types';
 
 interface MemberCardProps {
   member: CooperativeMember;
+  onUpdate?: (data: { memberId: string; updates: Partial<AddMemberFormData> }) => void;
   onDelete?: (memberId: string) => void;
+  isUpdating?: boolean;
   isDeleting?: boolean;
 }
 
 export const MemberCard: React.FC<MemberCardProps> = ({ 
   member, 
+  onUpdate,
   onDelete,
-  isDeleting 
+  isUpdating,
+  isDeleting,
 }) => {
   const hasCMU = member.cmu_status && member.cmu_status.toLowerCase() !== 'non';
   const hasCNPS = member.cnps_status && member.cnps_status.toLowerCase() !== 'non';
@@ -60,17 +65,26 @@ export const MemberCard: React.FC<MemberCardProps> = ({
               </div>
             </div>
           </div>
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              onClick={() => onDelete(member.id)}
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <div className="flex gap-1">
+            {onUpdate && (
+              <EditMemberDialog 
+                member={member} 
+                onUpdate={onUpdate} 
+                isUpdating={isUpdating} 
+              />
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                onClick={() => onDelete(member.id)}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

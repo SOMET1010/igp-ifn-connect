@@ -6,18 +6,22 @@ import React, { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, Users } from 'lucide-react';
 import { MemberCard } from './MemberCard';
-import type { CooperativeMember } from '../../types/member.types';
+import type { CooperativeMember, AddMemberFormData } from '../../types/member.types';
 
 interface MembersListProps {
   members: CooperativeMember[];
+  onUpdate?: (data: { memberId: string; updates: Partial<AddMemberFormData> }) => void;
   onDelete?: (memberId: string) => void;
+  isUpdating?: boolean;
   isDeleting?: boolean;
 }
 
 export const MembersList: React.FC<MembersListProps> = ({ 
   members, 
+  onUpdate,
   onDelete,
-  isDeleting 
+  isUpdating,
+  isDeleting,
 }) => {
   const [search, setSearch] = useState('');
 
@@ -59,7 +63,9 @@ export const MembersList: React.FC<MembersListProps> = ({
             <MemberCard 
               key={member.id} 
               member={member} 
+              onUpdate={onUpdate}
               onDelete={onDelete}
+              isUpdating={isUpdating}
               isDeleting={isDeleting}
             />
           ))}
