@@ -120,6 +120,10 @@ const App = () => (
                           {/* Redirections pour routes alternatives */}
                           <Route path="/social-login" element={<Navigate to="/marchand/connexion" replace />} />
                           <Route path="/marchand/login" element={<Navigate to="/marchand/connexion" replace />} />
+                          {/* Aliases historiques / anglais (éviter les 404) */}
+                          <Route path="/marchand/voice" element={<Navigate to="/marchand/connexion" replace />} />
+                          <Route path="/merchant" element={<Navigate to="/marchand/connexion" replace />} />
+                          <Route path="/merchant/voice" element={<Navigate to="/marchand/connexion" replace />} />
                           <Route path="/cooperative/connexion" element={<Navigate to="/cooperative/login" replace />} />
                           <Route path="/agent/connexion" element={<Navigate to="/agent/login" replace />} />
 
