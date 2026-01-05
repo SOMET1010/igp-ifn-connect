@@ -20,6 +20,7 @@ import AdminMerchants from '@/pages/admin/AdminMerchants';
 import AdminAgents from '@/pages/admin/AdminAgents';
 import AdminAgentRequests from '@/pages/admin/AdminAgentRequests';
 import AdminCooperatives from '@/pages/admin/AdminCooperatives';
+import AdminProducers from '@/pages/admin/AdminProducers';
 import AdminMonitoring from '@/pages/admin/AdminMonitoring';
 import AdminAnalytics from '@/pages/admin/AdminAnalytics';
 import AdminReports from '@/pages/admin/AdminReports';
@@ -51,6 +52,7 @@ export const adminProtectedRoutes = (
     <Route path="/admin/agents" element={<AdminAgents />} />
     <Route path="/admin/demandes-agents" element={<AdminAgentRequests />} />
     <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
+    <Route path="/admin/producteurs" element={<AdminProducers />} />
     <Route path="/admin/carte" element={<AdminMap />} />
     <Route path="/admin/monitoring" element={<AdminMonitoring />} />
     <Route path="/admin/analytics" element={<AdminAnalytics />} />

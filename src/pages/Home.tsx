@@ -439,7 +439,7 @@ const Index: React.FC = () => {
           ))}
         </div>
 
-        {/* Carte Coopérative (optionnelle - plus petite) */}
+        {/* Boutons secondaires : Coopérative, Producteur, Carte */}
         <motion.div
           className="mt-5 flex flex-wrap justify-center gap-3"
           initial={{ opacity: 0, y: 15 }}
@@ -451,21 +451,21 @@ const Index: React.FC = () => {
             className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-white/30 active:bg-white/40 transition-colors border border-white/20 flex items-center gap-2 min-h-[52px]"
           >
             <span>🌾</span>
-            <span>{t('i_am_cooperative') || 'Je suis Coopérative'}</span>
+            <span>{t('i_am_cooperative') || 'Coopérative'}</span>
           </button>
           <button
-            onClick={() => { triggerTap(); navigate('/cooperatives'); }}
-            className="bg-secondary/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-secondary active:bg-secondary/90 transition-colors border border-secondary/40 flex items-center gap-2 min-h-[52px]"
+            onClick={() => { triggerTap(); navigate('/producteur/connexion'); }}
+            className="bg-green-600/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-green-700 active:bg-green-800 transition-colors border border-green-500/40 flex items-center gap-2 min-h-[52px]"
           >
-            <span>👥</span>
-            <span>{t('view_cooperatives') || 'Voir les Coopératives'}</span>
+            <span>🧑‍🌾</span>
+            <span>{t('i_am_producer') || 'Producteur'}</span>
           </button>
           <button
             onClick={() => { triggerTap(); navigate('/carte'); }}
             className="bg-blue-600/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors border border-blue-500/40 flex items-center gap-2 min-h-[52px]"
           >
             <span>🗺️</span>
-            <span>{t('view_map') || 'Voir la Carte'}</span>
+            <span>{t('view_map') || 'Carte'}</span>
           </button>
         </motion.div>
 

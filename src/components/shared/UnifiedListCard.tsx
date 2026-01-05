@@ -4,7 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatusBadge, StatusType } from './StatusBadge';
 
-export type EntityType = 'merchant' | 'agent' | 'cooperative' | 'admin' | 'user' | 'order' | 'product';
+export type EntityType = 'merchant' | 'agent' | 'cooperative' | 'admin' | 'user' | 'order' | 'product' | 'producer';
 
 interface UnifiedListCardProps {
   // Contenu principal
@@ -49,6 +49,7 @@ const entityColors: Record<EntityType, string> = {
   user: 'border-l-muted-foreground',
   order: 'border-l-primary',
   product: 'border-l-secondary',
+  producer: 'border-l-green-600',
 };
 
 const avatarBgColors: Record<EntityType, string> = {
@@ -59,6 +60,7 @@ const avatarBgColors: Record<EntityType, string> = {
   user: 'bg-muted text-muted-foreground',
   order: 'bg-primary/15 text-primary',
   product: 'bg-secondary/15 text-secondary',
+  producer: 'bg-green-600/15 text-green-700',
 };
 
 export const UnifiedListCard: React.FC<UnifiedListCardProps> = ({
