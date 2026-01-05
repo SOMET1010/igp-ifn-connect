@@ -11,7 +11,10 @@ import {
   FileText,
   Mic,
   Leaf,
-  Activity
+  Activity,
+  Store,
+  UserCog,
+  Wheat
 } from 'lucide-react';
 import type { NavItem } from '@/components/shared/UnifiedBottomNav';
 
@@ -38,18 +41,26 @@ export const cooperativeNavItems: NavItem[] = [
   { icon: User, label: 'Profil', path: '/cooperative/profil' },
 ];
 
-// Admin navigation
+// Admin navigation - Main pages
 export const adminNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Store, label: 'Marchands', path: '/admin/marchands' },
+  { icon: UserCog, label: 'Agents', path: '/admin/agents' },
+  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
+];
+
+// Admin secondary navigation (for specialized pages like vivriers, studio, etc.)
+export const adminSecondaryNavItems: NavItem[] = [
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Wheat, label: 'Vivriers', path: '/admin/vivriers' },
+  { icon: Mic, label: 'Studio', path: '/admin/studio' },
+  { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
+];
+
+// Admin analytics navigation
+export const adminAnalyticsNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
   { icon: MapPin, label: 'Carte', path: '/admin/carte' },
   { icon: BarChart3, label: 'Stats', path: '/admin/analytics' },
   { icon: FileText, label: 'Rapports', path: '/admin/rapports' },
-];
-
-// Admin secondary navigation (for pages like vivriers, studio, etc.)
-export const adminSecondaryNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-  { icon: Leaf, label: 'Vivriers', path: '/admin/vivriers' },
-  { icon: Mic, label: 'Studio', path: '/admin/studio' },
-  { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
 ];
