@@ -10,6 +10,7 @@ import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
 import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
 import { SocialChallenge } from './SocialChallenge';
 import { supabase } from '@/integrations/supabase/client';
+import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@/features/auth/config/loginConfigs';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -442,21 +443,167 @@ export function InclusivePhoneAuth({
     await finalizeLogin(trustResult?.merchantId);
   };
 
-  // Finaliser la connexion
-  const finalizeLogin = async (merchantId?: string) => {
-    setStep('success');
-    vibrate(100);
+  // Helper: Récupérer la config selon userType
+  const getLoginConfig = useCallback(() => {
+    switch (userType) {
+      case 'merchant': return merchantLoginConfig;
+      case 'agent': return agentLoginConfig;
+      case 'cooperative': return cooperativeLoginConfig;
+      default: return merchantLoginConfig;
+    }
+  }, [userType]);
+
+  // Helper: S'assurer que le profil marchand existe (simplifié pour éviter les problèmes de typage)
+  const ensureMerchantProfile = async (userId: string, cleanPhone: string): Promise<string | null> => {
+    // Vérifier si le merchant existe déjà pour cet user
+    const { data: existing } = await supabase
+      .from('merchants')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
     
-    if (merchantId) {
-      await recordSuccessfulLogin(merchantId);
+    if (existing) return existing.id;
+    
+    // Vérifier si un merchant sans user_id existe avec ce téléphone
+    const { data: unlinked } = await supabase
+      .from('merchants')
+      .select('id')
+      .eq('phone', cleanPhone)
+      .is('user_id', null)
+      .maybeSingle();
+    
+    if (unlinked) {
+      // Lier le merchant existant à cet utilisateur
+      await supabase
+        .from('merchants')
+        .update({ user_id: userId })
+        .eq('id', unlinked.id);
+      return unlinked.id;
     }
     
-    toast.success('Connexion réussie !');
-    if (voiceEnabled) speak('Bienvenue ! Tu es connecté.', { priority: 'high' });
+    // Créer un nouveau merchant
+    const { data: newMerchant } = await supabase
+      .from('merchants')
+      .insert({
+        user_id: userId,
+        full_name: `Marchand ${cleanPhone}`,
+        phone: cleanPhone,
+        cmu_number: `CMU-${Date.now()}`,
+        activity_type: 'Détaillant',
+        status: 'validated' as const
+      })
+      .select('id')
+      .single();
     
-    setTimeout(() => {
-      navigate(redirectPath);
-    }, 1500);
+    return newMerchant?.id ?? null;
+  };
+
+  // Finaliser la connexion avec création de session Supabase
+  const finalizeLogin = async (existingMerchantId?: string) => {
+    setStep('success');
+    vibrate(100);
+    setIsLoading(true);
+    
+    try {
+      const config = getLoginConfig();
+      const cleanPhone = phone.replace(/\s/g, '');
+      const email = config.emailPattern(cleanPhone);
+      const password = config.passwordPattern(cleanPhone);
+      
+      console.log(`[finalizeLogin] Attempting auth for ${email}`);
+      
+      // Essayer de se connecter d'abord
+      let { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      let userId: string | undefined;
+      
+      // Si l'utilisateur n'existe pas, le créer
+      if (signInError?.message?.includes('Invalid login credentials')) {
+        console.log('[finalizeLogin] User not found, creating...');
+        
+        const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { 
+              full_name: `${config.role.charAt(0).toUpperCase() + config.role.slice(1)} ${cleanPhone}`,
+              phone: cleanPhone
+            }
+          }
+        });
+        
+        if (signUpError && !signUpError.message?.includes('already')) {
+          throw signUpError;
+        }
+        
+        userId = signUpData?.user?.id;
+        
+        // Se connecter après l'inscription
+        if (userId) {
+          const { error: retrySignIn } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          if (retrySignIn) {
+            console.error('[finalizeLogin] Retry sign in failed:', retrySignIn);
+          }
+        }
+      } else if (signInError) {
+        throw signInError;
+      } else {
+        userId = signInData?.user?.id;
+      }
+      
+      // Créer ou mettre à jour le profil marchand (pour userType merchant)
+      if (userId && userType === 'merchant') {
+        await ensureMerchantProfile(userId, cleanPhone);
+        
+        // Assigner le rôle marchand
+        try {
+          await supabase.rpc('assign_merchant_role', { p_user_id: userId });
+        } catch (rpcError) {
+          console.log('[finalizeLogin] Role may already exist:', rpcError);
+        }
+      } else if (userId && userType === 'agent') {
+        // Assigner le rôle agent
+        try {
+          await supabase.rpc('assign_agent_role', { p_user_id: userId });
+        } catch (rpcError) {
+          console.log('[finalizeLogin] Role may already exist:', rpcError);
+        }
+      } else if (userId && userType === 'cooperative') {
+        // Assigner le rôle coopérative
+        try {
+          await supabase.rpc('assign_cooperative_role', { p_user_id: userId });
+        } catch (rpcError) {
+          console.log('[finalizeLogin] Role may already exist:', rpcError);
+        }
+      }
+      
+      // Enregistrer le login réussi pour le trust score
+      if (existingMerchantId) {
+        await recordSuccessfulLogin(existingMerchantId);
+      }
+      
+      toast.success('Connexion réussie !');
+      if (voiceEnabled) speak('Bienvenue ! Tu es connecté.', { priority: 'high' });
+      
+      setTimeout(() => {
+        navigate(redirectPath);
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error('[finalizeLogin] Error:', error);
+      toast.error('Erreur de connexion. Réessaye.');
+      if (voiceEnabled) speak('Erreur de connexion. Réessaye.', { priority: 'high' });
+      setStep('phone');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Gérer la saisie OTP
