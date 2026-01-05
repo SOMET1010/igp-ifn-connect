@@ -21,7 +21,8 @@ import { useCooperativeMembers } from '@/features/cooperative/hooks/useCooperati
 import { 
   MemberStatsCards, 
   MembersList, 
-  AddMemberDialog 
+  AddMemberDialog,
+  ExportMembersPDF,
 } from '@/features/cooperative/components/members';
 
 const CooperativeMembers: React.FC = () => {
@@ -46,6 +47,8 @@ const CooperativeMembers: React.FC = () => {
     refetch,
     addMember,
     isAdding,
+    updateMember,
+    isUpdating,
     deleteMember,
     isDeleting,
   } = useCooperativeMembers(cooperative?.id, cooperative?.name);
@@ -99,15 +102,22 @@ const CooperativeMembers: React.FC = () => {
         {/* Statistiques */}
         <MemberStatsCards stats={stats} />
 
-        {/* Action d'ajout */}
-        <div className="flex justify-end">
+        {/* Actions */}
+        <div className="flex justify-between items-center gap-2 flex-wrap">
+          <ExportMembersPDF 
+            members={members} 
+            stats={stats} 
+            cooperativeName={cooperative?.name || ''} 
+          />
           <AddMemberDialog onAdd={addMember} isAdding={isAdding} />
         </div>
 
         {/* Liste des membres */}
         <MembersList 
           members={members} 
+          onUpdate={updateMember}
           onDelete={deleteMember}
+          isUpdating={isUpdating}
           isDeleting={isDeleting}
         />
       </div>

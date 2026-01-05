@@ -6,3 +6,5 @@ export { MemberStatsCards } from './MemberStatsCards';
 export { MemberCard } from './MemberCard';
 export { MembersList } from './MembersList';
 export { AddMemberDialog } from './AddMemberDialog';
+export { EditMemberDialog } from './EditMemberDialog';
+export { ExportMembersPDF } from './ExportMembersPDF';
