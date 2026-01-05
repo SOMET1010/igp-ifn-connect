@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useRecorder, useAudioLevel, AudioManager } from '@/shared/audio';
 import { AudioLevelMeter } from '@/components/shared/AudioLevelMeter';
 import { Mic, Square, Play, Pause, RotateCcw, Check, Loader2, Upload, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
 
 interface StudioRecorderProps {
   textKey: string;
@@ -37,27 +38,36 @@ export function StudioRecorder({
   onSkip,
   onDelete
 }: StudioRecorderProps) {
+  // Nouveau système audio unifié
   const {
-    isRecording,
+    state: recorderState,
     audioBlob,
     audioUrl,
     duration,
-    startRecording,
-    stopRecording,
-    resetRecording,
-    error,
-    isSupported,
-    permissionStatus,
-    audioLevel,
-    peakLevel,
-    isClipping
-  } = useAudioRecorder();
+    start: startRecording,
+    stop: stopRecording,
+    reset: resetRecording
+  } = useRecorder({ maxDuration: 30 });
+
+  // Analyse niveau audio (nécessite le stream actif)
+  const { level, smoothedLevel, isClipping, startAnalysis, stopAnalysis } = useAudioLevel();
+
+  // Vérifier les capacités
+  const capabilities = AudioManager.getCapabilities();
+  const isSupported = capabilities.hasMediaRecorder && capabilities.hasGetUserMedia;
+
+  // États dérivés
+  const isRecording = recorderState === 'recording';
+  // Utiliser smoothedLevel comme peakLevel pour l'affichage
+  const peakLevel = smoothedLevel;
+  const hasError = recorderState === 'error';
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayingExisting, setIsPlayingExisting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showReRecord, setShowReRecord] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const existingAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -68,19 +78,39 @@ export function StudioRecorder({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleStartRecording = async () => {
+    try {
+      setError(null);
+      await startRecording();
+      
+      // Démarrer l'analyse de niveau après un court délai
+      // pour laisser le temps au stream d'être prêt
+      setTimeout(() => {
+        const stream = AudioManager.getActiveStream();
+        if (stream) {
+          startAnalysis(stream);
+        }
+      }, 100);
+    } catch (err) {
+      console.error('[StudioRecorder] Start recording error:', err);
+      setError(err instanceof Error ? err.message : "Erreur lors du démarrage de l'enregistrement");
+    }
+  };
+
+  const handleStopRecording = () => {
+    stopAnalysis();
+    stopRecording();
+  };
+
   const handlePlay = () => {
-    console.log('[StudioRecorder] 🔊 handlePlay called:', { audioUrl, audioBlob: audioBlob?.size });
     if (audioRef.current && audioUrl) {
-      console.log('[StudioRecorder] Audio element readyState:', audioRef.current.readyState);
       if (isPlaying) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         setIsPlaying(false);
       } else {
-        audioRef.current.play().then(() => {
-          console.log('[StudioRecorder] ✅ Playback started');
-        }).catch(err => {
-          console.error('[StudioRecorder] ❌ Playback error:', err);
+        audioRef.current.play().catch(err => {
+          console.error('[StudioRecorder] Playback error:', err);
         });
         setIsPlaying(true);
       }
@@ -154,7 +184,15 @@ export function StudioRecorder({
   useEffect(() => {
     setShowReRecord(false);
     resetRecording();
-  }, [textKey]);
+    setError(null);
+  }, [textKey, resetRecording]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopAnalysis();
+    };
+  }, [stopAnalysis]);
 
   // Show existing recording UI if recorded and not in re-record mode
   const showExistingRecording = isRecorded && existingAudioUrl && !showReRecord && !audioUrl;
@@ -188,9 +226,9 @@ export function StudioRecorder({
       </div>
 
       {/* Error message */}
-      {error && (
+      {(error || hasError) && (
         <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm flex items-center gap-2">
-          <span className="font-medium">Erreur:</span> {error}
+          <span className="font-medium">Erreur:</span> {error || "Erreur lors de l'enregistrement"}
         </div>
       )}
 
@@ -198,13 +236,6 @@ export function StudioRecorder({
       {!isSupported && (
         <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm">
           L'enregistrement audio n'est pas supporté par ce navigateur.
-        </div>
-      )}
-
-      {/* Permission warning */}
-      {isSupported && permissionStatus === 'denied' && (
-        <div className="mb-4 p-3 bg-amber-100 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm">
-          L'accès au microphone est bloqué. Veuillez autoriser l'accès dans les paramètres du navigateur.
         </div>
       )}
 
@@ -247,7 +278,7 @@ export function StudioRecorder({
             <div className="flex flex-col items-center gap-4">
               {/* Audio Level Meter */}
               <AudioLevelMeter 
-                level={audioLevel}
+                level={level}
                 peakLevel={peakLevel}
                 isClipping={isClipping}
                 variant="wave"
@@ -286,14 +317,6 @@ export function StudioRecorder({
                   {formatDuration(duration)}
                 </span>
               </div>
-              {/* Debug: Bouton de téléchargement pour tester le blob */}
-              <a 
-                href={audioUrl} 
-                download={`debug-recording-${textKey}.webm`}
-                className="text-xs text-blue-500 underline mt-2"
-              >
-                ⬇️ Télécharger pour tester
-              </a>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -371,10 +394,16 @@ export function StudioRecorder({
             <Button
               size="lg"
               variant={isRecording ? "destructive" : "default"}
-              onClick={isRecording ? stopRecording : startRecording}
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
               className="rounded-full px-8 gap-2"
+              disabled={recorderState === 'requesting'}
             >
-              {isRecording ? (
+              {recorderState === 'requesting' ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Accès micro...
+                </>
+              ) : isRecording ? (
                 <>
                   <Square className="h-5 w-5" />
                   Arrêter

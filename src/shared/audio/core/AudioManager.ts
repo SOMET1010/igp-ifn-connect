@@ -206,5 +206,18 @@ class AudioManagerClass {
   }
 }
 
-// Export singleton
-export const AudioManager = AudioManagerClass.getInstance();
+// Export le singleton avec des méthodes statiques pratiques
+const instance = AudioManagerClass.getInstance();
+
+export const AudioManager = {
+  getInstance: () => instance,
+  getCapabilities: () => instance.getCapabilities(),
+  getBestMimeType: () => instance.getBestMimeType(),
+  getPermissionState: () => instance.getPermissionState(),
+  requestMicrophoneAccess: (constraints?: MediaTrackConstraints) => instance.requestMicrophoneAccess(constraints),
+  getActiveStream: () => instance.getActiveStream(),
+  getAudioContext: () => instance.getAudioContext(),
+  releaseStream: () => instance.releaseStream(),
+  releaseAll: () => instance.releaseAll(),
+  checkMicrophoneAvailable: () => instance.checkMicrophoneAvailable(),
+};
