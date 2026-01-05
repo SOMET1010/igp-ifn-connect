@@ -9,6 +9,7 @@ import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
 import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
 import { SocialChallenge } from './SocialChallenge';
+import { SimpleRegistrationForm } from './SimpleRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@/features/auth/config/loginConfigs';
 interface InclusivePhoneAuthProps {
@@ -17,7 +18,7 @@ interface InclusivePhoneAuthProps {
   className?: string;
 }
 
-type Step = 'phone' | 'phone_confirm' | 'otp' | 'verifying' | 'social_check' | 'blocked' | 'success';
+type Step = 'phone' | 'phone_confirm' | 'otp' | 'verifying' | 'social_check' | 'blocked' | 'success' | 'register';
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /**
@@ -722,11 +723,11 @@ export function InclusivePhoneAuth({
             setIsLoading(false);
             return;
           } else if (result.error === 'merchant_not_found') {
-            // Aucun marchand avec ce téléphone - il doit d'abord être inscrit par un agent
+            // Aucun marchand avec ce téléphone - proposer inscription rapide
             await supabase.auth.signOut();
-            toast.error('Aucun marchand trouvé avec ce numéro. Inscris-toi d\'abord auprès d\'un agent.');
-            if (voiceEnabled) speak('Tu n\'es pas encore inscrit. Contacte un agent pour t\'inscrire.', { priority: 'high' });
-            setStep('phone');
+            toast.info('Nouveau marchand ! Inscription rapide en cours...');
+            if (voiceEnabled) speak('Tu n\'es pas encore inscrit. On va faire ça ensemble maintenant.', { priority: 'high' });
+            setStep('register');
             setIsLoading(false);
             return;
           } else {
@@ -1629,6 +1630,27 @@ export function InclusivePhoneAuth({
                   Réessayer plus tard
                 </Button>
               </div>
+            </motion.div>
+          )}
+
+          {/* Étape Inscription rapide */}
+          {step === 'register' && (
+            <motion.div
+              key="register"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <SimpleRegistrationForm
+                phone={phone}
+                voiceEnabled={voiceEnabled}
+                onSuccess={() => {
+                  // Retour à l'écran téléphone avec message
+                  handleReset();
+                  toast.success('Inscription enregistrée ! Un agent va te valider.');
+                }}
+                onCancel={handleReset}
+              />
             </motion.div>
           )}
 
