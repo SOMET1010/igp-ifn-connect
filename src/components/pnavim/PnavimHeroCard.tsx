@@ -74,10 +74,26 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
   const styles = ACCENT_STYLES[accentColor];
   const IconComponent = ROLE_ICONS[role] || Wallet;
 
+  // Détection iframe pour pages sensibles au micro
+  const isInIframe = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+
+  // Pages qui nécessitent le micro
+  const MIC_SENSITIVE_PATHS = ['/marchand/connexion', '/marchand'];
+
   const handleCardClick = useCallback(() => {
     triggerTap();
+    
+    // Si on est dans un iframe et que la destination nécessite le micro, ouvrir en nouvel onglet
+    if (isInIframe && MIC_SENSITIVE_PATHS.some(p => link.startsWith(p))) {
+      const fullUrl = `${window.location.origin}${link}`;
+      window.open(fullUrl, '_blank');
+      return;
+    }
+    
     navigate(link);
-  }, [navigate, link, triggerTap]);
+  }, [navigate, link, triggerTap, isInIframe]);
 
   const stopAudio = useCallback(() => {
     if (audioRef.current) {

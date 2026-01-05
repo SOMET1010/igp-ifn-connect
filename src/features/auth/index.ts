@@ -31,6 +31,7 @@ export { usePersistedPersona } from './hooks/usePersistedPersona';
 export { AudioLevelIndicator, AudioPulse, AudioWaveform } from './components/AudioLevelIndicator';
 export { AudioFeedbackBanner } from './components/AudioFeedbackBanner';
 export { MicDebugPanel } from './components/MicDebugPanel';
+export { VoiceErrorDebugger } from './components/VoiceErrorDebugger';
 
 // === Audio Types ===
 export type { AudioStatus } from './hooks/useAudioLevel';

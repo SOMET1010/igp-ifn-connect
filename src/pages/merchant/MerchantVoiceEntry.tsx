@@ -24,8 +24,27 @@ const MerchantVoiceEntry: React.FC = () => {
   const { triggerTap } = useSensoryFeedback();
   const { speak, stop } = useVoiceQueue();
 
-  // Message de bienvenue au chargement
+  // Détection iframe
+  const isInIframe = (() => {
+    try { return window.self !== window.top; } catch { return true; }
+  })();
+
+  // Si dans iframe, tenter d'ouvrir en nouvel onglet automatiquement
   useEffect(() => {
+    if (isInIframe) {
+      const fullUrl = window.location.href;
+      // Tenter d'ouvrir en nouvel onglet (sera bloqué si popup bloqué)
+      const newWindow = window.open(fullUrl, '_blank');
+      if (!newWindow) {
+        console.log('[MerchantVoiceEntry] Popup blocked, showing banner');
+      }
+    }
+  }, [isInIframe]);
+
+  // Message de bienvenue au chargement (seulement hors iframe)
+  useEffect(() => {
+    if (isInIframe) return; // Ne pas parler dans l'iframe
+    
     const timer = setTimeout(() => {
       const message = language === "fr"
         ? "Bienvenue. Appuie sur le micro et dis ton numéro de téléphone."
@@ -37,7 +56,7 @@ const MerchantVoiceEntry: React.FC = () => {
       clearTimeout(timer);
       stop();
     };
-  }, [language, speak, stop]);
+  }, [language, speak, stop, isInIframe]);
 
   const handleBack = () => {
     triggerTap();
@@ -99,6 +118,21 @@ const MerchantVoiceEntry: React.FC = () => {
 
       {/* Contenu principal */}
       <main className="relative z-10 container max-w-lg mx-auto px-6 pt-24 pb-32 flex flex-col items-center">
+        {/* Bandeau iframe bloquant */}
+        {isInIframe && (
+          <div className="w-full mb-6 p-4 bg-orange-sanguine/20 border border-orange-sanguine/40 rounded-2xl text-center">
+            <p className="text-charbon font-semibold text-sm mb-2">
+              🎤 Le micro est bloqué dans l'aperçu
+            </p>
+            <button
+              onClick={() => window.open(window.location.href, '_blank')}
+              className="px-4 py-2 bg-orange-sanguine text-white rounded-full font-bold text-sm"
+            >
+              Ouvrir en plein écran
+            </button>
+          </div>
+        )}
+
         {/* Titre */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-nunito font-extrabold text-charbon leading-tight">
