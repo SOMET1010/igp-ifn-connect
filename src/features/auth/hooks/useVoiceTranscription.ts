@@ -70,14 +70,17 @@ function extractPhoneNumber(text: string): string | null {
 interface UseVoiceTranscriptionOptions {
   onPhoneDetected: (phone: string) => void;
   onError?: (error: string) => void;
+  onDigitsProgress?: (digits: string, count: number) => void;
 }
 
 export function useVoiceTranscription({
   onPhoneDetected,
   onError,
+  onDigitsProgress,
 }: UseVoiceTranscriptionOptions) {
   const [transcript, setTranscript] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [extractedDigits, setExtractedDigits] = useState('');
 
   const detectionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -136,6 +139,16 @@ export function useVoiceTranscription({
 
     if (hasDetectedRef.current) return;
 
+    // Extraire les chiffres en cours pour feedback temps réel
+    const converted = convertWordsToDigits(text);
+    const digitsOnly = converted.replace(/\D/g, '').slice(0, 10);
+    setExtractedDigits(digitsOnly);
+    
+    // Callback pour feedback progressif
+    if (digitsOnly.length > 0) {
+      onDigitsProgress?.(digitsOnly, digitsOnly.length);
+    }
+
     // Tentative immédiate d'extraction
     const phone = extractPhoneNumber(text);
     if (phone && phone.length >= 10) {
@@ -171,6 +184,7 @@ export function useVoiceTranscription({
     setIsConnecting(true);
     hasDetectedRef.current = false;
     setTranscript('');
+    setExtractedDigits('');
     lastTextRef.current = '';
     clearTimers();
 
@@ -247,5 +261,6 @@ export function useVoiceTranscription({
     isConnecting,
     transcript,
     partialTranscript: scribe.partialTranscript || '',
+    extractedDigits,
   };
 }
