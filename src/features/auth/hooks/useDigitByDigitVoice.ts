@@ -14,13 +14,13 @@ const WORD_TO_DIGIT: Record<string, string> = {
   // Français standard
   'zéro': '0', 'zero': '0', 'oh': '0', 'héros': '0',
   'un': '1', 'une': '1', 'hein': '1', 'hin': '1',
-  'deux': '2', 'de': '2', 'deu': '2', 'deuh': '2',
-  'trois': '3', 'toi': '3', 'troi': '3', 'troua': '3',
-  'quatre': '4', 'cat': '4', 'quart': '4', 'catre': '4', 'katre': '4',
+  'deux': '2', 'deu': '2', 'deuh': '2',
+  'trois': '3', 'troi': '3', 'troua': '3',
+  'quatre': '4', 'catre': '4', 'katre': '4',
   'cinq': '5', 'saint': '5', 'sain': '5', 'sink': '5', 'saink': '5',
-  'six': '6', 'si': '6', 'cis': '6', 'scie': '6',
-  'sept': '7', 'set': '7', 'cette': '7', 'cet': '7', 'sète': '7', 'sett': '7',
-  'huit': '8', 'oui': '8', 'ui': '8', 'wii': '8', 'ouïe': '8', 'huitte': '8',
+  'six': '6', 'cis': '6', 'scie': '6',
+  'sept': '7', 'sète': '7', 'sett': '7',
+  'huit': '8', 'ouïe': '8', 'huitte': '8',
   'neuf': '9', 'oeuf': '9', 'noeud': '9', 'neuffe': '9',
   'dix': '10',
   
@@ -130,6 +130,7 @@ export function useDigitByDigitVoice({
   const isCleaningUpRef = useRef(false);
   const shouldRestartRef = useRef(false);
   const isActiveRef = useRef(false); // Tracks if we should keep listening
+  const restartDelayMsRef = useRef(200); // Delay before restarting recognition
 
   // Nettoyage complet
   const cleanup = useCallback(() => {
@@ -206,6 +207,7 @@ export function useDigitByDigitVoice({
     setErrorMessage(null);
     setLastHeard('');
     shouldRestartRef.current = false;
+    restartDelayMsRef.current = 200;
     isActiveRef.current = true; // Mark as active
     
     try {
@@ -251,102 +253,87 @@ export function useDigitByDigitVoice({
       const MIN_DETECTION_INTERVAL = 800; // Minimum 800ms entre deux détections
       
       recognition.onresult = (event: any) => {
-        const result = event.results[0];
-        const transcript = result[0].transcript.trim();
-        const confidence = result[0].confidence;
-        
+        const result = event.results[event.results.length - 1];
+        const transcript = result?.[0]?.transcript?.trim?.() ?? '';
+
         // Afficher ce qu'on entend
         setLastHeard(transcript);
-        console.log(`[DigitVoice] Heard: "${transcript}" (confidence: ${(confidence * 100).toFixed(0)}%)`);
-        
-        // Vérifier la confiance minimale (60%)
-        if (confidence < 0.6) {
-          console.log('[DigitVoice] Confidence too low, asking to repeat');
-          setErrorMessage('Répète plus fort');
-          shouldRestartRef.current = true;
-          return;
-        }
-        
+
         // Essayer toutes les alternatives pour trouver un chiffre
         let detectedDigit: string | null = null;
-        let bestConfidence = 0;
-        
-        for (let alt = 0; alt < result.length; alt++) {
+
+        for (let alt = 0; alt < (result?.length ?? 0); alt++) {
           const altTranscript = result[alt].transcript;
-          const altConfidence = result[alt].confidence || 0;
           const digit = extractSingleDigit(altTranscript);
-          
-          if (digit && altConfidence > bestConfidence) {
+          if (digit) {
             detectedDigit = digit;
-            bestConfidence = altConfidence;
-            console.log(`[DigitVoice] Found digit "${digit}" in alt ${alt}: "${altTranscript}" (${(altConfidence * 100).toFixed(0)}%)`);
+            break;
           }
         }
-        
+
         const now = Date.now();
-        
+
         if (detectedDigit) {
           // Éviter les doublons rapides du même chiffre
           if (detectedDigit === lastDetectedDigit && (now - lastDetectionTime) < MIN_DETECTION_INTERVAL) {
-            console.log('[DigitVoice] Duplicate detection ignored');
+            setErrorMessage(null);
+            restartDelayMsRef.current = 350;
             shouldRestartRef.current = true;
+            try { recognition.stop(); } catch { /* ignore */ }
             return;
           }
-          
+
           lastDetectedDigit = detectedDigit;
           lastDetectionTime = now;
-          
-          console.log('[DigitVoice] ✓ Digit confirmed:', detectedDigit);
+
+          setErrorMessage(null);
           onDigitDetected(detectedDigit);
-          
-          // Pause avant de reprendre l'écoute
-          setTimeout(() => {
-            shouldRestartRef.current = true;
-            // Trigger restart manually since continuous is false
-            if (isActiveRef.current && recognitionRef.current) {
-              try {
-                recognitionRef.current.start();
-              } catch (e) {
-                console.log('[DigitVoice] Restart after digit failed:', e);
-              }
-            }
-          }, 500);
-        } else {
-          setErrorMessage('Chiffre non compris');
+
+          // Pause (pour éviter de capter "oui"/bruit juste après)
+          restartDelayMsRef.current = 700;
           shouldRestartRef.current = true;
+          try { recognition.stop(); } catch { /* ignore */ }
+          return;
         }
+
+        // Pas de chiffre
+        setErrorMessage('Répète le chiffre');
+        restartDelayMsRef.current = 450;
+        shouldRestartRef.current = true;
+        try { recognition.stop(); } catch { /* ignore */ }
       };
       
       recognition.onerror = (event: any) => {
         if (event.error === 'aborted') return; // Ignoré
-        
-        console.log('[DigitVoice] Error:', event.error);
-        
+
         if (event.error === 'no-speech') {
           setErrorMessage('Je n\'entends rien');
+          restartDelayMsRef.current = 500;
           shouldRestartRef.current = true;
         } else if (event.error === 'not-allowed') {
           setState('error');
           setErrorMessage('Micro non autorisé');
           onError?.('Micro non autorisé');
         } else {
+          restartDelayMsRef.current = 450;
           shouldRestartRef.current = true;
         }
       };
       
       recognition.onend = () => {
-        console.log('[DigitVoice] onend - shouldRestart:', shouldRestartRef.current, 'isActive:', isActiveRef.current);
-        // Use ref instead of state to avoid stale closure
+        // Redémarrer seulement si on est en mode actif
         if (shouldRestartRef.current && isActiveRef.current && recognitionRef.current) {
+          const delay = Math.max(200, restartDelayMsRef.current);
           shouldRestartRef.current = false;
+          restartDelayMsRef.current = 200;
+
           setTimeout(() => {
             try {
-              console.log('[DigitVoice] Restarting recognition...');
               recognitionRef.current?.start();
-            } catch (e) { 
-              console.log('[DigitVoice] Restart failed:', e);
+            } catch {
+              // ignore (InvalidStateError si déjà démarré)
             }
-          }, 150);
+          }, delay);
         }
       };
       
