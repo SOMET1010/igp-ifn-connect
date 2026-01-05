@@ -80,14 +80,15 @@ const VivriersCooperativesPage: React.FC = () => {
 
   // Fetch members for selected cooperative
   const { data: members = [], isLoading: loadingMembers } = useQuery({
-    queryKey: ['vivriers-members', selectedCooperative?.id],
+    queryKey: ['vivriers-members', selectedCooperative?.id, selectedCooperative?.name],
     queryFn: async () => {
       if (!selectedCooperative) return [];
       
+      // Chercher par cooperative_id OU cooperative_name pour couvrir les deux cas
       const { data, error } = await supabase
         .from('vivriers_members')
         .select('*')
-        .eq('cooperative_id', selectedCooperative.id)
+        .or(`cooperative_id.eq.${selectedCooperative.id},cooperative_name.eq.${selectedCooperative.name}`)
         .order('full_name');
       
       if (error) throw error;
