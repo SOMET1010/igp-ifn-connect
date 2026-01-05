@@ -83,8 +83,11 @@ export function InclusivePhoneAuth({
       speak(`J'ai entendu ${spaced}. C'est bon ?`, { priority: 'high' });
     },
     onError: (err) => {
+      const msg = err || 'Erreur vocale';
       setIsListeningMic(false);
-      toast.error(err || 'Erreur vocale');
+      toast.error(msg);
+      // Feedback vocal pour éviter l'effet "dans le vide"
+      speak(msg, { priority: 'high' });
     }
   });
 
@@ -133,34 +136,29 @@ export function InclusivePhoneAuth({
     return '✅ Numéro complet !';
   };
 
-  // Démarrer l'écoute micro avec fallback automatique
+  // Démarrer l'écoute micro (avec indication claire + auto-fin sur pause)
   const handleMicClick = async () => {
-    if (isListeningMic || isVoiceConnecting) {
+    // 2e tap = arrêter
+    if (isListeningMic || isVoiceConnecting || isVoiceConnected) {
       stopListening();
       setIsListeningMic(false);
+      vibrate(30);
+      speak('D’accord', { priority: 'normal' });
       return;
     }
-
-    // Timeout fallback: si rien après 5s, afficher le clavier
-    const fallbackTimeout = setTimeout(() => {
-      if (isListeningMic) {
-        stopListening();
-        setIsListeningMic(false);
-        toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
-        speak('Tape ton numéro sur le clavier', { priority: 'normal' });
-      }
-    }, 5000);
 
     try {
       setIsListeningMic(true);
       vibrate(50);
-      speak("Je t'écoute, dis ton numéro", { priority: 'high' });
+
+      // Important: ne pas dire "parle" tant que la connexion n'est pas prête
+      speak('Connexion au micro...', { priority: 'high' });
       await startListening();
-      clearTimeout(fallbackTimeout);
+
+      vibrate(30);
+      speak('Parle maintenant. Fais une pause quand tu as fini.', { priority: 'high' });
     } catch (err) {
-      clearTimeout(fallbackTimeout);
       setIsListeningMic(false);
-      // Fallback silencieux vers clavier
       toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
       speak('Tape ton numéro sur le clavier', { priority: 'normal' });
     }
@@ -1028,15 +1026,31 @@ export function InclusivePhoneAuth({
                     <Mic className="w-10 h-10 text-white" />
                   )}
                 </motion.button>
+
                 <p className="text-white text-sm text-center">
-                  {isVoiceConnecting 
-                    ? 'Connexion...' 
-                    : isListeningMic || isVoiceConnected 
-                      ? "🎙️ Je t'écoute..." 
-                      : "Appuie et parle"}
+                  {isVoiceConnecting
+                    ? 'Connexion...'
+                    : isListeningMic || isVoiceConnected
+                      ? '🎙️ Parle maintenant'
+                      : 'Appuie et parle'}
                 </p>
+
+                <p className="text-white/70 text-xs text-center">
+                  {isVoiceConnecting
+                    ? 'Attends…'
+                    : isListeningMic || isVoiceConnected
+                      ? 'Fais une pause quand tu as fini (auto-détection).'
+                      : 'Ou utilise le clavier ci-dessous.'}
+                </p>
+
+                {(isListeningMic || isVoiceConnected) && !transcript && (
+                  <p className="text-white/60 text-xs italic">Je suis prêt…</p>
+                )}
+
                 {transcript && (
-                  <p className="text-white/60 text-xs italic">"{transcript}"</p>
+                  <div className="max-w-xs rounded-xl bg-white/15 px-3 py-2">
+                    <p className="text-white/80 text-xs italic">"{transcript}"</p>
+                  </div>
                 )}
               </div>
 
