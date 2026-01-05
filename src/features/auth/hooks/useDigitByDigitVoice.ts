@@ -86,6 +86,7 @@ export function useDigitByDigitVoice({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isCleaningUpRef = useRef(false);
   const shouldRestartRef = useRef(false);
+  const isActiveRef = useRef(false); // Tracks if we should keep listening
 
   // Nettoyage complet
   const cleanup = useCallback(() => {
@@ -162,6 +163,7 @@ export function useDigitByDigitVoice({
     setErrorMessage(null);
     setLastHeard('');
     shouldRestartRef.current = false;
+    isActiveRef.current = true; // Mark as active
     
     try {
       // Demander le micro
@@ -210,13 +212,11 @@ export function useDigitByDigitVoice({
           const digit = extractSingleDigit(transcript);
           
           if (digit) {
-            setState('processing');
-            // Petit délai pour feedback visuel
-            setTimeout(() => {
-              onDigitDetected(digit);
-              // Préparer pour le prochain chiffre
-              shouldRestartRef.current = true;
-            }, 100);
+            console.log('[DigitVoice] Digit detected:', digit);
+            // Call callback immediately, keep listening state
+            onDigitDetected(digit);
+            // Schedule restart
+            shouldRestartRef.current = true;
           } else {
             // Pas de chiffre reconnu, relancer
             setErrorMessage('Répète le chiffre');
@@ -243,14 +243,18 @@ export function useDigitByDigitVoice({
       };
       
       recognition.onend = () => {
-        // Relancer si nécessaire
-        if (shouldRestartRef.current && state === 'listening' && recognitionRef.current) {
+        console.log('[DigitVoice] onend - shouldRestart:', shouldRestartRef.current, 'isActive:', isActiveRef.current);
+        // Use ref instead of state to avoid stale closure
+        if (shouldRestartRef.current && isActiveRef.current && recognitionRef.current) {
           shouldRestartRef.current = false;
           setTimeout(() => {
             try {
+              console.log('[DigitVoice] Restarting recognition...');
               recognitionRef.current?.start();
-            } catch (e) { /* ignore */ }
-          }, 100);
+            } catch (e) { 
+              console.log('[DigitVoice] Restart failed:', e);
+            }
+          }, 150);
         }
       };
       
@@ -270,6 +274,7 @@ export function useDigitByDigitVoice({
 
   // Arrêter l'écoute
   const stopListening = useCallback(() => {
+    isActiveRef.current = false; // Stop restart loop
     shouldRestartRef.current = false;
     cleanup();
     setState('idle');
