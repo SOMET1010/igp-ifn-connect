@@ -21,9 +21,14 @@ export { useSocialAuth } from './hooks/useSocialAuth';
 export { useDeviceFingerprint } from './hooks/useDeviceFingerprint';
 export { useTrustScore } from './hooks/useTrustScore';
 export { useVoiceTranscription } from './hooks/useVoiceTranscription';
+export { useVoiceTranscriptionV2 } from './hooks/useVoiceTranscriptionV2';
+export { useAudioLevel } from './hooks/useAudioLevel';
 export { useAgentValidation } from './hooks/useAgentValidation';
 export { useAuthLogging } from './hooks/useAuthLogging';
 export { usePersistedPersona } from './hooks/usePersistedPersona';
+
+// === Audio Feedback Components ===
+export { AudioLevelIndicator, AudioPulse, AudioWaveform } from './components/AudioLevelIndicator';
 
 // === Configs ===
 export {
