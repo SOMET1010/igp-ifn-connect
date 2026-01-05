@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, HelpCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Send, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -10,6 +10,17 @@ import { BigNumber, CardLarge, StatusBanner } from "@/components/ifn";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  WalletBalance, 
+  TransactionList, 
+  BeneficiaryList, 
+  TransferDialog,
+  QuickActions,
+  useWallet 
+} from "@/features/wallet";
+import type { Beneficiary } from "@/features/wallet";
+import { toast } from "sonner";
 
 interface MoneyData {
   totalSales: number;
@@ -30,6 +41,39 @@ export default function MerchantMoney() {
     netAmount: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("resume");
+  
+  // Wallet integration
+  const { 
+    wallet, 
+    transactions: walletTransactions, 
+    beneficiaries, 
+    isLoading: walletLoading, 
+    transfer,
+    toggleFavorite,
+    removeBeneficiary,
+    refresh 
+  } = useWallet();
+  
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [prefilledPhone, setPrefilledPhone] = useState("");
+  const [prefilledName, setPrefilledName] = useState("");
+
+  const handleSend = () => {
+    setPrefilledPhone("");
+    setPrefilledName("");
+    setTransferOpen(true);
+  };
+
+  const handleSelectBeneficiary = (beneficiary: Beneficiary) => {
+    setPrefilledPhone(beneficiary.phone || "");
+    setPrefilledName(beneficiary.merchant_name || beneficiary.nickname || "");
+    setTransferOpen(true);
+  };
+
+  const handleDeposit = () => {
+    toast.info("Dépôt Mobile Money - Bientôt disponible !");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,89 +142,139 @@ export default function MerchantMoney() {
         showNotifications={false}
       />
 
-      <main className="p-4 space-y-6">
-        {/* BigNumber - Net du mois */}
-        <div className="py-8">
-          <BigNumber 
-            value={data.netAmount}
-            label={`Ce que tu as gagné ${t("this_month")}`}
-            color="success"
-          />
-        </div>
+      <main className="p-4 space-y-4">
+        {/* Tabs: Résumé / Portefeuille */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-14">
+            <TabsTrigger value="resume" className="text-base gap-2">
+              <ArrowUpCircle className="w-5 h-5" />
+              Résumé
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="text-base gap-2">
+              <Wallet className="w-5 h-5" />
+              Portefeuille
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Détails entrées/sorties */}
-        <CardLarge className="space-y-5">
-          {/* Ventes */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
-              <ArrowUpCircle className="w-7 h-7 text-[hsl(142,76%,36%)]" />
+          {/* TAB: Résumé mensuel */}
+          <TabsContent value="resume" className="space-y-6 mt-4">
+            {/* BigNumber - Net du mois */}
+            <div className="py-6">
+              <BigNumber 
+                value={data.netAmount}
+                label={`Ce que tu as gagné ${t("this_month")}`}
+                color="success"
+              />
             </div>
-            <div className="flex-1">
-              <p className="text-muted-foreground">{t("your_sales")}</p>
-              <p className="text-2xl font-bold text-[hsl(142,76%,36%)]">
-                +{data.totalSales.toLocaleString()} FCFA
+
+            {/* Détails entrées/sorties */}
+            <CardLarge className="space-y-5">
+              {/* Ventes */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
+                  <ArrowUpCircle className="w-7 h-7 text-[hsl(142,76%,36%)]" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-muted-foreground">{t("your_sales")}</p>
+                  <p className="text-2xl font-bold text-[hsl(142,76%,36%)]">
+                    +{data.totalSales.toLocaleString()} FCFA
+                  </p>
+                </div>
+              </div>
+
+              {/* Santé (CMU) */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <ArrowDownCircle className="w-7 h-7 text-destructive" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-muted-foreground">{t("health_contribution")}</p>
+                  <p className="text-xl font-bold text-destructive">
+                    -{data.totalCMU.toLocaleString()} FCFA
+                  </p>
+                </div>
+              </div>
+
+              {/* Épargne (RSTI) */}
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <ArrowUpCircle className="w-7 h-7 text-secondary" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-muted-foreground">{t("savings")}</p>
+                  <p className="text-xl font-bold text-secondary">
+                    +{data.totalRSTI.toLocaleString()} FCFA
+                  </p>
+                </div>
+              </div>
+            </CardLarge>
+
+            {/* Badge protection santé */}
+            <CardLarge className="flex items-center gap-4 bg-[hsl(142,76%,36%)]/5 border-[hsl(142,76%,36%)]/20">
+              <div className="w-14 h-14 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
+                <Shield className="w-8 h-8 text-[hsl(142,76%,36%)]" />
+              </div>
+              <p className="text-lg font-bold text-[hsl(142,76%,30%)]">
+                🛡️ {t("your_health_protection")}
               </p>
-            </div>
-          </div>
+            </CardLarge>
+          </TabsContent>
 
-          {/* Santé (CMU) */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-              <ArrowDownCircle className="w-7 h-7 text-destructive" />
-            </div>
-            <div className="flex-1">
-              <p className="text-muted-foreground">{t("health_contribution")}</p>
-              <p className="text-xl font-bold text-destructive">
-                -{data.totalCMU.toLocaleString()} FCFA
-              </p>
-            </div>
-          </div>
+          {/* TAB: Portefeuille */}
+          <TabsContent value="wallet" className="space-y-6 mt-4">
+            {wallet ? (
+              <>
+                {/* Balance Card */}
+                <WalletBalance 
+                  balance={wallet.balance} 
+                  isLoading={walletLoading}
+                  onRefresh={refresh}
+                />
 
-          {/* Épargne (RSTI) */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-              <ArrowUpCircle className="w-7 h-7 text-secondary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-muted-foreground">{t("savings")}</p>
-              <p className="text-xl font-bold text-secondary">
-                +{data.totalRSTI.toLocaleString()} FCFA
-              </p>
-            </div>
-          </div>
-        </CardLarge>
+                {/* Quick Actions */}
+                <QuickActions 
+                  onSend={handleSend}
+                  onDeposit={handleDeposit}
+                  onHistory={() => navigate("/marchand/historique")}
+                />
 
-        {/* Badge protection santé */}
-        <CardLarge className="flex items-center gap-4 bg-[hsl(142,76%,36%)]/5 border-[hsl(142,76%,36%)]/20">
-          <div className="w-14 h-14 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
-            <Shield className="w-8 h-8 text-[hsl(142,76%,36%)]" />
-          </div>
-          <p className="text-lg font-bold text-[hsl(142,76%,30%)]">
-            🛡️ {t("your_health_protection")}
-          </p>
-        </CardLarge>
+                {/* Beneficiaries */}
+                <BeneficiaryList
+                  beneficiaries={beneficiaries}
+                  onSelect={handleSelectBeneficiary}
+                  onToggleFavorite={toggleFavorite}
+                  onRemove={removeBeneficiary}
+                  isLoading={walletLoading}
+                />
 
-        {/* Link to understand CMU/RSTI */}
-        <CardLarge 
-          onClick={() => navigate("/marchand/comprendre")}
-          className="flex items-center gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
-        >
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <HelpCircle className="w-7 h-7 text-primary" />
-          </div>
-          <div className="flex-1">
-            <p className="text-lg font-medium text-foreground">
-              {t("what_is_cmu_rsti")}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {t("understand_simple")}
-            </p>
-          </div>
-        </CardLarge>
+                {/* Recent Transactions */}
+                <TransactionList 
+                  transactions={walletTransactions} 
+                  isLoading={walletLoading} 
+                />
+              </>
+            ) : (
+              <CardLarge className="text-center py-8">
+                <Wallet className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground">Portefeuille non disponible</p>
+              </CardLarge>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Status Banner */}
         <StatusBanner isOnline={isOnline} />
       </main>
+
+      {/* Transfer Dialog */}
+      <TransferDialog
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        onTransfer={transfer}
+        prefilledPhone={prefilledPhone}
+        prefilledName={prefilledName}
+        maxAmount={wallet?.balance || 0}
+      />
 
       <UnifiedBottomNav items={merchantNavItems} />
     </div>

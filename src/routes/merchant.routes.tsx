@@ -25,9 +25,7 @@ import MerchantPromotions from '@/pages/merchant/MerchantPromotions';
 import MerchantSuppliers from '@/pages/merchant/MerchantSuppliers';
 import MerchantMoney from '@/pages/merchant/MerchantMoney';
 import MerchantHelp from '@/pages/merchant/MerchantHelp';
-import MerchantUnderstand from '@/pages/merchant/MerchantUnderstand';
 import MerchantInvoices from '@/pages/merchant/MerchantInvoices';
-import MerchantWallet from '@/pages/merchant/MerchantWallet';
 import MerchantKyc from '@/pages/merchant/MerchantKyc';
 import SalesQuick from '@/pages/merchant/SalesQuick';
 
@@ -61,11 +59,7 @@ export const merchantProtectedRoutes = (
     <Route path="/marchand/cmu" element={<MerchantCMU />} />
     <Route path="/marchand/credits" element={<MerchantCredits />} />
     <Route path="/marchand/scanner" element={<MerchantScanner />} />
-    <Route path="/marchand/promotions" element={<MerchantPromotions />} />
-    <Route path="/marchand/fournisseurs" element={<MerchantSuppliers />} />
-    <Route path="/marchand/comprendre" element={<MerchantUnderstand />} />
     <Route path="/marchand/factures" element={<MerchantInvoices />} />
-    <Route path="/marchand/wallet" element={<MerchantWallet />} />
     <Route path="/marchand/kyc" element={<MerchantKyc />} />
     <Route path="/marchand/vente-rapide" element={<SalesQuick />} />
     <Route path="/marchand/assistant-vocal" element={<VoiceAssistant />} />
