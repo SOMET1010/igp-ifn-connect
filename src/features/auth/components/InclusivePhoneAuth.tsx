@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete, ShieldCheck, AlertTriangle, PhoneCall, Mic, MicOff } from 'lucide-react';
+import { Loader2, ArrowRight, Phone, RotateCcw, CheckCircle2, Volume2, VolumeX, Delete, ShieldCheck, AlertTriangle, PhoneCall, Mic, MicOff, Undo2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -7,15 +7,12 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
-import { useSimpleVoiceTranscription } from '@/features/auth/hooks/useSimpleVoiceTranscription';
+import { useDigitByDigitVoice } from '@/features/auth/hooks/useDigitByDigitVoice';
 import { SocialChallenge } from './SocialChallenge';
 import { SimpleRegistrationForm } from './SimpleRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@/features/auth/config/loginConfigs';
-import { AudioLevelIndicator } from './AudioLevelIndicator';
-import { AudioFeedbackBanner } from './AudioFeedbackBanner';
-import { MicDebugPanel } from './MicDebugPanel';
-import { VoiceErrorDebugger } from './VoiceErrorDebugger';
+import { DigitProgressDisplay } from './DigitProgressDisplay';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -88,75 +85,64 @@ export function InclusivePhoneAuth({
   // Ref pour le timer d'annonce "C'est bon, je t'écoute" (pour pouvoir l'annuler si erreur)
   const listeningAnnouncementRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Transcription vocale pour le numéro (avec audioLevel pour feedback visuel)
-  const { 
-    startListening, 
-    stopListening, 
-    isConnected: isVoiceConnected, 
-    isConnecting: isVoiceConnecting,
-    transcript,
-    extractedDigits,
+  // ====== NOUVEAU SYSTÈME : CHIFFRE PAR CHIFFRE ======
+  // Au lieu de capturer 10 chiffres d'un coup (qui échoue souvent),
+  // on écoute UN chiffre à la fois avec confirmation vocale.
+  
+  const {
+    state: voiceState,
+    isListening: isVoiceListening,
+    isProcessing: isVoiceProcessing,
     errorMessage: voiceError,
-    scribeStatus,
-    scribeError,
-    // Métriques audio pour feedback visuel
+    lastHeard,
     audioLevel,
     isReceivingAudio,
-    levelHistory,
-    audioStatus,
-    silenceDuration,
-    state: voiceState,
-  } = useSimpleVoiceTranscription({
-    onPhoneDetected: (detectedPhone) => {
-      // Annuler l'annonce en cours si elle existe
-      if (listeningAnnouncementRef.current) {
-        clearTimeout(listeningAnnouncementRef.current);
-        listeningAnnouncementRef.current = null;
-      }
-      setPhone(detectedPhone);
-      setIsListeningMic(false);
-      stopListening();
-      // Montrer l'écran de confirmation
-      setStep('phone_confirm');
-      // Lire le numéro détecté
-      const spaced = detectedPhone.split('').join(' ');
-      vibrate(100);
-      speak(`J'ai entendu ${spaced}. C'est bon ?`, { priority: 'high' });
-    },
-    onDigitsProgress: (digits, count) => {
-      // Montrer la progression en direct dans le champ (sinon l'utilisateur a l'impression que ça "écoute dans le vide")
-      setPhone(prev => (digits.length >= prev.length ? digits : prev));
-
-      // Feedback progressif pendant la dictée
-      vibrate(20);
-      if (count === 4) {
-        speak('Continue...', { priority: 'normal' });
-      } else if (count === 8) {
-        speak('Presque fini...', { priority: 'normal' });
-      }
+    startListening,
+    stopListening,
+  } = useDigitByDigitVoice({
+    onDigitDetected: (digit) => {
+      // Ajouter le chiffre au numéro
+      setPhone(prev => {
+        if (prev.length >= 10) return prev;
+        const newPhone = prev + digit;
+        
+        // Confirmation vocale courte du chiffre
+        vibrate(30);
+        speak(digit, { priority: 'high' });
+        
+        // Si 10 chiffres atteints, passer à confirmation
+        if (newPhone.length === 10) {
+          setTimeout(() => {
+            setIsListeningMic(false);
+            stopListening();
+            setStep('phone_confirm');
+            const spaced = newPhone.split('').join(' ');
+            speak(`J'ai ${spaced}. C'est bon ?`, { priority: 'high' });
+          }, 500);
+        }
+        
+        return newPhone;
+      });
     },
     onError: (err) => {
-      // Annuler l'annonce "C'est bon, je t'écoute" si erreur
-      if (listeningAnnouncementRef.current) {
-        clearTimeout(listeningAnnouncementRef.current);
-        listeningAnnouncementRef.current = null;
-      }
-      setIsListeningMic(false);
-      // Le hook useVoiceTranscription gère déjà le toast et l'appel speak via notifyErrorOnce
-      // On ajoute juste le message vocal ici si pas en iframe
       if (!isInIframe && err) {
         speak(err, { priority: 'high' });
       }
     }
   });
 
-  // Ref stable pour stopListening (évite re-render loop sur cleanup)
+  // Variables dérivées pour compatibilité avec l'ancien code
+  const isVoiceConnected = isVoiceListening;
+  const isVoiceConnecting = voiceState === 'processing';
+  const extractedDigits = phone; // Le phone EST les digits extraits maintenant
+
+  // Ref stable pour stopListening
   const stopListeningRef = useRef(stopListening);
   useEffect(() => {
     stopListeningRef.current = stopListening;
   }, [stopListening]);
 
-  // Cleanup au démontage uniquement (pas de dépendance = stable)
+  // Cleanup au démontage
   useEffect(() => {
     return () => {
       stopListeningRef.current();
@@ -1326,58 +1312,56 @@ export function InclusivePhoneAuth({
                   </motion.button>
                 </div>
 
-                {/* Feedback audio temps réel - TRÈS VISIBLE */}
+                {/* Feedback audio temps réel - SIMPLIFIÉ */}
                 {(isListeningMic || isVoiceConnected || voiceState !== 'idle') && (
-                  <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-                    {/* Indicateur de niveau audio - barres */}
-                    <AudioLevelIndicator
-                      level={audioLevel}
-                      levelHistory={levelHistory}
-                      isReceivingAudio={isReceivingAudio}
-                      size="lg"
-                      barCount={7}
-                    />
-                    
-                    {/* Message contextuel (Je t'écoute / Je n'entends rien...) */}
-                    <AudioFeedbackBanner
-                      state={voiceState}
-                      audioStatus={audioStatus}
-                      silenceDuration={silenceDuration}
-                      errorMessage={voiceError ?? scribeError}
-                      onRetry={handleMicClick}
-                    />
-                    
-                    {/* Panneau debug (triple tap sur le badge pour activer) */}
-                    {debugMode && (
-                      <>
-                        <MicDebugPanel
-                          audioLevel={audioLevel}
-                          isReceivingAudio={isReceivingAudio}
-                          audioStatus={audioStatus}
-                          silenceDuration={silenceDuration}
-                          state={voiceState}
-                          isConnected={isVoiceConnected}
-                          isConnecting={isVoiceConnecting}
-                          transcript={transcript}
-                          extractedDigits={extractedDigits}
-                          scribeStatus={scribeStatus}
-                          scribeError={scribeError}
-                          errorMessage={voiceError}
+                  <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+                    {/* Barres audio simples */}
+                    <div className="flex items-center gap-1">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-1.5 bg-white rounded-full"
+                          animate={{
+                            height: isReceivingAudio 
+                              ? [8, 8 + audioLevel * 40, 8] 
+                              : 8,
+                          }}
+                          transition={{
+                            duration: 0.3,
+                            repeat: isReceivingAudio ? Infinity : 0,
+                            delay: i * 0.1,
+                          }}
                         />
-                        {(voiceError || scribeError) && (
-                          <VoiceErrorDebugger
-                            error={voiceError ?? String(scribeError)}
-                            isInIframe={isInIframe}
-                            isSecureContext={isSecureContext}
-                            hasGetUserMedia={hasGetUserMedia}
-                            voiceState={voiceState}
-                            scribeStatus={scribeStatus}
-                            scribeError={scribeError}
-                            onRetry={handleMicClick}
-                            onOpenFullscreen={handleOpenFullscreen}
-                          />
-                        )}
-                      </>
+                      ))}
+                    </div>
+                    
+                    {/* Message contextuel */}
+                    <p className={cn(
+                      "text-sm font-medium text-center",
+                      isReceivingAudio ? "text-white" : "text-white/70"
+                    )}>
+                      {voiceError 
+                        ? voiceError
+                        : isReceivingAudio 
+                          ? `J'écoute... "${lastHeard || ''}"`
+                          : "Parle maintenant - dis UN chiffre"}
+                    </p>
+                    
+                    {/* Bouton corriger le dernier chiffre */}
+                    {phone.length > 0 && (
+                      <Button
+                        onClick={() => {
+                          vibrate(20);
+                          setPhone(prev => prev.slice(0, -1));
+                          speak('Effacé', { priority: 'normal' });
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/80 hover:bg-white/20"
+                      >
+                        <Undo2 className="w-4 h-4 mr-1" />
+                        Corriger le dernier
+                      </Button>
                     )}
                   </div>
                 )}
@@ -1387,64 +1371,33 @@ export function InclusivePhoneAuth({
                   <p className="text-white text-sm font-medium">
                     {isVoiceConnecting
                       ? '⏳ Connexion...'
-                      : '👆 Appuie et parle'}
+                      : '👆 Appuie et parle UN chiffre à la fois'}
                   </p>
                 )}
 
-                {/* AFFICHAGE CHIFFRES DÉTECTÉS - TRÈS VISIBLE */}
+                {/* AFFICHAGE PROGRESSION CHIFFRES - NOUVEAU DESIGN */}
                 {(isListeningMic || isVoiceConnected) && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="w-full max-w-xs"
                   >
-                    <div className="bg-white rounded-2xl px-5 py-4 shadow-lg">
-                      {/* Chiffres détectés */}
-                      <div className="flex justify-center items-center gap-1 min-h-[48px]">
-                        {[...Array(10)].map((_, i) => (
-                          <motion.div
-                            key={i}
-                            className={cn(
-                              "w-6 h-12 rounded-lg flex items-center justify-center text-xl font-bold",
-                              extractedDigits[i] 
-                                ? "bg-emerald-500 text-white" 
-                                : "bg-gray-100 text-gray-300"
-                            )}
-                            initial={extractedDigits[i] ? { scale: 0 } : {}}
-                            animate={extractedDigits[i] ? { scale: 1 } : {}}
-                            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                          >
-                            {extractedDigits[i] || '–'}
-                          </motion.div>
-                        ))}
-                      </div>
-                      
-                      {/* Barre de progression */}
-                      <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-emerald-500 rounded-full"
-                          initial={{ width: '0%' }}
-                          animate={{ width: `${(extractedDigits.length / 10) * 100}%` }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      </div>
-                      
-                      {/* Compteur */}
-                      <p className="text-center text-sm text-gray-500 mt-2">
-                        {extractedDigits.length === 0 
-                          ? 'Dis ton numéro... "zéro sept..."' 
-                          : extractedDigits.length < 10 
-                            ? `${extractedDigits.length}/10 chiffres - continue !`
-                            : '✓ Numéro complet !'}
-                      </p>
-                    </div>
+                    {/* Cases de chiffres avec animation */}
+                    <DigitProgressDisplay
+                      digits={extractedDigits}
+                      currentIndex={extractedDigits.length}
+                      isListening={isReceivingAudio}
+                      className="mb-4"
+                    />
                     
-                    {/* Transcript brut pour debug */}
-                    {transcript && (
-                      <p className="text-white/50 text-xs text-center mt-2 italic">
-                        "{transcript}"
-                      </p>
-                    )}
+                    {/* Compteur vocal */}
+                    <p className="text-center text-sm text-white/80">
+                      {extractedDigits.length === 0 
+                        ? 'Dis "zéro", "un", "deux"...' 
+                        : extractedDigits.length < 10 
+                          ? `Chiffre ${extractedDigits.length + 1} sur 10`
+                          : '✓ Numéro complet !'}
+                    </p>
                   </motion.div>
                 )}
 
