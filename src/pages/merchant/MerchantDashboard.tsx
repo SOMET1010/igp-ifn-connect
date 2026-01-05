@@ -25,6 +25,9 @@ import { GlassCard } from "@/components/shared/GlassCard";
 import { GiantActionButton } from "@/components/shared/GiantActionButton";
 import { VoiceHeroButton } from "@/components/shared/VoiceHeroButton";
 
+// Onboarding
+import { OnboardingFlow, useOnboarding } from "@/features/onboarding";
+
 import {
   OpenDayDialog,
   CloseDayDialog,
@@ -57,6 +60,9 @@ export default function MerchantDashboard() {
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<"idle" | "listening" | "playing">("idle");
   const [showBalance, setShowBalance] = useState(false);
+
+  // Onboarding state
+  const { needsOnboarding, isLoading: onboardingLoading, completeOnboarding } = useOnboarding();
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
@@ -106,6 +112,16 @@ export default function MerchantDashboard() {
     }
     return "Bonjour {nom} ! Prêt·e pour les affaires ? 💪";
   };
+
+  // Show onboarding for new users
+  if (!onboardingLoading && needsOnboarding) {
+    return (
+      <OnboardingFlow 
+        merchantName={merchant?.full_name?.split(" ")[0]}
+        onComplete={completeOnboarding}
+      />
+    );
+  }
 
   if (error) {
     return (
