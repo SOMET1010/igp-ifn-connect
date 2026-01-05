@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@/features/auth/config/loginConfigs';
 import { AudioLevelIndicator } from './AudioLevelIndicator';
 import { AudioFeedbackBanner } from './AudioFeedbackBanner';
+import { MicDebugPanel } from './MicDebugPanel';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -66,6 +67,11 @@ export function InclusivePhoneAuth({
   const [isTimeout, setIsTimeout] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const otpAbortRef = useRef<AbortController | null>(null);
+  
+  // Mode debug (activer en tapant 3 fois sur le titre)
+  const [debugMode, setDebugMode] = useState(false);
+  const debugTapCountRef = useRef(0);
+  const debugTapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Transcription vocale pour le numéro (avec audioLevel pour feedback visuel)
   const { 
@@ -248,6 +254,26 @@ export function InclusivePhoneAuth({
     } else {
       setVoiceEnabled(true);
       speak('Assistance vocale activée. Appuie sur le gros micro pour parler.', { priority: 'high' });
+    }
+  };
+  
+  // Toggle debug mode (triple tap sur le badge)
+  const handleDebugTap = () => {
+    debugTapCountRef.current++;
+    
+    if (debugTapTimerRef.current) {
+      clearTimeout(debugTapTimerRef.current);
+    }
+    
+    debugTapTimerRef.current = setTimeout(() => {
+      debugTapCountRef.current = 0;
+    }, 500);
+    
+    if (debugTapCountRef.current >= 3) {
+      setDebugMode(prev => !prev);
+      debugTapCountRef.current = 0;
+      vibrate(100);
+      console.log('[DEBUG] Mode debug:', !debugMode);
     }
   };
 
@@ -1057,8 +1083,11 @@ export function InclusivePhoneAuth({
       <div className={cn("rounded-3xl p-6 shadow-xl", colors.bg)}>
         {/* Header: Badge + Voice + Progress */}
         <div className="flex items-center justify-between mb-2">
-          <span className="bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full">
-            Accès {labels}
+          <span 
+            onClick={handleDebugTap}
+            className="bg-white/20 text-white text-xs font-semibold px-4 py-1.5 rounded-full cursor-pointer select-none"
+          >
+            Accès {labels} {debugMode && '🔧'}
           </span>
           <button
             onClick={toggleVoice}
@@ -1209,6 +1238,21 @@ export function InclusivePhoneAuth({
                       silenceDuration={silenceDuration}
                       onRetry={handleMicClick}
                     />
+                    
+                    {/* Panneau debug (triple tap sur le badge pour activer) */}
+                    {debugMode && (
+                      <MicDebugPanel
+                        audioLevel={audioLevel}
+                        isReceivingAudio={isReceivingAudio}
+                        audioStatus={audioStatus}
+                        silenceDuration={silenceDuration}
+                        state={voiceState}
+                        isConnected={isVoiceConnected}
+                        isConnecting={isVoiceConnecting}
+                        transcript={transcript}
+                        extractedDigits={extractedDigits}
+                      />
+                    )}
                   </div>
                 )}
                 
