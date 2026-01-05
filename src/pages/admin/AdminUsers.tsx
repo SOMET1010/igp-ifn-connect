@@ -68,13 +68,7 @@ const roleConfig: Record<AppRole, { label: string; color: string; icon: React.El
   user: { label: 'Utilisateur', color: 'bg-muted text-muted-foreground border-muted', icon: Users },
 };
 
-const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Tableau', path: '/admin' },
-  { icon: Store, label: 'Marchands', path: '/admin/marchands' },
-  { icon: UserCog, label: 'Agents', path: '/admin/agents' },
-  { icon: Wheat, label: 'Coopératives', path: '/admin/cooperatives' },
-  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
-];
+import { adminNavItems } from '@/config/navigation';
 
 // CSV Export function
 const exportUsersToCSV = (users: AdminUserData[]) => {

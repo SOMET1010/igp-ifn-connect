@@ -72,23 +72,19 @@ export const SITEMAP = {
 
   agent: [
     { path: '/agent', name: 'Dashboard Agent', requiresAuth: true, roles: ['agent'] },
-    { path: '/agent/enrollment', name: 'Enrôlement', requiresAuth: true, roles: ['agent'] },
-    { path: '/agent/validation', name: 'Validation', requiresAuth: true, roles: ['agent'] },
+    { path: '/agent/enrolement', name: 'Enrôlement', requiresAuth: true, roles: ['agent'] },
     { path: '/agent/marchands', name: 'Mes Marchands', requiresAuth: true, roles: ['agent'] },
-    { path: '/agent/sync', name: 'Synchronisation', requiresAuth: true, roles: ['agent'] },
-    { path: '/agent/historique', name: 'Historique', requiresAuth: true, roles: ['agent'] },
-    { path: '/agent/aide', name: 'Aide', requiresAuth: true, roles: ['agent'] },
+    { path: '/agent/profil', name: 'Profil', requiresAuth: true, roles: ['agent'] },
   ] as RouteEntry[],
 
   cooperative: [
     { path: '/cooperative', name: 'Dashboard Coopérative', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/products', name: 'Produits', requiresAuth: true, roles: ['cooperative'] },
     { path: '/cooperative/stock', name: 'Stock', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/orders', name: 'Commandes', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/members', name: 'Membres', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/producers', name: 'Producteurs', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/transactions', name: 'Transactions', requiresAuth: true, roles: ['cooperative'] },
-    { path: '/cooperative/reports', name: 'Rapports', requiresAuth: true, roles: ['cooperative'] },
+    { path: '/cooperative/commandes', name: 'Commandes', requiresAuth: true, roles: ['cooperative'] },
+    { path: '/cooperative/profil', name: 'Profil', requiresAuth: true, roles: ['cooperative'] },
+    { path: '/cooperative/membres', name: 'Membres', requiresAuth: true, roles: ['cooperative'] },
+    { path: '/cooperative/producteurs', name: 'Producteurs', requiresAuth: true, roles: ['cooperative'] },
+    { path: '/cooperative/commandes-producteurs', name: 'Commandes Producteurs', requiresAuth: true, roles: ['cooperative'] },
   ] as RouteEntry[],
 
   producer: [

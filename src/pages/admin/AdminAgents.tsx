@@ -24,13 +24,7 @@ interface Agent {
   full_name?: string;
 }
 
-const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: 'Tableau', path: '/admin' },
-  { icon: Store, label: 'Marchands', path: '/admin/marchands' },
-  { icon: UserCog, label: 'Agents', path: '/admin/agents' },
-  { icon: Wheat, label: 'Coopératives', path: '/admin/cooperatives' },
-  { icon: Users, label: 'Utilisateurs', path: '/admin/utilisateurs' },
-];
+import { adminNavItems } from '@/config/navigation';
 
 const AdminAgents: React.FC = () => {
   const navigate = useNavigate();

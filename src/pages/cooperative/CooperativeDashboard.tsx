@@ -19,12 +19,11 @@ import {
   QuickGuide,
   DateFilterTabs,
 } from '@/features/cooperative';
+import { cooperativeNavItems } from '@/config/navigation';
 import { 
   Package, 
   ClipboardList,
   Award,
-  Home,
-  User,
   Users,
   ShoppingCart,
 } from 'lucide-react';
@@ -34,12 +33,7 @@ const CooperativeDashboard: React.FC = () => {
   const { signOut } = useAuth();
   const { t } = useLanguage();
 
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/cooperative' },
-    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
-    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
-    { icon: User, label: t("profile"), path: '/cooperative/profil' },
-  ];
+  const navItems = cooperativeNavItems;
 
   const {
     cooperative,
