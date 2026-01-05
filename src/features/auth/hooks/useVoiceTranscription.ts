@@ -336,21 +336,14 @@ export function useVoiceTranscription({
         try { return window.self !== window.top; } catch { return true; }
       })();
 
-      let msg: string;
-      if ((err?.name === 'NotAllowedError' || err?.name === 'SecurityError') && (isPermissionPolicy || isInIframe)) {
-        msg = "Le micro est bloqué dans l'aperçu. Ouvre en plein écran.";
-      } else if (err?.name === 'NotAllowedError' || err?.name === 'SecurityError') {
-        msg = "Autorise le micro dans les paramètres du navigateur.";
-      } else if (err?.name === 'NotFoundError') {
-        msg = 'Aucun micro détecté sur cet appareil.';
-      } else {
-        msg = err?.message || 'Erreur vocale';
-      }
+      // Utiliser la normalisation centralisée
+      const msg = normalizeVoiceError(err);
 
       setErrorMessage(msg);
       onError?.(msg);
 
-      if (!onError) {
+      // En iframe, ne jamais afficher de toast (le bandeau guide l'utilisateur)
+      if (!onError && !isInIframe) {
         toast.error(msg);
       }
 

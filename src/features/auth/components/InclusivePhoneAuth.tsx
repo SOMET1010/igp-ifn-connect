@@ -15,6 +15,7 @@ import { merchantLoginConfig, agentLoginConfig, cooperativeLoginConfig } from '@
 import { AudioLevelIndicator } from './AudioLevelIndicator';
 import { AudioFeedbackBanner } from './AudioFeedbackBanner';
 import { MicDebugPanel } from './MicDebugPanel';
+import { VoiceErrorDebugger } from './VoiceErrorDebugger';
 interface InclusivePhoneAuthProps {
   redirectPath: string;
   userType: 'merchant' | 'cooperative' | 'agent';
@@ -1306,19 +1307,35 @@ export function InclusivePhoneAuth({
                     
                     {/* Panneau debug (triple tap sur le badge pour activer) */}
                     {debugMode && (
-                      <MicDebugPanel
-                        audioLevel={audioLevel}
-                        isReceivingAudio={isReceivingAudio}
-                        audioStatus={audioStatus}
-                        silenceDuration={silenceDuration}
-                        state={voiceState}
-                        isConnected={isVoiceConnected}
-                        isConnecting={isVoiceConnecting}
-                        transcript={transcript}
-                        extractedDigits={extractedDigits}
-                        scribeStatus={scribeStatus}
-                        scribeError={scribeError}
-                      />
+                      <>
+                        <MicDebugPanel
+                          audioLevel={audioLevel}
+                          isReceivingAudio={isReceivingAudio}
+                          audioStatus={audioStatus}
+                          silenceDuration={silenceDuration}
+                          state={voiceState}
+                          isConnected={isVoiceConnected}
+                          isConnecting={isVoiceConnecting}
+                          transcript={transcript}
+                          extractedDigits={extractedDigits}
+                          scribeStatus={scribeStatus}
+                          scribeError={scribeError}
+                          errorMessage={voiceError}
+                        />
+                        {(voiceError || scribeError) && (
+                          <VoiceErrorDebugger
+                            error={voiceError ?? String(scribeError)}
+                            isInIframe={isInIframe}
+                            isSecureContext={isSecureContext}
+                            hasGetUserMedia={hasGetUserMedia}
+                            voiceState={voiceState}
+                            scribeStatus={scribeStatus}
+                            scribeError={scribeError}
+                            onRetry={handleMicClick}
+                            onOpenFullscreen={handleOpenFullscreen}
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 )}
