@@ -247,7 +247,7 @@ export default function EnrollmentWizard() {
               variant="outline"
               onClick={prevStep}
               disabled={isSubmitting}
-              className="flex-1 h-14 text-lg rounded-xl"
+              className="flex-1 btn-kpata-secondary"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Précédent
@@ -258,7 +258,7 @@ export default function EnrollmentWizard() {
             <Button
               onClick={nextStep}
               disabled={!canProceed() || isCheckingPhone}
-              className="flex-1 h-14 text-lg rounded-xl"
+              className="flex-1 btn-kpata-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Suivant
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -267,7 +267,7 @@ export default function EnrollmentWizard() {
             <Button
               onClick={handleSubmit}
               disabled={!canProceed() || isSubmitting}
-              className="flex-1 h-14 text-lg rounded-xl bg-green-600 hover:bg-green-700"
+              className="flex-1 btn-kpata-success disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

@@ -51,7 +51,7 @@ export function Step1Identity({
           placeholder="Ex: CI-2024-123456"
           value={data.cmu_number}
           onChange={(e) => updateField("cmu_number", e.target.value)}
-          className="h-14 text-lg rounded-xl border-2 focus:border-primary"
+          className="input-kpata"
         />
         <p className="text-sm text-muted-foreground">
           Numéro figurant sur la carte CMU du marchand
@@ -69,7 +69,7 @@ export function Step1Identity({
             placeholder="Ex: Kouamé Adjoua"
             value={data.full_name}
             onChange={(e) => updateField("full_name", e.target.value)}
-            className="h-14 text-lg rounded-xl border-2 focus:border-primary flex-1"
+            className="input-kpata flex-1"
           />
           <VoiceInput
             language={language}
@@ -92,7 +92,7 @@ export function Step1Identity({
           value={data.dob}
           onChange={(e) => updateField("dob", e.target.value)}
           max={new Date().toISOString().split("T")[0]}
-          className="h-14 text-lg rounded-xl border-2 focus:border-primary"
+          className="input-kpata"
         />
         {data.dob && (
           <div className={`flex items-center gap-2 text-sm ${isAdult ? "text-green-600" : "text-destructive"}`}>
