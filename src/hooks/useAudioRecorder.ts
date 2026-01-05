@@ -158,12 +158,20 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunksRef.current.push(e.data);
+          console.log('[AudioRecorder] ✅ Chunk reçu:', e.data.size, 'bytes - Total chunks:', chunksRef.current.length);
           logger.debug(`Audio chunk received: ${e.data.size} bytes`, { module: 'useAudioRecorder' });
+        } else {
+          console.warn('[AudioRecorder] ⚠️ Chunk vide reçu');
         }
       };
 
       // Quand l'enregistrement s'arrête
       mediaRecorder.onstop = () => {
+        const totalSize = chunksRef.current.reduce((acc, b) => acc + b.size, 0);
+        console.log('[AudioRecorder] 🛑 Recording stopped:', {
+          chunks: chunksRef.current.length,
+          totalSize: totalSize + ' bytes'
+        });
         logger.info(`Recording stopped. Total chunks: ${chunksRef.current.length}`, { 
           module: 'useAudioRecorder' 
         });
@@ -206,6 +214,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       setIsRecording(true);
       setDuration(0);
 
+      console.log('[AudioRecorder] 🎙️ Recording started - State:', mediaRecorder.state, '- MimeType:', mediaRecorder.mimeType);
       logger.info('Recording started', { module: 'useAudioRecorder' });
 
       // Timer pour la durée

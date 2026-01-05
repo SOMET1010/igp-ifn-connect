@@ -69,13 +69,19 @@ export function StudioRecorder({
   };
 
   const handlePlay = () => {
+    console.log('[StudioRecorder] 🔊 handlePlay called:', { audioUrl, audioBlob: audioBlob?.size });
     if (audioRef.current && audioUrl) {
+      console.log('[StudioRecorder] Audio element readyState:', audioRef.current.readyState);
       if (isPlaying) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
         setIsPlaying(false);
       } else {
-        audioRef.current.play();
+        audioRef.current.play().then(() => {
+          console.log('[StudioRecorder] ✅ Playback started');
+        }).catch(err => {
+          console.error('[StudioRecorder] ❌ Playback error:', err);
+        });
         setIsPlaying(true);
       }
     }
@@ -280,6 +286,14 @@ export function StudioRecorder({
                   {formatDuration(duration)}
                 </span>
               </div>
+              {/* Debug: Bouton de téléchargement pour tester le blob */}
+              <a 
+                href={audioUrl} 
+                download={`debug-recording-${textKey}.webm`}
+                className="text-xs text-blue-500 underline mt-2"
+              >
+                ⬇️ Télécharger pour tester
+              </a>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
