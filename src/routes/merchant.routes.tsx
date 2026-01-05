@@ -21,8 +21,6 @@ import MerchantTransactions from '@/pages/merchant/MerchantTransactions';
 import MerchantStock from '@/pages/merchant/MerchantStock';
 import MerchantCredits from '@/pages/merchant/MerchantCredits';
 import MerchantScanner from '@/pages/merchant/MerchantScanner';
-import MerchantPromotions from '@/pages/merchant/MerchantPromotions';
-import MerchantSuppliers from '@/pages/merchant/MerchantSuppliers';
 import MerchantMoney from '@/pages/merchant/MerchantMoney';
 import MerchantHelp from '@/pages/merchant/MerchantHelp';
 import MerchantInvoices from '@/pages/merchant/MerchantInvoices';
