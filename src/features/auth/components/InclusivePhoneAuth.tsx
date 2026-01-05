@@ -293,7 +293,7 @@ export function InclusivePhoneAuth({
     return 'HIGH';
   };
 
-  // Étape 2 : Vérifier l'OTP + Risk Gate
+  // Étape 2 : Vérifier l'OTP + Risk Gate (Trust Score uniquement pour marchands)
   const handleSubmitOtp = useCallback(async () => {
     if (otp.length !== 6) {
       setError('Le code doit avoir 6 chiffres');
@@ -317,6 +317,15 @@ export function InclusivePhoneAuth({
     setStep('verifying');
     setIsTimeout(false);
 
+    // Pour les agents et coopératives : accès direct sans Trust Score
+    if (userType !== 'merchant') {
+      console.log(`[handleSubmitOtp] ${userType} - Accès direct sans Trust Score`);
+      await new Promise(r => setTimeout(r, 800)); // Petite pause pour UX
+      await finalizeLogin();
+      return;
+    }
+
+    // Trust Score uniquement pour les marchands
     // Timeout de 12 secondes
     timeoutRef.current = setTimeout(() => {
       setIsTimeout(true);
@@ -360,7 +369,7 @@ export function InclusivePhoneAuth({
       }
       setIsTimeout(true);
     }
-  }, [otp, devOtp, phone, calculateTrustScore, voiceEnabled, speak]);
+  }, [otp, devOtp, phone, userType, calculateTrustScore, voiceEnabled, speak]);
 
   // Retry après timeout
   const handleRetryVerification = useCallback(async () => {
@@ -673,29 +682,49 @@ export function InclusivePhoneAuth({
       toast.success('Connexion réussie !');
       if (voiceEnabled) speak('Bienvenue ! Tu es connecté.', { priority: 'high' });
       
-      // Attendre que la session soit bien établie avant de naviguer
-      // Vérifier que la session est active avant de rediriger
+      // Attendre que la session ET le rôle soient bien établis avant de naviguer
       const checkSession = async (): Promise<boolean> => {
         const { data } = await supabase.auth.getSession();
         return !!data.session;
       };
       
+      const checkRoleReady = async (): Promise<boolean> => {
+        if (!userId) return false;
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId);
+        return roles && roles.length > 0;
+      };
+      
       // Attendre jusqu'à 3 secondes que la session soit prête
-      let attempts = 0;
+      let sessionAttempts = 0;
       const maxAttempts = 6;
-      while (attempts < maxAttempts) {
+      while (sessionAttempts < maxAttempts) {
         const hasSession = await checkSession();
         if (hasSession) {
-          console.log('[finalizeLogin] Session confirmed, navigating...');
-          navigate(redirectPath);
-          return;
+          console.log('[finalizeLogin] Session confirmed');
+          break;
         }
         await new Promise(r => setTimeout(r, 500));
-        attempts++;
+        sessionAttempts++;
       }
       
-      // Si on arrive ici, forcer la navigation quand même
-      console.warn('[finalizeLogin] Session check timed out, navigating anyway');
+      // Attendre jusqu'à 3 secondes supplémentaires que le rôle soit prêt
+      let roleAttempts = 0;
+      while (roleAttempts < maxAttempts) {
+        const hasRole = await checkRoleReady();
+        if (hasRole) {
+          console.log('[finalizeLogin] Role confirmed, navigating...');
+          break;
+        }
+        await new Promise(r => setTimeout(r, 500));
+        roleAttempts++;
+      }
+      
+      // Invalider le cache du rôle pour forcer un rechargement frais
+      localStorage.removeItem('ifn-user-role-cache');
+      
       navigate(redirectPath);
       
     } catch (error: any) {

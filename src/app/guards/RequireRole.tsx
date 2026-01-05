@@ -36,6 +36,17 @@ export function RequireRole({ requiredRole, redirectTo }: RequireRoleProps) {
     }
   }, [isLoading, isAuthenticated]);
 
+  // Timeout fallback : si bloqué sur "vérification" pendant plus de 5 secondes, forcer reload
+  useEffect(() => {
+    if (isAuthenticated && userRole === null) {
+      const timeout = setTimeout(() => {
+        console.warn('[RequireRole] Role check timeout - forcing reload');
+        window.location.reload();
+      }, 5000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isAuthenticated, userRole]);
+
   // Loading state with explicit UI - aussi quand on est authentifié mais le rôle pas encore chargé
   if (isLoading || (isAuthenticated && userRole === null)) {
     return (
