@@ -120,7 +120,7 @@ const AgentDashboard: React.FC = () => {
         }
       />
 
-      <div className="p-4 space-y-6 max-w-2xl mx-auto">
+      <main className="p-4 space-y-6 max-w-2xl mx-auto">
         <PendingSyncAlert
           pendingCount={pendingCount}
           isOnline={isOnline}
@@ -133,38 +133,51 @@ const AgentDashboard: React.FC = () => {
           todayEnrollments={stats.today} 
         />
 
-        <AgentStats stats={stats} isLoading={isLoading} />
+        {/* Statistiques */}
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Statistiques</h2>
+          <AgentStats stats={stats} isLoading={isLoading} />
+        </section>
 
-        <AgentEnrollmentsChart 
-          data={stats.weeklyEnrollments} 
-          isLoading={isLoading} 
-        />
+        {/* Analyse */}
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Analyse</h2>
+          <AgentEnrollmentsChart 
+            data={stats.weeklyEnrollments} 
+            isLoading={isLoading} 
+          />
+        </section>
 
+        {/* Action principale */}
         <Button
           onClick={() => navigate('/agent/enrolement')}
-          className="btn-institutional w-full h-14 text-lg"
+          className="w-full h-12 text-base font-medium"
         >
           <UserPlus className="h-5 w-5 mr-2" />
           {t("new_enrollment")}
         </Button>
 
-        <div className="space-y-3">
-          <UnifiedActionCard
-            title={t("my_merchants")}
-            description={t("view_list")}
-            icon={Users}
-            onClick={() => navigate('/agent/marchands')}
-          />
-          <UnifiedActionCard
-            title={t("my_profile")}
-            description={t("settings")}
-            icon={User}
-            onClick={() => navigate('/agent/profil')}
-          />
-        </div>
+        {/* Actions rapides */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Actions rapides</h2>
+          <div className="space-y-2">
+            <UnifiedActionCard
+              title={t("my_merchants")}
+              description={t("view_list")}
+              icon={Users}
+              onClick={() => navigate('/agent/marchands')}
+            />
+            <UnifiedActionCard
+              title={t("my_profile")}
+              description={t("settings")}
+              icon={User}
+              onClick={() => navigate('/agent/profil')}
+            />
+          </div>
+        </section>
 
         <AgentQuickGuide />
-      </div>
+      </main>
 
       <UnifiedBottomNav items={navItems} />
     </div>
