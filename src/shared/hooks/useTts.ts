@@ -17,8 +17,8 @@ import {
   playPrerecordedMessage,
   type MessageKey 
 } from '@/shared/services/audio/prerecordedPersonaAudio';
-import type { VoiceAuthLang, VoiceScriptKey } from '@/features/auth/config/audioScripts';
-import { getVoiceScript } from '@/features/auth/config/audioScripts';
+import type { VoiceAuthLang, VoiceScriptKey } from '@/shared/config/audio/suta';
+import { getVoiceScript } from '@/shared/config/audio/suta';
 import { toast } from 'sonner';
 import { voiceQueue } from '@/shared/services/voice/voiceQueue';
 

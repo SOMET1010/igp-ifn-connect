@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useTts } from '@/shared/hooks/useTts';
-import type { VoiceAuthLang } from "@/features/auth/config/audioScripts";
+import type { VoiceAuthLang } from "@/shared/config/audio/suta";
 
 interface InterviewQuestion {
   key: string;

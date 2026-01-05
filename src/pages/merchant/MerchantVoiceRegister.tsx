@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { VoiceInterviewWizard } from "@/features/auth/components/VoiceInterviewWizard";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { VoiceAuthLang } from "@/features/auth/config/audioScripts";
+import { VoiceAuthLang } from "@/shared/config/audio/suta";
 import { cn } from "@/lib/utils";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";
 import logoDge from "@/assets/logo-dge.png";
