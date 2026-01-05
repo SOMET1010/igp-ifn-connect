@@ -11,6 +11,7 @@ export { CulturalChallenge } from './components/CulturalChallenge';
 export { HumanFallback } from './components/HumanFallback';
 export { PersonaSelector } from './components/PersonaSelector';
 export { AgentValidationRequest } from './components/AgentValidationRequest';
+export { SimpleRegistrationForm } from './components/SimpleRegistrationForm';
 
 // === Voice Interview (merged from voice-auth) ===
 export { VoiceInterviewWizard } from './components/VoiceInterviewWizard';
