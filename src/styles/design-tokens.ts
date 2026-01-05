@@ -2,6 +2,7 @@
 // PNAVIM DESIGN TOKENS - SOURCE UNIQUE DE VÉRITÉ
 // ============================================
 // RÈGLE: Si une couleur n'est pas ici, elle est INTERDITE
+// Documentation complète: docs/design-system/README.md
 
 export const PNAVIM_COLORS = {
   // COULEURS IDENTITAIRES (Immuables)
@@ -43,6 +44,24 @@ export const PNAVIM_HSL = {
   border: '220 13% 91%',
 } as const;
 
+// ============================================
+// SHADOWS PNAVIM
+// ============================================
+export const PNAVIM_SHADOWS = {
+  primary: 'shadow-pnavim-primary',
+  secondary: 'shadow-pnavim-secondary',
+  warning: 'shadow-pnavim-warning',
+  muted: 'shadow-pnavim-muted',
+  // Glow effects
+  glowPrimary: 'shadow-glow-primary',
+  glowSecondary: 'shadow-glow-secondary',
+  glowWarning: 'shadow-glow-warning',
+  glowDestructive: 'shadow-glow-destructive',
+} as const;
+
+// ============================================
+// SPACING
+// ============================================
 export const PNAVIM_SPACING = {
   container: 'max-w-md mx-auto px-4', // Conteneur mobile standard
   touchTarget: 'min-h-[48px]',        // Standard accessibilité tactile (48px min)
@@ -50,6 +69,9 @@ export const PNAVIM_SPACING = {
   sectionGap: 'gap-4',                // Espacement entre sections
 } as const;
 
+// ============================================
+// TYPOGRAPHY
+// ============================================
 export const PNAVIM_TYPOGRAPHY = {
   title: 'text-xl font-bold text-pnavim-foreground',
   subtitle: 'text-lg font-semibold text-pnavim-foreground',
@@ -58,4 +80,31 @@ export const PNAVIM_TYPOGRAPHY = {
   stat: 'text-3xl font-bold',
 } as const;
 
+// ============================================
+// BREAKPOINTS
+// ============================================
+export const PNAVIM_BREAKPOINTS = {
+  sm: '640px',   // Téléphones paysage
+  md: '768px',   // Tablettes
+  lg: '1024px',  // Desktop
+  xl: '1280px',  // Grand desktop
+  '2xl': '1400px', // Très grand écran
+} as const;
+
+// ============================================
+// ANIMATIONS
+// ============================================
+export const PNAVIM_ANIMATIONS = {
+  fadeIn: 'animate-fade-in',
+  slideUp: 'animate-slide-up',
+  scaleIn: 'animate-scale-in',
+  pulseRing: 'animate-pulse-ring',
+  bounceGentle: 'animate-bounce-gentle',
+} as const;
+
+// ============================================
+// TYPES
+// ============================================
 export type PnavimColor = keyof typeof PNAVIM_COLORS;
+export type PnavimShadow = keyof typeof PNAVIM_SHADOWS;
+export type PnavimAnimation = keyof typeof PNAVIM_ANIMATIONS;

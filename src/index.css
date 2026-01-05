@@ -97,29 +97,16 @@
 
     --radius: 0.5rem;
 
-    /* Couleurs personnalisées */
-    --orange: 28 95% 55%;
+    /* ============================================
+       PNAVIM LEGACY ALIASES (Pour compatibilité CSS existant)
+       NOTE: Utilisez --primary, --secondary directement
+       ============================================ */
+    --orange: var(--primary);
     --orange-light: 28 95% 70%;
-    --orange-dark: 28 95% 40%;
-    
-    --green: 145 50% 35%;
+    --green: var(--secondary);
     --green-light: 145 50% 50%;
-    --green-dark: 145 50% 25%;
-    
-    --gold: 45 90% 55%;
-    --gold-light: 45 90% 70%;
-    --gold-dark: 45 90% 40%;
-    
+    --gold: var(--accent);
     --earth: 25 40% 30%;
-    --earth-light: 25 30% 50%;
-    --earth-dark: 25 50% 20%;
-
-    /* Palette "L'Âme du Marché" */
-    --terre-battue: 27 100% 38%;
-    --orange-sanguine: 28 81% 52%;
-    --sable: 36 100% 95%;
-    --charbon: 195 8% 19%;
-    --vert-manioc: 123 46% 34%;
 
     /* Success et Warning */
     --success: 145 50% 35%;

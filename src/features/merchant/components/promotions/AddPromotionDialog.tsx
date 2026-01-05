@@ -87,7 +87,7 @@ export function AddPromotionDialog({ onSubmit }: AddPromotionDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full h-14 text-lg font-semibold rounded-xl shadow-africa">
+        <Button className="w-full h-14 text-lg font-semibold rounded-xl shadow-pnavim-primary">
           <Plus className="w-5 h-5 mr-2" /> Nouvelle promotion
         </Button>
       </DialogTrigger>

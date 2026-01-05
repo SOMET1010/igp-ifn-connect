@@ -406,7 +406,7 @@ export default function MerchantScanner() {
                   <span className="text-2xl font-bold text-primary">{total.toLocaleString()} FCFA</span>
                 </div>
                 <Button 
-                  className="w-full h-14 text-lg font-bold rounded-xl shadow-africa"
+                  className="w-full h-14 text-lg font-bold rounded-xl shadow-pnavim-primary"
                   onClick={handleCheckout}
                 >
                   <Wallet className="w-5 h-5 mr-2" /> Encaisser
