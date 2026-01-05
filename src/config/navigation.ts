@@ -16,11 +16,11 @@ import {
 import type { NavItem } from '@/components/shared/UnifiedBottomNav';
 
 // Merchant navigation
+// Navigation marchand simplifiée - MAX 3 items pour UX inclusive
 export const merchantNavItems: NavItem[] = [
   { icon: Home, label: 'Accueil', path: '/marchand' },
-  { icon: Package, label: 'Stock', path: '/marchand/stock' },
-  { icon: Wallet, label: 'Encaisser', path: '/marchand/encaisser' },
-  { icon: User, label: 'Profil', path: '/marchand/profil' },
+  { icon: Wallet, label: 'Vendre', path: '/marchand/encaisser' },
+  { icon: User, label: 'Moi', path: '/marchand/profil' },
 ];
 
 // Agent navigation

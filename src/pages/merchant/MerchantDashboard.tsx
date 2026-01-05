@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
@@ -10,7 +10,6 @@ import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { useMascotImage } from "@/hooks/useMascotImage";
 import { useMarketBackground } from "@/hooks/useMarketBackground";
-import { Button } from "@/components/ui/button";
 import { merchantNavItems } from "@/config/navigation";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
@@ -19,12 +18,11 @@ import { ErrorState } from "@/components/shared/StateComponents";
 import { Confetti } from "@/components/shared/Confetti";
 import { OnlineStatusIndicator } from "@/components/merchant/dashboard";
 
-// Nouveaux composants Afro-Futuristes
+// Composants Afro-Futuristes
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { TantieMascot } from "@/components/shared/TantieMascot";
 import { GlassCard } from "@/components/shared/GlassCard";
-import { HeroActionCard } from "@/components/shared/HeroActionCard";
-import { StatCard } from "@/components/shared/StatCard";
+import { GiantActionButton } from "@/components/shared/GiantActionButton";
 import { VoiceHeroButton } from "@/components/shared/VoiceHeroButton";
 
 import {
@@ -32,28 +30,33 @@ import {
   CloseDayDialog,
   DaySessionBanner,
 } from "@/features/merchant/components/daily-session";
-import { 
-  getDashboardScript, 
-  formatAmountForSpeech 
-} from "@/shared/config/audio/dashboardScripts";
 
 // Formater le montant
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("fr-FR").format(amount);
 };
 
+/**
+ * MerchantDashboard - Écran "Aujourd'hui" simplifié
+ * 
+ * Design UX inclusive :
+ * - 1 action principale visible (VENDRE)
+ * - 1 action secondaire maximum (Mes ventes)
+ * - Pas de stats complexes au premier écran
+ * - Voix automatique au chargement
+ */
 export default function MerchantDashboard() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { t } = useLanguage();
   const { isOnline } = useOnlineStatus();
-  const { triggerTap, triggerMoney } = useSensoryFeedback();
+  const { triggerMoney } = useSensoryFeedback();
   const hasPlayedWelcome = useRef(false);
 
   const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
   const [voiceState, setVoiceState] = useState<"idle" | "listening" | "playing">("idle");
-  const [showBalance, setShowBalance] = useState(false); // Masquage solde par défaut
+  const [showBalance, setShowBalance] = useState(false);
 
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
@@ -73,31 +76,36 @@ export default function MerchantDashboard() {
 
   const merchant = data?.merchant;
   const todayTotal = data?.todayTotal || 0;
+  const todayTransactions = data?.todayTransactions || 0;
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/marchand/login');
+    navigate('/marchand/connexion');
   };
 
-  const handleEncaisser = () => {
+  const handleVendre = () => {
     triggerMoney();
     navigate("/marchand/encaisser");
   };
 
-  const handleHistorique = () => {
-    triggerTap();
+  const handleMesVentes = () => {
     navigate("/marchand/historique");
   };
 
   const handleVoiceCommand = () => {
     setVoiceState(voiceState === "idle" ? "listening" : "idle");
-    // Intégration TTS ici
   };
 
   // Message de bienvenue personnalisé pour Tantie
-  const welcomeMessage = sessionStatus === "none"
-    ? "Bonjour {nom} ! N'oublie pas d'ouvrir ta journée 🌅"
-    : "Bonjour {nom} ! Prêt pour les affaires aujourd'hui ? 💪";
+  const getWelcomeMessage = () => {
+    if (sessionStatus === "none") {
+      return "Bonjour {nom} ! Ouvre ta journée pour commencer à vendre 🌅";
+    }
+    if (todayTransactions > 0) {
+      return `Super {nom} ! Tu as fait ${todayTransactions} vente${todayTransactions > 1 ? 's' : ''} aujourd'hui 💪`;
+    }
+    return "Bonjour {nom} ! Prêt·e pour les affaires ? 💪";
+  };
 
   if (error) {
     return (
@@ -123,7 +131,7 @@ export default function MerchantDashboard() {
 
   return (
     <div className="min-h-screen relative pb-24">
-      {/* Fond immersif Afro-Futuriste avec image de marché */}
+      {/* Fond immersif Afro-Futuriste */}
       <ImmersiveBackground 
         variant="market-blur" 
         backgroundImageUrl={marketBgUrl}
@@ -133,23 +141,23 @@ export default function MerchantDashboard() {
 
       {showConfetti && <Confetti duration={3000} particleCount={60} />}
 
-      {/* Header avec fond transparent pour voir le gradient */}
+      {/* Header simplifié */}
       <EnhancedHeader
         title={merchant?.full_name || t("merchant")}
-        subtitle="Espace Marchand"
+        subtitle="Aujourd'hui"
         showSignOut
         onSignOut={handleSignOut}
         variant="default"
       />
 
-      <main className="px-4 py-4 space-y-5 max-w-2xl mx-auto">
+      <main className="px-4 py-4 space-y-5 max-w-lg mx-auto">
         {isLoading ? (
           <MerchantDashboardSkeleton />
         ) : (
           <>
-            {/* 1. MASCOTTE TANTIE SAGESSE */}
+            {/* 1. MASCOTTE TANTIE - Message contextuel */}
             <TantieMascot
-              message={welcomeMessage}
+              message={getWelcomeMessage()}
               merchantName={merchant?.full_name?.split(" ")[0]}
               imageUrl={mascotImageUrl}
               variant="large"
@@ -167,63 +175,52 @@ export default function MerchantDashboard() {
               />
             </GlassCard>
 
-            {/* 3. STATISTIQUES EN CARTES GLASS - avec masquage solde */}
-            <div className="grid grid-cols-3 gap-3">
-              <StatCard
-                title="Ventes"
-                value={showBalance ? formatCurrency(todayTotal) : "••••••"}
-                emoji="📊"
-                cardStyle="merchant"
-              />
-              <div className="relative">
-                <StatCard
-                  title="Solde"
-                  value={showBalance ? formatCurrency(0) : "••••••"}
-                  emoji="🏦"
-                  cardStyle="merchant"
-                  variant="success"
-                />
-                {/* Bouton œil pour toggle solde */}
-                <button
-                  onClick={() => setShowBalance(!showBalance)}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors shadow-sm"
-                  aria-label={showBalance ? "Masquer le solde" : "Afficher le solde"}
-                >
-                  {showBalance ? (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </button>
-              </div>
-              <StatCard
-                title="Alertes"
-                value="0"
-                emoji="🔔"
-                cardStyle="merchant"
-                variant="warning"
-              />
-            </div>
+            {/* 3. BOUTON GÉANT VENDRE - Action principale */}
+            <GiantActionButton
+              emoji="🛒"
+              title="VENDRE"
+              subtitle="Encaisser une vente"
+              variant="orange"
+              onClick={handleVendre}
+              disabled={!isSessionOpen}
+            />
 
-            {/* 4. CARTES ACTION HÉROS - VENDRE & HISTORIQUE */}
-            <div className="space-y-4">
-              <HeroActionCard
-                title="VENDRE"
-                subtitle="Encaisser une vente"
-                emoji="🛒"
-                variant="orange"
-                onClick={handleEncaisser}
-                disabled={!isSessionOpen}
-              />
-              
-              <HeroActionCard
-                title="HISTORIQUE"
-                subtitle="Voir mes ventes"
-                emoji="📜"
-                variant="violet"
-                onClick={handleHistorique}
-              />
-            </div>
+            {/* 4. BOUTON SECONDAIRE - Mes ventes du jour */}
+            <GlassCard 
+              onClick={handleMesVentes}
+              className="flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">📜</span>
+                <div>
+                  <p className="font-semibold text-foreground">Mes ventes du jour</p>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span>{todayTransactions} vente{todayTransactions !== 1 ? 's' : ''}</span>
+                    <span>•</span>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowBalance(!showBalance);
+                      }}
+                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                    >
+                      {showBalance ? (
+                        <>
+                          <span>{formatCurrency(todayTotal)} FCFA</span>
+                          <EyeOff className="w-4 h-4" />
+                        </>
+                      ) : (
+                        <>
+                          <span>••••••</span>
+                          <Eye className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </GlassCard>
 
             {/* 5. BOUTON COMMANDES VOCALES */}
             <div className="flex justify-center pt-2">
@@ -241,7 +238,7 @@ export default function MerchantDashboard() {
         )}
       </main>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - 3 items */}
       <UnifiedBottomNav items={merchantNavItems} />
 
       {/* Dialogs */}
