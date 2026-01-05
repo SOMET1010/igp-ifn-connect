@@ -15,6 +15,7 @@ export interface DailySales {
 export interface MerchantDashboardData {
   merchant: MerchantDashboardViewData;
   todayTotal: number;
+  todayTransactions: number;
   chartData: DailySales[];
   weeklyTotal: number;
   trend: number;
@@ -35,8 +36,9 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
 
   // Step 2: Parallel fetch all dependent data
   const sevenDaysAgo = startOfDay(subDays(new Date(), 6));
+  const todayStart = startOfDay(new Date());
 
-  const [marketResult, todayTotalResult, weeklyTransactionsResult] = await Promise.all([
+  const [marketResult, todayTotalResult, todayCountResult, weeklyTransactionsResult] = await Promise.all([
     // Fetch market name (if exists)
     merchantData.market_id
       ? supabase.from('markets').select('name').eq('id', merchantData.market_id).maybeSingle()
@@ -44,6 +46,13 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
     
     // RPC for today's total (server-side aggregation)
     supabase.rpc('get_merchant_today_total', { _merchant_id: merchantData.id }),
+    
+    // Count today's transactions
+    supabase
+      .from('transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('merchant_id', merchantData.id)
+      .gte('created_at', todayStart.toISOString()),
     
     // Weekly transactions for chart
     supabase
@@ -60,6 +69,7 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
 
   const marketName = marketResult.data?.name || '';
   const todayTotal = Number(todayTotalResult.data) || 0;
+  const todayTransactions = todayCountResult.count || 0;
 
   // Process chart data
   const dailyTotals: Record<string, number> = {};
@@ -83,7 +93,7 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
   // Convert to array for chart
   const chartData: DailySales[] = Object.entries(dailyTotals).map(([date, total]) => ({
     date,
-    total,
+    total: total as number,
     displayDate: format(new Date(date), 'EEE', { locale: fr }),
   }));
 
@@ -102,6 +112,7 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
   merchantLogger.info('Merchant dashboard data loaded', {
     merchantName: merchantData.full_name,
     todayTotal,
+    todayTransactions,
     weeklyTotal,
   });
 
@@ -112,6 +123,7 @@ async function fetchMerchantDashboardData(userId: string): Promise<MerchantDashb
       market_name: marketName,
     },
     todayTotal,
+    todayTransactions,
     chartData,
     weeklyTotal,
     trend,
