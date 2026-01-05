@@ -126,8 +126,12 @@ export function InclusivePhoneAuth({
     onError: (err) => {
       const msg = err || 'Erreur vocale';
       setIsListeningMic(false);
-      toast.error(msg);
-      speak(msg, { priority: 'high' });
+      // Ne pas afficher de toast d'erreur dans l'iframe - le bandeau AudioFeedbackBanner suffit
+      if (!isInIframe) {
+        toast.error(msg);
+        speak(msg, { priority: 'high' });
+      }
+      // Dans l'iframe, on ne parle pas non plus pour éviter confusion (le bandeau guide vers plein écran)
     }
   });
 
@@ -214,14 +218,26 @@ export function InclusivePhoneAuth({
     window.open(window.location.href, '_blank');
   };
 
+  // Détecter si le micro est indisponible ici (iframe, non sécurisé, ou pas de getUserMedia)
+  const micUnavailableHere = isInIframe || !isSecureContext || !hasGetUserMedia;
+
   // Démarrer l'écoute micro (avec indication claire + auto-fin sur pause)
   const handleMicClick = async () => {
+    // Si le micro est bloqué dans cet environnement, ouvrir en plein écran
+    if (micUnavailableHere) {
+      stop(); // Arrêter TTS
+      vibrate(50);
+      toast.info("Ouverture en plein écran pour le micro...", { duration: 2000 });
+      handleOpenFullscreen();
+      return;
+    }
+
     // 2e tap = arrêter
     if (isListeningMic || isVoiceConnecting || isVoiceConnected) {
       stopListening();
       setIsListeningMic(false);
       vibrate(30);
-      speak('D’accord', { priority: 'normal' });
+      speak("D'accord", { priority: 'normal' });
       return;
     }
 
@@ -241,7 +257,10 @@ export function InclusivePhoneAuth({
       }, 300);
     } catch (err) {
       setIsListeningMic(false);
-      toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
+      // Ne pas toaster d'erreur si en iframe - le bandeau suffit
+      if (!isInIframe) {
+        toast.info('Utilise le clavier pour entrer ton numéro', { duration: 4000 });
+      }
       speak('Tape ton numéro sur le clavier', { priority: 'normal' });
     }
   };

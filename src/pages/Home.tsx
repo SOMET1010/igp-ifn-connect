@@ -191,7 +191,15 @@ const Index: React.FC = () => {
 
   const handleLoginClick = useCallback(() => {
     triggerTap();
-    navigate('/marchand/connexion');
+    // Si on est dans un iframe, ouvrir en nouvel onglet pour éviter les problèmes de micro
+    const isInIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+    if (isInIframe) {
+      window.open('/marchand/connexion', '_blank');
+    } else {
+      navigate('/marchand/connexion');
+    }
   }, [navigate, triggerTap]);
 
   // Scroll to specific card (for dot navigation)

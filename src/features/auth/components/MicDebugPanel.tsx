@@ -28,6 +28,7 @@ interface MicDebugPanelProps {
   extractedDigits: string;
   scribeStatus?: string;
   scribeError?: string | null;
+  errorMessage?: string | null;
 }
 
 // Indicateur de niveau audio visuel
@@ -65,6 +66,7 @@ export function MicDebugPanel({
   extractedDigits,
   scribeStatus,
   scribeError,
+  errorMessage,
 }: MicDebugPanelProps) {
   const [micPermission, setMicPermission] = useState<'checking' | 'granted' | 'denied' | 'prompt'>('checking');
 
@@ -122,8 +124,13 @@ export function MicDebugPanel({
     prompt: 'text-yellow-400',
   };
 
-  // Détection si iframe bloqué
-  const isIframeBlocked = isInIframe && (micPermission === 'denied' || state === 'error');
+  // Détection si iframe bloqué (aussi basé sur le message d'erreur normalisé)
+  const isIframeBlocked = isInIframe && (
+    micPermission === 'denied' || 
+    state === 'error' || 
+    errorMessage?.includes('aperçu') || 
+    errorMessage?.includes('plein écran')
+  );
 
   return (
     <motion.div
@@ -180,11 +187,11 @@ export function MicDebugPanel({
         <span className="text-white/80">{scribeStatus || '—'}</span>
       </div>
 
-      {scribeError && (
+      {(scribeError || errorMessage) && (
         <div className="pt-1 border-t border-white/10">
           <span className="text-white/60">Erreur:</span>
           <div className="text-red-200 text-[10px] mt-1 bg-black/20 p-1 rounded max-h-12 overflow-auto">
-            {scribeError}
+            {errorMessage || scribeError}
           </div>
         </div>
       )}

@@ -186,6 +186,40 @@ export function useVoiceTranscription({
     scheduleSilenceFinalize(text);
   };
 
+  // Fonction utilitaire pour normaliser les erreurs vocales
+  const normalizeVoiceError = useCallback((err: unknown): string => {
+    const isInIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+
+    // En iframe, toujours le même message clair
+    if (isInIframe) {
+      return "Le micro ne fonctionne pas dans l'aperçu. Ouvre en plein écran.";
+    }
+
+    // Erreur string directe
+    if (typeof err === 'string') return err;
+
+    // Erreur standard avec message
+    if (err instanceof Error && err.message) {
+      if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+        return 'Autorise le micro dans les paramètres du navigateur.';
+      }
+      if (err.name === 'NotFoundError') {
+        return 'Aucun micro détecté sur cet appareil.';
+      }
+      return err.message;
+    }
+
+    // Objet avec type (erreur ElevenLabs)
+    if ((err as any)?.type) {
+      return `Erreur micro: ${(err as any).type}`;
+    }
+
+    // Fallback
+    return 'Erreur vocale';
+  }, []);
+
   const scribe = useScribe({
     modelId: 'scribe_v2_realtime',
     commitStrategy: CommitStrategy.VAD,
@@ -193,19 +227,17 @@ export function useVoiceTranscription({
     onCommittedTranscript: (data) => handleTextUpdate(data.text, 'committed'),
     onError: (err) => {
       console.error('[STT] Scribe error:', err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : (err as any)?.type
-            ? `Erreur micro: ${(err as any).type}`
-            : 'Erreur vocale';
+      const msg = normalizeVoiceError(err);
       setErrorMessage(msg);
       setIsConnecting(false);
       setState('error');
       onError?.(msg);
 
-      // Fallback si aucun handler externe
-      if (!onError) {
+      // Fallback toast si aucun handler externe et hors iframe
+      const isInIframe = (() => {
+        try { return window.self !== window.top; } catch { return true; }
+      })();
+      if (!onError && !isInIframe) {
         toast.error(msg);
       }
     },
