@@ -1182,15 +1182,43 @@ export function InclusivePhoneAuth({
                 <div className="flex-1 h-px bg-white/20" />
               </div>
 
-              {/* Affichage numéro */}
+              {/* Affichage numéro avec progression visuelle TOUJOURS VISIBLE */}
               <div className="bg-white/95 rounded-2xl p-4">
-                <p className={cn(
-                  "text-2xl font-mono font-bold tracking-wider text-center min-h-[2rem] transition-colors",
-                  phone.length === 10 ? "text-emerald-600" : "text-gray-800"
-                )}>
-                  {formatPhoneDisplay(phone) || '__ __ __ __ __'}
-                </p>
-                <div className="flex items-center justify-between mt-2">
+                {/* Grille de chiffres animée */}
+                <div className="flex justify-center items-center gap-1 mb-3">
+                  {[...Array(10)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className={cn(
+                        "w-7 h-11 rounded-lg flex items-center justify-center text-lg font-bold transition-all",
+                        phone[i] 
+                          ? "bg-emerald-500 text-white shadow-md" 
+                          : "bg-gray-100 text-gray-300"
+                      )}
+                      initial={phone[i] ? { scale: 0.5, opacity: 0 } : {}}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    >
+                      {phone[i] || '–'}
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Barre de progression */}
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+                  <motion.div
+                    className={cn(
+                      "h-full rounded-full transition-colors",
+                      phone.length === 10 ? "bg-emerald-500" : "bg-orange-400"
+                    )}
+                    initial={{ width: '0%' }}
+                    animate={{ width: `${(phone.length / 10) * 100}%` }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </div>
+                
+                {/* Compteur */}
+                <div className="flex items-center justify-between">
                   <span className={cn(
                     "text-xs font-medium",
                     phone.length === 10 ? "text-emerald-600" : "text-gray-500"
