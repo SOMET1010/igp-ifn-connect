@@ -1,6 +1,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { InclusivePhoneAuth } from '@/features/auth/components/InclusivePhoneAuth';
+import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { Separator } from '@/components/ui/separator';
 import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';
 
@@ -77,6 +79,17 @@ export function SimpleLoginPage({
             redirectPath={redirectPath}
             userType={userType}
           />
+
+          {/* Séparateur et Google OAuth */}
+          <div className="mt-4">
+            <div className="relative">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-50 px-2 text-xs text-muted-foreground">
+                ou
+              </span>
+            </div>
+            <GoogleSignInButton className="w-full mt-4" />
+          </div>
 
           {/* Contenu additionnel */}
           {children}

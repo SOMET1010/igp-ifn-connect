@@ -1,6 +1,7 @@
 /**
  * Page publique des Coopératives Vivriers
  * Affiche les coopératives et leurs membres producteurs
+ * Sécurisée : bannière d'invitation à se connecter si non authentifié
  */
 
 import React, { useState, useMemo } from 'react';
@@ -21,10 +22,12 @@ import {
   FileDown,
   SortAsc,
   Filter,
-  ArrowUpDown
+  ArrowUpDown,
+  LogIn
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -87,6 +90,7 @@ type SizeFilter = 'all' | 'small' | 'medium' | 'large';
 
 const VivriersCooperativesPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, userRole } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCooperative, setSelectedCooperative] = useState<VivriersCooperative | null>(null);
   const [showMembersDialog, setShowMembersDialog] = useState(false);
@@ -96,6 +100,9 @@ const VivriersCooperativesPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<SortOption>('name');
   const [filterCmu, setFilterCmu] = useState<CmuFilter>('all');
   const [filterSize, setFilterSize] = useState<SizeFilter>('all');
+
+  // Vérifier si l'utilisateur est admin ou coopérative
+  const isAdminOrCoop = userRole === 'admin' || userRole === 'cooperative';
 
   // Fetch cooperatives
   const { data: cooperatives = [], isLoading: loadingCoops } = useQuery({
@@ -258,6 +265,19 @@ const VivriersCooperativesPage: React.FC = () => {
             PNAVIM
           </Badge>
 
+          {/* Bouton de connexion si non authentifié */}
+          {!isAuthenticated && (
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => navigate('/cooperative/login')}
+              className="shrink-0"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Connexion
+            </Button>
+          )}
+
           {/* Menu d'actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -319,6 +339,28 @@ const VivriersCooperativesPage: React.FC = () => {
             </Card>
           ))}
         </motion.div>
+
+        {/* Bannière de connexion pour les non-authentifiés */}
+        {!isAuthenticated && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <LogIn className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Accédez à votre espace coopérative</p>
+                <p className="text-sm text-muted-foreground">Connectez-vous pour gérer vos membres et commandes</p>
+              </div>
+            </div>
+            <Button onClick={() => navigate('/cooperative/login')}>
+              Se connecter
+            </Button>
+          </motion.div>
+        )}
 
         {/* Search & Filters */}
         <motion.div
