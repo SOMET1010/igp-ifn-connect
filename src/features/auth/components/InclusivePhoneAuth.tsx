@@ -695,15 +695,43 @@ export function InclusivePhoneAuth({
         userId = signInData?.user?.id;
       }
       
-      // Créer ou mettre à jour le profil marchand (pour userType merchant)
+      // Créer ou mettre à jour le profil selon le userType
       if (userId && userType === 'merchant') {
-        await ensureMerchantProfile(userId, cleanPhone);
+        // Utiliser la nouvelle fonction robuste claim_merchant_by_phone
+        const { data: claimResult, error: claimError } = await supabase.rpc('claim_merchant_by_phone', { 
+          p_phone: cleanPhone 
+        });
         
-        // Assigner le rôle marchand
-        try {
-          await supabase.rpc('assign_merchant_role', { p_user_id: userId });
-        } catch (rpcError) {
-          console.log('[finalizeLogin] Role may already exist:', rpcError);
+        console.log('[finalizeLogin] claim_merchant_by_phone result:', claimResult);
+        
+        if (claimError) {
+          console.error('[finalizeLogin] claim_merchant_by_phone error:', claimError);
+          throw new Error('Erreur lors de la liaison du compte');
+        }
+        
+        // Vérifier le résultat de la fonction
+        const result = claimResult as { success: boolean; error?: string; message?: string; merchant_id?: string };
+        
+        if (!result.success) {
+          if (result.error === 'phone_already_linked') {
+            // Ce numéro est lié à un autre compte actif - déconnecter et afficher erreur
+            await supabase.auth.signOut();
+            toast.error(result.message || 'Ce numéro est déjà lié à un autre compte');
+            if (voiceEnabled) speak('Ce numéro est déjà utilisé par un autre compte. Contacte un agent.', { priority: 'high' });
+            setStep('phone');
+            setIsLoading(false);
+            return;
+          } else if (result.error === 'merchant_not_found') {
+            // Aucun marchand avec ce téléphone - il doit d'abord être inscrit par un agent
+            await supabase.auth.signOut();
+            toast.error('Aucun marchand trouvé avec ce numéro. Inscris-toi d\'abord auprès d\'un agent.');
+            if (voiceEnabled) speak('Tu n\'es pas encore inscrit. Contacte un agent pour t\'inscrire.', { priority: 'high' });
+            setStep('phone');
+            setIsLoading(false);
+            return;
+          } else {
+            throw new Error(result.message || 'Erreur de liaison du compte');
+          }
         }
       } else if (userId && userType === 'agent') {
         // Créer ou lier le profil agent AVANT d'assigner le rôle
