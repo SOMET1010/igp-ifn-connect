@@ -58,3 +58,9 @@ export { agentProfileEditSchema } from "./types/profile.types";
 // === Components ===
 export * from "./components/dashboard";
 export * from "./components/profile";
+export * from "./components/enrollment";
+
+// Composants UI Agent
+export { AgentRegistrationForm } from "./components/AgentRegistrationForm";
+export { AgentRequestStatus } from "./components/AgentRequestStatus";
+export { MiniMap } from "./components/MiniMap";

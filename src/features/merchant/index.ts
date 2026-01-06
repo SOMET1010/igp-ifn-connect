@@ -123,6 +123,25 @@ export type {
   TransactionDetails,
 } from "./types/transaction.types";
 
+// Composants UI Merchant
+export { AudioBars } from "./components/AudioBars";
+export { CalculatorKeypad, useSuccessFeedback } from "./components/CalculatorKeypad";
+export { CashDenominationPad } from "./components/CashDenominationPad";
+export { ClassicModeCard } from "./components/ClassicModeCard";
+export { DailyRevenue } from "./components/DailyRevenue";
+export { FNEInvoice, type InvoiceData } from "./components/FNEInvoice";
+export { MerchantDashboardSkeleton } from "./components/MerchantDashboardSkeleton";
+export { ProductSelector } from "./components/ProductSelector";
+export { QRReceipt } from "./components/QRReceipt";
+export { SalesChart } from "./components/SalesChart";
+export { VoiceModeCard } from "./components/VoiceModeCard";
+
+// Composants Dashboard
+export * from "./components/dashboard";
+
+// Composants Stock
+export * from "./components/stock";
+
 // Utilitaires Cashier
 export {
   calculateCmuDeduction,

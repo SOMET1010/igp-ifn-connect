@@ -72,3 +72,9 @@ export {
   CooperativeProfileView, 
   CooperativeProfileEditForm 
 } from "./components/profile";
+
+// Composants Orders
+export * from "./components/orders";
+
+// Composants Stock
+export * from "./components/stock";
