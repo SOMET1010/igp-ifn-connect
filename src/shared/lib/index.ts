@@ -52,8 +52,8 @@ export {
   setCachedData,
   getCachedData,
   clearExpiredCache,
-  type OfflineItem
 } from './offlineDB';
+// Note: OfflineItem type is exported from ./types/offline.types.ts
 
 // Safe fetch
 export { safeFetch, safeFetchWithRetry } from './safeFetch';

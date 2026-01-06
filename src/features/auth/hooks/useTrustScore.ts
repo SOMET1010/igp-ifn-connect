@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDeviceFingerprint } from '@/features/auth/hooks/useDeviceFingerprint';
 import { TRUST_THRESHOLDS } from '@/features/auth/config/personas';
 import { useAuthLogging } from '@/features/auth/hooks/useAuthLogging';
+import type { TrustFactors, TrustScoreResult, AuthDecision } from '@/shared/types';
+import { parseRawTrustFactors } from '@/shared/types';
 
 /**
  * Hook pour calculer le score de confiance (Layer 2)
@@ -14,32 +16,16 @@ import { useAuthLogging } from '@/features/auth/hooks/useAuthLogging';
  * - Historique de connexions réussies
  */
 
-interface TrustFactors {
-  deviceKnown: boolean;
-  deviceScore: number;
-  timeMatch: boolean;
-  timeScore: number;
-  geoMatch: boolean;
-  geoScore: number;
-  historyScore: number;
-}
-
-interface TrustResult {
-  score: number;
-  factors: TrustFactors;
-  decision: 'direct_access' | 'challenge' | 'human_fallback';
-  merchantId?: string;
-  merchantName?: string;
-}
+// TrustFactors and TrustScoreResult are now imported from @/shared/types
 
 export function useTrustScore() {
   const { fingerprint, deviceName } = useDeviceFingerprint();
   const [isCalculating, setIsCalculating] = useState(false);
-  const [lastResult, setLastResult] = useState<TrustResult | null>(null);
+  const [lastResult, setLastResult] = useState<TrustScoreResult | null>(null);
   const { logAuthDecision, detectRiskEvents, updateAuthOutcome } = useAuthLogging();
   const currentLogIdRef = useRef<string | null>(null);
 
-  const calculateTrustScore = useCallback(async (phone: string): Promise<TrustResult> => {
+  const calculateTrustScore = useCallback(async (phone: string): Promise<TrustScoreResult> => {
     setIsCalculating(true);
     
     try {
@@ -52,7 +38,7 @@ export function useTrustScore() {
       
       if (merchantError || !merchant) {
         // Nouveau utilisateur - score bas mais pas d'erreur
-        const result: TrustResult = {
+        const result: TrustScoreResult = {
           score: 0,
           factors: {
             deviceKnown: false,
@@ -113,19 +99,7 @@ export function useTrustScore() {
       
       if (!scoreError && scoreData && scoreData.length > 0) {
         trustScore = scoreData[0].trust_score || 0;
-        const rawFactors = scoreData[0].factors as any;
-        
-        if (rawFactors) {
-          factors = {
-            deviceKnown: rawFactors.device_known || false,
-            deviceScore: rawFactors.device_score || 0,
-            timeMatch: rawFactors.time_match || false,
-            timeScore: rawFactors.time_score || 0,
-            geoMatch: rawFactors.geo_match || false,
-            geoScore: rawFactors.geo_score || 0,
-            historyScore: rawFactors.history_score || 0,
-          };
-        }
+        factors = parseRawTrustFactors(scoreData[0].factors);
       }
       
       // 4. Déterminer la décision
@@ -138,7 +112,7 @@ export function useTrustScore() {
         decision = 'human_fallback';
       }
       
-      const result: TrustResult = {
+      const result: TrustScoreResult = {
         score: trustScore,
         factors,
         decision,
@@ -168,7 +142,7 @@ export function useTrustScore() {
       console.error('Error calculating trust score:', error);
       
       // En cas d'erreur, fallback humain
-      const result: TrustResult = {
+      const result: TrustScoreResult = {
         score: 0,
         factors: {
           deviceKnown: false,
