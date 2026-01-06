@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { Wifi, WifiOff } from "lucide-react";
 
 interface StatusBannerProps {

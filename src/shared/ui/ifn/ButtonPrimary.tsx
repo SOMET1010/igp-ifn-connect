@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { forwardRef, useState, MouseEvent } from "react";
 import { motion, HTMLMotionProps } from "framer-motion";
 import { useReducedMotion, useButtonFeedback } from "@/shared/hooks";

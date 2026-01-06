@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { Mic, Play, Pause, Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 

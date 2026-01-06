@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Camera, X, RotateCcw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { toast } from "sonner";
 
 interface PhotoCaptureProps {

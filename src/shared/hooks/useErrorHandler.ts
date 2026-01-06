@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import { logger } from '@/infra/logger';
-import { toastError, toastNetworkError, toastSessionExpired } from '@/lib/toast-utils';
+import { toastError, toastNetworkError, toastSessionExpired } from '@/shared/lib';
 
 // ============================================
 // TYPES

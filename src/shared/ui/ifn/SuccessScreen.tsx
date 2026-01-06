@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { CheckCircle2 } from "lucide-react";
 import { ButtonSecondary } from "./ButtonSecondary";
 import { Confetti } from "@/shared/ui";

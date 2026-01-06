@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { useReducedMotion } from "@/shared/hooks";
 
 interface ConfettiProps {

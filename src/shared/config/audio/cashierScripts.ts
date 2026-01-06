@@ -8,7 +8,7 @@
  */
 
 // Import global LanguageCode from translations
-import { LanguageCode } from '@/lib/translations';
+import { LanguageCode } from '@/shared/lib';
 import { logger } from '@/infra/logger';
 
 export type CashierScriptKey = 

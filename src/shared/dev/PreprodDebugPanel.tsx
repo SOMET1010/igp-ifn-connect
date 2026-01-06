@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, Bug, Wifi, WifiOff, Database, Shield, Clock, Download, Filter, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import { useOnlineStatus } from "@/shared/hooks";
+import { useAuth } from "@/shared/contexts";
+import { cn } from "@/shared/lib";
 import { logger, type LogLevel, type LogEntry } from "@/infra/logger";
 
 interface DebugLog {

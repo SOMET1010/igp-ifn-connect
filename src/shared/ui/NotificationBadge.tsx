@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 export type NotificationBadgeVariant = 'default' | 'warning' | 'destructive';
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useDemoMode } from '@/hooks/useDemoMode';
+import { useDemoMode } from '@/shared/hooks';
 import { TestTube, X } from 'lucide-react';
 
 export function DemoBanner() {

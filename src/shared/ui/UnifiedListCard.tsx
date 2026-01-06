@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from "@/shared/lib";
 import { StatusBadge, StatusType } from './StatusBadge';
 
 export type EntityType = 'merchant' | 'agent' | 'cooperative' | 'admin' | 'user' | 'order' | 'product' | 'producer';

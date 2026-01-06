@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { MapPin, Loader2, CheckCircle, RefreshCw, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { toast } from "sonner";
 
 interface GPSCaptureProps {

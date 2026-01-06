@@ -1,6 +1,6 @@
 import React from "react";
-import { cn } from "@/lib/utils";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { cn } from "@/shared/lib";
+import { useReducedMotion } from "@/shared/hooks";
 
 interface GlassCardProps {
   /** Contenu de la carte */

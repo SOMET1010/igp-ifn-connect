@@ -1,5 +1,5 @@
 import { Volume2, X } from 'lucide-react';
-import { useAudioContext } from '@/contexts/AudioContext';
+import { useAudioContext } from '@/shared/contexts';
 
 export function AudioPlayingIndicator() {
   const { isPlaying, stop } = useAudioContext();

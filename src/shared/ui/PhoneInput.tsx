@@ -2,8 +2,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Phone, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { isValidCIPhonePrefix } from '@/lib/validationSchemas';
+import { cn, isValidCIPhonePrefix } from '@/shared/lib';
 
 export interface PhoneInputProps {
   value: string;

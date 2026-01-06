@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { cn } from '@/shared/lib';
+import { useReducedMotion } from '@/shared/hooks';
 
 interface SearchInputProps {
   value: string;

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Mic, Loader2, Square, AlertCircle, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LanguageCode } from "@/lib/translations";
+import { LanguageCode } from "@/shared/lib";
 import logger from "@/infra/logger";
 import { useAudioLevel } from "@/shared/audio";
 import { AudioLevelMeter } from "./AudioLevelMeter";
