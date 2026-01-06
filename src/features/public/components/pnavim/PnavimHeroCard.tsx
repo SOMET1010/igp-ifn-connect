@@ -2,7 +2,7 @@ import React, { useCallback, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, VolumeX, Loader2, Wallet, UserCheck, Users, ShoppingBasket, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 import { useSensoryFeedback } from '@/shared/hooks';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
 import { VOICE_BY_CONTEXT, PNAVIM_VOICES } from '@/shared/config/voiceConfig';

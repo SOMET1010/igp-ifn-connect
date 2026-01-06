@@ -3,7 +3,7 @@ import { Phone, Clock, CheckCircle, XCircle, Loader2, Shield } from 'lucide-reac
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAgentValidation, ValidationRequest } from '@/features/auth/hooks/useAgentValidation';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface AgentValidationRequestProps {
   merchantId: string;

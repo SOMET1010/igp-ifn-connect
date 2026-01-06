@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { MapPin, Phone, Calendar, ClipboardList, Users } from 'lucide-react';
 import {
   EnhancedHeader,

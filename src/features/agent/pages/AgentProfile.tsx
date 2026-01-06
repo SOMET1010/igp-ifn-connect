@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { LogOut, Loader2 } from 'lucide-react';
 import { NotificationToggle, EnhancedHeader, UnifiedBottomNav } from '@/shared/ui';
 import { agentNavItems } from '@/config/navigation';

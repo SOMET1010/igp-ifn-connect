@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { phoneLocalOptionalSchema } from '@/lib/validationSchemas';
+import { phoneLocalOptionalSchema } from '@/shared/lib';
 
 // Données complètes du profil agent
 export interface AgentProfileData {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/shared/contexts';
+import { useToast } from '@/shared/hooks';
 import { creditsService } from '../services/creditsService';
 import type { CustomerCredit, CreditFilter, NewCreditInput } from '../types/credits.types';
 import { isCreditOverdue } from '../types/credits.types';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { Package, Loader2, Bell, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
 import { NotificationBadge } from '@/shared/ui';
 import { cooperativeNavItems } from '@/config/navigation';

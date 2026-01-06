@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput, ImmersiveBackground, GlassCard } from '@/shared/ui';
 import OTPInput from "@/features/auth/components/OTPInput";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
@@ -18,7 +18,7 @@ import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButto
 import { 
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
-} from '@/lib/validationSchemas';
+} from '@/shared/lib';
 import { PnavimInstitutionalHeader, PnavimPillButton, PnavimWaxCurve } from '@/features/public/components/pnavim';
 import type { Database } from '@/integrations/supabase/types';
 

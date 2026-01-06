@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { Volume2, VolumeX, User, Minus, Plus } from 'lucide-react';
 import { useSensoryFeedback } from '@/shared/hooks';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageCode } from '@/lib/translations';
+import { useLanguage } from '@/shared/contexts';
+import { LanguageCode } from '@/shared/lib';
 
 // Icônes de drapeaux pour les langues
 const languageFlags: Record<string, string> = {

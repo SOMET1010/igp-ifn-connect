@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { toast } from 'sonner';
 import { fetchCooperativeProfile, updateCooperativeProfile } from '../services/profileService';
 import { cooperativeProfileSchema } from '../types/profile.types';

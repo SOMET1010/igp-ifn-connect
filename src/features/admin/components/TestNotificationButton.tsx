@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Bell, TestTube } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { createNotification, NotificationType, NotificationCategory } from '@/features/notifications';
 import { toast } from 'sonner';
 import { adminLogger } from '@/infra/logger';

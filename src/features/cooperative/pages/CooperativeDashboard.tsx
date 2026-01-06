@@ -7,7 +7,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 import { AudioButton, UnifiedActionCard } from '@/shared/ui';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 

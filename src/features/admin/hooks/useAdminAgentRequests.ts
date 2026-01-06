@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks';
 import { supabase } from '@/integrations/supabase/client';
 import { agentRequestsService } from '../services/agentRequestsService';
 import type { AgentRequest, AgentRequestsFilters, AgentRequestsStats } from '../types/agentRequests.types';

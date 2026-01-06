@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { Loader2, ShieldAlert, Volume2 } from 'lucide-react';
 import { useVoiceQueue } from '@/shared/hooks/useVoiceQueue';
 
