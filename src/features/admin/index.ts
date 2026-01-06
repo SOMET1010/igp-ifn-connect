@@ -33,8 +33,14 @@ export { usersService } from './services/usersService';
 export { mapService } from './services/mapService';
 export * from './services/cardsImportService';
 
-// Components
+// Components Dashboard
 export * from './components/dashboard';
+
+// Components UI Admin
+export { ActivityTimeline } from './components/ActivityTimeline';
+export { DashboardSkeleton } from './components/DashboardSkeleton';
+export { TestNotificationButton } from './components/TestNotificationButton';
+export * from './components/map';
 
 // Types - Dashboard
 export type { AdminDashboardStats, ChartDataPoint, AdminDashboardData } from './types/dashboard.types';

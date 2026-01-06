@@ -13,6 +13,9 @@ export { RecapCard } from './components/RecapCard';
 export { OfflineBadge } from './components/OfflineBadge';
 export { PictogramActionBar } from './components/PictogramActionBar';
 
+// Composants Studio
+export * from './components/studio';
+
 // Hooks
 export { useVoiceAssistantCore } from './hooks/useVoiceAssistantCore';
 

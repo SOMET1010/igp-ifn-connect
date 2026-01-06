@@ -75,3 +75,8 @@ export type {
 
 // === Utils ===
 export { normalizeAnswer, compareAnswers, similarityScore } from './utils/normalize';
+
+// === Composants UI Auth ===
+export { GoogleSignInButton } from './components/GoogleSignInButton';
+export { default as OTPInput } from './components/OTPInput';
+export { default as ProtectedRoute } from './components/ProtectedRoute';
