@@ -6,7 +6,7 @@ import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
 import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';
 import { useTts } from '@/shared/hooks/useTts';
 import { usePersistedPersona } from '@/features/auth/hooks/usePersistedPersona';
-import { AudioBars } from '@/components/merchant/AudioBars';
+import { AudioBars } from '@/features/merchant/components/AudioBars';
 import { Button } from '@/components/ui/button';
 import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';

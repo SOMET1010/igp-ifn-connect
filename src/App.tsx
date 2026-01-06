@@ -10,7 +10,7 @@ import { AudioProvider } from "@/contexts/AudioContext";
 import { AppShell } from "@/app/layouts";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { NetworkGuard } from "@/app/guards/NetworkGuard";
-import { PreprodDebugPanel } from "@/components/dev/PreprodDebugPanel";
+import { PreprodDebugPanel } from "@/shared/dev/PreprodDebugPanel";
 import React, { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 

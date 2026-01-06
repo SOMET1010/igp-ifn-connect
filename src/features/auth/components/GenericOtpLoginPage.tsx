@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import OTPInput from "@/components/auth/OTPInput";
+import OTPInput from "@/features/auth/components/OTPInput";
 import { Loader2, RefreshCw } from "lucide-react";
 import { PhoneInput } from "@/components/shared/PhoneInput";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";

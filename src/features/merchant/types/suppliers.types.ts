@@ -2,7 +2,7 @@
 // Types - Merchant Suppliers
 // ============================================
 
-import type { Product, ProductOffer } from "@/components/market/ProductGrid";
+import type { Product, ProductOffer } from "@/features/public/components/market/ProductGrid";
 
 export type { Product, ProductOffer };
 

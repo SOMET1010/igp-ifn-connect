@@ -12,7 +12,7 @@ import {
   PnavimInstitutionalHeader,
   PnavimHelpButton,
   PnavimVoiceFab,
-} from '@/components/pnavim';
+} from '@/features/public/components/pnavim';
 import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 
 // Contexts & Hooks

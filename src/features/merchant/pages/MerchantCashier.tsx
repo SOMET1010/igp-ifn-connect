@@ -5,7 +5,7 @@ import { AudioButton } from "@/components/shared/AudioButton";
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
+import { useSuccessFeedback } from "@/features/merchant/components/CalculatorKeypad";
 import { getCashierScript } from "@/shared/config/audio/cashierScripts";
 import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
 import {

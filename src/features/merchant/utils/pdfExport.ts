@@ -4,7 +4,7 @@
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { InvoiceData } from '@/components/merchant/FNEInvoice';
+import { InvoiceData } from '@/features/merchant/components/FNEInvoice';
 
 /**
  * Exporte une facture FNE en PDF

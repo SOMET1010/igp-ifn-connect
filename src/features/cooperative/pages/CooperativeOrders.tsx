@@ -9,7 +9,7 @@ import { cooperativeNavItems } from '@/config/navigation';
 import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import { useCooperativeOrders } from '@/features/cooperative';
 import type { Order } from '@/features/cooperative';
-import { OrderCard, CancelOrderDialog } from '@/components/cooperative/orders';
+import { OrderCard, CancelOrderDialog } from '@/features/cooperative/components/orders';
 import { NotificationBadge } from '@/components/shared/NotificationBadge';
 
 const CooperativeOrders: React.FC = () => {

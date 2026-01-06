@@ -21,7 +21,7 @@ import {
   AddStockDialog,
   EditStockDialog,
   RestockDialog,
-} from "@/components/merchant/stock";
+} from "@/features/merchant/components/stock";
 import { useMerchantStock, getStockStatus, type StockItem } from "@/features/merchant";
 
 export default function MerchantStock() {

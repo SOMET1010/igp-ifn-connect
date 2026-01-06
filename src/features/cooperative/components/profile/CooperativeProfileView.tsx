@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Phone, Mail, Users, Hash, Award } from 'lucide-react';
-import { MiniMap } from '@/components/agent/MiniMap';
+import { MiniMap } from '@/features/agent/components/MiniMap';
 import type { CooperativeProfileData } from '../../types/profile.types';
 
 interface CooperativeProfileViewProps {

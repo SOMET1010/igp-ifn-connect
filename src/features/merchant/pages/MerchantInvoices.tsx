@@ -5,7 +5,7 @@ import { merchantNavItems } from '@/config/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Plus, Shield } from 'lucide-react';
-import { FNEInvoice } from '@/components/merchant/FNEInvoice';
+import { FNEInvoice } from '@/features/merchant/components/FNEInvoice';
 import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
 import { useInvoices } from '@/features/merchant/hooks/useInvoices';
 import {

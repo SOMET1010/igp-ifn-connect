@@ -31,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { ActivityTimeline } from '@/components/admin/ActivityTimeline';
+import { ActivityTimeline } from '@/features/admin/components/ActivityTimeline';
 import { useAdminUserDetail, type AppRole } from '@/features/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';

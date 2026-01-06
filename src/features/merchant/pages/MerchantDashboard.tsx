@@ -13,10 +13,10 @@ import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackgrou
 import { merchantNavItems } from "@/config/navigation";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
-import { MerchantDashboardSkeleton } from "@/components/merchant/MerchantDashboardSkeleton";
+import { MerchantDashboardSkeleton } from "@/features/merchant/components/MerchantDashboardSkeleton";
 import { ErrorState } from "@/components/shared/StateComponents";
 import { Confetti } from "@/components/shared/Confetti";
-import { OnlineStatusIndicator } from "@/components/merchant/dashboard";
+import { OnlineStatusIndicator } from "@/features/merchant/components/dashboard";
 
 // Composants Afro-Futuristes
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";

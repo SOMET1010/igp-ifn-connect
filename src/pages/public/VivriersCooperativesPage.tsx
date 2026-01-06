@@ -54,7 +54,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ExportCooperativesPDF } from '@/components/public/ExportCooperativesPDF';
+import { ExportCooperativesPDF } from '@/features/public/components/ExportCooperativesPDF';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 

@@ -5,7 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useAdminMapData } from '@/features/admin';
-import { MapFilters, MapLegend, getIcon, TYPE_LABELS, initLeafletIcons } from '@/components/admin/map';
+import { MapFilters, MapLegend, getIcon, TYPE_LABELS, initLeafletIcons } from '@/features/admin/components/map';
 
 // Component to set map view
 const SetViewOnLoad: React.FC<{ center: [number, number] }> = ({ center }) => {

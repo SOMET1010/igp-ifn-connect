@@ -7,7 +7,7 @@ import { NotificationBadge } from '@/components/shared/NotificationBadge';
 import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock, useCooperativeNotifications, getStockStatus } from '@/features/cooperative';
 import type { CooperativeStockItem, StockStatus } from '@/features/cooperative';
-import { StockCard, LowStockAlert, AddStockDialog } from '@/components/cooperative/stock';
+import { StockCard, LowStockAlert, AddStockDialog } from '@/features/cooperative/components/stock';
 import { PageWithList, FilterOption } from '@/templates';
 
 const CooperativeStock = () => {

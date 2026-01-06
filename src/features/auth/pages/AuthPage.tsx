@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneInput } from '@/components/shared/PhoneInput';
-import OTPInput from '@/components/auth/OTPInput';
+import OTPInput from "@/features/auth/components/OTPInput";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -14,14 +14,14 @@ import {
   Mail, Lock, Loader2, ArrowLeft, User, ShieldCheck, 
   Store, Users, Briefcase, Volume2
 } from 'lucide-react';
-import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import { 
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
 } from '@/lib/validationSchemas';
 import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
 import { GlassCard } from '@/components/shared/GlassCard';
-import { PnavimInstitutionalHeader, PnavimPillButton, PnavimWaxCurve } from '@/components/pnavim';
+import { PnavimInstitutionalHeader, PnavimPillButton, PnavimWaxCurve } from '@/features/public/components/pnavim';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
