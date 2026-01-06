@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { AppShell } from "@/app/layouts";
-import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { NetworkGuard } from "@/app/guards/NetworkGuard";
 import { PreprodDebugPanel } from "@/shared/dev/PreprodDebugPanel";
 import React, { Suspense } from "react";

@@ -66,5 +66,3 @@ export const WaxPattern: React.FC<WaxPatternProps> = ({
     </svg>
   );
 };
-
-export default WaxPattern;

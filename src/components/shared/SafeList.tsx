@@ -86,5 +86,3 @@ export function SafeList<T>({
     </div>
   );
 }
-
-export default SafeList;

@@ -167,5 +167,3 @@ export const VoiceHeroButton: React.FC<VoiceHeroButtonProps> = ({
     </div>
   );
 };
-
-export default VoiceHeroButton;

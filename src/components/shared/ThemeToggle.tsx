@@ -18,5 +18,3 @@ export const ThemeToggle = () => {
     </Button>
   );
 };
-
-export default ThemeToggle;

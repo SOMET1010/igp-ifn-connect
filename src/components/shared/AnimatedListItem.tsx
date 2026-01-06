@@ -36,5 +36,3 @@ export const AnimatedListItem = ({ children, className = '' }: AnimatedListItemP
     </motion.div>
   );
 };
-
-export default AnimatedListItem;

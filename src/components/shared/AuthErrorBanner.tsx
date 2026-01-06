@@ -184,5 +184,3 @@ export function createAuthError(
     type,
   };
 }
-
-export default AuthErrorBanner;

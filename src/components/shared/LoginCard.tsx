@@ -37,5 +37,3 @@ export const LoginCard: React.FC<LoginCardProps> = ({
     </div>
   );
 };
-
-export default LoginCard;

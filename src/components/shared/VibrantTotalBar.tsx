@@ -82,5 +82,3 @@ export const VibrantTotalBar: React.FC<VibrantTotalBarProps> = ({
     </div>
   );
 };
-
-export default VibrantTotalBar;

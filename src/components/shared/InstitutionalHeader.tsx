@@ -60,5 +60,3 @@ export const InstitutionalHeader: React.FC<InstitutionalHeaderProps> = ({
     </header>
   );
 };
-
-export default InstitutionalHeader;

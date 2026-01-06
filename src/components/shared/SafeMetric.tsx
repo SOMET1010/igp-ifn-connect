@@ -88,5 +88,3 @@ export function SafeMetric({
     </div>
   );
 }
-
-export default SafeMetric;
