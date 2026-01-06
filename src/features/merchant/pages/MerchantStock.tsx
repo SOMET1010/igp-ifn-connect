@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { merchantNavItems } from "@/config/navigation";
 import { PageWithList, FilterOption } from "@/templates";
-import { Pictogram } from "@/components/shared/Pictogram";
+import { Pictogram } from "@/shared/ui";
 import { useTts } from "@/shared/hooks/useTts";
 import { getStockScript } from "@/shared/config/audio/stockScripts";
 import {

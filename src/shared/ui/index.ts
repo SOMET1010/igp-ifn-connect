@@ -2,65 +2,93 @@
  * Shared UI Components
  * 
  * Barrel export pour tous les composants UI partagés
- * Migré depuis src/components/shared/
+ * Architecture unifiée: tous les composants sont maintenant dans src/shared/ui/
  */
 
-// Re-export all components from src/components/shared
-export { AccessibilityControls } from '@/components/shared/AccessibilityControls';
-export { AnimatedList } from '@/components/shared/AnimatedList';
-export { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-export { AudioButton } from '@/components/shared/AudioButton';
-export { AudioLevelMeter } from '@/components/shared/AudioLevelMeter';
-export { AudioPlayingIndicator } from '@/components/shared/AudioPlayingIndicator';
-export { AuthErrorBanner, createAuthError } from '@/components/shared/AuthErrorBanner';
-export { BackgroundDecor } from '@/components/shared/BackgroundDecor';
-export { Confetti } from '@/components/shared/Confetti';
-export { ContextualHelp } from '@/components/shared/ContextualHelp';
-export { CurrencyCalculator } from '@/components/shared/CurrencyCalculator';
-export { DemoBanner } from '@/components/shared/DemoBanner';
-export { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-export { ErrorBoundary } from '@/components/shared/ErrorBoundary';
-export { FilterChips, type FilterOption } from '@/components/shared/FilterChips';
-export { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';
-export { GPSCapture } from '@/components/shared/GPSCapture';
-export { GiantActionButton } from '@/components/shared/GiantActionButton';
-export { GlassCard } from '@/components/shared/GlassCard';
-export { HeroActionCard } from '@/components/shared/HeroActionCard';
-export { HeroOverlay } from '@/components/shared/HeroOverlay';
-export { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
-export { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
-export { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
-export { LanguageSelector } from '@/components/shared/LanguageSelector';
-export { LanguageToggle } from '@/components/shared/LanguageToggle';
-export { LoginCard } from '@/components/shared/LoginCard';
-export { NotificationBadge } from '@/components/shared/NotificationBadge';
-export { NotificationDropdown } from '@/components/shared/NotificationDropdown';
-export { NotificationToggle } from '@/components/shared/NotificationToggle';
-export { OfflineIndicator } from '@/components/shared/OfflineIndicator';
-export { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
-export { PageHero } from '@/components/shared/PageHero';
-export { PhoneInput } from '@/components/shared/PhoneInput';
-export { PhoneNumPad } from '@/components/shared/PhoneNumPad';
-export { PhotoCapture } from '@/components/shared/PhotoCapture';
-export { Pictogram } from '@/components/shared/Pictogram';
-export { ProfileInfoCard } from '@/components/shared/ProfileInfoCard';
-export { RetryIndicator } from '@/components/shared/RetryIndicator';
-export { SafeCard } from '@/components/shared/SafeCard';
-export { SafeList } from '@/components/shared/SafeList';
-export { SafeMetric } from '@/components/shared/SafeMetric';
-export { SearchInput } from '@/components/shared/SearchInput';
-export { SimpleLoginPage } from '@/components/shared/SimpleLoginPage';
-export { StatCard } from '@/components/shared/StatCard';
-export { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateComponents';
-export { StatusBadge, type StatusType } from '@/components/shared/StatusBadge';
-export { StepProgress } from '@/components/shared/StepProgress';
-export { TantieMascot } from '@/components/shared/TantieMascot';
-export { ThemeToggle } from '@/components/shared/ThemeToggle';
-export { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
-export { UnifiedBottomNav, type NavItem } from '@/components/shared/UnifiedBottomNav';
-export { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-export { UnifiedLoginPage } from '@/components/shared/UnifiedLoginPage';
-export { VibrantTotalBar } from '@/components/shared/VibrantTotalBar';
-export { VoiceHeroButton } from '@/components/shared/VoiceHeroButton';
-export { VoiceInput } from '@/components/shared/VoiceInput';
-export { WaxPattern } from '@/components/shared/WaxPattern';
+// Accessibility & Controls
+export { AccessibilityControls } from './AccessibilityControls';
+export { FloatingAccessibilityButton } from './FloatingAccessibilityButton';
+export { ThemeToggle } from './ThemeToggle';
+
+// Animation
+export { AnimatedList } from './AnimatedList';
+export { AnimatedListItem } from './AnimatedListItem';
+export { Confetti } from './Confetti';
+
+// Audio
+export { AudioButton } from './AudioButton';
+export { AudioLevelMeter } from './AudioLevelMeter';
+export { AudioPlayingIndicator } from './AudioPlayingIndicator';
+export { VoiceHeroButton } from './VoiceHeroButton';
+export { VoiceInput } from './VoiceInput';
+
+// Auth & Login
+export { AuthErrorBanner, createAuthError } from './AuthErrorBanner';
+export { LoginCard } from './LoginCard';
+export { SimpleLoginPage } from './SimpleLoginPage';
+export { UnifiedLoginPage } from './UnifiedLoginPage';
+
+// Backgrounds & Patterns
+export { BackgroundDecor } from './BackgroundDecor';
+export { HeroOverlay } from './HeroOverlay';
+export { ImmersiveBackground } from './ImmersiveBackground';
+export { WaxPattern } from './WaxPattern';
+
+// Cards
+export { GlassCard } from './GlassCard';
+export { HeroActionCard } from './HeroActionCard';
+export { ProfileInfoCard } from './ProfileInfoCard';
+export { SafeCard } from './SafeCard';
+export { StatCard } from './StatCard';
+export { UnifiedActionCard } from './UnifiedActionCard';
+export { UnifiedListCard } from './UnifiedListCard';
+
+// Data Display
+export { FilterChips, type FilterOption } from './FilterChips';
+export { SafeList } from './SafeList';
+export { SafeMetric } from './SafeMetric';
+export { StatusBadge, type StatusType } from './StatusBadge';
+export { VibrantTotalBar } from './VibrantTotalBar';
+
+// Error & State
+export { ErrorBoundary } from './ErrorBoundary';
+export { LoadingState, ErrorState, EmptyState } from './StateComponents';
+export { RetryIndicator } from './RetryIndicator';
+
+// Forms & Input
+export { CurrencyCalculator } from './CurrencyCalculator';
+export { GPSCapture } from './GPSCapture';
+export { PhoneInput } from './PhoneInput';
+export { PhoneNumPad } from './PhoneNumPad';
+export { PhotoCapture } from './PhotoCapture';
+export { SearchInput } from './SearchInput';
+
+// Headers & Navigation
+export { EnhancedHeader } from './EnhancedHeader';
+export { InstitutionalFooter } from './InstitutionalFooter';
+export { InstitutionalHeader } from './InstitutionalHeader';
+export { PageHero } from './PageHero';
+export { UnifiedBottomNav, type NavItem } from './UnifiedBottomNav';
+
+// Help & Onboarding
+export { ContextualHelp } from './ContextualHelp';
+export { OnboardingTutorial } from './OnboardingTutorial';
+export { StepProgress } from './StepProgress';
+export { TantieMascot } from './TantieMascot';
+
+// Language
+export { LanguageSelector } from './LanguageSelector';
+export { LanguageToggle } from './LanguageToggle';
+
+// Notifications
+export { NotificationBadge } from './NotificationBadge';
+export { NotificationDropdown } from './NotificationDropdown';
+export { NotificationToggle } from './NotificationToggle';
+
+// Indicators
+export { DemoBanner } from './DemoBanner';
+export { OfflineIndicator } from './OfflineIndicator';
+
+// Actions
+export { GiantActionButton } from './GiantActionButton';
+export { Pictogram } from './Pictogram';

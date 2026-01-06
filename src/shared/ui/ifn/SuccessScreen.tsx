@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { CheckCircle2 } from "lucide-react";
 import { ButtonSecondary } from "./ButtonSecondary";
-import { Confetti } from "@/components/shared/Confetti";
+import { Confetti } from "@/shared/ui";
 
 interface SuccessScreenProps {
   title?: string;

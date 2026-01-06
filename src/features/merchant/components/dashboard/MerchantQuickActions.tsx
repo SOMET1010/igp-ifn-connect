@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Package, Receipt, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { UnifiedActionCard } from "@/components/shared/UnifiedActionCard";
+import { UnifiedActionCard } from "@/shared/ui";
 
 interface MerchantQuickActionsProps {
   stockAlertCount: number;

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Calendar, FileText, Check } from "lucide-react";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
+import { EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";

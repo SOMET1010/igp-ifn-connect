@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LanguageCode } from "@/lib/translations";
 import logger from "@/infra/logger";
 import { useAudioLevel } from "@/shared/audio";
-import { AudioLevelMeter } from "@/components/shared/AudioLevelMeter";
+import { AudioLevelMeter } from "./AudioLevelMeter";
 import { 
   getSpeechRecognitionConstructor, 
   type SpeechRecognitionEvent,

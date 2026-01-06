@@ -5,10 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
-import { AudioButton } from "@/components/shared/AudioButton";
-import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
+import { EnhancedHeader, UnifiedBottomNav, AudioButton, ImmersiveBackground } from "@/shared/ui";
 import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/features/merchant/components/CalculatorKeypad";

@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { format } from "date-fns";
-import { AudioButton } from "@/components/shared/AudioButton";
+import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
 import { CardLarge, ButtonSecondary, StatusBanner } from "@/shared/ui/ifn";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import {
   Select,

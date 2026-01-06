@@ -1,9 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EnrollmentData } from "@/features/agent";
-import { VoiceInput } from "@/components/shared/VoiceInput";
+import { VoiceInput, PhoneInput } from "@/shared/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PhoneInput } from "@/components/shared/PhoneInput";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 interface Step1IdentityProps {

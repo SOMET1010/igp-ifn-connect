@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PhotoCapture } from "@/components/shared/PhotoCapture";
+import { PhotoCapture } from "@/shared/ui";
 import type { EnrollmentData, IdDocType } from "@/features/agent";
 import { ID_DOC_TYPES } from "@/features/agent/types/enrollment.types";
 

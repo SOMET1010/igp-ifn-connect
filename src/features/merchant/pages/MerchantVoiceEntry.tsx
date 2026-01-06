@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Volume2 } from "lucide-react";
-import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
+import { ImmersiveBackground } from "@/shared/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { LANGUAGES } from "@/lib/translations";

@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { PhoneInput } from "@/components/shared/PhoneInput";
+import { PhoneInput } from "@/shared/ui";
 import { profileEditSchema, type ProfileEditInput, type MerchantProfileData } from "../../types/profile.types";
 
 interface ProfileEditFormProps {

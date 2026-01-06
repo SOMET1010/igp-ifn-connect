@@ -5,10 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
-import { AudioButton } from "@/components/shared/AudioButton";
+import { AudioButton, EnhancedHeader, UnifiedBottomNav, LoadingState, EmptyState } from "@/shared/ui";
 import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/shared/ui/ifn";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -41,7 +39,7 @@ import {
 } from "@/features/merchant/components/invoices";
 import { Invoice } from "@/features/merchant/types/invoices.types";
 import { FNEInvoice } from "@/features/merchant/components/FNEInvoice";
-import { LoadingState, EmptyState } from "@/components/shared/StateComponents";
+
 
 interface MoneyData {
   totalSales: number;

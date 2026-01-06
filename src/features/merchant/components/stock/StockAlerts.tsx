@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Pictogram } from "@/components/shared/Pictogram";
+import { Pictogram } from "@/shared/ui";
 import type { StockItem } from "./types";
 import { cn } from "@/lib/utils";
 

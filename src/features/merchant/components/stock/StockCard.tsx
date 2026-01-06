@@ -1,7 +1,7 @@
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Pictogram } from "@/components/shared/Pictogram";
+import { Pictogram } from "@/shared/ui";
 import type { StockItem, StockStatus } from "./types";
 import { getStockStatus } from "./types";
 import { cn } from "@/lib/utils";

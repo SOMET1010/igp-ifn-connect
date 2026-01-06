@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Pictogram } from "@/components/shared/Pictogram";
+import { Pictogram } from "@/shared/ui";
 import type { StockItem } from "./types";
 
 interface RestockDialogProps {
