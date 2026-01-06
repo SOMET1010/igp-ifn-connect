@@ -3,13 +3,17 @@
  * 
  * Wrapper autour de PageLayout qui injecte automatiquement
  * la navigation appropriée selon le rôle utilisateur.
+ * 
+ * Phase 6: Ajout headerRight, showSignOut, onSignOut pour migration dashboards
  */
 
 import React from 'react';
-import { Home, Leaf, User } from 'lucide-react';
+import { Home, Leaf, User, LogOut, Wifi, WifiOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageLayout, type BreadcrumbItem } from './PageLayout';
 import type { NavItem } from '@/components/shared/UnifiedBottomNav';
+import { Button } from '@/components/ui/button';
 import {
   merchantNavItems,
   agentNavItems,
@@ -30,6 +34,15 @@ const roleNavMap: Record<string, NavItem[]> = {
   cooperative: cooperativeNavItems,
   producer: producerNavItems,
   admin: adminNavItems,
+};
+
+// Chemins de redirection après déconnexion par rôle
+const roleLogoutPaths: Record<string, string> = {
+  merchant: '/marchand/login',
+  agent: '/agent/login',
+  cooperative: '/cooperative/login',
+  producer: '/producteur/login',
+  admin: '/admin/login',
 };
 
 interface RoleLayoutProps {
@@ -66,6 +79,16 @@ interface RoleLayoutProps {
   children: React.ReactNode;
   /** Classes CSS additionnelles */
   className?: string;
+  
+  // Nouvelles props Phase 6
+  /** Contenu supplémentaire à droite du header (badges, status) */
+  headerRight?: React.ReactNode;
+  /** Afficher le bouton de déconnexion */
+  showSignOut?: boolean;
+  /** Action personnalisée de déconnexion (sinon utilise auth.signOut) */
+  onSignOut?: () => void | Promise<void>;
+  /** Largeur maximale du contenu */
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
 export function RoleLayout({
@@ -84,11 +107,28 @@ export function RoleLayout({
   emptyAction,
   children,
   className,
+  // Nouvelles props
+  headerRight,
+  showSignOut = false,
+  onSignOut,
+  maxWidth = 'lg',
 }: RoleLayoutProps) {
-  const { userRole } = useAuth();
+  const { userRole, signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Déterminer la navigation selon le rôle
   const navItems = customNavItems || (userRole ? roleNavMap[userRole] : undefined);
+
+  // Gestion de la déconnexion
+  const handleSignOut = async () => {
+    if (onSignOut) {
+      await onSignOut();
+    } else {
+      await signOut();
+      const logoutPath = userRole ? roleLogoutPaths[userRole] : '/';
+      navigate(logoutPath);
+    }
+  };
 
   // Construire le breadcrumb avec préfixe du rôle
   const fullBreadcrumb = React.useMemo(() => {
@@ -110,6 +150,38 @@ export function RoleLayout({
     return breadcrumb;
   }, [breadcrumb, userRole]);
 
+  // Composer le headerRight avec le bouton signOut si nécessaire
+  const composedHeaderRight = React.useMemo(() => {
+    if (!showSignOut && !headerRight) return undefined;
+    
+    return (
+      <div className="flex items-center gap-2">
+        {headerRight}
+        {showSignOut && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="sr-only">Déconnexion</span>
+          </Button>
+        )}
+      </div>
+    );
+  }, [showSignOut, headerRight, handleSignOut]);
+
+  // Mapper maxWidth vers les classes CSS
+  const maxWidthClasses: Record<string, string> = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    full: 'max-w-full',
+  };
+
   return (
     <PageLayout
       title={title}
@@ -126,6 +198,7 @@ export function RoleLayout({
       emptyMessage={emptyMessage}
       emptyAction={emptyAction}
       className={className}
+      maxWidth={maxWidth}
     >
       {children}
     </PageLayout>

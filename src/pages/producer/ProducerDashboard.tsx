@@ -1,17 +1,16 @@
 /**
  * Dashboard Producteur - PNAVIM
+ * Phase 6: Migré vers RoleLayout
  */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 
-  Sprout, 
   Package, 
   ShoppingCart, 
-  User, 
   Plus,
   ArrowRight,
   Loader2
@@ -30,38 +29,32 @@ const ProducerDashboard: React.FC = () => {
   const { harvests, isLoading: isHarvestsLoading } = useProducerHarvests(producer?.id);
   const { pendingOrders, isLoading: isOrdersLoading } = useProducerOrders(producer?.id);
 
-  const navItems = [
-    { icon: Sprout, label: 'Accueil', path: '/producteur', isActive: true },
-    { icon: Package, label: 'Récoltes', path: '/producteur/recoltes' },
-    { icon: ShoppingCart, label: 'Commandes', path: '/producteur/commandes' },
-    { icon: User, label: 'Profil', path: '/producteur/profil' },
-  ];
-
-  if (isLoading) {
-    return (
-      <MobileLayout title="Producteur" navItems={navItems}>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </MobileLayout>
-    );
-  }
-
   const recentHarvests = harvests.slice(0, 2);
   const recentOrders = pendingOrders.slice(0, 2);
 
+  // Header personnalisé avec gradient
+  const CustomHeader = () => (
+    <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 -mx-4 -mt-4 px-4 py-6 text-white rounded-b-xl">
+      <h1 className="text-xl font-bold">
+        Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'} 👋
+      </h1>
+      <p className="text-emerald-100 text-sm mt-1">
+        {producer?.cooperative?.name || 'Producteur indépendant'}
+      </p>
+    </div>
+  );
+
   return (
-    <MobileLayout title="Producteur" navItems={navItems}>
+    <RoleLayout
+      title="Producteur"
+      subtitle="Espace producteur PNAVIM"
+      isLoading={isLoading}
+      showSignOut
+      showHeader={false}
+    >
       <div className="space-y-6 pb-6">
-        {/* Header */}
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 -mx-4 -mt-4 px-4 py-6 text-white">
-          <h1 className="text-xl font-bold">
-            Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'} 👋
-          </h1>
-          <p className="text-emerald-100 text-sm mt-1">
-            {producer?.cooperative?.name || 'Producteur indépendant'}
-          </p>
-        </div>
+        {/* Header gradient custom */}
+        <CustomHeader />
 
         {/* Stats */}
         <ProducerStats stats={stats} isLoading={isStatsLoading} />
@@ -139,7 +132,7 @@ const ProducerDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </MobileLayout>
+    </RoleLayout>
   );
 };
 

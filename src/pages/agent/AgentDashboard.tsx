@@ -1,3 +1,8 @@
+/**
+ * Dashboard Agent - PNAVIM
+ * Phase 6: Migré vers RoleLayout
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,11 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { AudioButton } from '@/components/shared/AudioButton';
-import { ErrorState } from '@/components/shared/StateComponents';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
-import { RetryIndicator } from '@/components/shared/RetryIndicator';
+import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 
   useAgentDashboard,
   AgentStats,
@@ -19,7 +21,6 @@ import {
   AgentQuickGuide,
   AgentRegistrationSection,
 } from '@/features/agent';
-import { agentNavItems } from '@/config/navigation';
 import { 
   UserPlus, 
   Users, 
@@ -30,7 +31,7 @@ import {
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const { isOnline, pendingCount, isSyncing, syncWithServer } = useOfflineSync();
   const {
@@ -38,62 +39,62 @@ const AgentDashboard: React.FC = () => {
     isAgentRegistered,
     isLoading,
     error,
-    isNetworkError,
     refetch,
-    nextRetryIn,
-    retryCount,
   } = useAgentDashboard();
-
-  const navItems = agentNavItems;
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/agent/login');
-  };
 
   const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}. ${t("validated")}: ${stats.validated}.`;
 
+  // Status indicateur online/offline pour le header
+  const OnlineStatusBadge = (
+    <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
+      isOnline ? 'text-secondary' : 'text-destructive'
+    }`}>
+      {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+      {isOnline ? t("online") : t("offline")}
+    </div>
+  );
+
+  // Cas: Erreur
   if (error) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader
-          title={t("agent")}
-          subtitle="Plateforme IFN – Espace Agent"
-          showSignOut
-          onSignOut={handleSignOut}
-        />
-        <div className="p-4 space-y-4 max-w-2xl mx-auto">
-          <ErrorState
-            message={error.message || "Erreur de chargement"}
-            onRetry={refetch}
-            isNetworkError={isNetworkError}
-          />
-        </div>
-        <UnifiedBottomNav items={navItems} />
-      </div>
+      <RoleLayout
+        title={t("agent")}
+        subtitle="Plateforme IFN – Espace Agent"
+        showSignOut
+        error={error}
+        onRetry={refetch}
+        headerRight={OnlineStatusBadge}
+      >
+        <div />
+      </RoleLayout>
     );
   }
 
-  // User logged in but not registered as agent
+  // Cas: Non enregistré comme agent
   if (!isLoading && !isAgentRegistered) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader
-          title={t("agent")}
-          subtitle="Plateforme IFN – Espace Agent"
-          showSignOut
-          onSignOut={handleSignOut}
-        />
-        <div className="p-4 space-y-4 max-w-2xl mx-auto">
+      <RoleLayout
+        title={t("agent")}
+        subtitle="Plateforme IFN – Espace Agent"
+        showSignOut
+        headerRight={OnlineStatusBadge}
+      >
+        <div className="space-y-4">
           <AgentRegistrationSection user={user} onSuccess={refetch} />
         </div>
-        <UnifiedBottomNav items={navItems} />
-      </div>
+      </RoleLayout>
     );
   }
 
+  // Cas: Normal
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <RoleLayout
+      title={t("agent")}
+      subtitle="Plateforme IFN – Espace Agent"
+      showSignOut
+      isLoading={isLoading}
+      headerRight={OnlineStatusBadge}
+    >
       <AudioButton 
         textToRead={audioText}
         variant="floating"
@@ -101,22 +102,7 @@ const AgentDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50"
       />
 
-      <EnhancedHeader
-        title={t("agent")}
-        subtitle="Plateforme IFN – Espace Agent"
-        showSignOut
-        onSignOut={handleSignOut}
-        rightContent={
-          <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-            isOnline ? 'text-secondary' : 'text-destructive'
-          }`}>
-            {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-            {isOnline ? t("online") : t("offline")}
-          </div>
-        }
-      />
-
-      <main className="p-4 space-y-6 max-w-2xl mx-auto">
+      <div className="space-y-6">
         <PendingSyncAlert
           pendingCount={pendingCount}
           isOnline={isOnline}
@@ -173,10 +159,8 @@ const AgentDashboard: React.FC = () => {
         </section>
 
         <AgentQuickGuide />
-      </main>
-
-      <UnifiedBottomNav items={navItems} />
-    </div>
+      </div>
+    </RoleLayout>
   );
 };
 
