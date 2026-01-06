@@ -404,3 +404,56 @@ graph TD
 - `src/shared/offline/` - Capability offline
 - `src/routes/*.routes.tsx` - Routes par rôle
 - `docs/adr/*.md` - 4 ADRs documentés
+
+## Conventions Anti-Vibe-Coding (Janvier 2026)
+
+### Barrel Exports
+
+Tous les composants partagés sont exportés via `src/shared/ui/index.ts`:
+
+```typescript
+// ✅ Correct
+import { StatCard, SearchInput, FilterChips } from '@/shared/ui';
+
+// ❌ Éviter
+import { StatCard } from '@/components/shared/StatCard';
+```
+
+### Named Exports
+
+Tous les composants utilisent des exports nommés:
+
+```typescript
+// ✅ Correct
+export const MyComponent = () => { ... };
+
+// ❌ Éviter
+export default function MyComponent() { ... }
+```
+
+### Typage Strict
+
+- Pas de `any` sauf cas justifiés (APIs externes)
+- Types Web APIs dans `src/shared/types/web-apis.ts`
+- Interfaces métier dans `src/domain/`
+
+### Design Tokens
+
+Toujours utiliser les tokens CSS sémantiques:
+
+```tsx
+// ✅ Correct - utilise les tokens
+<div className="bg-background text-foreground">
+  <Button className="bg-primary text-primary-foreground">Action</Button>
+</div>
+
+// ❌ Éviter - couleurs hardcodées
+<div className="bg-white text-gray-900">
+  <Button className="bg-green-600 text-white">Action</Button>
+</div>
+```
+
+### Tests Smoke
+
+Chaque route publique doit avoir un test smoke dans:
+- `src/__tests__/routes/routes.smoke.test.tsx`
