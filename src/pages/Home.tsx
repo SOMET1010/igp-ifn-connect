@@ -320,16 +320,16 @@ const Index: React.FC = () => {
 
       {/* Contenu principal */}
       <main className="relative z-10 pt-20 pb-40 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-        {/* Message d'accueil social et chaleureux */}
+        {/* Hero Section avec glassmorphism */}
         <motion.div
-          className="text-center mb-6 sm:mb-8"
+          className="bg-white/15 backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-8 border border-white/25 shadow-2xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Greeting dynamique avec emoji */}
           <motion.h1 
-            className="text-4xl sm:text-5xl lg:text-6xl font-nunito font-extrabold text-white drop-shadow-lg mb-3"
+            className="text-center text-4xl sm:text-5xl lg:text-6xl font-nunito font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] mb-3"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
@@ -339,35 +339,35 @@ const Index: React.FC = () => {
           
           {/* Sous-titre contextuel : jour + période + statut marché */}
           <motion.p 
-            className="text-lg sm:text-xl lg:text-2xl font-semibold text-white/90 drop-shadow-md"
+            className="text-center text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.4 }}
           >
             {getContextualSubtitle()}
           </motion.p>
-        </motion.div>
 
-        {/* Bouton ÉCOUTER proéminent - jaune, grand, animé */}
-        <motion.div
-          className="flex justify-center mb-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.3 }}
-        >
+          {/* Bouton ÉCOUTER proéminent - dans le hero */}
           <motion.div
-            animate={{ scale: [1, 1.03, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex justify-center mt-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.3 }}
           >
-            <PnavimPillButton
-              variant="primary"
-              size="lg"
-              leftIcon={<Volume2 className="w-6 h-6" />}
-              onClick={playWelcomeAudio}
-              className="bg-jaune-sahel text-charbon font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 border-2 border-jaune-sahel/50"
+            <motion.div
+              animate={{ scale: [1, 1.03, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              {t('click_to_listen') || '🔊 Écouter'}
-            </PnavimPillButton>
+              <PnavimPillButton
+                variant="primary"
+                size="lg"
+                leftIcon={<Volume2 className="w-6 h-6" />}
+                onClick={playWelcomeAudio}
+                className="bg-jaune-sahel text-charbon font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 border-2 border-jaune-sahel/50"
+              >
+                {t('click_to_listen') || '🔊 Écouter'}
+              </PnavimPillButton>
+            </motion.div>
           </motion.div>
         </motion.div>
 
@@ -398,7 +398,7 @@ const Index: React.FC = () => {
               badgeText={getTimeBadge()}
               audioMessage={getMerchantAudio()}
               link="/marchand/connexion"
-              className="min-h-[280px] sm:min-h-[300px]"
+              className="min-h-[280px] sm:min-h-[300px] shadow-2xl"
             />
           </motion.div>
 
@@ -415,7 +415,7 @@ const Index: React.FC = () => {
               accentColor="green"
               audioMessage={getAgentAudio()}
               link="/agent/connexion"
-              className="min-h-[240px] sm:min-h-[260px] opacity-95"
+              className="min-h-[240px] sm:min-h-[260px] shadow-2xl"
             />
           </motion.div>
         </motion.div>
@@ -437,34 +437,36 @@ const Index: React.FC = () => {
           ))}
         </div>
 
-        {/* Boutons secondaires : Coopérative, Producteur, Carte */}
+        {/* Boutons secondaires avec glassmorphism amélioré */}
         <motion.div
-          className="mt-5 flex flex-wrap justify-center gap-3"
+          className="mt-6 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
         >
-          <button
-            onClick={() => { triggerTap(); navigate('/cooperative/connexion'); }}
-            className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-white/30 active:bg-white/40 transition-colors border border-white/20 flex items-center gap-2 min-h-[52px]"
-          >
-            <span>🌾</span>
-            <span>{t('i_am_cooperative') || 'Coopérative'}</span>
-          </button>
-          <button
-            onClick={() => { triggerTap(); navigate('/producteur/connexion'); }}
-            className="bg-green-600/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-green-700 active:bg-green-800 transition-colors border border-green-500/40 flex items-center gap-2 min-h-[52px]"
-          >
-            <span>🧑‍🌾</span>
-            <span>{t('i_am_producer') || 'Producteur'}</span>
-          </button>
-          <button
-            onClick={() => { triggerTap(); navigate('/carte'); }}
-            className="bg-blue-600/80 backdrop-blur-sm text-white px-6 py-3 rounded-full font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors border border-blue-500/40 flex items-center gap-2 min-h-[52px]"
-          >
-            <span>🗺️</span>
-            <span>{t('view_map') || 'Carte'}</span>
-          </button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              onClick={() => { triggerTap(); navigate('/cooperative/connexion'); }}
+              className="bg-white/25 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-white/35 active:bg-white/45 transition-all border border-white/30 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+            >
+              <span>🌾</span>
+              <span className="drop-shadow-sm">{t('i_am_cooperative') || 'Coopérative'}</span>
+            </button>
+            <button
+              onClick={() => { triggerTap(); navigate('/producteur/connexion'); }}
+              className="bg-green-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600 active:bg-green-700 transition-all border border-green-500/50 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+            >
+              <span>🧑‍🌾</span>
+              <span className="drop-shadow-sm">{t('i_am_producer') || 'Producteur'}</span>
+            </button>
+            <button
+              onClick={() => { triggerTap(); navigate('/carte'); }}
+              className="bg-blue-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 active:bg-blue-700 transition-all border border-blue-500/50 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+            >
+              <span>🗺️</span>
+              <span className="drop-shadow-sm">{t('view_map') || 'Carte'}</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* Footer logos institutionnels avec fond dégradé */}
