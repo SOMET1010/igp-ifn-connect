@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useLanguage } from "@/shared/contexts";
+import { useOnlineStatus } from "@/shared/hooks";
 import { format } from "date-fns";
 import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
 import { CardLarge, ButtonSecondary, StatusBanner } from "@/shared/ui/ifn";

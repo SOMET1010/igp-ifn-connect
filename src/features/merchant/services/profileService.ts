@@ -46,10 +46,10 @@ export const profileService = {
     const { error } = await supabase
       .from("merchants")
       .update({
-        full_name: data.full_name,
-        phone: data.phone,
-        activity_type: data.activity_type,
-        activity_description: data.activity_description,
+        full_name: data.full_name as string,
+        phone: data.phone as string,
+        activity_type: data.activity_type as string,
+        activity_description: data.activity_description as string | null,
       })
       .eq("user_id", userId);
 

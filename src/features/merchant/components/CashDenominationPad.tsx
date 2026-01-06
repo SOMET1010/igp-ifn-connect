@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { playPrerecordedAudio, stopAudio } from "@/lib/audioService";
+import { useLanguage } from "@/shared/contexts";
+import { playPrerecordedAudio, stopAudio } from "@/shared/lib";
 import { getCashierScript, type CashierScriptKey } from "@/shared/config/audio/cashierScripts";
 
 // Import bill images

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/shared/hooks";
+import { useLanguage } from "@/shared/contexts";
 
 const CONFETTI_KEY_PREFIX = 'ifn_first_sale_celebrated_';
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phoneLocalSchema } from "@/lib/validationSchemas";
+import { phoneLocalSchema } from "@/shared/lib";
 
 // Types de données du profil marchand
 export interface MerchantProfileData {

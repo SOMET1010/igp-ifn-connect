@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/shared/hooks";
+import { useAuth } from "@/shared/contexts";
 import { Mail, Lock, Loader2 } from "lucide-react";
-import { emailSchema, passwordSchema, getValidationError } from "@/lib/validationSchemas";
+import { emailSchema, passwordSchema, getValidationError } from "@/shared/lib";
 import { AudioButton, BackgroundDecor } from "@/shared/ui";
 import { AdminLoginConfig } from "../types/login.types";
 

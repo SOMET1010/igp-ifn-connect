@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/shared/contexts";
 import { dailySessionService } from "../services/dailySessionService";
 import { transactionService } from "../services/transactionService";
 import type { 
@@ -10,7 +10,7 @@ import type {
   SessionStatus,
   SessionSummary
 } from "../types/dailySession.types";
-import { sensoryToast } from "@/lib/sensoryToast";
+import { sensoryToast } from "@/shared/lib";
 
 export function useDailySession() {
   const { user } = useAuth();

@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Volume2 } from "lucide-react";
 import { ImmersiveBackground } from "@/shared/ui";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
-import { LANGUAGES } from "@/lib/translations";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/shared/contexts";
+import { useSensoryFeedback } from "@/shared/hooks";
+import { LANGUAGES } from "@/shared/lib";
+import { cn } from "@/shared/lib";
 import { InclusivePhoneAuth } from "@/features/auth/components/InclusivePhoneAuth";
 import { useVoiceQueue } from "@/shared/hooks/useVoiceQueue";
 

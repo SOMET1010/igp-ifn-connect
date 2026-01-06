@@ -9,8 +9,8 @@ import { Step3Location } from "@/features/agent/components/enrollment/Step3Locat
 import { Step4Activity } from "@/features/agent/components/enrollment/Step4Activity";
 import { Step5Confirm } from "@/features/agent/components/enrollment/Step5Confirm";
 import { useEnrollmentForm, enrollmentService } from "@/features/agent";
-import { useOfflineSync } from "@/hooks/useOfflineSync";
-import { useAuth } from "@/contexts/AuthContext";
+import { useOfflineSync } from "@/shared/hooks";
+import { useAuth } from "@/shared/contexts";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 

@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, History, User, Truck } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
-import { cn } from "@/lib/utils";
+import { useLanguage } from "@/shared/contexts";
+import { useSensoryFeedback } from "@/shared/hooks";
+import { cn } from "@/shared/lib";
 
 interface ToolTile {
   icon: React.ElementType;

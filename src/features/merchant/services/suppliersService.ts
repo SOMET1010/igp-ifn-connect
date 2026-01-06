@@ -3,7 +3,7 @@
 // ============================================
 
 import { supabase } from "@/integrations/supabase/client";
-import { calculateDistance } from "@/lib/geoUtils";
+import { calculateDistance } from "@/shared/lib";
 import type {
   Category,
   Cooperative,
