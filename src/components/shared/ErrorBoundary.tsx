@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/infra/logger';
 
 interface Props {
   children: ReactNode;
@@ -24,10 +25,21 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log structuré avec le logger centralisé
+    logger.error('ErrorBoundary caught an error', error, {
+      module: 'ErrorBoundary',
+      componentStack: errorInfo.componentStack,
+      errorName: error.name,
+    });
+
     this.setState({ errorInfo });
-    
-    // TODO: Envoyer à un service de monitoring (Sentry, etc.)
+
+    // Sentry integration (si configuré)
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
+        contexts: { react: { componentStack: errorInfo.componentStack } },
+      });
+    }
   }
 
   handleReload = () => {
@@ -40,6 +52,14 @@ class ErrorBoundary extends Component<Props, State> {
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
+  };
+
+  handleContactSupport = () => {
+    // Ouvre WhatsApp avec message pré-rempli
+    const message = encodeURIComponent(
+      `Bonjour, j'ai rencontré une erreur sur l'application PNAVIM: ${this.state.error?.message || 'Erreur inconnue'}`
+    );
+    window.open(`https://wa.me/22500000000?text=${message}`, '_blank');
   };
 
   render() {
@@ -56,14 +76,14 @@ class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-10 h-10 text-destructive" />
             </div>
 
-            {/* Message */}
+            {/* Message simple et clair */}
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-foreground">
-                Une erreur est survenue
+                Oups, quelque chose ne va pas
               </h1>
               <p className="text-muted-foreground">
-                L'application a rencontré un problème inattendu. 
-                Nous nous excusons pour la gêne occasionnée.
+                L'application a rencontré un problème. 
+                Pas d'inquiétude, tes données sont en sécurité.
               </p>
             </div>
 
@@ -102,17 +122,21 @@ class ErrorBoundary extends Component<Props, State> {
                 Retour à l'accueil
               </Button>
 
-              <button
-                onClick={this.handleReload}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              <Button
+                onClick={this.handleContactSupport}
+                variant="ghost"
+                className="w-full"
+                size="sm"
               >
-                Recharger la page
-              </button>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contacter le support
+              </Button>
             </div>
 
-            {/* Support info */}
+            {/* Info supplémentaire */}
             <p className="text-xs text-muted-foreground">
-              Si le problème persiste, contactez le support technique.
+              Si le problème persiste, contacte le support au{' '}
+              <span className="font-medium">+225 00 00 00 00</span>
             </p>
           </div>
         </div>

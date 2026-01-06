@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { X, Bug, Wifi, WifiOff, Database, Shield, Clock } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, Bug, Wifi, WifiOff, Database, Shield, Clock, Download, Filter, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { logger, type LogLevel, type LogEntry } from "@/infra/logger";
 
 interface DebugLog {
   timestamp: string;
@@ -19,8 +20,36 @@ export function PreprodDebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [logs, setLogs] = useState<DebugLog[]>([]);
+  const [storedLogs, setStoredLogs] = useState<LogEntry[]>([]);
+  const [logFilter, setLogFilter] = useState<LogLevel | 'all'>('all');
   const { isOnline } = useOnlineStatus();
   const { isAuthenticated, userRole, user } = useAuth();
+
+  // Load stored logs from logger
+  const refreshStoredLogs = useCallback(() => {
+    const logs = logger.getStoredLogs();
+    setStoredLogs(logs.reverse()); // Most recent first
+  }, []);
+
+  // Refresh logs when panel opens
+  useEffect(() => {
+    if (isExpanded) {
+      refreshStoredLogs();
+    }
+  }, [isExpanded, refreshStoredLogs]);
+
+  const handleExportLogs = () => {
+    logger.downloadLogs();
+  };
+
+  const handleClearLogs = () => {
+    logger.clearStoredLogs();
+    refreshStoredLogs();
+  };
+
+  const filteredStoredLogs = storedLogs.filter(
+    log => logFilter === 'all' || log.level === logFilter
+  );
 
   // Check if debug mode is enabled
   useEffect(() => {
@@ -169,33 +198,74 @@ export function PreprodDebugPanel() {
             </div>
           </div>
 
-          {/* Logs */}
-          <div className="max-h-48 overflow-y-auto">
-            <div className="px-4 py-2 bg-muted/50 border-b">
-              <span className="text-xs font-medium">Logs récents</span>
+          {/* Logs with filter */}
+          <div className="max-h-64 overflow-y-auto">
+            <div className="px-4 py-2 bg-muted/50 border-b flex items-center justify-between">
+              <span className="text-xs font-medium">Logs système ({filteredStoredLogs.length})</span>
+              <div className="flex items-center gap-2">
+                <select
+                  value={logFilter}
+                  onChange={(e) => setLogFilter(e.target.value as LogLevel | 'all')}
+                  className="text-xs bg-background border rounded px-1 py-0.5"
+                >
+                  <option value="all">Tous</option>
+                  <option value="error">Erreurs</option>
+                  <option value="warn">Warnings</option>
+                  <option value="info">Info</option>
+                  <option value="debug">Debug</option>
+                </select>
+                <button
+                  onClick={handleExportLogs}
+                  className="p-1 hover:bg-muted rounded"
+                  title="Exporter les logs"
+                >
+                  <Download className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={handleClearLogs}
+                  className="p-1 hover:bg-muted rounded text-destructive"
+                  title="Effacer les logs"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
             </div>
-            {logs.length === 0 ? (
+            {filteredStoredLogs.length === 0 ? (
               <p className="p-4 text-xs text-muted-foreground text-center">
                 Aucun log récent
               </p>
             ) : (
               <div className="divide-y">
-                {logs.map((log, i) => (
+                {filteredStoredLogs.slice(0, 30).map((log, i) => (
                   <div key={i} className="px-4 py-2 text-xs">
                     <div className="flex items-center gap-2 mb-1">
                       <span
                         className={cn(
-                          "w-2 h-2 rounded-full",
+                          "w-2 h-2 rounded-full flex-shrink-0",
+                          log.level === "fatal" && "bg-purple-500",
                           log.level === "error" && "bg-red-500",
                           log.level === "warn" && "bg-yellow-500",
-                          log.level === "info" && "bg-blue-500"
+                          log.level === "info" && "bg-blue-500",
+                          log.level === "debug" && "bg-gray-400"
                         )}
                       />
-                      <span className="text-muted-foreground">
-                        {log.timestamp}
+                      <span className="text-muted-foreground flex-shrink-0">
+                        {log.timestamp.split('T')[1]?.slice(0, 8) || log.timestamp}
                       </span>
+                      {log.context?.module && (
+                        <span className="text-muted-foreground/70 text-[10px]">
+                          [{log.context.module}]
+                        </span>
+                      )}
                     </div>
                     <p className="text-foreground break-all">{log.message}</p>
+                    {log.error && (
+                      <p className="text-destructive/80 text-[10px] mt-1 break-all">
+                        {typeof log.error === 'object' && log.error !== null
+                          ? (log.error as any).message || JSON.stringify(log.error)
+                          : String(log.error)}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
