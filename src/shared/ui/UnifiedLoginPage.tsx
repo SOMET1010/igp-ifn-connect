@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { VoiceSocialAuth } from '@/features/auth';
 import { ImmersiveBackground } from './ImmersiveBackground';
 import { GlassCard } from './GlassCard';

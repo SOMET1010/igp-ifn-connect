@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { AlertCircle, RefreshCw, Keyboard, Phone, WifiOff, MicOff, ServerCrash, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 

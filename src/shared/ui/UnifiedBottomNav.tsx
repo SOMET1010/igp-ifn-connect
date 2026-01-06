@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 export interface NavItem {
   icon: LucideIcon;

@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNotificationsRealtime } from '@/features/notifications/hooks/useNotificationsRealtime';
 import type { Notification } from '@/features/notifications/types/notification.types';
-import { cn } from '@/lib/utils';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { cn } from '@/shared/lib';
+import { useSensoryFeedback } from '@/shared/hooks';
 import { useNavigate } from 'react-router-dom';
 
 interface NotificationItemProps {

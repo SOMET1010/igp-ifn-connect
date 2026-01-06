@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/shared/lib';
+import { useLanguage } from '@/shared/contexts';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
-import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/lib/audioService';
+import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/shared/lib';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
 import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
 import logger from '@/infra/logger';

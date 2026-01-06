@@ -1,7 +1,7 @@
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { cn } from '@/lib/utils';
+import { usePushNotifications } from '@/shared/hooks';
+import { cn } from '@/shared/lib';
 
 interface NotificationToggleProps {
   className?: string;

@@ -1,6 +1,6 @@
 import React from "react";
 import { WaxPattern } from "./WaxPattern";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib";
 
 interface VibrantTotalBarProps {
   /** Libellé au-dessus du montant */

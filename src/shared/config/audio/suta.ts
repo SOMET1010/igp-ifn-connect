@@ -6,7 +6,7 @@
  * SUTA parle uniquement sur les écrans de connexion et d'aide
  */
 
-import { LanguageCode } from '@/lib/translations';
+import { LanguageCode } from '@/shared/lib';
 
 // Alias de compatibilité pour l'ancien type VoiceAuthLang
 export type VoiceAuthLang = 'fr' | 'nouchi' | 'suta';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface RetryIndicatorProps {
   /** Temps restant avant le prochain retry en ms */

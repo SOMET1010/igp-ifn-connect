@@ -1,11 +1,10 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LucideIcon, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { NotificationBadge, NotificationBadgeVariant } from './NotificationBadge';
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { useButtonFeedback } from '@/hooks/useButtonFeedback';
+import { useReducedMotion, useButtonFeedback } from '@/shared/hooks';
 
 interface UnifiedActionCardProps {
   title: string;

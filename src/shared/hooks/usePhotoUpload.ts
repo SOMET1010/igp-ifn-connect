@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { compressImage, compressBase64Image } from "@/lib/imageCompression";
+import { compressImage, compressBase64Image } from "@/shared/lib";
 
 const BUCKET_NAME = "merchant-photos";
 

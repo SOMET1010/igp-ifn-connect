@@ -1,6 +1,6 @@
-import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useOfflineSync } from '@/shared/hooks';
 import { WifiOff, RefreshCw, CheckCircle, CloudOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 export function OfflineIndicator() {
   const { isOnline, pendingCount, isSyncing, syncWithServer } = useOfflineSync();

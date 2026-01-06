@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { toast } from 'sonner';
 import { logger } from '@/infra/logger';
 // VAPID public key - this should match your server's public key

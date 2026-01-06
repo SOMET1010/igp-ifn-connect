@@ -11,7 +11,7 @@
 
 import React, { useCallback } from 'react';
 import { Delete, X, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { motion } from 'framer-motion';
 
 interface PhoneNumPadProps {

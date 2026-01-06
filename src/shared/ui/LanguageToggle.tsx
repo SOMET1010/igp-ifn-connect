@@ -1,4 +1,4 @@
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -6,8 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { cn } from '@/shared/lib';
+import { useSensoryFeedback } from '@/shared/hooks';
 import { Globe } from 'lucide-react';
 
 interface LanguageToggleProps {

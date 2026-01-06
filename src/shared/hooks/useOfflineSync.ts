@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { compressBase64Image } from "@/lib/imageCompression";
+import { compressBase64Image } from "@/shared/lib";
 import {
   addToOfflineQueue as addToIndexedDB,
   getOfflineQueue as getFromIndexedDB,
@@ -9,7 +9,7 @@ import {
   updateQueueItem,
   openDB,
   type OfflineItem,
-} from "@/lib/offlineDB";
+} from "@/shared/lib";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 import { syncLogger } from "@/infra/logger";
 

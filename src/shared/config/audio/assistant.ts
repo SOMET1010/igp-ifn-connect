@@ -6,7 +6,7 @@
  * ASSISTANT parle sur le dashboard et les écrans de vente
  */
 
-import { LanguageCode } from '@/lib/translations';
+import { LanguageCode } from '@/shared/lib';
 
 export type AssistantScriptKey = 
   // Début de journée

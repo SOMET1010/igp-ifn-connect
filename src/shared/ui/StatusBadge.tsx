@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Check, Clock, X, Pause, AlertCircle, Shield, TrendingUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 export type StatusType = 
   | 'validated' | 'pending' | 'rejected' | 'suspended'

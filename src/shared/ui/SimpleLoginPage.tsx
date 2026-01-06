@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { InclusivePhoneAuth } from '@/features/auth/components/InclusivePhoneAuth';
 import { GoogleSignInButton } from '@/features/auth/components/GoogleSignInButton';
 import { Separator } from '@/components/ui/separator';

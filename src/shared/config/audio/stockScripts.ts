@@ -4,7 +4,7 @@
  */
 
 // Import global LanguageCode from translations
-import { LanguageCode } from '@/lib/translations';
+import { LanguageCode } from '@/shared/lib';
 
 export interface StockAudioScript {
   key: string;
