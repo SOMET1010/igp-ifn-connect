@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { format } from "date-fns";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { CardLarge, ButtonSecondary, StatusBanner } from "@/components/ifn";
+import { CardLarge, ButtonSecondary, StatusBanner } from "@/shared/ui/ifn";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";

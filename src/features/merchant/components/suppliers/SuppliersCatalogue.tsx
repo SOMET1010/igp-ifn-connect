@@ -3,8 +3,8 @@
 // ============================================
 
 import { Input } from "@/components/ui/input";
-import { CategoryCarousel } from "@/components/market/CategoryCarousel";
-import { ProductGrid } from "@/components/market/ProductGrid";
+import { CategoryCarousel } from "@/features/public/components/market/CategoryCarousel";
+import { ProductGrid } from "@/features/public/components/market/ProductGrid";
 import { Search } from "lucide-react";
 import type { CategoryWithCount, Product } from "../../types/suppliers.types";
 

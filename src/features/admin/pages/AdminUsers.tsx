@@ -10,7 +10,7 @@ import { PageHero } from '@/components/shared/PageHero';
 import { FilterChips } from '@/components/shared/FilterChips';
 import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
 import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
-import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
+import { DashboardSkeleton } from '@/features/admin/components/DashboardSkeleton';
 import { AnimatedList } from '@/components/shared/AnimatedList';
 import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
 import { SearchInput } from '@/components/shared/SearchInput';

@@ -8,7 +8,7 @@ import {
   AdvancedToolsGrid 
 } from '@/features/admin';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
-import { TestNotificationButton } from '@/components/admin/TestNotificationButton';
+import { TestNotificationButton } from '@/features/admin/components/TestNotificationButton';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();

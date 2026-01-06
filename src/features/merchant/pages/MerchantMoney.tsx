@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton } from "@/components/shared/AudioButton";
-import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/components/ifn";
+import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/shared/ui/ifn";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
@@ -40,7 +40,7 @@ import {
   InvoicesFilters,
 } from "@/features/merchant/components/invoices";
 import { Invoice } from "@/features/merchant/types/invoices.types";
-import { FNEInvoice } from "@/components/merchant/FNEInvoice";
+import { FNEInvoice } from "@/features/merchant/components/FNEInvoice";
 import { LoadingState, EmptyState } from "@/components/shared/StateComponents";
 
 interface MoneyData {

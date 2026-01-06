@@ -3,8 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAgentRequest } from "../../hooks/useAgentRequest";
-import { AgentRegistrationForm } from "@/components/agent/AgentRegistrationForm";
-import { AgentRequestStatus } from "@/components/agent/AgentRequestStatus";
+import { AgentRegistrationForm } from "@/features/agent/components/AgentRegistrationForm";
+import { AgentRequestStatus } from "@/features/agent/components/AgentRequestStatus";
 
 interface AgentRegistrationSectionProps {
   user: { id: string; phone?: string } | null;

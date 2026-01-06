@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { SuccessScreen, ButtonPrimary, ButtonSecondary } from "@/components/ifn";
-import { QRReceipt } from "@/components/merchant/QRReceipt";
+import { SuccessScreen, ButtonPrimary, ButtonSecondary } from "@/shared/ui/ifn";
+import { QRReceipt } from "@/features/merchant/components/QRReceipt";
 import type { PaymentMethod, TransactionDetails } from "../../types/transaction.types";
 
 // ============================================

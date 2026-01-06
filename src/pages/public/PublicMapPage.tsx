@@ -5,7 +5,7 @@ import {
   PublicMapFilters, 
   PublicMapFiltersState, 
   PublicMapLegend
-} from '@/components/public/map';
+} from '@/features/public/components/map';
 import { PageLayout } from '@/templates';
 
 const TYPE_LABELS: Record<PublicMapEntity['type'], string> = {
@@ -14,7 +14,7 @@ const TYPE_LABELS: Record<PublicMapEntity['type'], string> = {
 };
 
 // Lazy load the map component to avoid SSR issues
-const MapView = lazy(() => import('@/components/public/map/MapView'));
+const MapView = lazy(() => import('@/features/public/components/map/MapView'));
 
 const PublicMapPage: React.FC = () => {
   const [entities, setEntities] = useState<PublicMapEntity[]>([]);

@@ -2,9 +2,9 @@ import { Banknote, Smartphone, Wifi, RefreshCw, Mic, Ear, ShoppingBag } from "lu
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
-import { CashDenominationPad } from "@/components/merchant/CashDenominationPad";
-import { CalculatorKeypad } from "@/components/merchant/CalculatorKeypad";
-import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/components/merchant/ProductSelector";
+import { CashDenominationPad } from "@/features/merchant/components/CashDenominationPad";
+import { CalculatorKeypad } from "@/features/merchant/components/CalculatorKeypad";
+import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/features/merchant/components/ProductSelector";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { VibrantTotalBar } from "@/components/shared/VibrantTotalBar";
 import { WaxPattern } from "@/components/shared/WaxPattern";

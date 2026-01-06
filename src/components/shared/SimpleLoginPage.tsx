@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { InclusivePhoneAuth } from '@/features/auth/components/InclusivePhoneAuth';
-import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { GoogleSignInButton } from '@/features/auth/components/GoogleSignInButton';
 import { Separator } from '@/components/ui/separator';
 import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';

@@ -5,7 +5,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MobileLayout } from '@/components/layout/MobileLayout';
+import { MobileLayout } from '@/shared/layout/MobileLayout';
 import { 
   Sprout, 
   Package, 

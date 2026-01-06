@@ -3,7 +3,7 @@ import { Mic, Loader2, Send, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { AudioBars } from '@/components/merchant/AudioBars';
+import { AudioBars } from '@/features/merchant/components/AudioBars';
 import { useTts } from '@/shared/hooks/useTts';
 import marcheIvoirien from '@/assets/marche-ivoirien.jpg';
 

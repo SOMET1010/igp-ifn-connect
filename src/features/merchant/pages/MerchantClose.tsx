@@ -13,7 +13,7 @@ import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { useMerchantDashboardData } from "@/features/merchant/hooks/useMerchantDashboardData";
-import { PnavimButton, PnavimCard, PnavimStat } from "@/components/pnavim";
+import { PnavimButton, PnavimCard, PnavimStat } from "@/features/public/components/pnavim";
 
 type CloseStep = "summary" | "confirm" | "success";
 

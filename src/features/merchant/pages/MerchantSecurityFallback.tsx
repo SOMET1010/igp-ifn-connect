@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Phone, Fingerprint, HelpCircle, ArrowLeft, Shield, Heart } from "lucide-react";
 import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
 import { GlassCard } from "@/components/shared/GlassCard";
-import { PnavimPillButton } from "@/components/pnavim";
+import { PnavimPillButton } from "@/features/public/components/pnavim";
 import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useLanguage } from "@/contexts/LanguageContext";
 
