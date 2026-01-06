@@ -5,7 +5,7 @@
 // RÈGLE: Maximum 1 bouton primary par écran
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { Loader2 } from 'lucide-react';
 import { useSensoryFeedback, useReducedMotion } from '@/shared/hooks';
 

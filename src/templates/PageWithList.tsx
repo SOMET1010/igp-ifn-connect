@@ -2,7 +2,7 @@ import React from 'react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
 import { SearchInput, FilterChips, AnimatedList, AnimatedListItem, type FilterOption } from '@/shared/ui';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 // Re-export FilterOption pour compatibilité
 export type { FilterOption } from '@/shared/ui';

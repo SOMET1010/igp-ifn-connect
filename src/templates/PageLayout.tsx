@@ -1,6 +1,6 @@
 import React from 'react';
 import { EnhancedHeader, UnifiedBottomNav, type NavItem } from '@/shared/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 // ============================================
 // TYPES

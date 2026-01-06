@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { Mic, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { VoiceAuthLang } from '@/shared/config/audio/suta';
 import { useTts } from '@/shared/hooks/useTts';
 import { AudioBars } from './AudioBars';

@@ -3,7 +3,7 @@
  */
 
 import { WifiOff, Wifi, CloudOff, RefreshCw } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface OfflineBadgeProps {
   isOffline: boolean;

@@ -5,7 +5,7 @@
 // RÈGLE: Maximum 4 stats par écran, même hauteur partout
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { LucideIcon } from 'lucide-react';
 
 type StatVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger';
