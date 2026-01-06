@@ -2,6 +2,27 @@
 // Public API - Feature Merchant
 // ============================================
 
+// === PAGES (Architecture Vertical Slices) ===
+export { default as MerchantDashboard } from "./pages/MerchantDashboard";
+export { default as MerchantSell } from "./pages/MerchantSell";
+export { default as MerchantMoney } from "./pages/MerchantMoney";
+export { default as MerchantProfile } from "./pages/MerchantProfile";
+export { default as MerchantStock } from "./pages/MerchantStock";
+export { default as MerchantCredits } from "./pages/MerchantCredits";
+export { default as MerchantClose } from "./pages/MerchantClose";
+export { default as MerchantKyc } from "./pages/MerchantKyc";
+export { default as MerchantLogin } from "./pages/MerchantLogin";
+export { default as MerchantVoiceEntry } from "./pages/MerchantVoiceEntry";
+export { default as MerchantVoiceRegister } from "./pages/MerchantVoiceRegister";
+export { default as MerchantSecurityFallback } from "./pages/MerchantSecurityFallback";
+export { default as MerchantCashier } from "./pages/MerchantCashier";
+export { default as MerchantScanner } from "./pages/MerchantScanner";
+export { default as MerchantTransactions } from "./pages/MerchantTransactions";
+export { default as MerchantInvoices } from "./pages/MerchantInvoices";
+export { default as MerchantCMU } from "./pages/MerchantCMU";
+export { default as MerchantHelp } from "./pages/MerchantHelp";
+export { default as SalesQuick } from "./pages/SalesQuick";
+
 // Hooks publics
 export { useCashierPayment } from "./hooks/useCashierPayment";
 export { useMerchantStock } from "./hooks/useMerchantStock";

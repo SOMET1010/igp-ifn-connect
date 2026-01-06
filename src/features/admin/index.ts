@@ -1,3 +1,24 @@
+// === PAGES (Architecture Vertical Slices) ===
+export { default as AdminDashboard } from "./pages/AdminDashboard";
+export { default as AdminLogin } from "./pages/AdminLogin";
+export { default as AdminMerchants } from "./pages/AdminMerchants";
+export { default as AdminAgents } from "./pages/AdminAgents";
+export { default as AdminAgentRequests } from "./pages/AdminAgentRequests";
+export { default as AdminCooperatives } from "./pages/AdminCooperatives";
+export { default as AdminProducers } from "./pages/AdminProducers";
+export { default as AdminMap } from "./pages/AdminMap";
+export { default as AdminMonitoring } from "./pages/AdminMonitoring";
+export { default as AdminAnalytics } from "./pages/AdminAnalytics";
+export { default as AdminReports } from "./pages/AdminReports";
+export { default as AdminStudio } from "./pages/AdminStudio";
+export { default as AdminVivriers } from "./pages/AdminVivriers";
+export { default as AdminUsers } from "./pages/AdminUsers";
+export { default as AdminUserDetail } from "./pages/AdminUserDetail";
+export { default as AdminKycReview } from "./pages/AdminKycReview";
+export { default as AdminDiagnostics } from "./pages/AdminDiagnostics";
+export { default as AdminCardsImport } from "./pages/AdminCardsImport";
+export { default as AdminCardsSearch } from "./pages/AdminCardsSearch";
+
 // Hooks publics
 export { useAdminDashboard } from './hooks/useAdminDashboard';
 export { useAdminAgentRequests } from './hooks/useAdminAgentRequests';

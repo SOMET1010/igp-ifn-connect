@@ -3,7 +3,16 @@
  * Seules les API exposées ici sont considérées publiques
  */
 
-// Hooks publics
+// === PAGES (Architecture Vertical Slices) ===
+export { default as CooperativeDashboard } from "./pages/CooperativeDashboard";
+export { default as CooperativeLogin } from "./pages/CooperativeLogin";
+export { default as CooperativeRegister } from "./pages/CooperativeRegister";
+export { default as CooperativeStock } from "./pages/CooperativeStock";
+export { default as CooperativeOrders } from "./pages/CooperativeOrders";
+export { default as CooperativeProfilePage } from "./pages/CooperativeProfile";
+export { default as CooperativeMembers } from "./pages/CooperativeMembers";
+export { default as CooperativeProducers } from "./pages/CooperativeProducers";
+export { default as CooperativeProducerOrders } from "./pages/CooperativeProducerOrders";
 export { useCooperativeStock } from "./hooks/useCooperativeStock";
 export { useCooperativeOrders } from "./hooks/useCooperativeOrders";
 export { useCooperativeNotifications } from "./hooks/useCooperativeNotifications";

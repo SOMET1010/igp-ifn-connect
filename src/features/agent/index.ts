@@ -1,3 +1,10 @@
+// === PAGES (Architecture Vertical Slices) ===
+export { default as AgentDashboard } from "./pages/AgentDashboard";
+export { default as AgentLogin } from "./pages/AgentLogin";
+export { default as AgentProfilePage } from "./pages/AgentProfile";
+export { default as EnrollmentWizard } from "./pages/EnrollmentWizard";
+export { default as MerchantList } from "./pages/MerchantList";
+
 // === Hooks ===
 export { useAgentRequest } from "./hooks/useAgentRequest";
 export { useEnrollmentForm } from "./hooks/useEnrollmentForm";

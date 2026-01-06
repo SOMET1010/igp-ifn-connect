@@ -3,6 +3,12 @@
  * Export centralisé
  */
 
+// === PAGES (Architecture Vertical Slices) ===
+export { default as ProducerDashboard } from './pages/ProducerDashboard';
+export { default as ProducerHarvests } from './pages/ProducerHarvests';
+export { default as ProducerOrders } from './pages/ProducerOrders';
+export { default as ProducerProfilePage } from './pages/ProducerProfile';
+
 // Hooks
 export { useProducerData } from './hooks/useProducerData';
 export { useProducerHarvests } from './hooks/useProducerHarvests';
