@@ -1,14 +1,16 @@
+/**
+ * Dashboard Coopérative - PNAVIM
+ * Phase 6: Migré vers RoleLayout
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AudioButton } from '@/components/shared/AudioButton';
-import { ErrorState, LoadingState } from '@/components/shared/StateComponents';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
 import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
+import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 
   useCooperativeDashboard,
   useCooperativeNotifications,
@@ -19,7 +21,6 @@ import {
   QuickGuide,
   DateFilterTabs,
 } from '@/features/cooperative';
-import { cooperativeNavItems } from '@/config/navigation';
 import { 
   Package, 
   ClipboardList,
@@ -30,10 +31,7 @@ import {
 
 const CooperativeDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
   const { t } = useLanguage();
-
-  const navItems = cooperativeNavItems;
 
   const {
     cooperative,
@@ -43,61 +41,41 @@ const CooperativeDashboard: React.FC = () => {
     weeklyRevenue,
     isLoading,
     error,
-    isNetworkError,
     refetch,
   } = useCooperativeDashboard();
 
   const notifications = useCooperativeNotifications();
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/cooperative/login');
-  };
-
   const audioText = `${t("audio_coop_dashboard")} ${cooperative?.total_members ?? 0} ${t("members")}, ${stats.products} ${t("products")}, ${stats.pendingOrders} ${t("pending_orders")}.`;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
-        <LoadingState message="Chargement du tableau de bord..." />
-        <UnifiedBottomNav items={navItems} />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title={t("cooperative")} subtitle="Plateforme IFN – Espace Coopérative" showSignOut onSignOut={handleSignOut} />
-        <div className="p-4 space-y-4 max-w-2xl mx-auto">
-          <ErrorState message={error.message || "Erreur de chargement"} onRetry={refetch} isNetworkError={isNetworkError} />
-        </div>
-        <UnifiedBottomNav items={navItems} />
-      </div>
-    );
-  }
+  // Badge IGP pour le header
+  const IGPBadge = cooperative?.igp_certified ? (
+    <Badge variant="secondary" className="text-xs">
+      <Award className="w-3 h-3 mr-1" />IFN
+    </Badge>
+  ) : null;
 
   // Calcul du CA hebdomadaire total
   const weeklyRevenueTotal = weeklyRevenue.reduce((sum, d) => sum + d.revenue, 0);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <AudioButton textToRead={audioText} variant="floating" size="lg" className="bottom-24 right-4 z-50" />
-
-      <EnhancedHeader
-        title={cooperative?.name ?? t("cooperative")}
-        subtitle="Plateforme IFN – Espace Coopérative"
-        showSignOut
-        onSignOut={handleSignOut}
-        rightContent={cooperative?.igp_certified && (
-          <Badge variant="secondary" className="text-xs">
-            <Award className="w-3 h-3 mr-1" />IFN
-          </Badge>
-        )}
+    <RoleLayout
+      title={cooperative?.name ?? t("cooperative")}
+      subtitle="Plateforme IFN – Espace Coopérative"
+      showSignOut
+      isLoading={isLoading}
+      error={error}
+      onRetry={refetch}
+      headerRight={IGPBadge}
+    >
+      <AudioButton 
+        textToRead={audioText} 
+        variant="floating" 
+        size="lg" 
+        className="bottom-24 right-4 z-50" 
       />
 
-      <main className="p-4 space-y-6 max-w-2xl mx-auto">
+      <div className="space-y-6">
         {/* Localisation */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground">{cooperative?.commune}, {cooperative?.region}</p>
@@ -171,10 +149,8 @@ const CooperativeDashboard: React.FC = () => {
         </section>
 
         <QuickGuide />
-      </main>
-
-      <UnifiedBottomNav items={navItems} />
-    </div>
+      </div>
+    </RoleLayout>
   );
 };
 
