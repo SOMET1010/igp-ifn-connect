@@ -7,6 +7,7 @@ import { useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { OrderStatus } from "../types/suppliers.types";
+import type { OrderRealtimePayload } from "@/shared/types";
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "En attente",
@@ -26,7 +27,7 @@ export function useOrdersRealtime({
   onStatusChange,
 }: UseOrdersRealtimeOptions) {
   const handleStatusChange = useCallback(
-    (payload: { new: { status: OrderStatus }; old: { status: OrderStatus } }) => {
+    (payload: { new: { status: OrderStatus }; old: { status: OrderStatus | undefined } }) => {
       const newStatus = payload.new.status;
       const oldStatus = payload.old.status;
 
@@ -64,7 +65,11 @@ export function useOrdersRealtime({
         },
         (payload) => {
           console.log("Order status changed:", payload);
-          handleStatusChange(payload as any);
+          const typedPayload = payload as unknown as OrderRealtimePayload;
+          handleStatusChange({
+            new: { status: typedPayload.new.status as OrderStatus },
+            old: { status: typedPayload.old.status as OrderStatus | undefined },
+          });
         }
       )
       .subscribe();

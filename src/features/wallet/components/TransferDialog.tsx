@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Send, User, CheckCircle2, Phone, Banknote } from "lucide-react";
 import { walletService } from "../services/walletService";
-import type { Beneficiary, TransferInput } from "../types/wallet.types";
+import type { TransferInput, TransferResponse } from "../types/wallet.types";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TransferDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onTransfer: (input: TransferInput) => Promise<{ success: boolean; data?: any; error?: string }>;
+  onTransfer: (input: TransferInput) => Promise<TransferResponse>;
   prefilledPhone?: string;
   prefilledName?: string;
   maxAmount: number;
@@ -36,7 +36,7 @@ export function TransferDialog({
   const [isSearching, setIsSearching] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<TransferResponse['data'] | null>(null);
 
   const resetForm = () => {
     setStep("input");

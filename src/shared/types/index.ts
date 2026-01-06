@@ -191,3 +191,6 @@ export interface SyncStatus {
 export * from './errors';
 export * from './web-apis';
 export * from './ui';
+export * from './realtime.types';
+export * from './auth.types';
+export * from './offline.types';
