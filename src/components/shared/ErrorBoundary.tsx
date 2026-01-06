@@ -2,6 +2,7 @@ import React, { Component, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { logger } from '@/infra/logger';
+import { getSentry } from '@/shared/types';
 
 interface Props {
   children: ReactNode;
@@ -35,8 +36,9 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ errorInfo });
 
     // Sentry integration (si configuré)
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    const sentry = getSentry();
+    if (sentry) {
+      sentry.captureException(error, {
         contexts: { react: { componentStack: errorInfo.componentStack } },
       });
     }

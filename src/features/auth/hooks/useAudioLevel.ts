@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { getAudioContextConstructor } from '@/shared/types';
 
 export type AudioStatus = 'silence' | 'weak' | 'ok';
 
@@ -118,7 +119,9 @@ export function useAudioLevel(options: UseAudioLevelOptions = {}): UseAudioLevel
     isCleanedUpRef.current = false;
     
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextConstructor();
+      if (!AudioContextClass) return;
+      const audioContext = new AudioContextClass();
       // Sur iOS/Safari, l'AudioContext peut démarrer "suspended"
       if (audioContext.state === 'suspended') {
         audioContext.resume().catch(() => {});

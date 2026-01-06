@@ -9,6 +9,7 @@
  */
 
 import { AudioCapabilities, MicrophonePermissionState, PREFERRED_MIME_TYPES } from './types';
+import { getAudioContextConstructor } from '@/shared/types';
 
 class AudioManagerClass {
   private static instance: AudioManagerClass | null = null;
@@ -147,9 +148,11 @@ class AudioManagerClass {
   /**
    * Obtenir ou créer un AudioContext
    */
-  getAudioContext(): AudioContext {
+  getAudioContext(): AudioContext | null {
     if (!this.audioContext || this.audioContext.state === 'closed') {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextConstructor();
+      if (!AudioContextClass) return null;
+      this.audioContext = new AudioContextClass();
     }
     
     // Reprendre si suspendu
