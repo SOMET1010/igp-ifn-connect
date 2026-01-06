@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Wheat, MapPin, Users, Award, UserCog, Store, LayoutDashboard } from 'lucide-react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
-import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
+import { EnhancedHeader } from '@/shared/ui/EnhancedHeader';
+import { PageHero } from '@/shared/ui/PageHero';
+import { FilterChips } from '@/shared/ui/FilterChips';
+import { UnifiedListCard } from '@/shared/ui/UnifiedListCard';
+import { UnifiedBottomNav, NavItem } from '@/shared/ui/UnifiedBottomNav';
+import { LoadingState, EmptyState } from '@/shared/ui/StateComponents';
+import { AnimatedList } from '@/shared/ui/AnimatedList';
+import { AnimatedListItem } from '@/shared/ui/AnimatedListItem';
+import { SearchInput } from '@/shared/ui/SearchInput';
 
 interface Cooperative {
   id: string;

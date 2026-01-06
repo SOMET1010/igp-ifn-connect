@@ -16,7 +16,7 @@ import {
   UserCog,
   Wheat
 } from 'lucide-react';
-import type { NavItem } from '@/components/shared/UnifiedBottomNav';
+import type { NavItem } from '@/shared/ui/UnifiedBottomNav';
 
 // Merchant navigation
 // Navigation marchand simplifiée - MAX 3 items pour UX inclusive

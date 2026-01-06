@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { AudioButton } from '@/components/shared/AudioButton';
-import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
+import { AudioButton } from '@/shared/ui/AudioButton';
+import { UnifiedActionCard } from '@/shared/ui/UnifiedActionCard';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 
   useCooperativeDashboard,

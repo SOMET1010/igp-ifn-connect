@@ -6,9 +6,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { LoadingState, ErrorState } from '@/components/shared/StateComponents';
+import { EnhancedHeader } from '@/shared/ui/EnhancedHeader';
+import { UnifiedBottomNav } from '@/shared/ui/UnifiedBottomNav';
+import { LoadingState, ErrorState } from '@/shared/ui/StateComponents';
 import { 
   Home, 
   Package, 
