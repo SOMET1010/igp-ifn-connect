@@ -37,10 +37,53 @@
   </head>
 
   <body>
-    <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link">
+    <!-- Skip to main content link for accessibility (hidden until app loads) -->
+    <a href="#main-content" class="skip-link" style="display:none">
       Aller au contenu principal
     </a>
+    
+    <!-- Static loader shown during React initialization -->
+    <div id="app-loader">
+      <div class="loader-content">
+        <div class="loader-icon">🏪</div>
+        <div class="loader-spinner"></div>
+        <p class="loader-text">PNAVIM-CI</p>
+      </div>
+    </div>
+    
+    <style>
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+      #app-loader.hidden { opacity: 0; pointer-events: none; }
+      .loader-content { text-align: center; }
+      .loader-icon { font-size: 64px; margin-bottom: 16px; }
+      .loader-spinner {
+        width: 40px; height: 40px;
+        margin: 0 auto 16px;
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .loader-text { 
+        color: white; 
+        font-family: 'Nunito', sans-serif; 
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 2px;
+      }
+    </style>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
