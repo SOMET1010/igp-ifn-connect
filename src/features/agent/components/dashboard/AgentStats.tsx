@@ -1,6 +1,6 @@
 import { Calendar, TrendingUp, Users, CheckCircle, Clock, Percent } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { StatCard } from "@/components/shared/StatCard";
+import { StatCard } from "@/shared/ui";
 import type { AgentDashboardStats } from "../../types/agent.types";
 import { cn } from "@/lib/utils";
 

@@ -7,16 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import OTPInput from "@/features/auth/components/OTPInput";
 import { Loader2, RefreshCw } from "lucide-react";
-import { PhoneInput } from "@/components/shared/PhoneInput";
+import { PhoneInput, InstitutionalHeader, InstitutionalFooter, LoginCard, AudioButton, BackgroundDecor } from "@/shared/ui";
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
-import { InstitutionalHeader } from "@/components/shared/InstitutionalHeader";
-import { InstitutionalFooter } from "@/components/shared/InstitutionalFooter";
-import { LoginCard } from "@/components/shared/LoginCard";
 import { supabase } from "@/integrations/supabase/client";
 import { authLogger } from "@/infra/logger";
 import { useRetryOperation } from "@/hooks/useRetryOperation";
-import { AudioButton } from "@/components/shared/AudioButton";
-import { BackgroundDecor } from "@/components/shared/BackgroundDecor";
 import { LoginRoleConfig, LoginStep } from "../types/login.types";
 
 interface GenericOtpLoginPageProps {

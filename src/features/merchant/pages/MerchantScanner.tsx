@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { UnifiedBottomNav, EnhancedHeader } from "@/shared/ui";
 import { merchantNavItems } from "@/config/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,7 @@ import {
   Wallet
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
+
 import { merchantLogger } from "@/infra/logger";
 
 

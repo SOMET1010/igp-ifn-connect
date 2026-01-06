@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Send, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StepProgress } from "@/components/shared/StepProgress";
+import { StepProgress } from "@/shared/ui";
 import { Step1Identity } from "@/features/agent/components/enrollment/Step1Identity";
 import { Step2Documents } from "@/features/agent/components/enrollment/Step2Documents";
 import { Step3Location } from "@/features/agent/components/enrollment/Step3Location";

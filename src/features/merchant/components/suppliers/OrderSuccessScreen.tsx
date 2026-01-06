@@ -6,7 +6,7 @@
 import { useEffect } from "react";
 import { CheckCircle, Package, Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Confetti } from "@/components/shared/Confetti";
+import { Confetti } from "@/shared/ui";
 import type { CartItem } from "../../types/suppliers.types";
 
 interface OrderSuccessScreenProps {

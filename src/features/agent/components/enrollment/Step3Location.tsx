@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GPSCapture } from "@/components/shared/GPSCapture";
+import { GPSCapture } from "@/shared/ui";
 import { MiniMap } from "@/features/agent/components/MiniMap";
 import { supabase } from "@/integrations/supabase/client";
 import type { EnrollmentData } from "@/features/agent";

@@ -2,11 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Play, Volume2, Phone, Heart, PiggyBank, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AudioButton } from "@/components/shared/AudioButton";
+import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
 import { CardLarge } from "@/shared/ui/ifn";
 import { toast } from "sonner";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
 import { merchantNavItems } from "@/config/navigation";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 

@@ -11,19 +11,19 @@ import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { useMascotImage } from "@/hooks/useMascotImage";
 import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
 import { merchantNavItems } from "@/config/navigation";
-import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
-import { UnifiedBottomNav } from "@/components/shared/UnifiedBottomNav";
+import { 
+  EnhancedHeader, 
+  UnifiedBottomNav, 
+  ErrorState, 
+  Confetti, 
+  ImmersiveBackground, 
+  TantieMascot, 
+  GlassCard, 
+  GiantActionButton, 
+  VoiceHeroButton 
+} from "@/shared/ui";
 import { MerchantDashboardSkeleton } from "@/features/merchant/components/MerchantDashboardSkeleton";
-import { ErrorState } from "@/components/shared/StateComponents";
-import { Confetti } from "@/components/shared/Confetti";
 import { OnlineStatusIndicator } from "@/features/merchant/components/dashboard";
-
-// Composants Afro-Futuristes
-import { ImmersiveBackground } from "@/components/shared/ImmersiveBackground";
-import { TantieMascot } from "@/components/shared/TantieMascot";
-import { GlassCard } from "@/components/shared/GlassCard";
-import { GiantActionButton } from "@/components/shared/GiantActionButton";
-import { VoiceHeroButton } from "@/components/shared/VoiceHeroButton";
 
 // Onboarding
 import { OnboardingFlow, useOnboarding } from "@/features/onboarding";

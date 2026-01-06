@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowRight, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AudioButton } from "@/components/shared/AudioButton";
-import { TantieMascot } from "@/components/shared/TantieMascot";
+import { AudioButton, TantieMascot } from "@/shared/ui";
 import { cn } from "@/lib/utils";
 
 interface OnboardingStep {

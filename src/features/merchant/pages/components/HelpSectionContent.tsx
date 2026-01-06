@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { Play, Volume2, Phone, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AudioButton } from "@/components/shared/AudioButton";
+import { AudioButton } from "@/shared/ui";
 import { CardLarge } from "@/shared/ui/ifn";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";

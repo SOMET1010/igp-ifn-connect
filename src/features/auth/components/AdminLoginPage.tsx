@@ -8,8 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { emailSchema, passwordSchema, getValidationError } from "@/lib/validationSchemas";
-import { AudioButton } from "@/components/shared/AudioButton";
-import { BackgroundDecor } from "@/components/shared/BackgroundDecor";
+import { AudioButton, BackgroundDecor } from "@/shared/ui";
 import { AdminLoginConfig } from "../types/login.types";
 
 interface AdminLoginPageProps {

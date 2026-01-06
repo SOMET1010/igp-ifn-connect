@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import type { EnrollmentData } from "@/features/agent";
-import { VoiceInput } from "@/components/shared/VoiceInput";
+import { VoiceInput } from "@/shared/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Category {
