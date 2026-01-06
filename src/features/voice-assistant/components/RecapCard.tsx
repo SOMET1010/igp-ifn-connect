@@ -5,7 +5,7 @@
 import { Check, X, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import type { RecapCardProps } from '../types/voice.types';
 
 export function RecapCard({ 

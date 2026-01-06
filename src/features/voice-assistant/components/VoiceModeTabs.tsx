@@ -3,7 +3,7 @@
  */
 
 import { ShoppingCart, Package, Layers } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import type { VoiceMode } from '../types/voice.types';
 
 interface VoiceModeTabsProps {

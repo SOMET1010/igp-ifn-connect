@@ -5,7 +5,7 @@
 
 import { useRef, useCallback } from 'react';
 import { Mic, MicOff, Loader2, WifiOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import type { BigMicButtonProps } from '../types/voice.types';
 
 const SIZE_CLASSES = {

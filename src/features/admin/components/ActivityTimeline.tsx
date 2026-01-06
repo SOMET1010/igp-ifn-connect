@@ -5,7 +5,7 @@ import {
   Building2, UserCheck, Banknote, FileText, Circle
 } from 'lucide-react';
 import { type UserActivity } from '@/features/admin';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface ActivityTimelineProps {
   activities: UserActivity[];

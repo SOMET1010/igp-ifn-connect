@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
 import { StatCard, UnifiedActionCard, AnimatedList, AnimatedListItem } from '@/shared/ui';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 // ============================================
 // TYPES

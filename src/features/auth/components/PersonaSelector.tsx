@@ -6,7 +6,7 @@
 import { motion } from 'framer-motion';
 import { Check, Volume2 } from 'lucide-react';
 import { PERSONAS, PersonaType } from '@/features/auth/config/personas';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface PersonaSelectorProps {
   selectedPersona: PersonaType;

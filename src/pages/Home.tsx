@@ -15,9 +15,8 @@ import {
 } from '@/features/public/components/pnavim';
 
 // Contexts & Hooks
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
-import { useTimeOfDay } from '@/hooks/useTimeOfDay';
+import { useLanguage } from '@/shared/contexts';
+import { useSensoryFeedback, useTimeOfDay } from '@/shared/hooks';
 
 // TTS (voix PNAVIM uniquement)
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';

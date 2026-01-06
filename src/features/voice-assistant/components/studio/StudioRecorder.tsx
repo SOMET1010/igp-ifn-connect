@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useRecorder, useAudioLevel, AudioManager } from '@/shared/audio';
 import { AudioLevelMeter } from '@/shared/ui';
 import { Mic, Square, Play, Pause, RotateCcw, Check, Loader2, Upload, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import {
   AlertDialog,
   AlertDialogAction,

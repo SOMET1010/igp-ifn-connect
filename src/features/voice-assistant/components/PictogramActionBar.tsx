@@ -4,7 +4,7 @@
  */
 
 import { Check, X, RotateCcw, HelpCircle, Undo2, Mic } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface PictogramActionBarProps {
   onConfirm: () => void;

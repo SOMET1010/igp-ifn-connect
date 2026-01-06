@@ -5,7 +5,7 @@
  */
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { Loader2 } from 'lucide-react';
 
 interface RequireAuthProps {

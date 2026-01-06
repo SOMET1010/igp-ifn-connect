@@ -14,7 +14,7 @@
 import React from 'react';
 import { Loader2, Mic, AlertCircle, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import type { AudioStatus } from '../hooks/useAudioLevel';
 
 // Types d'état de transcription

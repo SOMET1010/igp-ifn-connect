@@ -6,7 +6,7 @@
  */
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { Loader2, ShieldAlert, LogIn } from 'lucide-react';
 import type { AppRole } from '@/domain/rbac';
 import { getRedirectPath } from '@/domain/rbac';

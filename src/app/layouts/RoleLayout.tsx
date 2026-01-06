@@ -10,7 +10,7 @@
 import React from 'react';
 import { Home, Leaf, User, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { PageLayout, type BreadcrumbItem } from './PageLayout';
 import { type NavItem } from '@/shared/ui';
 import { Button } from '@/components/ui/button';

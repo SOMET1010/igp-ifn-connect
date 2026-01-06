@@ -5,7 +5,7 @@
 // RÈGLE: Maximum 3 cartes par écran
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { useSensoryFeedback } from '@/shared/hooks';
 
 type CardVariant = 'default' | 'elevated' | 'outlined' | 'success' | 'warning';

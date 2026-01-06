@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, ExternalLink, RefreshCw, Mic, MicOff, Wifi, WifiOff, Shield, ShieldOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface VoiceErrorDebuggerProps {
   error: string | null;

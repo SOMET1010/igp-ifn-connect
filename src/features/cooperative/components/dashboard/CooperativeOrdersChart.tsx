@@ -6,7 +6,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
 import { ClipboardList } from 'lucide-react';
 import type { DashboardStats } from '../../types/cooperative.types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface CooperativeOrdersChartProps {
   stats: DashboardStats;
