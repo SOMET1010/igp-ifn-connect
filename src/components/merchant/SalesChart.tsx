@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { DailySales } from '@/hooks/useMerchantDashboardData';
+import type { DailySales } from '@/features/merchant/hooks/useMerchantDashboardData';
 
 interface SalesChartProps {
   data?: DailySales[];

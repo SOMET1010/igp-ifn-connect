@@ -13,7 +13,7 @@ import { merchantNavItems } from "@/config/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/components/merchant/CalculatorKeypad";
 import { getCashierScript } from "@/shared/config/audio/cashierScripts";
-import { useMarketBackground } from "@/hooks/useMarketBackground";
+import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Banknote, QrCode, Mic } from "lucide-react";
 import {

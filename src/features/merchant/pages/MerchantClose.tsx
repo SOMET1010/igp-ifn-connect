@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EnhancedHeader } from "@/components/shared/EnhancedHeader";
 import { AudioButton } from "@/components/shared/AudioButton";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
-import { useMerchantDashboardData } from "@/hooks/useMerchantDashboardData";
+import { useMerchantDashboardData } from "@/features/merchant/hooks/useMerchantDashboardData";
 import { PnavimButton, PnavimCard, PnavimStat } from "@/components/pnavim";
 
 type CloseStep = "summary" | "confirm" | "success";

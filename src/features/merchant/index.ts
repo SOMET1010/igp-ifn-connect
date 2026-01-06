@@ -31,6 +31,10 @@ export { useMerchantSuppliers } from "./hooks/useMerchantSuppliers";
 export { useSupplierCart } from "./hooks/useSupplierCart";
 export { useMerchantCredits } from "./hooks/useMerchantCredits";
 export { useTransactions } from "./hooks/useTransactions";
+export { useMerchantDashboardData } from "./hooks/useMerchantDashboardData";
+export type { DailySales, MerchantDashboardData } from "./hooks/useMerchantDashboardData";
+export { useMerchantNotifications } from "./hooks/useMerchantNotifications";
+export { useMarketBackground } from "./hooks/useMarketBackground";
 
 // Services
 export { transactionService } from "./services/transactionService";

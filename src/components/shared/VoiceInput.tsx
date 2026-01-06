@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageCode } from "@/lib/translations";
 import logger from "@/infra/logger";
-import { useAudioLevel } from "@/hooks/useAudioLevel";
+import { useAudioLevel } from "@/shared/audio";
 import { AudioLevelMeter } from "@/components/shared/AudioLevelMeter";
 
 interface VoiceInputProps {
@@ -89,7 +89,7 @@ export function VoiceInput({
   const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { audioLevel, peakLevel, isClipping, startAnalysis, stopAnalysis } = useAudioLevel();
+  const { level: audioLevel, smoothedLevel: peakLevel, isClipping, startAnalysis, stopAnalysis } = useAudioLevel();
 
   const useLafricamobile = LAFRICAMOBILE_STT_LANGUAGES.includes(language);
   

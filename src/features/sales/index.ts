@@ -8,6 +8,7 @@ export { QuickSaleScreen } from './components/QuickSaleScreen';
 
 // Hooks
 export { useQuickSale } from './hooks/useQuickSale';
+export { useFirstSaleCelebration } from './hooks/useFirstSaleCelebration';
 
 // Services
 export { 
