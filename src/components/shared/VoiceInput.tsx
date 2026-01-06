@@ -8,6 +8,11 @@ import { LanguageCode } from "@/lib/translations";
 import logger from "@/infra/logger";
 import { useAudioLevel } from "@/shared/audio";
 import { AudioLevelMeter } from "@/components/shared/AudioLevelMeter";
+import { 
+  getSpeechRecognitionConstructor, 
+  type SpeechRecognitionEvent,
+  type SpeechRecognitionErrorEvent 
+} from '@/shared/types';
 
 interface VoiceInputProps {
   onResult: (text: string) => void;
@@ -366,8 +371,11 @@ export function VoiceInput({
     setErrorMessage(null);
     
     try {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      const recognition = new SpeechRecognition();
+      const SpeechRecognitionClass = getSpeechRecognitionConstructor();
+      if (!SpeechRecognitionClass) {
+        throw new Error('Speech recognition not supported');
+      }
+      const recognition = new SpeechRecognitionClass();
       
       recognition.lang = 'fr-FR';
       recognition.continuous = false;
@@ -379,7 +387,7 @@ export function VoiceInput({
         setIsListening(true);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         const confidence = event.results[0][0].confidence;
         
@@ -397,7 +405,7 @@ export function VoiceInput({
         });
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         logger.error('Speech recognition error', event.error, { module: 'VoiceInput' });
         setIsListening(false);
         

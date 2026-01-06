@@ -3,6 +3,7 @@
 // ============================================
 
 import { useCallback, useRef } from 'react';
+import { getAudioContextConstructor } from '@/shared/types';
 
 export type FeedbackType = 'tap' | 'success' | 'error' | 'money' | 'light';
 
@@ -35,7 +36,9 @@ export function useSensoryFeedback() {
   // Obtenir ou créer l'AudioContext
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = getAudioContextConstructor();
+      if (!AudioContextClass) return null;
+      audioContextRef.current = new AudioContextClass();
     }
     return audioContextRef.current;
   }, []);
@@ -44,6 +47,7 @@ export function useSensoryFeedback() {
   const playSound = useCallback((type: FeedbackType) => {
     try {
       const ctx = getAudioContext();
+      if (!ctx) return;
       if (ctx.state === 'suspended') {
         ctx.resume();
       }

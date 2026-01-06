@@ -3,7 +3,7 @@
  * Remplace les console.* dispersés dans l'application
  */
 
-// ============================================
+import { getSentry } from '@/shared/types';
 // TYPES
 // ============================================
 
@@ -262,8 +262,9 @@ export const logger = {
     storeLog(createLogEntry('fatal', message, context, error));
     
     // Sentry integration si disponible
-    if (typeof window !== 'undefined' && (window as any).Sentry && error) {
-      (window as any).Sentry.captureException(error, {
+    const sentry = getSentry();
+    if (sentry && error) {
+      sentry.captureException(error, {
         level: 'fatal',
         extra: context,
       });

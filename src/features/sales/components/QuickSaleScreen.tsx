@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useQuickSale } from '../hooks/useQuickSale';
+import { getSpeechRecognitionConstructor, type SpeechRecognitionEvent } from '@/shared/types';
 
 interface QuickSaleScreenProps {
   onClose?: () => void;
@@ -56,14 +57,14 @@ export function QuickSaleScreen({ onClose }: QuickSaleScreenProps) {
   }, [state.step, state.error, speak, getConfirmationText, getSuccessText]);
 
   const handleStartRecording = useCallback(() => {
-    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognitionClass = getSpeechRecognitionConstructor();
     if (!SpeechRecognitionClass) {
       toast.error('Reconnaissance vocale non supportée');
       return;
     }
     const recognition = new SpeechRecognitionClass();
     recognition.lang = 'fr-FR';
-    recognition.onresult = (e: any) => {
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
       const transcript = e.results[0][0].transcript;
       processVoiceInput(transcript);
       setIsRecording(false);

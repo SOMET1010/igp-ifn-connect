@@ -11,6 +11,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAudioLevel } from './useAudioLevel';
+import { getAudioContextConstructor } from '@/shared/types';
 
 // Regex pour extraire les numéros ivoiriens
 const PHONE_REGEX = /(?:\+?225\s?)?(?:0?[1579])\s?\d{2}\s?\d{2}\s?\d{2}\s?\d{2}/g;
@@ -308,9 +309,9 @@ export function useVoiceTranscriptionV2({
   
   const setupAudioSending = (stream: MediaStream, ws: WebSocket) => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
-        sampleRate: 16000,
-      });
+      const AudioContextClass = getAudioContextConstructor();
+      if (!AudioContextClass) return;
+      const audioContext = new AudioContextClass();
       audioContextRef.current = audioContext;
       
       const source = audioContext.createMediaStreamSource(stream);

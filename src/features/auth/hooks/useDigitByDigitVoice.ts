@@ -1,7 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { 
+  getSpeechRecognitionConstructor, 
+  type SpeechRecognition, 
+  type SpeechRecognitionEvent,
+  type SpeechRecognitionErrorEvent 
+} from '@/shared/types';
 
 /**
- * useDigitByDigitVoice - Écoute vocale chiffre par chiffre
  * 
  * Au lieu de capturer 10 chiffres d'un coup (qui échoue souvent),
  * on écoute UN chiffre à la fois avec confirmation vocale.
@@ -97,11 +102,7 @@ function extractSingleDigit(text: string): string | null {
   return null;
 }
 
-// Obtenir le SpeechRecognition natif
-function getSpeechRecognition(): any {
-  if (typeof window === 'undefined') return null;
-  return (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null;
-}
+// La fonction getSpeechRecognitionConstructor est importée depuis @/shared/types
 
 interface UseDigitByDigitVoiceOptions {
   onDigitDetected: (digit: string) => void;
@@ -122,7 +123,7 @@ export function useDigitByDigitVoice({
   const [lastHeard, setLastHeard] = useState<string>('');
   
   // Refs
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -175,7 +176,7 @@ export function useDigitByDigitVoice({
   // Démarrer l'écoute pour UN chiffre
   const startListening = useCallback(async (): Promise<boolean> => {
     // Vérifier le support
-    const SpeechRecognitionClass = getSpeechRecognition();
+    const SpeechRecognitionClass = getSpeechRecognitionConstructor();
     if (!SpeechRecognitionClass) {
       const msg = 'Reconnaissance vocale non supportée';
       setErrorMessage(msg);
@@ -252,7 +253,7 @@ export function useDigitByDigitVoice({
       let lastDetectionTime = 0;
       const MIN_DETECTION_INTERVAL = 800; // Minimum 800ms entre deux détections
       
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const result = event.results[event.results.length - 1];
         const transcript = result?.[0]?.transcript?.trim?.() ?? '';
 
@@ -303,7 +304,7 @@ export function useDigitByDigitVoice({
         try { recognition.stop(); } catch { /* ignore */ }
       };
       
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         if (event.error === 'aborted') return; // Ignoré
 
         if (event.error === 'no-speech') {

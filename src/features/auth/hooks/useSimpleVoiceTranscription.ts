@@ -6,6 +6,12 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { 
+  getSpeechRecognitionConstructor, 
+  type SpeechRecognition, 
+  type SpeechRecognitionEvent,
+  type SpeechRecognitionErrorEvent 
+} from '@/shared/types';
 
 // === TYPES ===
 export type VoiceState = 'idle' | 'connecting' | 'listening' | 'processing' | 'error';
@@ -55,11 +61,6 @@ function extractPhoneNumber(text: string): string | null {
   return digitsOnly.length > 0 ? digitsOnly : null;
 }
 
-function getSpeechRecognition(): (new () => any) | null {
-  if (typeof window === 'undefined') return null;
-  return (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition || null;
-}
-
 // === INTERFACE ===
 interface UseSimpleVoiceTranscriptionOptions {
   onPhoneDetected: (phone: string) => void;
@@ -82,7 +83,7 @@ export function useSimpleVoiceTranscription({
   const [isReceivingAudio, setIsReceivingAudio] = useState(false);
 
   // === REFS (ordre fixe - 10 refs) ===
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -207,7 +208,7 @@ export function useSimpleVoiceTranscription({
     }
 
     // Check browser support
-    const SpeechRecognitionClass = getSpeechRecognition();
+    const SpeechRecognitionClass = getSpeechRecognitionConstructor();
     if (!SpeechRecognitionClass) {
       notifyError("Ton navigateur ne supporte pas la reconnaissance vocale.");
       wantsToListenRef.current = false;
@@ -282,7 +283,7 @@ export function useSimpleVoiceTranscription({
         console.log('[SimpleSTT] 🗣️ Speech detected!');
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
         let interimTranscript = '';
 
@@ -299,7 +300,7 @@ export function useSimpleVoiceTranscription({
         handleResult(text);
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.warn('[SimpleSTT] ⚠️ Error:', event.error);
 
         if (event.error === 'aborted') {
@@ -379,7 +380,7 @@ export function useSimpleVoiceTranscription({
 
       return true;
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('[SimpleSTT] ❌ Start failed:', err);
 
       let msg = 'Erreur vocale';

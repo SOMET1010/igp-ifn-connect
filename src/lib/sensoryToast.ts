@@ -3,6 +3,7 @@
 // ============================================
 
 import { toast as sonnerToast, ExternalToast } from "sonner";
+import { getAudioContextConstructor } from "@/shared/types";
 
 // Patterns de vibration
 const vibrationPatterns = {
@@ -23,9 +24,11 @@ const audioConfig = {
 // Créer un AudioContext unique
 let audioContext: AudioContext | null = null;
 
-function getAudioContext(): AudioContext {
+function getAudioContext(): AudioContext | null {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioContextClass = getAudioContextConstructor();
+    if (!AudioContextClass) return null;
+    audioContext = new AudioContextClass();
   }
   return audioContext;
 }
@@ -34,6 +37,7 @@ function getAudioContext(): AudioContext {
 function playFeedbackSound(type: 'success' | 'error' | 'info' | 'warning') {
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
     if (ctx.state === 'suspended') {
       ctx.resume();
     }

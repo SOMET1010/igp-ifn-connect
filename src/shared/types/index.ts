@@ -189,4 +189,5 @@ export interface SyncStatus {
 // ============================================
 
 export * from './errors';
+export * from './web-apis';
 export * from './ui';
