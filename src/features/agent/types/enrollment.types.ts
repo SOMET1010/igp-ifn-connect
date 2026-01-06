@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { phoneLocalSchema } from "@/lib/validationSchemas";
+import { phoneLocalSchema } from "@/shared/lib";
 
 // === Types de documents d'identité ===
 export type IdDocType = 'cni' | 'attestation' | 'passport' | 'autre' | '';

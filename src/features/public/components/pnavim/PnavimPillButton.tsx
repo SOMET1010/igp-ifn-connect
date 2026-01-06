@@ -1,7 +1,6 @@
 import React from "react";
-import { cn } from "@/lib/utils";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { cn } from "@/shared/lib";
+import { useSensoryFeedback, useReducedMotion } from "@/shared/hooks";
 
 interface PnavimPillButtonProps {
   children: React.ReactNode;

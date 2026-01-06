@@ -1,4 +1,6 @@
-// Barrel de compatibilité - réexporte depuis @/shared/hooks
-// TODO: Migrer tous les imports vers @/shared/hooks et supprimer ce fichier
+/**
+ * Barrel de compatibilité - réexporte depuis @/shared/hooks
+ * @deprecated Utiliser import depuis '@/shared/hooks' directement
+ */
 
 export * from '@/shared/hooks';

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { QuantitySelector } from "./QuantitySelector";
 import { MapPin, Leaf, ShoppingCart, Check, Package } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { formatDistance } from "@/lib/geoUtils";
+import { cn } from "@/shared/lib";
+import { formatDistance } from "@/shared/lib";
 import type { Product, ProductOffer } from "./ProductGrid";
 
 // Product emoji mapping

@@ -1,8 +1,8 @@
 import { Banknote, Smartphone, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
+import { useLanguage } from "@/shared/contexts";
+import { useSensoryFeedback } from "@/shared/hooks";
 import type { PaymentMethod } from "../../types/transaction.types";
 import { formatCurrency } from "../../utils/cashierCalculations";
 

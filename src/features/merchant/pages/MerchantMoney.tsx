@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Send, Wallet, FileText, History, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useAuth } from "@/shared/contexts";
+import { useLanguage } from "@/shared/contexts";
+import { useOnlineStatus } from "@/shared/hooks";
 import { supabase } from "@/integrations/supabase/client";
 import { AudioButton, EnhancedHeader, UnifiedBottomNav, LoadingState, EmptyState } from "@/shared/ui";
 import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/shared/ui/ifn";

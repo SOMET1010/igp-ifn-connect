@@ -1,14 +1,12 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ChevronRight } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/shared/contexts";
+import { useLanguage } from "@/shared/contexts";
 import { useMerchantDashboardData } from "@/features/merchant/hooks/useMerchantDashboardData";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useOnlineStatus, useSensoryFeedback, useMascotImage } from "@/shared/hooks";
 import { useFirstSaleCelebration } from "@/features/sales";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
-import { useMascotImage } from "@/hooks/useMascotImage";
 import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
 import { merchantNavItems } from "@/config/navigation";
 import { 
