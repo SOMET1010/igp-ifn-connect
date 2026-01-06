@@ -1,10 +1,10 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
-import { StatCard } from '@/components/shared/StatCard';
-import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { StatCard } from '@/shared/ui/StatCard';
+import { UnifiedActionCard } from '@/shared/ui/UnifiedActionCard';
+import { AnimatedList } from '@/shared/ui/AnimatedList';
+import { AnimatedListItem } from '@/shared/ui/AnimatedListItem';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 

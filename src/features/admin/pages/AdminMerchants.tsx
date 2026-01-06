@@ -13,16 +13,16 @@ import {
   Store,
   Calendar
 } from 'lucide-react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
+import { EnhancedHeader } from '@/shared/ui/EnhancedHeader';
+import { UnifiedBottomNav } from '@/shared/ui/UnifiedBottomNav';
+import { UnifiedListCard } from '@/shared/ui/UnifiedListCard';
+import { PageHero } from '@/shared/ui/PageHero';
+import { FilterChips } from '@/shared/ui/FilterChips';
+import { AnimatedList } from '@/shared/ui/AnimatedList';
+import { AnimatedListItem } from '@/shared/ui/AnimatedListItem';
+import { SearchInput } from '@/shared/ui/SearchInput';
 import { adminNavItems } from '@/config/navigation';
-import type { StatusType } from '@/components/shared/StatusBadge';
+import type { StatusType } from '@/shared/ui/StatusBadge';
 
 interface Merchant {
   id: string;
