@@ -22,3 +22,55 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(),
+};
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
+// Mock sessionStorage
+Object.defineProperty(window, 'sessionStorage', {
+  value: localStorageMock,
+  writable: true,
+});
+
+// Mock speechSynthesis (pour les tests TTS)
+Object.defineProperty(window, 'speechSynthesis', {
+  value: {
+    speak: vi.fn(),
+    cancel: vi.fn(),
+    pause: vi.fn(),
+    resume: vi.fn(),
+    getVoices: vi.fn().mockReturnValue([]),
+    speaking: false,
+    paused: false,
+    pending: false,
+  },
+  writable: true,
+});
+
+// Mock IntersectionObserver
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+  root: null,
+  rootMargin: '',
+  thresholds: [],
+}));
+
+// Mock scrollTo
+window.scrollTo = vi.fn();
+
+// Suppress console errors/warnings in tests (optional, can be removed for debugging)
+// vi.spyOn(console, 'error').mockImplementation(() => {});
+// vi.spyOn(console, 'warn').mockImplementation(() => {});
