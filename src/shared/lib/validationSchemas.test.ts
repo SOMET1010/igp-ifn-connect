@@ -6,7 +6,7 @@ import {
   normalizePhoneCI,
   formatPhoneCI,
   isValidCIPhonePrefix,
-} from '@/shared/lib/validationSchemas';
+} from './validationSchemas';
 
 // ============================================
 // Tests phoneLocalSchema (10 chiffres ivoiriens)
