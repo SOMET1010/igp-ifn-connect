@@ -7,7 +7,7 @@
 // TYPES
 // ============================================
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
 export interface LogContext {
   module?: string;
@@ -16,7 +16,7 @@ export interface LogContext {
   [key: string]: unknown;
 }
 
-interface LogEntry {
+export interface LogEntry {
   level: LogLevel;
   message: string;
   context?: LogContext;
@@ -33,6 +33,7 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   info: 1,
   warn: 2,
   error: 3,
+  fatal: 4,
 };
 
 // En production, on ne log que warn et error
@@ -218,11 +219,55 @@ export const logger = {
   },
 
   /**
-   * Exporte les logs pour diagnostic
+   * Exporte les logs pour diagnostic avec metadata
    */
   exportLogs(): string {
-    const logs = logger.getStoredLogs();
-    return JSON.stringify(logs, null, 2);
+    const logs = this.getStoredLogs();
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+      appVersion: typeof import.meta !== 'undefined' ? import.meta.env.VITE_APP_VERSION || 'dev' : 'unknown',
+      environment: typeof import.meta !== 'undefined' ? import.meta.env.MODE : 'unknown',
+      logsCount: logs.length,
+      logs,
+    };
+    return JSON.stringify(exportData, null, 2);
+  },
+
+  /**
+   * Télécharge les logs en fichier JSON
+   */
+  downloadLogs(): void {
+    const data = this.exportLogs();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pnavim-logs-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
+  /**
+   * Log fatal - erreurs critiques non récupérables
+   */
+  fatal(message: string, error?: unknown, context?: LogContext): void {
+    const prefix = formatPrefix('fatal', context?.module);
+    const contextStr = formatContext(context);
+    
+    console.error(`🔴 ${prefix} ${message}${contextStr}`, error);
+    
+    storeLog(createLogEntry('fatal', message, context, error));
+    
+    // Sentry integration si disponible
+    if (typeof window !== 'undefined' && (window as any).Sentry && error) {
+      (window as any).Sentry.captureException(error, {
+        level: 'fatal',
+        extra: context,
+      });
+    }
   },
 };
 
