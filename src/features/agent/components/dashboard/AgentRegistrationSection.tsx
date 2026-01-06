@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/shared/hooks";
 import { useAgentRequest } from "../../hooks/useAgentRequest";
 import { AgentRegistrationForm } from "@/features/agent/components/AgentRegistrationForm";
 import { AgentRequestStatus } from "@/features/agent/components/AgentRequestStatus";

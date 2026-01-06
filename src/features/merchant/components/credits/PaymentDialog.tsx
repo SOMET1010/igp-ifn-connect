@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { paymentSchema, type CustomerCredit } from '../../types/credits.types';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks';
 
 interface PaymentDialogProps {
   credit: CustomerCredit | null;

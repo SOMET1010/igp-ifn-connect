@@ -2,7 +2,7 @@ import { WifiOff, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useOnlineStatus } from "@/shared/hooks";
 
 const OfflinePage = () => {
   const navigate = useNavigate();

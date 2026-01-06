@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRetryOperation } from "@/hooks/useRetryOperation";
+import { useRetryOperation } from "@/shared/hooks";
 import { merchantLogger } from "@/infra/logger";
 import { toast } from "sonner";
 import { transactionService } from "../services/transactionService";

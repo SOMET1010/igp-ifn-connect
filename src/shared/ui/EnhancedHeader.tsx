@@ -6,7 +6,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { NotificationDropdown } from './NotificationDropdown';
 import { LanguageToggle } from './LanguageToggle';
 import { NotificationToggle } from './NotificationToggle';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { useSensoryFeedback } from '@/shared/hooks';
 import logoAnsut from '@/assets/logo-ansut.png';
 import logoDge from '@/assets/logo-dge.png';
 

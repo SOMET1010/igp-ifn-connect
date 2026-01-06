@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDemoMode } from '@/hooks/useDemoMode';
+import { useDemoMode } from '@/shared/hooks';
 import type { Database } from '@/integrations/supabase/types';
 import { Loader2, User, LogOut, LogIn, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';

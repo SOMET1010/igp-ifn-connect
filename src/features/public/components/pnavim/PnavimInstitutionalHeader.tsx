@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Volume2, VolumeX, User, Minus, Plus } from 'lucide-react';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { useSensoryFeedback } from '@/shared/hooks';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageCode } from '@/lib/translations';
 

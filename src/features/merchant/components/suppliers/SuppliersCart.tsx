@@ -4,7 +4,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from "lucide-react";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
+import { useSensoryFeedback } from "@/shared/hooks";
 import type { CartItem } from "../../types/suppliers.types";
 
 interface SuppliersCartProps {

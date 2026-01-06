@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/shared/hooks";
 import { useAuth } from "@/contexts/AuthContext";
 import OTPInput from "@/features/auth/components/OTPInput";
 import { Loader2, RefreshCw } from "lucide-react";
@@ -11,7 +11,7 @@ import { PhoneInput, InstitutionalHeader, InstitutionalFooter, LoginCard, AudioB
 import { phoneSchema, fullNameSchema, otpSchema, getValidationError } from "@/lib/validationSchemas";
 import { supabase } from "@/integrations/supabase/client";
 import { authLogger } from "@/infra/logger";
-import { useRetryOperation } from "@/hooks/useRetryOperation";
+import { useRetryOperation } from "@/shared/hooks";
 import { LoginRoleConfig, LoginStep } from "../types/login.types";
 
 interface GenericOtpLoginPageProps {

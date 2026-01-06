@@ -1,7 +1,7 @@
 import { Banknote, Smartphone, Wifi, RefreshCw, Mic, Ear, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSensoryFeedback } from "@/hooks/useSensoryFeedback";
+import { useSensoryFeedback } from "@/shared/hooks";
 import { CashDenominationPad } from "@/features/merchant/components/CashDenominationPad";
 import { CalculatorKeypad } from "@/features/merchant/components/CalculatorKeypad";
 import { ProductSelector, type SelectedProduct as ProductSelectorProduct } from "@/features/merchant/components/ProductSelector";
