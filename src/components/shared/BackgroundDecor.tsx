@@ -63,5 +63,3 @@ export const BackgroundDecor: React.FC<BackgroundDecorProps> = ({
     </div>
   );
 };
-
-export default BackgroundDecor;

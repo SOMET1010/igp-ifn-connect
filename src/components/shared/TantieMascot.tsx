@@ -102,5 +102,3 @@ export const TantieMascot: React.FC<TantieMascotProps> = ({
     </div>
   );
 };
-
-export default TantieMascot;

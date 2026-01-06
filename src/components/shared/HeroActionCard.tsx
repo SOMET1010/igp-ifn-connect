@@ -104,5 +104,3 @@ export const HeroActionCard: React.FC<HeroActionCardProps> = ({
     </button>
   );
 };
-
-export default HeroActionCard;

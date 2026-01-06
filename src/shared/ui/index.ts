@@ -19,7 +19,7 @@ export { ContextualHelp } from '@/components/shared/ContextualHelp';
 export { CurrencyCalculator } from '@/components/shared/CurrencyCalculator';
 export { DemoBanner } from '@/components/shared/DemoBanner';
 export { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-export { default as ErrorBoundary } from '@/components/shared/ErrorBoundary';
+export { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 export { FilterChips, type FilterOption } from '@/components/shared/FilterChips';
 export { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';
 export { GPSCapture } from '@/components/shared/GPSCapture';

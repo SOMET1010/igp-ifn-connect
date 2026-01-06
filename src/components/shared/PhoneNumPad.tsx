@@ -185,5 +185,3 @@ export function PhoneNumPad({
     </div>
   );
 }
-
-export default PhoneNumPad;

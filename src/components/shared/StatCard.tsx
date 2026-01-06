@@ -161,5 +161,3 @@ export const StatCard: React.FC<StatCardProps> = ({
     </Card>
   );
 };
-
-export default StatCard;

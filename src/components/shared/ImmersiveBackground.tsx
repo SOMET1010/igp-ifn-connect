@@ -192,5 +192,3 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
     </div>
   );
 };
-
-export default ImmersiveBackground;

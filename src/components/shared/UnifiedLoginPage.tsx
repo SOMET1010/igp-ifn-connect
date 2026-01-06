@@ -150,5 +150,3 @@ export function UnifiedLoginPage({
     </div>
   );
 }
-
-export default UnifiedLoginPage;

@@ -53,5 +53,3 @@ export const AnimatedList = ({
     </motion.div>
   );
 };
-
-export default AnimatedList;

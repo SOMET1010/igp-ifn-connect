@@ -105,5 +105,3 @@ export function SimpleLoginPage({
     </div>
   );
 }
-
-export default SimpleLoginPage;

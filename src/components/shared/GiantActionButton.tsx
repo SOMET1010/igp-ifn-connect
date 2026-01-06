@@ -76,5 +76,3 @@ export const GiantActionButton: React.FC<GiantActionButtonProps> = ({
     </motion.button>
   );
 };
-
-export default GiantActionButton;

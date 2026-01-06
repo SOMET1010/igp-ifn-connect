@@ -88,5 +88,3 @@ export function SafeCard({
     </Card>
   );
 }
-
-export default SafeCard;
