@@ -1,8 +1,7 @@
 import { cn } from "@/lib/utils";
 import { forwardRef, useState, MouseEvent } from "react";
 import { motion, HTMLMotionProps } from "framer-motion";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useButtonFeedback } from "@/hooks/useButtonFeedback";
+import { useReducedMotion, useButtonFeedback } from "@/shared/hooks";
 
 interface RippleType {
   id: number;

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
+import { useSensoryFeedback } from '@/shared/hooks';
 
 type CardVariant = 'default' | 'elevated' | 'outlined' | 'success' | 'warning';
 type CardPadding = 'none' | 'sm' | 'md' | 'lg';

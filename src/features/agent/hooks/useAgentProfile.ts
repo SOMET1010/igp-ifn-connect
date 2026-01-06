@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { agentProfileService } from '../services/profileService';
 import type { AgentProfileData, AgentProfileEditInput } from '../types/profile.types';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks';
 import { agentLogger } from '@/infra/logger';
 
 export function useAgentProfile() {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/shared/hooks";
 import { promotionsService } from "../services/promotionsService";
 import type { Promotion, PromotionFilter, NewPromotionInput } from "../types/promotions.types";
 import { isPromotionExpired } from "../types/promotions.types";

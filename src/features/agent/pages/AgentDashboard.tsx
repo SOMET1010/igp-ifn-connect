@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { useOfflineSync } from '@/shared/hooks';
 import { AudioButton, UnifiedActionCard } from '@/shared/ui';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 

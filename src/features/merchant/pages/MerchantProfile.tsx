@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LANGUAGES } from "@/lib/translations";
 import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { usePushNotifications } from "@/shared/hooks";
 import { merchantNavItems } from "@/config/navigation";
 import { useMerchantProfile } from "@/features/merchant/hooks/useMerchantProfile";
 import { ProfileEditForm } from "@/features/merchant/components/profile";

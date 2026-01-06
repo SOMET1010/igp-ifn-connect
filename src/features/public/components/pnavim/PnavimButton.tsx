@@ -7,8 +7,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useSensoryFeedback, useReducedMotion } from '@/shared/hooks';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'; // xl = Giant button (remplace GiantActionButton)

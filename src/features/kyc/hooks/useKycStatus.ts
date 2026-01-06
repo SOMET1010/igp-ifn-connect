@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDemoMode } from '@/hooks/useDemoMode';
+import { useDemoMode } from '@/shared/hooks';
 import type { KycLevel, KycStatus, KycRequest, KYC_LEVELS_CONFIG } from '../types/kyc.types';
 
 interface UseKycStatusReturn {

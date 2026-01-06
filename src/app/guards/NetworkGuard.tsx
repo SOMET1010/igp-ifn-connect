@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState, useCallback } from "react";
 import { WifiOff, Wifi, AlertTriangle, RefreshCw } from "lucide-react";
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { useOnlineStatus } from "@/shared/hooks";
 import { cn } from "@/lib/utils";
 
 type NetworkState = "online" | "offline" | "unstable" | "syncing";

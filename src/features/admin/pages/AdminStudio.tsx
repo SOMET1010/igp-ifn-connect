@@ -9,7 +9,7 @@ import { StudioSessionProgress } from '@/features/voice-assistant/components/stu
 import { StudioSessionComplete } from '@/features/voice-assistant/components/studio/StudioSessionComplete';
 import { translations, LANGUAGES, LanguageCode } from '@/lib/translations';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks';
 import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle } from 'lucide-react';
 import { adminLogger } from '@/infra/logger';
 import { UnifiedBottomNav } from '@/shared/ui';

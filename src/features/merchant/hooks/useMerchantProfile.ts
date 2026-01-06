@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { profileService } from "../services/profileService";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/shared/hooks";
 import type { MerchantProfileData, ProfileEditInput } from "../types/profile.types";
 
 export function useMerchantProfile() {
