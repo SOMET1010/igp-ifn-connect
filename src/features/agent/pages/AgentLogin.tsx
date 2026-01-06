@@ -1,5 +1,5 @@
 import React from 'react';
-import { SimpleLoginPage } from '@/components/shared/SimpleLoginPage';
+import { SimpleLoginPage } from '@/shared/ui';
 import { Link } from 'react-router-dom';
 
 /**

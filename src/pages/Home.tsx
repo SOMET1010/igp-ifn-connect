@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 
 // Components
-import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
+import { ImmersiveBackground, OnboardingTutorial } from '@/shared/ui';
 import { 
   PnavimHeroCard,
   PnavimPillButton, 
@@ -13,7 +13,6 @@ import {
   PnavimHelpButton,
   PnavimVoiceFab,
 } from '@/features/public/components/pnavim';
-import { OnboardingTutorial } from '@/components/shared/OnboardingTutorial';
 
 // Contexts & Hooks
 import { useLanguage } from '@/contexts/LanguageContext';

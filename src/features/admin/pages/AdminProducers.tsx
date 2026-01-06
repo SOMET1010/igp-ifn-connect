@@ -20,15 +20,18 @@ import {
   Shield,
   Users
 } from 'lucide-react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
+import {
+  EnhancedHeader,
+  PageHero,
+  FilterChips,
+  UnifiedListCard,
+  UnifiedBottomNav,
+  LoadingState,
+  EmptyState,
+  AnimatedList,
+  AnimatedListItem,
+  SearchInput,
+} from '@/shared/ui';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {

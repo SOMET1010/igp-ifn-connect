@@ -6,7 +6,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateComponents';
+import { LoadingState, ErrorState, EmptyState } from '@/shared/ui';
 
 describe('StateComponents', () => {
   

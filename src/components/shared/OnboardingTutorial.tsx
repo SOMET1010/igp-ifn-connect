@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft, Mic, Volume2, Calculator, Shield, HelpCircle } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Volume2, Shield, HelpCircle, Mic, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTts } from '@/shared/hooks/useTts';
 
@@ -56,11 +56,9 @@ interface OnboardingTutorialProps {
   onComplete?: () => void;
 }
 
-export const OnboardingTutorial: React.FC<OnboardingTutorialProps> = ({
-  isOpen,
-  onClose,
-  onComplete
-}) => {
+// Utilisation de forwardRef pour compatibilité avec AnimatePresence et parents
+export const OnboardingTutorial = forwardRef<HTMLDivElement, OnboardingTutorialProps>(
+  function OnboardingTutorial({ isOpen, onClose, onComplete }, ref) {
   const [currentStep, setCurrentStep] = useState(0);
   const { speak, isSpeaking, stop } = useTts();
 
@@ -202,4 +200,4 @@ export const OnboardingTutorial: React.FC<OnboardingTutorialProps> = ({
       </motion.div>
     </AnimatePresence>
   );
-};
+});

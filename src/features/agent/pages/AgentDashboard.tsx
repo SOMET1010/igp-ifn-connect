@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
-import { AudioButton } from '@/components/shared/AudioButton';
-import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
+import { AudioButton, UnifiedActionCard } from '@/shared/ui';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
 import { 
   useAgentDashboard,

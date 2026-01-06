@@ -12,9 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, Edit2, MapPin, Save, X } from 'lucide-react';
-import { GPSCapture } from '@/components/shared/GPSCapture';
+import { GPSCapture, PhoneInput } from '@/shared/ui';
 import { MiniMap } from '@/features/agent/components/MiniMap';
-import { PhoneInput } from '@/components/shared/PhoneInput';
 import { REGIONS_CI, type CooperativeProfileFormData } from '../../types/profile.types';
 
 interface CooperativeProfileEditFormProps {

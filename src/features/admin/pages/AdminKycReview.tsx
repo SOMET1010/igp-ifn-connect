@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { GlassCard } from '@/components/shared/GlassCard';
+import { GlassCard } from '@/shared/ui';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,

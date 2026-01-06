@@ -13,7 +13,7 @@ import {
 import { Plus } from 'lucide-react';
 import { newCreditSchema, type NewCreditInput } from '../../types/credits.types';
 import { useToast } from '@/hooks/use-toast';
-import { PhoneInput } from '@/components/shared/PhoneInput';
+import { PhoneInput } from '@/shared/ui';
 
 interface AddCreditDialogProps {
   onSubmit: (input: NewCreditInput) => Promise<boolean>;

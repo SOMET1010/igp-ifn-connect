@@ -1,14 +1,11 @@
 import React from 'react';
 import { PageLayout, PageLayoutProps } from './PageLayout';
-import { SearchInput } from '@/components/shared/SearchInput';
-import { FilterChips, FilterOption } from '@/components/shared/FilterChips';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
+import { SearchInput, FilterChips, AnimatedList, AnimatedListItem, type FilterOption } from '@/shared/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 // Re-export FilterOption pour compatibilité
-export type { FilterOption } from '@/components/shared/FilterChips';
+export type { FilterOption } from '@/shared/ui';
 
 export interface PageWithListProps<T> extends Omit<PageLayoutProps, 'children'> {
   /** Valeur de recherche */

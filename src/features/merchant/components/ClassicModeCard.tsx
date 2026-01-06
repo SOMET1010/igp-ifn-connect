@@ -1,6 +1,6 @@
 import React from 'react';
 import { Mic, Loader2, RefreshCw } from 'lucide-react';
-import { PhoneInput } from '@/components/shared/PhoneInput';
+import { PhoneInput } from '@/shared/ui';
 import { Button } from '@/components/ui/button';
 import { VoiceAuthLang } from '@/shared/config/audio/suta';
 

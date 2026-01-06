@@ -13,10 +13,15 @@ import React from 'react';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { InstitutionalHeader } from '@/components/shared/InstitutionalHeader';
-import { InstitutionalFooter } from '@/components/shared/InstitutionalFooter';
-import { UnifiedBottomNav, type NavItem } from '@/components/shared/UnifiedBottomNav';
-import { LoadingState, ErrorState, EmptyState } from '@/components/shared/StateComponents';
+import {
+  InstitutionalHeader,
+  InstitutionalFooter,
+  UnifiedBottomNav,
+  LoadingState,
+  ErrorState,
+  EmptyState,
+  type NavItem,
+} from '@/shared/ui';
 
 export interface BreadcrumbItem {
   label: string;

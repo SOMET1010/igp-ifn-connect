@@ -1,6 +1,6 @@
 import React from 'react';
 import { Store, Users, Wheat, DollarSign } from 'lucide-react';
-import { StatCard } from '@/components/shared/StatCard';
+import { StatCard } from '@/shared/ui';
 import type { AdminDashboardStats } from '../../types/dashboard.types';
 
 interface AdminStatsProps {

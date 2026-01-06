@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { PhoneInput } from '@/components/shared/PhoneInput';
+import { PhoneInput } from '@/shared/ui';
 import {
   agentProfileEditSchema,
   type AgentProfileData,

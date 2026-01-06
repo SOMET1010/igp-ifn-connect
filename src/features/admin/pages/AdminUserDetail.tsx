@@ -8,7 +8,7 @@ import {
   Banknote, FileText, Users, RefreshCw, Pencil, Save, Loader2, Plus, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ErrorState } from '@/components/shared/StateComponents';
+import { ErrorState } from '@/shared/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';

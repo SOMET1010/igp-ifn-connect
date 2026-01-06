@@ -1,6 +1,5 @@
 import React from 'react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import { EnhancedHeader, UnifiedBottomNav, type NavItem } from '@/shared/ui';
 import { cn } from '@/lib/utils';
 
 // ============================================

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { EnhancedHeader } from '@/shared/ui/EnhancedHeader';
+import { EnhancedHeader } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
 import { logger, type LogEntry } from '@/shared/services/logger';
 import { getOfflineQueue } from '@/lib/offlineDB';

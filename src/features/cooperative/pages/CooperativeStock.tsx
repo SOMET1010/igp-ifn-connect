@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Package, Loader2, Bell, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
-import { NotificationBadge } from '@/components/shared/NotificationBadge';
+import { NotificationBadge } from '@/shared/ui';
 import { cooperativeNavItems } from '@/config/navigation';
 import { useCooperativeStock, useCooperativeNotifications, getStockStatus } from '@/features/cooperative';
 import type { CooperativeStockItem, StockStatus } from '@/features/cooperative';

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { VoiceInterviewWizard } from "@/features/auth/components/VoiceInterviewWizard";
-import { AudioButton } from "@/shared/ui/AudioButton";
+import { AudioButton } from '@/shared/ui';
 import { VoiceAuthLang } from "@/shared/config/audio/suta";
 import { cn } from "@/lib/utils";
 import marcheIvoirien from "@/assets/marche-ivoirien.jpg";

@@ -3,7 +3,7 @@
  * Design unifié avec le système institutionnel
  */
 import React from 'react';
-import { StatCard } from '@/components/shared/StatCard';
+import { StatCard } from '@/shared/ui';
 import { 
   Users, 
   Package, 

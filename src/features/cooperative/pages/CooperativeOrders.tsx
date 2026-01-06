@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClipboardList } from 'lucide-react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { EnhancedHeader, UnifiedBottomNav, EmptyState, LoadingState, NotificationBadge } from '@/shared/ui';
 import { cooperativeNavItems } from '@/config/navigation';
-import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import { useCooperativeOrders } from '@/features/cooperative';
 import type { Order } from '@/features/cooperative';
 import { OrderCard, CancelOrderDialog } from '@/features/cooperative/components/orders';
-import { NotificationBadge } from '@/components/shared/NotificationBadge';
 
 const CooperativeOrders: React.FC = () => {
   const navigate = useNavigate();
