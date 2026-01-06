@@ -1,6 +1,10 @@
 // Auth Feature - Authentification PNAVIM Unifiée
 // Protocole à 4 couches pour l'inclusion des marchands ivoiriens
 
+// === PAGES (Architecture Vertical Slices) ===
+export { default as AuthPage } from './pages/AuthPage';
+export { default as AuthCallback } from './pages/AuthCallback';
+
 // === OTP Auth Components (original) ===
 export { GenericOtpLoginPage } from "./components/GenericOtpLoginPage";
 export { AdminLoginPage } from "./components/AdminLoginPage";

@@ -1,37 +1,38 @@
 /**
- * Routes Admin
+ * Routes Admin - Architecture Vertical Slices (Phase 2)
  * 
  * Routes protégées pour les administrateurs
+ * Pages importées depuis src/features/admin/
  */
 
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages publiques
-import AdminLogin from '@/pages/admin/AdminLogin';
+// === IMPORT DEPUIS FEATURE ADMIN ===
+import {
+  AdminDashboard,
+  AdminLogin,
+  AdminMerchants,
+  AdminAgents,
+  AdminAgentRequests,
+  AdminCooperatives,
+  AdminProducers,
+  AdminMonitoring,
+  AdminAnalytics,
+  AdminReports,
+  AdminStudio,
+  AdminVivriers,
+  AdminUsers,
+  AdminUserDetail,
+  AdminKycReview,
+  AdminDiagnostics,
+  AdminCardsImport,
+  AdminCardsSearch,
+} from '@/features/admin';
 
-// Lazy load for heavy components
-const AdminMap = React.lazy(() => import('@/pages/admin/AdminMap'));
-
-// Pages protégées
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminMerchants from '@/pages/admin/AdminMerchants';
-import AdminAgents from '@/pages/admin/AdminAgents';
-import AdminAgentRequests from '@/pages/admin/AdminAgentRequests';
-import AdminCooperatives from '@/pages/admin/AdminCooperatives';
-import AdminProducers from '@/pages/admin/AdminProducers';
-import AdminMonitoring from '@/pages/admin/AdminMonitoring';
-import AdminAnalytics from '@/pages/admin/AdminAnalytics';
-import AdminReports from '@/pages/admin/AdminReports';
-import AdminStudio from '@/pages/admin/AdminStudio';
-import AdminVivriers from '@/pages/admin/AdminVivriers';
-import AdminUsers from '@/pages/admin/AdminUsers';
-import AdminUserDetail from '@/pages/admin/AdminUserDetail';
-import AdminKycReview from '@/pages/admin/AdminKycReview';
-import AdminDiagnostics from '@/pages/admin/AdminDiagnostics';
-import AdminCardsImport from '@/pages/admin/AdminCardsImport';
-import AdminCardsSearch from '@/pages/admin/AdminCardsSearch';
+// Lazy load for heavy components (Map)
+const AdminMapLazy = React.lazy(() => import('@/features/admin/pages/AdminMap'));
 
 /**
  * Routes publiques de l'admin (login)
@@ -53,7 +54,7 @@ export const adminProtectedRoutes = (
     <Route path="/admin/demandes-agents" element={<AdminAgentRequests />} />
     <Route path="/admin/cooperatives" element={<AdminCooperatives />} />
     <Route path="/admin/producteurs" element={<AdminProducers />} />
-    <Route path="/admin/carte" element={<AdminMap />} />
+    <Route path="/admin/carte" element={<AdminMapLazy />} />
     <Route path="/admin/monitoring" element={<AdminMonitoring />} />
     <Route path="/admin/analytics" element={<AdminAnalytics />} />
     <Route path="/admin/rapports" element={<AdminReports />} />

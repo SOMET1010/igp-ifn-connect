@@ -1,24 +1,25 @@
 /**
- * Routes Coopérative
+ * Routes Coopérative - Architecture Vertical Slices (Phase 2)
  * 
  * Routes protégées pour les coopératives agricoles
+ * Pages importées depuis src/features/cooperative/
  */
 
 import { Route } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages publiques
-import CooperativeLogin from '@/pages/cooperative/CooperativeLogin';
-import CooperativeRegister from '@/pages/cooperative/CooperativeRegister';
-
-// Pages protégées
-import CooperativeDashboard from '@/pages/cooperative/CooperativeDashboard';
-import CooperativeStock from '@/pages/cooperative/CooperativeStock';
-import CooperativeOrders from '@/pages/cooperative/CooperativeOrders';
-import CooperativeProfile from '@/pages/cooperative/CooperativeProfile';
-import CooperativeMembers from '@/pages/cooperative/CooperativeMembers';
-import CooperativeProducers from '@/pages/cooperative/CooperativeProducers';
-import CooperativeProducerOrders from '@/pages/cooperative/CooperativeProducerOrders';
+// === IMPORT DEPUIS FEATURE COOPERATIVE ===
+import {
+  CooperativeDashboard,
+  CooperativeLogin,
+  CooperativeRegister,
+  CooperativeStock,
+  CooperativeOrders,
+  CooperativeProfilePage,
+  CooperativeMembers,
+  CooperativeProducers,
+  CooperativeProducerOrders,
+} from '@/features/cooperative';
 
 /**
  * Routes publiques de la coopérative (login, inscription)
@@ -38,7 +39,7 @@ export const cooperativeProtectedRoutes = (
     <Route path="/cooperative" element={<CooperativeDashboard />} />
     <Route path="/cooperative/stock" element={<CooperativeStock />} />
     <Route path="/cooperative/commandes" element={<CooperativeOrders />} />
-    <Route path="/cooperative/profil" element={<CooperativeProfile />} />
+    <Route path="/cooperative/profil" element={<CooperativeProfilePage />} />
     <Route path="/cooperative/membres" element={<CooperativeMembers />} />
     <Route path="/cooperative/producteurs" element={<CooperativeProducers />} />
     <Route path="/cooperative/commandes-producteurs" element={<CooperativeProducerOrders />} />

@@ -8,7 +8,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 
 // Lazy load for performance
-const AuthPage = React.lazy(() => import('@/pages/auth/AuthPage'));
+const AuthPage = React.lazy(() => import('@/features/auth/pages/AuthPage'));
 
 // Direct imports for critical paths
 import Home from '@/pages/Home';

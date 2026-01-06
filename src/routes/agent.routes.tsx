@@ -1,20 +1,21 @@
 /**
- * Routes Agent
+ * Routes Agent - Architecture Vertical Slices (Phase 2)
  * 
  * Routes protégées pour les agents terrain
+ * Pages importées depuis src/features/agent/
  */
 
 import { Route } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages publiques
-import AgentLogin from '@/pages/agent/AgentLogin';
-
-// Pages protégées
-import AgentDashboard from '@/pages/agent/AgentDashboard';
-import MerchantList from '@/pages/agent/MerchantList';
-import AgentProfile from '@/pages/agent/AgentProfile';
-import EnrollmentWizard from '@/pages/agent/EnrollmentWizard';
+// === IMPORT DEPUIS FEATURE AGENT ===
+import {
+  AgentDashboard,
+  AgentLogin,
+  AgentProfilePage,
+  EnrollmentWizard,
+  MerchantList,
+} from '@/features/agent';
 
 /**
  * Routes publiques de l'agent (login)
@@ -33,7 +34,7 @@ export const agentProtectedRoutes = (
     <Route path="/agent" element={<AgentDashboard />} />
     <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
     <Route path="/agent/marchands" element={<MerchantList />} />
-    <Route path="/agent/profil" element={<AgentProfile />} />
+    <Route path="/agent/profil" element={<AgentProfilePage />} />
   </Route>
 );
 

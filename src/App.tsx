@@ -28,9 +28,9 @@ import {
   adminProtectedRoutes,
 } from "@/routes/index.ts";
 
-// Pages publiques
-const AuthPage = React.lazy(() => import("./pages/auth/AuthPage"));
-const AuthCallback = React.lazy(() => import("./pages/auth/AuthCallback"));
+// Pages publiques (auth depuis features)
+const AuthPage = React.lazy(() => import("@/features/auth/pages/AuthPage"));
+const AuthCallback = React.lazy(() => import("@/features/auth/pages/AuthCallback"));
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import MyAccount from "./pages/account/MyAccount";

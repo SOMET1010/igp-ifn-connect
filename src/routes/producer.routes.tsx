@@ -1,18 +1,22 @@
 /**
- * Routes Producteur - PNAVIM
+ * Routes Producteur - Architecture Vertical Slices (Phase 2)
  * 
  * Routes protégées pour les producteurs agricoles
+ * Pages importées depuis src/features/producer/
  */
 
 import { Route } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages
-import ProducerDashboard from '@/pages/producer/ProducerDashboard';
-import ProducerHarvests from '@/pages/producer/ProducerHarvests';
-import ProducerOrders from '@/pages/producer/ProducerOrders';
-import ProducerProfile from '@/pages/producer/ProducerProfile';
-import AuthPage from '@/pages/auth/AuthPage';
+// === IMPORT DEPUIS FEATURES ===
+import {
+  ProducerDashboard,
+  ProducerHarvests,
+  ProducerOrders,
+  ProducerProfilePage,
+} from '@/features/producer';
+
+import { AuthPage } from '@/features/auth';
 
 /**
  * Routes publiques producteur (login)
@@ -31,7 +35,7 @@ export const producerProtectedRoutes = (
     <Route path="/producteur" element={<ProducerDashboard />} />
     <Route path="/producteur/recoltes" element={<ProducerHarvests />} />
     <Route path="/producteur/commandes" element={<ProducerOrders />} />
-    <Route path="/producteur/profil" element={<ProducerProfile />} />
+    <Route path="/producteur/profil" element={<ProducerProfilePage />} />
   </Route>
 );
 

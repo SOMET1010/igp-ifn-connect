@@ -1,29 +1,28 @@
 /**
- * Routes Marchand - Architecture unifiée (Phase 2)
+ * Routes Marchand - Architecture Vertical Slices (Phase 2)
  * 
  * 7 écrans principaux au lieu de 14
+ * Pages importées depuis src/features/merchant/
  */
 
 import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
-// Pages publiques (connexion vocale + login simplifié)
-import MerchantVoiceEntry from '@/pages/merchant/MerchantVoiceEntry';
-import MerchantSecurityFallback from '@/pages/merchant/MerchantSecurityFallback';
-import MerchantVoiceRegister from '@/pages/merchant/MerchantVoiceRegister';
-import MerchantLogin from '@/pages/merchant/MerchantLogin';
-
-// Pages principales unifiées
-import MerchantDashboard from '@/pages/merchant/MerchantDashboard';
-import MerchantSell from '@/pages/merchant/MerchantSell';
-import MerchantMoney from '@/pages/merchant/MerchantMoney';
-import MerchantProfile from '@/pages/merchant/MerchantProfile';
-import MerchantStock from '@/pages/merchant/MerchantStock';
-import MerchantCredits from '@/pages/merchant/MerchantCredits';
-import MerchantClose from '@/pages/merchant/MerchantClose';
-
-// Page KYC (accessible depuis profil mais aussi directement)
-import MerchantKyc from '@/pages/merchant/MerchantKyc';
+// === IMPORT DEPUIS FEATURE MERCHANT ===
+import {
+  MerchantDashboard,
+  MerchantSell,
+  MerchantMoney,
+  MerchantProfile,
+  MerchantStock,
+  MerchantCredits,
+  MerchantClose,
+  MerchantKyc,
+  MerchantLogin,
+  MerchantVoiceEntry,
+  MerchantVoiceRegister,
+  MerchantSecurityFallback,
+} from '@/features/merchant';
 
 // Module Voice Assistant
 import { VoiceAssistant } from '@/features/voice-assistant';
