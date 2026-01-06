@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Loader2 } from 'lucide-react';
-import { NotificationToggle } from '@/components/shared/NotificationToggle';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { NotificationToggle, EnhancedHeader, UnifiedBottomNav } from '@/shared/ui';
 import { agentNavItems } from '@/config/navigation';
 import { useAgentProfile, AgentProfileHeader, AgentProfileEditForm } from '@/features/agent';
 

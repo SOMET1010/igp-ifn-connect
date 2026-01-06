@@ -8,16 +8,19 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { adminLogger } from '@/infra/logger';
-import { LoadingState, EmptyState } from '@/components/shared/StateComponents';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import {
+  LoadingState,
+  EmptyState,
+  EnhancedHeader,
+  PageHero,
+  FilterChips,
+  UnifiedListCard,
+  UnifiedBottomNav,
+  AnimatedList,
+  AnimatedListItem,
+  SearchInput,
+} from '@/shared/ui';
 import { adminSecondaryNavItems } from '@/config/navigation';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Cooperative {

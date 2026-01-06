@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, LogOut } from 'lucide-react';
-import { NotificationToggle } from '@/components/shared/NotificationToggle';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { NotificationToggle, EnhancedHeader, UnifiedBottomNav } from '@/shared/ui';
 import { cooperativeNavItems } from '@/config/navigation';
 import {
   useCooperativeProfile,

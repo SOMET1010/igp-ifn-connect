@@ -13,16 +13,18 @@ import {
   Store,
   Calendar
 } from 'lucide-react';
-import { EnhancedHeader } from '@/shared/ui/EnhancedHeader';
-import { UnifiedBottomNav } from '@/shared/ui/UnifiedBottomNav';
-import { UnifiedListCard } from '@/shared/ui/UnifiedListCard';
-import { PageHero } from '@/shared/ui/PageHero';
-import { FilterChips } from '@/shared/ui/FilterChips';
-import { AnimatedList } from '@/shared/ui/AnimatedList';
-import { AnimatedListItem } from '@/shared/ui/AnimatedListItem';
-import { SearchInput } from '@/shared/ui/SearchInput';
+import {
+  EnhancedHeader,
+  UnifiedBottomNav,
+  UnifiedListCard,
+  PageHero,
+  FilterChips,
+  AnimatedList,
+  AnimatedListItem,
+  SearchInput,
+  type StatusType,
+} from '@/shared/ui';
 import { adminNavItems } from '@/config/navigation';
-import type { StatusType } from '@/shared/ui/StatusBadge';
 
 interface Merchant {
   id: string;

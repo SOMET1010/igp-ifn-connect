@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useRecorder, useAudioLevel, AudioManager } from '@/shared/audio';
-import { AudioLevelMeter } from '@/components/shared/AudioLevelMeter';
+import { AudioLevelMeter } from '@/shared/ui';
 import { Mic, Square, Play, Pause, RotateCcw, Check, Loader2, Upload, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {

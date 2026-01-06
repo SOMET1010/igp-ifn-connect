@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button';
 import { CulturalChallenge } from './CulturalChallenge';
 import { HumanFallback } from './HumanFallback';
 import { PersonaSelector } from './PersonaSelector';
-import { PhoneNumPad } from '@/components/shared/PhoneNumPad';
-import { AuthErrorBanner, createAuthError } from '@/components/shared/AuthErrorBanner';
+import { PhoneNumPad, AuthErrorBanner, createAuthError } from '@/shared/ui';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 

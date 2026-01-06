@@ -7,7 +7,7 @@ import {
   Mic, 
   Leaf 
 } from 'lucide-react';
-import { UnifiedActionCard } from '@/components/shared/UnifiedActionCard';
+import { UnifiedActionCard } from '@/shared/ui';
 
 interface AdvancedToolsGridProps {
   onNavigate: (path: string) => void;

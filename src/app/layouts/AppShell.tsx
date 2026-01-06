@@ -6,9 +6,7 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { DemoBanner } from '@/components/shared/DemoBanner';
-import { OfflineIndicator } from '@/components/shared/OfflineIndicator';
-import { AudioPlayingIndicator } from '@/components/shared/AudioPlayingIndicator';
+import { DemoBanner, OfflineIndicator, AudioPlayingIndicator } from '@/shared/ui';
 
 interface AppShellProps {
   children?: React.ReactNode;

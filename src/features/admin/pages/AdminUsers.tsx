@@ -5,15 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { UnifiedBottomNav, NavItem } from '@/components/shared/UnifiedBottomNav';
+import {
+  EnhancedHeader,
+  PageHero,
+  FilterChips,
+  UnifiedListCard,
+  UnifiedBottomNav,
+  AnimatedList,
+  AnimatedListItem,
+  SearchInput,
+  type NavItem,
+} from '@/shared/ui';
 import { DashboardSkeleton } from '@/features/admin/components/DashboardSkeleton';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
 import { useAdminUsersData, type AdminUserData, type ExpectedEntityType, type AppRole } from '@/features/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -54,7 +57,7 @@ import {
   Download,
   LayoutDashboard
 } from 'lucide-react';
-import { ErrorState } from '@/components/shared/StateComponents';
+import { ErrorState } from '@/shared/ui';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 

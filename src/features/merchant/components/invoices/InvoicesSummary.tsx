@@ -1,5 +1,5 @@
 import { FileText, XCircle, Banknote } from 'lucide-react';
-import { StatCard } from '@/components/shared/StatCard';
+import { StatCard } from '@/shared/ui';
 
 interface InvoicesSummaryProps {
   issuedCount: number;

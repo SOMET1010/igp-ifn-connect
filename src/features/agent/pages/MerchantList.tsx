@@ -2,18 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { MapPin, Phone, Calendar, ClipboardList, Users } from 'lucide-react';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { UnifiedListCard } from '@/components/shared/UnifiedListCard';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips } from '@/components/shared/FilterChips';
-import { AnimatedList } from '@/components/shared/AnimatedList';
-import { AnimatedListItem } from '@/components/shared/AnimatedListItem';
-import { SearchInput } from '@/components/shared/SearchInput';
+import {
+  EnhancedHeader,
+  UnifiedBottomNav,
+  UnifiedListCard,
+  PageHero,
+  FilterChips,
+  AnimatedList,
+  AnimatedListItem,
+  SearchInput,
+  EmptyState,
+  LoadingState,
+  type StatusType,
+} from '@/shared/ui';
 import { agentNavItems } from '@/config/navigation';
-import { EmptyState, LoadingState } from '@/components/shared/StateComponents';
 import type { Database } from '@/integrations/supabase/types';
-import type { StatusType } from '@/components/shared/StatusBadge';
 
 type Merchant = Database['public']['Tables']['merchants']['Row'];
 type MerchantStatus = Database['public']['Enums']['merchant_status'];

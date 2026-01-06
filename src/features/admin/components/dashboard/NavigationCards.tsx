@@ -1,6 +1,6 @@
 import React from 'react';
 import { Store, Users, Wheat, Map as MapIcon } from 'lucide-react';
-import { UnifiedActionCard } from '@/shared/ui/UnifiedActionCard';
+import { UnifiedActionCard } from '@/shared/ui';
 import type { AdminDashboardStats } from '../../types/dashboard.types';
 
 interface NavigationCardsProps {

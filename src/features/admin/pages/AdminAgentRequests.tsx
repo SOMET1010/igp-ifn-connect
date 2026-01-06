@@ -29,11 +29,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
-import { PageHero } from '@/components/shared/PageHero';
-import { FilterChips, FilterOption } from '@/components/shared/FilterChips';
-import { SearchInput } from '@/components/shared/SearchInput';
-import { AnimatedList } from '@/components/shared/AnimatedList';
+import { EnhancedHeader, PageHero, FilterChips, SearchInput, AnimatedList, type FilterOption } from '@/shared/ui';
 
 import { useAdminAgentRequests, type AgentRequest } from '@/features/admin';
 

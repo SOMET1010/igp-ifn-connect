@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentRequest, type AgentRequestInput } from '@/features/agent';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { PhoneInput } from '@/components/shared/PhoneInput';
+import { PhoneInput } from '@/shared/ui';
 import { phoneLocalSchema } from '@/lib/validationSchemas';
 
 const formSchema = z.object({

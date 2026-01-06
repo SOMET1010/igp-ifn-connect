@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { VoiceSocialAuth } from '@/features/auth';
-import { ImmersiveBackground } from '@/components/shared/ImmersiveBackground';
-import { GlassCard } from '@/components/shared/GlassCard';
-import { FloatingAccessibilityButton } from '@/components/shared/FloatingAccessibilityButton';
-import { ContextualHelp } from '@/components/shared/ContextualHelp';
+import { ImmersiveBackground } from './ImmersiveBackground';
+import { GlassCard } from './GlassCard';
+import { FloatingAccessibilityButton } from './FloatingAccessibilityButton';
+import { ContextualHelp } from './ContextualHelp';
 import logoDge from '@/assets/logo-dge.png';
 import logoAnsut from '@/assets/logo-ansut.png';
 

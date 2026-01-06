@@ -2,8 +2,7 @@ import React from 'react';
 import { User, Phone, Briefcase, MapPin, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ProfileInfoCard } from '@/components/shared/ProfileInfoCard';
-import { StatCard } from '@/components/shared/StatCard';
+import { ProfileInfoCard, StatCard } from '@/shared/ui';
 import type { AgentProfileData } from '../../types/profile.types';
 
 interface AgentProfileHeaderProps {

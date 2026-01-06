@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
+import { EnhancedHeader } from '@/shared/ui';
 
 interface DashboardSkeletonProps {
   title?: string;

@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle } from 'lucide-react';
 import { adminLogger } from '@/infra/logger';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
+import { UnifiedBottomNav } from '@/shared/ui';
 import { adminSecondaryNavItems } from '@/config/navigation';
 
 interface RecordingStatus {

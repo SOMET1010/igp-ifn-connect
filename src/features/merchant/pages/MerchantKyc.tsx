@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { GlassCard } from '@/components/shared/GlassCard';
+import { GlassCard } from '@/shared/ui';
 import { KycWizard, useKycStatus, KYC_LEVELS_CONFIG, KYC_STATUS_LABELS } from '@/features/kyc';
 
 export default function MerchantKyc() {

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { UnifiedBottomNav } from '@/components/shared/UnifiedBottomNav';
-import { EnhancedHeader } from '@/components/shared/EnhancedHeader';
+import { UnifiedBottomNav, EnhancedHeader } from '@/shared/ui';
 import { merchantNavItems } from '@/config/navigation';
 import { useMerchantCredits } from '@/features/merchant/hooks/useMerchantCredits';
 import {
