@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useSensoryFeedback } from '@/hooks/useSensoryFeedback';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { cn } from '@/shared/lib';
+import { useSensoryFeedback } from '@/shared/hooks';
+import { useLanguage } from '@/shared/contexts';
 
 export type FabState = 'idle' | 'listening' | 'processing' | 'disabled';
 

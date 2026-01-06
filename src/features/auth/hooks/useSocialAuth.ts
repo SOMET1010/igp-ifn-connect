@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { useTrustScore } from '@/features/auth/hooks/useTrustScore';
 import { useDeviceFingerprint } from '@/features/auth/hooks/useDeviceFingerprint';
 import { PersonaType, PERSONAS, CULTURAL_QUESTIONS } from '@/features/auth/config/personas';

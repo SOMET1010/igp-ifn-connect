@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { phoneLocalOptionalSchema, emailSchema } from '@/lib/validationSchemas';
+import { phoneLocalOptionalSchema, emailSchema } from '@/shared/lib';
 
 // === Cooperative Profile Data ===
 

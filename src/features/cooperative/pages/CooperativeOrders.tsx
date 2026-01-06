@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { ClipboardList } from 'lucide-react';
 import { EnhancedHeader, UnifiedBottomNav, EmptyState, LoadingState, NotificationBadge } from '@/shared/ui';
 import { cooperativeNavItems } from '@/config/navigation';

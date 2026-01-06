@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { format, subDays, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { merchantLogger } from '@/infra/logger';

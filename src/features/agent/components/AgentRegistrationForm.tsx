@@ -9,11 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks';
 import { useAgentRequest, type AgentRequestInput } from '@/features/agent';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 import { PhoneInput } from '@/shared/ui';
-import { phoneLocalSchema } from '@/lib/validationSchemas';
+import { phoneLocalSchema } from '@/shared/lib';
 
 const formSchema = z.object({
   full_name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères').max(100),

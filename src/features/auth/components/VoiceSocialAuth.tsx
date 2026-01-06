@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Mic, Loader2, Phone, ArrowRight, Volume2, Keyboard, Users, VolumeX, RefreshCw } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
 import { useVoiceTranscription } from '@/features/auth/hooks/useVoiceTranscription';

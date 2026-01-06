@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 
 export const QuickGuide: React.FC = () => {
   const { t } = useLanguage();

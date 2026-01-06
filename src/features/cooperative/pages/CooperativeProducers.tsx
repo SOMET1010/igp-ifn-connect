@@ -4,8 +4,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth, useLanguage } from '@/shared/contexts';
 import { EnhancedHeader, UnifiedBottomNav, LoadingState, ErrorState } from '@/shared/ui';
 import { Tractor } from 'lucide-react';
 import { useCooperativeDashboard } from '@/features/cooperative';

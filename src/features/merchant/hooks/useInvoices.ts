@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { toast } from 'sonner';
 import { invoicesService } from '../services/invoicesService';
 import { Invoice, InvoiceFilter, MerchantInvoiceData, NewInvoiceInput } from '../types/invoices.types';

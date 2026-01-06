@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { addToOfflineQueue } from '@/lib/offlineDB';
+import { addToOfflineQueue } from '@/shared/lib';
 import { logger } from '@/shared/services/logger';
 import type { QuickSale, QuickSaleInput } from '../types/sale.types';
 

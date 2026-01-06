@@ -12,9 +12,9 @@ import {
   Truck,
   Warehouse
 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/shared/contexts';
 import type { DashboardStats } from '../../types/cooperative.types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib';
 
 interface CooperativeStatsProps {
   stats: DashboardStats;

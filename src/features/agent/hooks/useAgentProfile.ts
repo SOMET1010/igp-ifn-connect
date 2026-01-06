@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/contexts';
 import { agentProfileService } from '../services/profileService';
 import type { AgentProfileData, AgentProfileEditInput } from '../types/profile.types';
 import { useToast } from '@/shared/hooks';

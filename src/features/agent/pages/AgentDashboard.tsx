@@ -6,8 +6,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth, useLanguage } from '@/shared/contexts';
 import { useOfflineSync } from '@/shared/hooks';
 import { AudioButton, UnifiedActionCard } from '@/shared/ui';
 import { RoleLayout } from '@/app/layouts/RoleLayout';
