@@ -194,3 +194,4 @@ export * from './ui';
 export * from './realtime.types';
 export * from './auth.types';
 export * from './offline.types';
+export * from './rbac';

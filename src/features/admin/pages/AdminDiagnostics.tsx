@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { EnhancedHeader } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
 import { logger, type LogEntry } from '@/shared/services/logger';
-import { getOfflineQueue } from '@/lib/offlineDB';
+import { getOfflineQueue } from '@/shared/lib';
 import { getEnvStatus } from '@/app/bootstrap/validateEnv';
 import { SITEMAP, getAllRoutes } from '@/app/router/sitemap';
 

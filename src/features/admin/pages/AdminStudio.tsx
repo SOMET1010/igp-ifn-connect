@@ -7,7 +7,7 @@ import { StudioRecorder } from '@/features/voice-assistant/components/studio/Stu
 import { StudioTextList } from '@/features/voice-assistant/components/studio/StudioTextList';
 import { StudioSessionProgress } from '@/features/voice-assistant/components/studio/StudioSessionProgress';
 import { StudioSessionComplete } from '@/features/voice-assistant/components/studio/StudioSessionComplete';
-import { translations, LANGUAGES, LanguageCode } from '@/lib/translations';
+import { translations, LANGUAGES, LanguageCode } from '@/shared/lib';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/shared/hooks';
 import { ArrowLeft, Mic, Download, RefreshCw, PlayCircle } from 'lucide-react';
