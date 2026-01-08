@@ -31,6 +31,9 @@ import {
   AdminCardsSearch,
 } from '@/features/admin';
 
+// Lazy load for documentation generator
+const AdminDocumentation = React.lazy(() => import('@/features/admin/pages/AdminDocumentation'));
+
 // Lazy load for heavy components (Map)
 const AdminMapLazy = React.lazy(() => import('@/features/admin/pages/AdminMap'));
 
@@ -66,6 +69,7 @@ export const adminProtectedRoutes = (
     <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
     <Route path="/admin/cartes/import" element={<AdminCardsImport />} />
     <Route path="/admin/cartes/recherche" element={<AdminCardsSearch />} />
+    <Route path="/admin/documentation" element={<AdminDocumentation />} />
   </Route>
 );
 
