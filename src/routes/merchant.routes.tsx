@@ -22,6 +22,7 @@ import {
   MerchantVoiceEntry,
   MerchantVoiceRegister,
   MerchantSecurityFallback,
+  MerchantMarketplace,
 } from '@/features/merchant';
 
 // Module Voice Assistant
@@ -55,6 +56,9 @@ export const merchantProtectedRoutes = (
     
     {/* KYC standalone (wizard complet) */}
     <Route path="/marchand/kyc" element={<MerchantKyc />} />
+    
+    {/* Marché Virtuel / Marketplace (Workflow 11.3 PNAVIM-CI) */}
+    <Route path="/marchand/fournisseurs" element={<MerchantMarketplace />} />
     
     {/* Assistant vocal */}
     <Route path="/marchand/assistant-vocal" element={<VoiceAssistant />} />

@@ -22,6 +22,7 @@ export { default as MerchantInvoices } from "./pages/MerchantInvoices";
 export { default as MerchantCMU } from "./pages/MerchantCMU";
 export { default as MerchantHelp } from "./pages/MerchantHelp";
 export { default as SalesQuick } from "./pages/SalesQuick";
+export { default as MerchantMarketplace } from "./pages/MerchantMarketplace";
 
 // Hooks publics
 export { useCashierPayment } from "./hooks/useCashierPayment";
