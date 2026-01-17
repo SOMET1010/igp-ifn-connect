@@ -129,6 +129,25 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     balance: "Solde",
     
     /* ======================
+       ACTIONS UI
+    ====================== */
+    add: "Ajouter",
+    edit: "Modifier",
+    delete: "Supprimer",
+    save: "Enregistrer",
+    items: "article(s)",
+    search: "Rechercher",
+    filter: "Filtrer",
+    refresh: "Actualiser",
+    retry: "Réessayer",
+    see_more: "Voir plus",
+    see_less: "Voir moins",
+    offline_message: "Mode hors ligne disponible",
+    what_are_you_selling: "Que vendez-vous ?",
+    say_amount: "Dis le montant ou appuie sur un billet",
+    how_much: "Tu prends combien ?",
+    
+    /* ======================
        STOCK
     ====================== */
     stock_title: "Tes marchandises",
@@ -331,6 +350,25 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     view_receipt: "Reçu lajɛ",
     total: "Bɛɛ",
     balance: "Tɔ",
+    
+    /* ======================
+       ACTIONS UI
+    ====================== */
+    add: "Fara a kan",
+    edit: "Yɛlɛma",
+    delete: "Bɔ",
+    save: "Mara",
+    items: "fɛn",
+    search: "Ɲini",
+    filter: "Sugandi",
+    refresh: "Kura",
+    retry: "Segin",
+    see_more: "Lajɛ tun",
+    see_less: "Lajɛ dɔɔni",
+    offline_message: "A bɛ baara kɛ rɛzɔ kɔ",
+    what_are_you_selling: "Mun do i bɛ feere?",
+    say_amount: "Fɔ hakɛ walima digi biyɛ kan",
+    how_much: "Wari joli?",
     
     /* ======================
        STOCK
