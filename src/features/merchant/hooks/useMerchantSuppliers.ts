@@ -83,7 +83,16 @@ export function useMerchantSuppliers(): UseMerchantSuppliersReturn {
   // Fetch merchant ID
   useEffect(() => {
     if (user?.id) {
-      suppliersService.getMerchantId(user.id).then(setMerchantId);
+      suppliersService.getMerchantId(user.id).then((id) => {
+        setMerchantId(id);
+        // If no merchant found, stop loading
+        if (!id) {
+          setLoading(false);
+        }
+      });
+    } else {
+      // No user, stop loading
+      setLoading(false);
     }
   }, [user?.id]);
 
