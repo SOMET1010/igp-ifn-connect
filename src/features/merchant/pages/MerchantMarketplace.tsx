@@ -106,6 +106,29 @@ export default function MerchantMarketplace() {
     );
   }
 
+  // Error state - no merchant found
+  if (!merchantId) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <EnhancedHeader
+          title="Marché Virtuel"
+          showBack
+          backTo="/marchand"
+        />
+        <div className="flex flex-col items-center justify-center p-8 text-center mt-20">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Store className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Profil marchand introuvable</h2>
+          <p className="text-muted-foreground">
+            Veuillez vous reconnecter pour accéder au marché virtuel.
+          </p>
+        </div>
+        <UnifiedBottomNav items={merchantNavItems} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
