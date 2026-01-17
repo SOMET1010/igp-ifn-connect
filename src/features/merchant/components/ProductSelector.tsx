@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { ShoppingBag, Plus, Minus, X, Package } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingBag, Plus, Minus, X, Package, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StockItem {
   id: string;
@@ -37,10 +39,38 @@ export function ProductSelector({
   isLoading 
 }: ProductSelectorProps) {
   const { t } = useLanguage();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // Expanded by default
+
+  // Fetch all products from catalogue if no stocks configured
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ['all-products-catalogue'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, unit, image_url')
+        .limit(50);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 5 * 60_000,
+  });
 
   // Filter stocks with prices
   const availableStocks = stocks.filter(s => s.unit_price && s.quantity > 0);
+  
+  // If no stocks configured, create virtual stocks from products with default prices
+  const displayStocks: StockItem[] = availableStocks.length > 0 
+    ? availableStocks 
+    : allProducts.map(p => ({
+        id: `virtual-${p.id}`,
+        product_id: p.id,
+        product_name: p.name,
+        quantity: 999, // Unlimited for virtual
+        unit_price: 500, // Default price 500 FCFA
+        image_url: p.image_url,
+        unit: p.unit,
+      }));
 
   const handleAddProduct = (stock: StockItem) => {
     const existing = selectedProducts.find(p => p.stockId === stock.id);
@@ -113,9 +143,19 @@ export function ProductSelector({
     );
   }
 
-  if (availableStocks.length === 0) {
-    return null; // Don't show if no products with prices
+  // Always show - use displayStocks (either merchant stocks or all products)
+  if (displayStocks.length === 0) {
+    return (
+      <div className="bg-muted/30 rounded-2xl p-4 text-center">
+        <AlertCircle className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">
+          Aucun produit disponible. Configurez votre stock dans "Mes Stocks".
+        </p>
+      </div>
+    );
   }
+
+  const hasNoMerchantStocks = availableStocks.length === 0;
 
   return (
     <div className="bg-muted/30 rounded-2xl p-3 space-y-3">
@@ -174,9 +214,19 @@ export function ProductSelector({
       {/* Expanded product grid */}
       {isExpanded && (
         <div className="space-y-3 animate-fade-in">
+          {/* Warning if using default catalogue */}
+          {hasNoMerchantStocks && (
+            <div className="flex items-center gap-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <span className="text-xs text-amber-700 dark:text-amber-300">
+                Mode catalogue. Configurez vos stocks pour des prix personnalisés.
+              </span>
+            </div>
+          )}
+          
           {/* Product grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-            {availableStocks.map(stock => {
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-64 overflow-y-auto">
+            {displayStocks.map(stock => {
               const selected = selectedProducts.find(p => p.stockId === stock.id);
               const quantity = selected?.quantity || 0;
               
