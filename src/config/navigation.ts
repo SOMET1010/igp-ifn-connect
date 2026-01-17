@@ -52,9 +52,9 @@ export const adminNavItems: NavItem[] = [
 // Admin secondary navigation (for specialized pages like vivriers, studio, etc.)
 export const adminSecondaryNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+  { icon: Package, label: 'Produits', path: '/admin/produits' },
   { icon: Wheat, label: 'Vivriers', path: '/admin/vivriers' },
   { icon: Mic, label: 'Studio', path: '/admin/studio' },
-  { icon: Activity, label: 'Monitoring', path: '/admin/monitoring' },
 ];
 
 // Admin analytics navigation

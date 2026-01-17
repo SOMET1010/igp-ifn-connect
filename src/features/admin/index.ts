@@ -12,6 +12,7 @@ export { default as AdminAnalytics } from "./pages/AdminAnalytics";
 export { default as AdminReports } from "./pages/AdminReports";
 export { default as AdminStudio } from "./pages/AdminStudio";
 export { default as AdminVivriers } from "./pages/AdminVivriers";
+export { default as AdminProducts } from "./pages/AdminProducts";
 export { default as AdminUsers } from "./pages/AdminUsers";
 export { default as AdminUserDetail } from "./pages/AdminUserDetail";
 export { default as AdminKycReview } from "./pages/AdminKycReview";
@@ -25,12 +26,14 @@ export { useAdminAgentRequests } from './hooks/useAdminAgentRequests';
 export { useAdminUsersData } from './hooks/useAdminUsersData';
 export { useAdminUserDetail } from './hooks/useAdminUserDetail';
 export { useAdminMapData } from './hooks/useAdminMapData';
+export { useAdminProducts } from './hooks/useAdminProducts';
 
 // Services
 export { dashboardService } from './services/dashboardService';
 export { agentRequestsService } from './services/agentRequestsService';
 export { usersService } from './services/usersService';
 export { mapService } from './services/mapService';
+export { productsService } from './services/productsService';
 export * from './services/cardsImportService';
 
 // Components Dashboard
@@ -41,6 +44,7 @@ export { ActivityTimeline } from './components/ActivityTimeline';
 export { DashboardSkeleton } from './components/DashboardSkeleton';
 export { TestNotificationButton } from './components/TestNotificationButton';
 export * from './components/map';
+export * from './components/products';
 
 // Types - Dashboard
 export type { AdminDashboardStats, ChartDataPoint, AdminDashboardData } from './types/dashboard.types';

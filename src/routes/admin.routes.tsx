@@ -23,6 +23,7 @@ import {
   AdminReports,
   AdminStudio,
   AdminVivriers,
+  AdminProducts,
   AdminUsers,
   AdminUserDetail,
   AdminKycReview,
@@ -63,6 +64,7 @@ export const adminProtectedRoutes = (
     <Route path="/admin/rapports" element={<AdminReports />} />
     <Route path="/admin/studio" element={<AdminStudio />} />
     <Route path="/admin/vivriers" element={<AdminVivriers />} />
+    <Route path="/admin/produits" element={<AdminProducts />} />
     <Route path="/admin/utilisateurs" element={<AdminUsers />} />
     <Route path="/admin/utilisateurs/:userId" element={<AdminUserDetail />} />
     <Route path="/admin/kyc" element={<AdminKycReview />} />
