@@ -5,7 +5,7 @@
  * Pages importées depuis src/features/producer/
  */
 
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
 // === IMPORT DEPUIS FEATURES ===
@@ -24,6 +24,7 @@ import { AuthPage } from '@/features/auth';
 export const producerPublicRoutes = (
   <>
     <Route path="/producteur/login" element={<AuthPage />} />
+    <Route path="/producteur/connexion" element={<Navigate to="/producteur/login" replace />} />
   </>
 );
 
