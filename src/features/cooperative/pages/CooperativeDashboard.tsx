@@ -59,8 +59,8 @@ const CooperativeDashboard: React.FC = () => {
 
   return (
     <RoleLayout
-      title={cooperative?.name ?? t("cooperative")}
-      subtitle="Plateforme IFN – Espace Coopérative"
+      title="Ma coopérative"
+      subtitle={cooperative?.name ?? "Espace Coopérative"}
       showSignOut
       isLoading={isLoading}
       error={error}
@@ -86,15 +86,15 @@ const CooperativeDashboard: React.FC = () => {
         {/* Alertes stock */}
         <CooperativeAlerts notifications={notifications} />
 
-        {/* Statistiques */}
+        {/* Ce qu'on a */}
         <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Statistiques</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Ce qu'on a</h2>
           <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
         </section>
 
-        {/* Graphiques */}
+        {/* Nos chiffres */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Analyse</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Nos chiffres</h2>
           <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
           <CooperativeOrdersChart stats={stats} />
         </section>
@@ -102,44 +102,44 @@ const CooperativeDashboard: React.FC = () => {
         {/* Action principale */}
         <Button 
           onClick={() => navigate('/cooperative/stock')} 
-          className="w-full h-12 text-base font-medium"
+          className="w-full h-14 text-lg font-bold rounded-2xl"
         >
-          <Package className="h-5 w-5 mr-2" />
-          {t("manage_my_stock")}
+          <Package className="h-6 w-6 mr-2" />
+          Voir nos produits
         </Button>
 
-        {/* Actions rapides */}
+        {/* Nos actions */}
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Actions rapides</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Nos actions</h2>
           <div className="space-y-2">
             <UnifiedActionCard 
-              title={t("my_stock")} 
-              description={`${stats.products} ${t("products")}`} 
+              title="Nos produits" 
+              description={`${stats.products} produits`} 
               icon={Package} 
               onClick={() => navigate('/cooperative/stock')} 
             />
             <UnifiedActionCard 
-              title={t("orders")} 
-              description={t("manage_requests")} 
+              title="Ce qu'on nous demande" 
+              description="Voir les demandes" 
               icon={ClipboardList} 
               onClick={() => navigate('/cooperative/commandes')} 
               badge={stats.pendingOrders} 
               badgeVariant="warning" 
             />
             <UnifiedActionCard 
-              title="Producteurs" 
-              description="Gérer les producteurs affiliés" 
+              title="Nos cultivateurs" 
+              description="Gérer les producteurs" 
               icon={Users} 
               onClick={() => navigate('/cooperative/producteurs')} 
             />
             <UnifiedActionCard 
-              title="Membres" 
+              title="Nos membres" 
               description={`${cooperative?.total_members ?? 0} membres`} 
               icon={Users} 
               onClick={() => navigate('/cooperative/membres')} 
             />
             <UnifiedActionCard 
-              title="Commandes Producteurs" 
+              title="Acheter aux cultivateurs" 
               description="Commander des récoltes" 
               icon={ShoppingCart} 
               onClick={() => navigate('/cooperative/commandes-producteurs')} 

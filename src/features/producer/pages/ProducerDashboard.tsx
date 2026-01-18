@@ -36,18 +36,18 @@ const ProducerDashboard: React.FC = () => {
   const CustomHeader = () => (
     <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 -mx-4 -mt-4 px-4 py-6 text-white rounded-b-xl">
       <h1 className="text-xl font-bold">
-        Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'} 👋
+        Mon champ 🌾
       </h1>
       <p className="text-emerald-100 text-sm mt-1">
-        {producer?.cooperative?.name || 'Producteur indépendant'}
+        Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'}
       </p>
     </div>
   );
 
   return (
     <RoleLayout
-      title="Producteur"
-      subtitle="Espace producteur PNAVIM"
+      title="Mon champ"
+      subtitle="Ce que je cultive"
       isLoading={isLoading}
       showSignOut
       showHeader={false}
@@ -59,21 +59,21 @@ const ProducerDashboard: React.FC = () => {
         {/* Stats */}
         <ProducerStats stats={stats} isLoading={isStatsLoading} />
 
-        {/* Quick Action */}
+        {/* Action principale XXL */}
         <Link to="/producteur/recoltes">
-          <Button className="w-full gap-2 h-12">
-            <Plus className="h-5 w-5" />
-            Publier une nouvelle récolte
+          <Button className="w-full gap-2 h-16 text-lg font-bold rounded-2xl">
+            <Plus className="h-6 w-6" />
+            DÉCLARER MA RÉCOLTE
           </Button>
         </Link>
 
-        {/* Recent Harvests */}
+        {/* Ce que j'ai récolté */}
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Mes récoltes
+                Ce que j'ai récolté
               </CardTitle>
               <Link to="/producteur/recoltes" className="text-sm text-primary flex items-center gap-1">
                 Voir tout <ArrowRight className="h-3 w-3" />
@@ -92,22 +92,22 @@ const ProducerDashboard: React.FC = () => {
             ) : (
               <div className="text-center py-6 text-muted-foreground">
                 <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Aucune récolte publiée</p>
+                <p className="text-sm">Tu n'as pas encore déclaré de récolte</p>
                 <Link to="/producteur/recoltes">
-                  <Button variant="link" size="sm">Publier maintenant</Button>
+                  <Button variant="link" size="sm">Déclarer maintenant</Button>
                 </Link>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Pending Orders */}
+        {/* Ce qu'on me demande */}
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
-                Commandes en cours
+                Ce qu'on me demande
               </CardTitle>
               <Link to="/producteur/commandes" className="text-sm text-primary flex items-center gap-1">
                 Voir tout <ArrowRight className="h-3 w-3" />
@@ -126,7 +126,7 @@ const ProducerDashboard: React.FC = () => {
             ) : (
               <div className="text-center py-6 text-muted-foreground">
                 <ShoppingCart className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Aucune commande en cours</p>
+                <p className="text-sm">Personne ne t'a encore demandé de produits</p>
               </div>
             )}
           </CardContent>

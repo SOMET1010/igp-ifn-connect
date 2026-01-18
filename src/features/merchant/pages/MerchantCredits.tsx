@@ -51,8 +51,8 @@ export default function MerchantCredits() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <EnhancedHeader
-        title="Crédits Clients"
-        subtitle="Gérez vos créances"
+        title="Qui me doit"
+        subtitle="Les clients qui n'ont pas encore payé"
         showBack
         backTo="/marchand"
         showNotifications={false}

@@ -154,7 +154,7 @@ export default function MerchantStock() {
   return (
     <>
       <PageWithList<StockItem>
-        title="Mon Stock"
+        title="Ma marchandise"
         subtitle={`${stocks.length} produit${stocks.length !== 1 ? "s" : ""}${alertCount > 0 ? ` • ${alertCount} alerte${alertCount !== 1 ? "s" : ""}` : ""}`}
         showBack
         backTo="/marchand"
@@ -229,7 +229,7 @@ export default function MerchantStock() {
               className="w-full h-16 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl gap-3"
             >
               <Pictogram type="add" size="md" showBackground={false} />
-              <span>Ajouter un produit</span>
+              <span>Ajouter à ma marchandise</span>
             </Button>
           </div>
         }
@@ -240,10 +240,10 @@ export default function MerchantStock() {
             <CardContent className="p-8 text-center">
               <Pictogram type="stock" size="xl" className="mx-auto mb-4 opacity-50" />
               <p className="text-lg font-semibold text-foreground mb-2">
-                {searchQuery || statusFilter !== "all" ? "Aucun produit trouvé" : "Ton stock est vide"}
+                {searchQuery || statusFilter !== "all" ? "Rien trouvé" : "Tu n'as pas encore de marchandise"}
               </p>
               <p className="text-muted-foreground">
-                Appuie sur le bouton + pour ajouter
+                Appuie sur le bouton pour en ajouter
               </p>
             </CardContent>
           </Card>

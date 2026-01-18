@@ -133,8 +133,8 @@ export default function MerchantMarketplace() {
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <EnhancedHeader
-        title="Marché Virtuel"
-        subtitle="Commandez auprès des coopératives IFN"
+        title="Commander aux fournisseurs"
+        subtitle="Achète chez les coopératives"
         showBack
         backTo="/marchand"
         rightContent={
@@ -163,11 +163,11 @@ export default function MerchantMarketplace() {
           <TabsList className="grid w-full grid-cols-2 h-14">
             <TabsTrigger value="catalogue" className="text-base gap-2">
               <Store className="h-4 w-4" />
-              Catalogue
+              Produits
             </TabsTrigger>
             <TabsTrigger value="commandes" className="text-base gap-2 relative">
               <Package className="h-4 w-4" />
-              Commandes
+              Mes demandes
               {pendingOrdersCount > 0 && (
                 <Badge
                   variant="destructive"
