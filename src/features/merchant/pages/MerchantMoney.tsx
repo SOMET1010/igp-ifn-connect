@@ -166,16 +166,16 @@ export default function MerchantMoney() {
       />
 
       <main className="p-4 space-y-4">
-        {/* Tabs: Résumé / Portefeuille / Historique / Factures */}
+        {/* Tabs: Mon mois / Mon argent / Mes ventes / Mes tickets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-14">
             <TabsTrigger value="resume" className="text-sm gap-1 px-2">
               <ArrowUpCircle className="w-4 h-4" />
-              Résumé
+              Mon mois
             </TabsTrigger>
             <TabsTrigger value="wallet" className="text-sm gap-1 px-2">
               <Wallet className="w-4 h-4" />
-              Porte.
+              Argent
             </TabsTrigger>
             <TabsTrigger value="historique" className="text-sm gap-1 px-2">
               <History className="w-4 h-4" />
@@ -183,7 +183,7 @@ export default function MerchantMoney() {
             </TabsTrigger>
             <TabsTrigger value="factures" className="text-sm gap-1 px-2">
               <FileText className="w-4 h-4" />
-              Factures
+              Tickets
             </TabsTrigger>
           </TabsList>
 
@@ -285,9 +285,9 @@ export default function MerchantMoney() {
                 />
               </>
             ) : (
-              <CardLarge className="text-center py-8">
+            <CardLarge className="text-center py-8">
                 <Wallet className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">Portefeuille non disponible</p>
+                <p className="text-muted-foreground">Ton argent gardé n'est pas encore disponible</p>
               </CardLarge>
             )}
           </TabsContent>

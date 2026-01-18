@@ -150,8 +150,8 @@ export default function MerchantClose() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-pnavim-bg to-white pb-24">
       <EnhancedHeader
-        title="Fin de journée"
-        subtitle="Résumé de tes ventes"
+        title="Fermer ma journée"
+        subtitle="Ce que tu as vendu aujourd'hui"
         showBack
         backTo="/marchand"
         showNotifications={false}
@@ -236,6 +236,7 @@ export default function MerchantClose() {
             onClick={() => setStep("confirm")}
             fullWidth
             leftIcon={<Moon className="w-6 h-6" />}
+            className="mt-4"
           >
             Clôturer ma journée
           </PnavimButton>

@@ -87,7 +87,7 @@ const AgentDashboard: React.FC = () => {
   // Cas: Normal
   return (
     <RoleLayout
-      title={t("agent")}
+      title="Mes inscriptions"
       subtitle="Plateforme IFN – Espace Agent"
       showSignOut
       isLoading={isLoading}
@@ -113,43 +113,43 @@ const AgentDashboard: React.FC = () => {
           todayEnrollments={stats.today} 
         />
 
-        {/* Statistiques */}
+        {/* Ce que j'ai fait */}
         <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Statistiques</h2>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Ce que j'ai fait</h2>
           <AgentStats stats={stats} isLoading={isLoading} />
         </section>
 
-        {/* Analyse */}
+        {/* Mes progrès */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Analyse</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Mes progrès</h2>
           <AgentEnrollmentsChart 
             data={stats.weeklyEnrollments} 
             isLoading={isLoading} 
           />
         </section>
 
-        {/* Action principale */}
+        {/* Action principale XXL */}
         <Button
           onClick={() => navigate('/agent/enrolement')}
-          className="w-full h-12 text-base font-medium"
+          className="w-full h-16 text-lg font-bold bg-primary hover:bg-primary/90 rounded-2xl"
         >
-          <UserPlus className="h-5 w-5 mr-2" />
-          {t("new_enrollment")}
+          <UserPlus className="h-6 w-6 mr-2" />
+          INSCRIRE QUELQU'UN
         </Button>
 
-        {/* Actions rapides */}
+        {/* Actions */}
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Actions rapides</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">Mes actions</h2>
           <div className="space-y-2">
             <UnifiedActionCard
-              title={t("my_merchants")}
-              description={t("view_list")}
+              title="Les gens que j'aide"
+              description="Voir la liste"
               icon={Users}
               onClick={() => navigate('/agent/marchands')}
             />
             <UnifiedActionCard
-              title={t("my_profile")}
-              description={t("settings")}
+              title="Moi"
+              description="Mes réglages"
               icon={User}
               onClick={() => navigate('/agent/profil')}
             />
