@@ -1,8 +1,18 @@
+/**
+ * EnrollmentWizard - Wizard d'enrôlement marchand
+ * Refonte Jùlaba Design System
+ */
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Send, Loader2, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { StepProgress } from "@/shared/ui";
+import { toast } from "sonner";
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaButton,
+  JulabaStepIndicator,
+  type JulabaStep,
+} from "@/shared/ui/julaba";
 import { Step1Identity } from "@/features/agent/components/enrollment/Step1Identity";
 import { Step2Documents } from "@/features/agent/components/enrollment/Step2Documents";
 import { Step3Location } from "@/features/agent/components/enrollment/Step3Location";
@@ -12,9 +22,14 @@ import { useEnrollmentForm, enrollmentService } from "@/features/agent";
 import { useOfflineSync } from "@/shared/hooks";
 import { useAuth } from "@/shared/contexts";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
-const STEPS = ["Identité", "Documents", "Localisation", "Activité", "Confirmation"];
+const STEPS: JulabaStep[] = [
+  { id: "identity", label: "Identité", emoji: "👤" },
+  { id: "documents", label: "Documents", emoji: "📄" },
+  { id: "location", label: "Lieu", emoji: "📍" },
+  { id: "activity", label: "Activité", emoji: "🏪" },
+  { id: "confirm", label: "Confirmer", emoji: "✅" },
+];
 
 export default function EnrollmentWizard() {
   const navigate = useNavigate();
@@ -105,7 +120,6 @@ export default function EnrollmentWizard() {
     setIsSubmitting(true);
 
     try {
-      // Get agent ID
       const agentId = await enrollmentService.getAgentId(user.id);
       if (!agentId) {
         toast.error("Profil agent non trouvé");
@@ -113,7 +127,6 @@ export default function EnrollmentWizard() {
         return;
       }
 
-      // Final phone check
       const phoneUnique = await checkPhoneUnique(data.phone);
       if (!phoneUnique) {
         toast.error("Ce numéro de téléphone est déjà enregistré");
@@ -122,14 +135,12 @@ export default function EnrollmentWizard() {
       }
 
       if (isOnline) {
-        // Upload photos in parallel
         const [cmuPhotoUrl, locationPhotoUrl, idDocPhotoUrl] = await Promise.all([
           uploadPhoto(data.cmu_photo_base64, "cmu", data.cmu_number),
           uploadPhoto(data.location_photo_base64, "locations", data.phone),
           uploadPhoto(data.id_doc_photo_base64, "id-docs", data.id_doc_number),
         ]);
 
-        // Submit to database
         await enrollmentService.submitEnrollment({
           cmu_number: data.cmu_number.trim(),
           full_name: data.full_name.trim(),
@@ -152,7 +163,6 @@ export default function EnrollmentWizard() {
 
         toast.success("Marchand enregistré avec succès !");
       } else {
-        // Save for offline sync
         const offlineData = {
           ...data,
           enrolled_by: agentId,
@@ -170,6 +180,13 @@ export default function EnrollmentWizard() {
       toast.error("Erreur lors de l'inscription");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleClearDraft = () => {
+    if (confirm("Effacer le brouillon ?")) {
+      clearDraft();
+      toast.info("Brouillon effacé");
     }
   };
 
@@ -206,84 +223,72 @@ export default function EnrollmentWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <JulabaPageLayout background="gradient" withBottomNav={false}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
-        <div className="flex items-center justify-between px-4 h-16">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/agent")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="font-bold text-lg">Nouvel Enrôlement</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (confirm("Effacer le brouillon ?")) {
-                clearDraft();
-                toast.info("Brouillon effacé");
-              }
-            }}
-          >
-            <Trash2 className="w-5 h-5 text-destructive" />
-          </Button>
-        </div>
-      </header>
+      <JulabaHeader
+        title="Nouvel Enrôlement"
+        subtitle={`Étape ${currentStep + 1} sur 5`}
+        showBack
+        backPath="/agent"
+        rightAction={{
+          emoji: "🗑️",
+          onClick: handleClearDraft,
+          label: "Effacer brouillon"
+        }}
+      />
 
-      {/* Step Progress */}
-      <StepProgress steps={STEPS} currentStep={currentStep} />
+      {/* Indicateur d'étapes */}
+      <div className="px-4 py-3 bg-white/80 backdrop-blur sticky top-16 z-40">
+        <JulabaStepIndicator
+          steps={STEPS}
+          currentStep={currentStep}
+        />
+      </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-32">{renderStep()}</div>
+      {/* Contenu */}
+      <div className="flex-1 overflow-y-auto pb-32">
+        {renderStep()}
+      </div>
 
       {/* Footer Navigation */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t p-4">
-        <div className="flex gap-3 max-w-lg mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t p-4 max-w-[428px] mx-auto">
+        <div className="flex gap-3">
           {currentStep > 0 && (
-            <Button
-              variant="outline"
+            <JulabaButton
+              variant="secondary"
               onClick={prevStep}
               disabled={isSubmitting}
-              className="flex-1 btn-kpata-secondary"
+              className="flex-1"
+              emoji="⬅️"
             >
-              <ArrowLeft className="w-5 h-5 mr-2" />
               Précédent
-            </Button>
+            </JulabaButton>
           )}
           
           {currentStep < 4 ? (
-            <Button
+            <JulabaButton
+              variant="primary"
               onClick={nextStep}
               disabled={!canProceed() || isCheckingPhone}
-              className="flex-1 btn-kpata-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1"
+              emoji="➡️"
             >
               Suivant
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
+            </JulabaButton>
           ) : (
-            <Button
+            <JulabaButton
+              variant="hero"
               onClick={handleSubmit}
               disabled={!canProceed() || isSubmitting}
-              className="flex-1 btn-kpata-success disabled:opacity-50 disabled:cursor-not-allowed"
+              isLoading={isSubmitting}
+              className="flex-1"
+              emoji="✅"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Envoi...
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5 mr-2" />
-                  Enregistrer
-                </>
-              )}
-            </Button>
+              {isSubmitting ? "Envoi..." : "Enregistrer"}
+            </JulabaButton>
           )}
         </div>
-      </footer>
-    </div>
+      </div>
+    </JulabaPageLayout>
   );
 }
