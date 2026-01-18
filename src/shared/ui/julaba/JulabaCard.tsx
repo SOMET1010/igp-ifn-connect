@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 export interface JulabaCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Variante de bordure colorée */
-  accent?: 'none' | 'orange' | 'green' | 'gold';
+  accent?: 'none' | 'orange' | 'green' | 'gold' | 'blue';
   /** Padding interne */
   padding?: 'none' | 'sm' | 'md' | 'lg';
   /** Effet hover interactif */
@@ -39,6 +39,7 @@ const JulabaCard = forwardRef<HTMLDivElement, JulabaCardProps>(
       orange: 'border-l-4 border-l-[hsl(30_100%_60%)]',
       green: 'border-l-4 border-l-[hsl(145_74%_42%)]',
       gold: 'border-l-4 border-l-[hsl(45_100%_50%)]',
+      blue: 'border-l-4 border-l-[hsl(210_100%_50%)]',
     };
     
     const paddingStyles = {
