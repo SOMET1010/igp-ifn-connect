@@ -1,14 +1,20 @@
-// ============================================
-// Page - Merchant Marketplace (Marché Virtuel)
-// Workflow 11.3 PNAVIM-CI: Marketplace/Marché Virtuel
-// ============================================
+/**
+ * Page Marché Virtuel - /marchand/marche
+ * Refactorisée avec Design System Jùlaba
+ */
 
 import { useState } from "react";
-import { EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
-import { merchantNavItems } from "@/config/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaTabBar,
+  JulabaCard,
+  JulabaEmptyState,
+  JulabaBottomNav,
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Store, Package, ShoppingCart } from "lucide-react";
+import { Loader2, ShoppingCart } from "lucide-react";
 
 // Hooks
 import { useMerchantSuppliers } from "../hooks/useMerchantSuppliers";
@@ -23,7 +29,13 @@ import { OrderSuccessScreen } from "../components/suppliers/OrderSuccessScreen";
 import { PriceCompareSheet } from "@/features/public/components/market/PriceCompareSheet";
 
 // Types
-import type { Product, ProductOffer } from "../types/suppliers.types";
+import type { ProductOffer } from "../types/suppliers.types";
+
+// Tabs Jùlaba
+const MARKETPLACE_TABS = [
+  { id: "catalogue", label: "Produits", emoji: "🏪" },
+  { id: "commandes", label: "Mes demandes", emoji: "📦" },
+];
 
 export default function MerchantMarketplace() {
   const {
@@ -97,54 +109,46 @@ export default function MerchantMarketplace() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <JulabaPageLayout background="warm" className="flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <p className="text-muted-foreground">Chargement du marché...</p>
         </div>
-      </div>
+      </JulabaPageLayout>
     );
   }
 
   // Error state - no merchant found
   if (!merchantId) {
     return (
-      <div className="min-h-screen bg-background pb-24">
-        <EnhancedHeader
-          title="Marché Virtuel"
-          showBack
-          backTo="/marchand"
+      <JulabaPageLayout background="warm" className="pb-24">
+        <JulabaHeader
+          title="🏪 Marché Virtuel"
+          backPath="/marchand"
         />
-        <div className="flex flex-col items-center justify-center p-8 text-center mt-20">
-          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
-            <Store className="h-10 w-10 text-muted-foreground" />
-          </div>
-          <h2 className="text-xl font-semibold mb-2">Profil marchand introuvable</h2>
-          <p className="text-muted-foreground">
-            Veuillez vous reconnecter pour accéder au marché virtuel.
-          </p>
-        </div>
-        <UnifiedBottomNav items={merchantNavItems} />
-      </div>
+        <main className="p-4">
+          <JulabaEmptyState
+            emoji="🏪"
+            title="Profil marchand introuvable"
+            description="Reconnecte-toi pour accéder au marché virtuel."
+          />
+        </main>
+        <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <JulabaPageLayout background="warm" className="pb-24">
       {/* Header */}
-      <EnhancedHeader
-        title="Commander aux fournisseurs"
-        subtitle="Achète chez les coopératives"
-        showBack
-        backTo="/marchand"
-        rightContent={
-          cartItemCount > 0 ? (
-            <Badge className="bg-primary text-primary-foreground">
-              <ShoppingCart className="h-3 w-3 mr-1" />
-              {cartItemCount}
-            </Badge>
-          ) : undefined
-        }
+      <JulabaHeader
+        title="🏪 Commander"
+        backPath="/marchand"
+        rightAction={cartItemCount > 0 ? {
+          emoji: "🛒",
+          label: `${cartItemCount}`,
+          onClick: () => {},
+        } : undefined}
       />
 
       {/* Success Screen (overlay) */}
@@ -158,49 +162,44 @@ export default function MerchantMarketplace() {
 
       {/* Main Content */}
       <main className="px-4 py-4 space-y-4">
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 h-14">
-            <TabsTrigger value="catalogue" className="text-base gap-2">
-              <Store className="h-4 w-4" />
-              Produits
-            </TabsTrigger>
-            <TabsTrigger value="commandes" className="text-base gap-2 relative">
-              <Package className="h-4 w-4" />
-              Mes demandes
-              {pendingOrdersCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
-                >
-                  {pendingOrdersCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
+        {/* Tabs Jùlaba */}
+        <div className="relative">
+          <JulabaTabBar
+            tabs={MARKETPLACE_TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+          {pendingOrdersCount > 0 && (
+            <Badge
+              variant="destructive"
+              className="absolute -top-1 right-2 h-5 w-5 p-0 text-xs flex items-center justify-center"
+            >
+              {pendingOrdersCount}
+            </Badge>
+          )}
+        </div>
 
-          {/* Catalogue Tab */}
-          <TabsContent value="catalogue" className="mt-4">
-            <SuppliersCatalogue
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              products={filteredProducts}
-              onSelectProduct={setSelectedProduct}
-            />
-          </TabsContent>
+        {/* Catalogue Tab */}
+        {activeTab === "catalogue" && (
+          <SuppliersCatalogue
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            products={filteredProducts}
+            onSelectProduct={setSelectedProduct}
+          />
+        )}
 
-          {/* Orders Tab */}
-          <TabsContent value="commandes" className="mt-4">
-            <SuppliersOrdersList
-              orders={orders}
-              onCancelOrder={cancelOrder}
-              onBrowseCatalogue={() => setActiveTab("catalogue")}
-            />
-          </TabsContent>
-        </Tabs>
+        {/* Orders Tab */}
+        {activeTab === "commandes" && (
+          <SuppliersOrdersList
+            orders={orders}
+            onCancelOrder={cancelOrder}
+            onBrowseCatalogue={() => setActiveTab("catalogue")}
+          />
+        )}
       </main>
 
       {/* Price Compare Sheet */}
@@ -231,7 +230,7 @@ export default function MerchantMarketplace() {
       />
 
       {/* Bottom Navigation */}
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }

@@ -1,12 +1,24 @@
+/**
+ * Page Aide - /marchand/aide
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Volume2, Phone, Heart, PiggyBank, ChevronDown, ChevronUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
-import { CardLarge } from "@/shared/ui/ifn";
+import { AudioButton } from "@/shared/ui";
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaTantie,
+  JulabaBottomNav,
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import { toast } from "sonner";
-import { merchantNavItems } from "@/config/navigation";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function MerchantHelp() {
   const navigate = useNavigate();
@@ -20,7 +32,7 @@ export default function MerchantHelp() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <JulabaPageLayout background="warm" className="pb-24">
       {/* Floating Audio Button */}
       <AudioButton 
         textToRead={pageAudioText}
@@ -28,84 +40,91 @@ export default function MerchantHelp() {
         size="lg"
       />
 
-      <EnhancedHeader
-        title={t("my_help")}
-        showBack
-        backTo="/marchand"
-        showNotifications={false}
+      <JulabaHeader
+        title="❓ Mon aide"
+        backPath="/marchand"
       />
 
-      <main className="p-4 space-y-5">
+      <main className="p-4 space-y-5 max-w-lg mx-auto">
+        {/* Message Tantie rassurant */}
+        <JulabaTantie
+          message="N'hésite pas à demander de l'aide ! Je suis là pour toi."
+          variant="small"
+        />
+
         {/* Vidéo Comment encaisser */}
-        <CardLarge 
-          onClick={() => {
-            // TODO: Implémenter modal vidéo
-            toast.info("Vidéo tutoriel bientôt disponible");
-          }}
-          className="flex items-center gap-4"
+        <JulabaCard 
+          interactive
+          onClick={() => toast.info("Vidéo tutoriel bientôt disponible")}
         >
-          <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center">
-            <Play className="w-9 h-9 text-secondary" fill="currentColor" />
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center">
+              <span className="text-3xl">🎬</span>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-foreground">
+                {t("how_to_collect")}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                Regarde la vidéo
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">
-              {t("how_to_collect")}
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              Regarde la vidéo
-            </p>
-          </div>
-        </CardLarge>
+        </JulabaCard>
 
         {/* Écouter en Dioula */}
-        <CardLarge className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-            <Volume2 className="w-9 h-9 text-amber-600" />
+        <JulabaCard>
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+              <span className="text-3xl">🔊</span>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-foreground">
+                {t("listen_dioula")}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                On t'explique tout
+              </p>
+            </div>
+            <AudioButton 
+              textToRead="Bienvenue sur l'application. Pour encaisser, appuie sur le gros bouton vert. Tape le montant, puis choisis Espèces ou Mobile Money."
+              size="lg"
+              className="h-14 w-14"
+            />
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">
-              {t("listen_dioula")}
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              On t'explique tout
-            </p>
-          </div>
-          <AudioButton 
-            textToRead="Bienvenue sur l'application. Pour encaisser, appuie sur le gros bouton vert. Tape le montant, puis choisis Espèces ou Mobile Money."
-            size="lg"
-            className="h-14 w-14"
-          />
-        </CardLarge>
+        </JulabaCard>
 
         {/* Comprendre CMU et RSTI - Section dépliable */}
         <Collapsible open={understandOpen} onOpenChange={setUnderstandOpen}>
           <CollapsibleTrigger asChild>
-            <CardLarge className="flex items-center gap-4 cursor-pointer">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <span className="text-3xl">💡</span>
+            <JulabaCard interactive className="cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <span className="text-3xl">💡</span>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-foreground">
+                    {t("understand_cmu_rsti")}
+                  </h2>
+                  <p className="text-muted-foreground mt-1">
+                    {t("understand_simple")}
+                  </p>
+                </div>
+                {understandOpen ? (
+                  <ChevronUp className="w-6 h-6 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-6 h-6 text-muted-foreground" />
+                )}
               </div>
-              <div className="flex-1">
-                <h2 className="text-xl font-bold text-foreground">
-                  {t("understand_cmu_rsti")}
-                </h2>
-                <p className="text-muted-foreground mt-1">
-                  {t("understand_simple")}
-                </p>
-              </div>
-              {understandOpen ? (
-                <ChevronUp className="w-6 h-6 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-6 h-6 text-muted-foreground" />
-              )}
-            </CardLarge>
+            </JulabaCard>
           </CollapsibleTrigger>
           
           <CollapsibleContent className="space-y-4 mt-4">
             {/* CMU Section */}
-            <CardLarge className="border-2 border-destructive/30 bg-destructive/5">
+            <JulabaCard accent="orange">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">🏥</span>
-                <h3 className="text-lg font-bold text-destructive">
+                <h3 className="text-lg font-bold text-primary">
                   {t("cmu_simple_title")}
                 </h3>
               </div>
@@ -115,13 +134,13 @@ export default function MerchantHelp() {
                 <p className="flex items-center gap-2">🏥 {t("cmu_benefit_1")}</p>
                 <p className="flex items-center gap-2">💊 {t("cmu_benefit_2")}</p>
               </div>
-            </CardLarge>
+            </JulabaCard>
 
             {/* RSTI Section */}
-            <CardLarge className="border-2 border-[hsl(142,76%,36%)]/30 bg-[hsl(142,76%,36%)]/5">
+            <JulabaCard accent="green">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">🏦</span>
-                <h3 className="text-lg font-bold text-[hsl(142,76%,36%)]">
+                <h3 className="text-lg font-bold text-secondary">
                   {t("rsti_simple_title")}
                 </h3>
               </div>
@@ -131,55 +150,58 @@ export default function MerchantHelp() {
                 <p className="flex items-center gap-2">🏦 {t("rsti_benefit_1")}</p>
                 <p className="flex items-center gap-2">👴 {t("rsti_benefit_2")}</p>
               </div>
-            </CardLarge>
+            </JulabaCard>
 
             {/* Exemple concret */}
-            <CardLarge className="bg-secondary/5">
+            <JulabaCard>
               <p className="font-bold mb-2">📊 {t("example_title")}</p>
-              <div className="bg-background rounded-lg p-3 text-sm space-y-1">
+              <div className="bg-muted/50 rounded-xl p-4 text-sm space-y-2">
                 <div className="flex justify-between">
                   <span>{t("example_sale")}</span>
                   <span className="font-bold">10 000 FCFA</span>
                 </div>
-                <div className="flex justify-between text-destructive">
+                <div className="flex justify-between text-primary">
                   <span>🏥 CMU</span>
                   <span>-100 FCFA</span>
                 </div>
-                <div className="flex justify-between text-[hsl(142,76%,36%)]">
+                <div className="flex justify-between text-secondary">
                   <span>🏦 RSTI</span>
                   <span>+50 FCFA</span>
                 </div>
-                <div className="border-t pt-1 flex justify-between font-bold">
+                <div className="border-t pt-2 flex justify-between font-bold">
                   <span>💵 {t("you_keep")}</span>
-                  <span className="text-[hsl(142,76%,36%)]">9 900 FCFA</span>
+                  <span className="text-secondary">9 900 FCFA</span>
                 </div>
               </div>
-            </CardLarge>
+            </JulabaCard>
           </CollapsibleContent>
         </Collapsible>
 
         {/* Appeler mon agent */}
-        <CardLarge 
+        <JulabaCard 
+          accent="green"
+          interactive
           onClick={handleCallAgent}
-          className="flex items-center gap-4 bg-[hsl(142,76%,36%)]/5 border-[hsl(142,76%,36%)]/30"
         >
-          <div className="w-16 h-16 rounded-2xl bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
-            <Phone className="w-9 h-9 text-[hsl(142,76%,36%)]" />
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center">
+              <span className="text-3xl">📞</span>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-foreground">
+                {t("call_agent")}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                On est là pour toi
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-foreground">
-              {t("call_agent")}
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              On est là pour toi
-            </p>
-          </div>
-        </CardLarge>
+        </JulabaCard>
 
         {/* Message rassurant */}
-        <div className="text-center py-8">
-          <p className="text-2xl">❓</p>
-          <p className="text-muted-foreground mt-2 text-lg">
+        <div className="text-center py-6">
+          <p className="text-4xl mb-2">🤗</p>
+          <p className="text-muted-foreground text-lg">
             Tu hésites ? C'est normal.
           </p>
           <p className="text-muted-foreground">
@@ -188,7 +210,7 @@ export default function MerchantHelp() {
         </div>
       </main>
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
