@@ -23,5 +23,20 @@ export { JulabaActionTile, type JulabaActionTileProps } from './JulabaActionTile
 export { JulabaHeader, type JulabaHeaderProps } from './JulabaHeader';
 export { JulabaBottomNav, type JulabaBottomNavProps, type JulabaNavItem } from './JulabaBottomNav';
 
+// Layout
+export { JulabaPageLayout, type JulabaPageLayoutProps } from './JulabaPageLayout';
+export { JulabaTabBar, type JulabaTab, type JulabaTabBarProps } from './JulabaTabBar';
+
+// Formulaires
+export { JulabaInput, type JulabaInputProps } from './JulabaInput';
+export { JulabaStepIndicator, type JulabaStep, type JulabaStepIndicatorProps } from './JulabaStepIndicator';
+
+// Listes
+export { JulabaListItem, type JulabaListItemProps } from './JulabaListItem';
+export { JulabaEmptyState, type JulabaEmptyStateProps } from './JulabaEmptyState';
+
+// Dialogs
+export { JulabaDialog, type JulabaDialogProps } from './JulabaDialog';
+
 // Personnages
 export { JulabaTantie, type JulabaTantieProps } from './JulabaTantie';

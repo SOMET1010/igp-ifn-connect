@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 
 export interface JulabaButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Variante de style */
-  variant?: 'hero' | 'secondary' | 'success' | 'outline' | 'ghost';
+  variant?: 'hero' | 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost';
   /** Taille du bouton */
   size?: 'sm' | 'md' | 'lg' | 'hero';
   /** Emoji/icône à afficher */
@@ -48,6 +48,12 @@ const JulabaButton = forwardRef<HTMLButtonElement, JulabaButtonProps>(
         hover:shadow-[0_12px_40px_-8px_hsl(30_100%_50%/0.6)]
         border-0
       `,
+      primary: `
+        bg-gradient-to-br from-[hsl(30_100%_60%)] to-[hsl(27_100%_50%)]
+        text-white shadow-[0_8px_32px_-8px_hsl(30_100%_50%/0.5)]
+        hover:shadow-[0_12px_40px_-8px_hsl(30_100%_50%/0.6)]
+        border-0
+      `,
       secondary: `
         bg-white border-2 border-[hsl(30_100%_60%)]
         text-[hsl(27_100%_45%)]
@@ -56,6 +62,11 @@ const JulabaButton = forwardRef<HTMLButtonElement, JulabaButtonProps>(
       success: `
         bg-gradient-to-br from-[hsl(145_74%_42%)] to-[hsl(145_74%_32%)]
         text-white shadow-[0_8px_32px_-8px_hsl(145_74%_40%/0.5)]
+        border-0
+      `,
+      danger: `
+        bg-gradient-to-br from-[hsl(0_80%_60%)] to-[hsl(0_80%_50%)]
+        text-white shadow-[0_8px_32px_-8px_hsl(0_80%_50%/0.5)]
         border-0
       `,
       outline: `
