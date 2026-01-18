@@ -5,7 +5,7 @@
  * Pages importées depuis src/features/agent/
  */
 
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
 // === IMPORT DEPUIS FEATURE AGENT ===
@@ -35,6 +35,10 @@ export const agentProtectedRoutes = (
     <Route path="/agent/enrolement" element={<EnrollmentWizard />} />
     <Route path="/agent/marchands" element={<MerchantList />} />
     <Route path="/agent/profil" element={<AgentProfilePage />} />
+    
+    {/* === ALIAS UX INCLUSIFS === */}
+    <Route path="/agent/inscrire" element={<Navigate to="/agent/enrolement" replace />} />
+    <Route path="/agent/mes-gens" element={<Navigate to="/agent/marchands" replace />} />
   </Route>
 );
 

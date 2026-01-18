@@ -63,6 +63,12 @@ export const merchantProtectedRoutes = (
     {/* Assistant vocal */}
     <Route path="/marchand/assistant-vocal" element={<VoiceAssistant />} />
 
+    {/* === ALIAS UX INCLUSIFS === */}
+    <Route path="/marchand/marchandise" element={<Navigate to="/marchand/stock" replace />} />
+    <Route path="/marchand/dettes" element={<Navigate to="/marchand/credits" replace />} />
+    <Route path="/marchand/identite" element={<Navigate to="/marchand/kyc" replace />} />
+    <Route path="/marchand/fermer" element={<Navigate to="/marchand/cloture" replace />} />
+    
     {/* === REDIRECTIONS LEGACY (compatibilité) === */}
     <Route path="/marchand/encaisser" element={<Navigate to="/marchand/vendre" replace />} />
     <Route path="/marchand/scanner" element={<Navigate to="/marchand/vendre?mode=scanner" replace />} />

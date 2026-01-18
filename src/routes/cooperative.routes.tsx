@@ -5,7 +5,7 @@
  * Pages importées depuis src/features/cooperative/
  */
 
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { RequireRole } from '@/app/guards';
 
 // === IMPORT DEPUIS FEATURE COOPERATIVE ===
@@ -43,6 +43,11 @@ export const cooperativeProtectedRoutes = (
     <Route path="/cooperative/membres" element={<CooperativeMembers />} />
     <Route path="/cooperative/producteurs" element={<CooperativeProducers />} />
     <Route path="/cooperative/commandes-producteurs" element={<CooperativeProducerOrders />} />
+    
+    {/* === ALIAS UX INCLUSIFS === */}
+    <Route path="/cooperative/produits" element={<Navigate to="/cooperative/stock" replace />} />
+    <Route path="/cooperative/demandes" element={<Navigate to="/cooperative/commandes" replace />} />
+    <Route path="/cooperative/cultivateurs" element={<Navigate to="/cooperative/producteurs" replace />} />
   </Route>
 );
 

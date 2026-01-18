@@ -37,6 +37,10 @@ export const producerProtectedRoutes = (
     <Route path="/producteur/recoltes" element={<ProducerHarvests />} />
     <Route path="/producteur/commandes" element={<ProducerOrders />} />
     <Route path="/producteur/profil" element={<ProducerProfilePage />} />
+    
+    {/* === ALIAS UX INCLUSIFS === */}
+    <Route path="/producteur/demandes" element={<Navigate to="/producteur/commandes" replace />} />
+    <Route path="/producteur/ventes" element={<Navigate to="/producteur/recoltes" replace />} />
   </Route>
 );
 
