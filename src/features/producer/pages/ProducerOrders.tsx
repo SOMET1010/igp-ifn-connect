@@ -1,24 +1,38 @@
 /**
  * Page Commandes du Producteur - PNAVIM
+ * Refonte Jùlaba Design System
  */
 
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileLayout } from '@/shared/layout/MobileLayout';
-import { 
-  Sprout, 
-  Package, 
-  ShoppingCart, 
-  User, 
-  Loader2,
-  Clock,
-  CheckCircle2
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaTabBar,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { 
   useProducerData, 
   useProducerOrders,
   OrderCard
 } from '@/features/producer';
+
+// Nav items Producteur
+const PRODUCER_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🌾', label: 'Accueil', path: '/producteur' },
+  { emoji: '📦', label: 'Récoltes', path: '/producteur/recoltes' },
+  { emoji: '🛒', label: 'Commandes', path: '/producteur/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/producteur/profil' },
+];
+
+const ORDER_TABS = [
+  { id: 'pending', label: 'En cours', emoji: '⏳' },
+  { id: 'completed', label: 'Terminées', emoji: '✅' },
+];
 
 const ProducerOrders: React.FC = () => {
   const { producer, isLoading: isProducerLoading } = useProducerData();
@@ -30,93 +44,90 @@ const ProducerOrders: React.FC = () => {
     isUpdating
   } = useProducerOrders(producer?.id);
 
-  const navItems = [
-    { icon: Sprout, label: 'Accueil', path: '/producteur' },
-    { icon: Package, label: 'Récoltes', path: '/producteur/recoltes' },
-    { icon: ShoppingCart, label: 'Commandes', path: '/producteur/commandes', isActive: true },
-    { icon: User, label: 'Profil', path: '/producteur/profil' },
-  ];
+  const [activeTab, setActiveTab] = useState('pending');
+
+  const displayedOrders = activeTab === 'pending' ? pendingOrders : completedOrders;
 
   if (isProducerLoading) {
     return (
-      <MobileLayout title="Commandes" navItems={navItems}>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
-      </MobileLayout>
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <MobileLayout title="Commandes" navItems={navItems}>
-      <div className="space-y-4 pb-6">
-        {/* Stats Summary */}
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader
+        title="Commandes"
+        subtitle={`${pendingOrders.length + completedOrders.length} commande(s)`}
+        showBack
+        backPath="/producteur"
+      />
+
+      <div className="p-4 space-y-4">
+        {/* Stats rapides */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600" />
-              <span className="text-sm text-amber-800">En cours</span>
-            </div>
-            <p className="text-2xl font-bold text-amber-900 mt-1">{pendingOrders.length}</p>
-          </div>
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-              <span className="text-sm text-emerald-800">Terminées</span>
-            </div>
-            <p className="text-2xl font-bold text-emerald-900 mt-1">{completedOrders.length}</p>
-          </div>
+          <JulabaStatCard
+            label="En cours"
+            value={pendingOrders.length}
+            emoji="⏳"
+            iconBg="orange"
+          />
+          <JulabaStatCard
+            label="Terminées"
+            value={completedOrders.length}
+            emoji="✅"
+            iconBg="green"
+          />
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="pending" className="gap-1">
-              En cours ({pendingOrders.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="gap-1">
-              Terminées ({completedOrders.length})
-            </TabsTrigger>
-          </TabsList>
+        <JulabaTabBar
+          tabs={ORDER_TABS.map(t => ({
+            ...t,
+            label: `${t.label} (${t.id === 'pending' ? pendingOrders.length : completedOrders.length})`,
+          }))}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-          <TabsContent value="pending" className="space-y-3 mt-4">
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : pendingOrders.length > 0 ? (
-              pendingOrders.map((order) => (
+        {/* Liste */}
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : displayedOrders.length > 0 ? (
+          <div className="space-y-3">
+            {displayedOrders.map((order) => (
+              <JulabaCard key={order.id} className="p-3">
                 <OrderCard 
-                  key={order.id} 
                   order={order}
-                  onUpdateStatus={(orderId, status) => updateStatus({ orderId, status })}
+                  onUpdateStatus={activeTab === 'pending' 
+                    ? (orderId, status) => updateStatus({ orderId, status })
+                    : undefined
+                  }
                   isUpdating={isUpdating}
                 />
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Aucune commande en cours</p>
-                <p className="text-sm mt-1">Les nouvelles commandes des coopératives apparaîtront ici</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-3 mt-4">
-            {completedOrders.length > 0 ? (
-              completedOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Aucune commande terminée</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              </JulabaCard>
+            ))}
+          </div>
+        ) : (
+          <JulabaEmptyState
+            emoji={activeTab === 'pending' ? '📭' : '📜'}
+            title={activeTab === 'pending' ? 'Aucune commande en cours' : 'Aucune commande terminée'}
+            description={activeTab === 'pending' 
+              ? 'Les nouvelles commandes apparaîtront ici' 
+              : 'Les commandes terminées apparaîtront ici'
+            }
+          />
+        )}
       </div>
-    </MobileLayout>
+
+      <JulabaBottomNav items={PRODUCER_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

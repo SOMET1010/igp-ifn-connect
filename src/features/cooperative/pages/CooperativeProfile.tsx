@@ -1,17 +1,36 @@
+/**
+ * CooperativeProfile - Profil Coopérative
+ * Refonte Jùlaba Design System
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/shared/contexts';
-import { Loader2, LogOut } from 'lucide-react';
-import { NotificationToggle, EnhancedHeader, UnifiedBottomNav } from '@/shared/ui';
-import { cooperativeNavItems } from '@/config/navigation';
+import { NotificationToggle } from '@/shared/ui';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import {
   useCooperativeProfile,
   CooperativeProfileHeader,
   CooperativeProfileView,
   CooperativeProfileEditForm,
 } from '@/features/cooperative';
+
+// Nav items Coopérative
+const COOP_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/cooperative' },
+  { emoji: '📦', label: 'Stock', path: '/cooperative/stock' },
+  { emoji: '📋', label: 'Commandes', path: '/cooperative/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/cooperative/profil' },
+];
 
 const CooperativeProfile: React.FC = () => {
   const navigate = useNavigate();
@@ -36,77 +55,99 @@ const CooperativeProfile: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
     );
   }
 
   if (!cooperative) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Aucun profil coopérative trouvé</p>
-      </div>
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader
+          title="Profil"
+          subtitle="Coopérative"
+          showBack
+          backPath="/cooperative"
+        />
+        <div className="p-4">
+          <JulabaEmptyState
+            emoji="🤷"
+            title="Profil introuvable"
+            description="Aucun profil coopérative trouvé"
+          />
+        </div>
+        <JulabaBottomNav items={COOP_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <EnhancedHeader
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader
         title="Profil Coopérative"
-        subtitle="Informations et paramètres"
+        subtitle={cooperative.name}
         showBack
-        backTo="/cooperative"
+        backPath="/cooperative"
       />
 
       <div className="p-4 space-y-4 max-w-lg mx-auto">
         {/* Profile header with edit button */}
         {!isEditing && (
-          <CooperativeProfileHeader
-            cooperative={cooperative}
-            onEditClick={toggleEditing}
-          />
+          <JulabaCard className="p-4">
+            <CooperativeProfileHeader
+              cooperative={cooperative}
+              onEditClick={toggleEditing}
+            />
+          </JulabaCard>
         )}
 
         {/* Edit form or view mode */}
         {isEditing ? (
-          <CooperativeProfileEditForm
-            formData={formData}
-            isSaving={isSaving}
-            onUpdateField={updateField}
-            onGPSCapture={handleGPSCapture}
-            onSave={saveProfile}
-            onCancel={toggleEditing}
-          />
+          <JulabaCard className="p-4">
+            <CooperativeProfileEditForm
+              formData={formData}
+              isSaving={isSaving}
+              onUpdateField={updateField}
+              onGPSCapture={handleGPSCapture}
+              onSave={saveProfile}
+              onCancel={toggleEditing}
+            />
+          </JulabaCard>
         ) : (
-          <CooperativeProfileView cooperative={cooperative} />
+          <JulabaCard className="p-4">
+            <CooperativeProfileView cooperative={cooperative} />
+          </JulabaCard>
         )}
 
         {/* Notifications */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-foreground mb-3">Notifications</h3>
-            <NotificationToggle className="w-full" />
-          </CardContent>
-        </Card>
+        <JulabaCard accent="blue" className="p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">🔔</span>
+            <h3 className="font-semibold">Notifications</h3>
+          </div>
+          <NotificationToggle className="w-full" />
+        </JulabaCard>
 
         {/* Logout button */}
-        <Button
+        <JulabaButton
+          variant="danger"
+          emoji="🚪"
           onClick={handleSignOut}
-          variant="outline"
-          className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          className="w-full"
         >
-          <LogOut className="h-5 w-5 mr-2" />
           Se déconnecter
-        </Button>
+        </JulabaButton>
 
         <p className="text-center text-xs text-muted-foreground pt-4">
           Plateforme IFN - © 2024
         </p>
       </div>
 
-      <UnifiedBottomNav items={cooperativeNavItems} />
-    </div>
+      <JulabaBottomNav items={COOP_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

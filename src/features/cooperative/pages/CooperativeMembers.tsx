@@ -1,18 +1,21 @@
 /**
- * Page de gestion des membres de la coopérative
+ * CooperativeMembers - Membres Coopérative
+ * Refonte Jùlaba Design System
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useLanguage } from '@/shared/contexts';
-import { EnhancedHeader, UnifiedBottomNav, LoadingState, ErrorState } from '@/shared/ui';
-import { 
-  Home, 
-  Package, 
-  ClipboardList, 
-  User,
-  Users,
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { useCooperativeDashboard } from '@/features/cooperative';
 import { useCooperativeMembers } from '@/features/cooperative/hooks/useCooperativeMembers';
 import { 
@@ -22,17 +25,18 @@ import {
   ExportMembersPDF,
 } from '@/features/cooperative/components/members';
 
+// Nav items Coopérative
+const COOP_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/cooperative' },
+  { emoji: '📦', label: 'Stock', path: '/cooperative/stock' },
+  { emoji: '📋', label: 'Commandes', path: '/cooperative/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/cooperative/profil' },
+];
+
 const CooperativeMembers: React.FC = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { t } = useLanguage();
-
-  const navItems = [
-    { icon: Home, label: t("home"), path: '/cooperative' },
-    { icon: Package, label: t("stock"), path: '/cooperative/stock' },
-    { icon: ClipboardList, label: t("orders"), path: '/cooperative/commandes' },
-    { icon: User, label: t("profile"), path: '/cooperative/profil' },
-  ];
 
   const { cooperative, isLoading: isLoadingCoop, error: errorCoop } = useCooperativeDashboard();
 
@@ -57,57 +61,69 @@ const CooperativeMembers: React.FC = () => {
 
   if (isLoadingCoop || isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title="Membres" subtitle={cooperative?.name} showSignOut onSignOut={handleSignOut} />
-        <LoadingState message="Chargement des membres..." />
-        <UnifiedBottomNav items={navItems} />
-      </div>
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
     );
   }
 
   if (errorCoop || error) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title="Membres" subtitle="Coopérative" showSignOut onSignOut={handleSignOut} />
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader 
+          title="Membres" 
+          subtitle={cooperative?.name}
+          showBack
+          backPath="/cooperative"
+        />
         <div className="p-4">
-          <ErrorState 
-            message={error?.message || errorCoop?.message || "Erreur de chargement"} 
-            onRetry={refetch} 
+          <JulabaEmptyState
+            emoji="😕"
+            title="Erreur de chargement"
+            description={error?.message || errorCoop?.message || "Erreur inconnue"}
           />
         </div>
-        <UnifiedBottomNav items={navItems} />
-      </div>
+        <JulabaBottomNav items={COOP_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <EnhancedHeader 
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader 
         title="Membres" 
-        subtitle={cooperative?.name}
-        showSignOut 
-        onSignOut={handleSignOut}
-        rightContent={
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Users className="h-4 w-4" />
-            {stats.total}
-          </div>
-        }
+        subtitle={`${stats.total} membre(s)`}
+        showBack
+        backPath="/cooperative"
+        rightAction={{
+          emoji: '👥',
+          onClick: () => {},
+          label: `${stats.total} membres`
+        }}
       />
 
       <div className="p-4 space-y-6 max-w-2xl mx-auto">
         {/* Statistiques */}
-        <MemberStatsCards stats={stats} />
+        <JulabaStatCard
+          label="Total membres"
+          value={stats.total}
+          emoji="👥"
+          iconBg="blue"
+        />
 
         {/* Actions */}
-        <div className="flex justify-between items-center gap-2 flex-wrap">
-          <ExportMembersPDF 
-            members={members} 
-            stats={stats} 
-            cooperativeName={cooperative?.name || ''} 
-          />
-          <AddMemberDialog onAdd={addMember} isAdding={isAdding} />
-        </div>
+        <JulabaCard className="p-4">
+          <div className="flex justify-between items-center gap-2 flex-wrap">
+            <ExportMembersPDF 
+              members={members} 
+              stats={stats} 
+              cooperativeName={cooperative?.name || ''} 
+            />
+            <AddMemberDialog onAdd={addMember} isAdding={isAdding} />
+          </div>
+        </JulabaCard>
 
         {/* Liste des membres */}
         <MembersList 
@@ -119,8 +135,8 @@ const CooperativeMembers: React.FC = () => {
         />
       </div>
 
-      <UnifiedBottomNav items={navItems} />
-    </div>
+      <JulabaBottomNav items={COOP_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

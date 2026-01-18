@@ -1,15 +1,24 @@
 /**
  * Dashboard Coopérative - PNAVIM
- * Phase 6: Migré vers RoleLayout
+ * Refonte Jùlaba Design System
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/shared/contexts';
-import { AudioButton, UnifiedActionCard } from '@/shared/ui';
-import { RoleLayout } from '@/app/layouts/RoleLayout';
+import { AudioButton } from '@/shared/ui';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaListItem,
+  JulabaStatCard,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { 
   useCooperativeDashboard,
   useCooperativeNotifications,
@@ -20,13 +29,14 @@ import {
   QuickGuide,
   DateFilterTabs,
 } from '@/features/cooperative';
-import { 
-  Package, 
-  ClipboardList,
-  Award,
-  Users,
-  ShoppingCart,
-} from 'lucide-react';
+
+// Nav items Coopérative
+const COOP_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/cooperative' },
+  { emoji: '📦', label: 'Stock', path: '/cooperative/stock' },
+  { emoji: '📋', label: 'Commandes', path: '/cooperative/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/cooperative/profil' },
+];
 
 const CooperativeDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -47,26 +57,61 @@ const CooperativeDashboard: React.FC = () => {
 
   const audioText = `${t("audio_coop_dashboard")} ${cooperative?.total_members ?? 0} ${t("members")}, ${stats.products} ${t("products")}, ${stats.pendingOrders} ${t("pending_orders")}.`;
 
-  // Badge IGP pour le header
-  const IGPBadge = cooperative?.igp_certified ? (
-    <Badge variant="secondary" className="text-xs">
-      <Award className="w-3 h-3 mr-1" />IFN
-    </Badge>
-  ) : null;
-
-  // Calcul du CA hebdomadaire total
+  // CA hebdomadaire total
   const weeklyRevenueTotal = weeklyRevenue.reduce((sum, d) => sum + d.revenue, 0);
 
+  // Loading
+  if (isLoading) {
+    return (
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
+    );
+  }
+
+  // Erreur
+  if (error) {
+    return (
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader 
+          title="Ma Coopérative" 
+          subtitle="IFN - PNAVIM"
+          showLogout
+        />
+        <div className="p-4 space-y-4">
+          <JulabaEmptyState
+            emoji="😕"
+            title="Erreur de chargement"
+            description={String(error)}
+          />
+          <JulabaButton 
+            variant="primary" 
+            onClick={() => refetch()}
+            className="w-full"
+          >
+            Réessayer
+          </JulabaButton>
+        </div>
+        <JulabaBottomNav items={COOP_NAV_ITEMS} />
+      </JulabaPageLayout>
+    );
+  }
+
   return (
-    <RoleLayout
-      title="Ma coopérative"
-      subtitle={cooperative?.name ?? "Espace Coopérative"}
-      showSignOut
-      isLoading={isLoading}
-      error={error}
-      onRetry={refetch}
-      headerRight={IGPBadge}
-    >
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader 
+        title="Ma Coopérative" 
+        subtitle={cooperative?.name ?? "Espace Coopérative"}
+        showLogout
+        rightAction={cooperative?.igp_certified ? {
+          emoji: '🏆',
+          onClick: () => {},
+          label: 'Certifié IFN'
+        } : undefined}
+      />
+
       <AudioButton 
         textToRead={audioText} 
         variant="floating" 
@@ -74,11 +119,16 @@ const CooperativeDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50" 
       />
 
-      <div className="space-y-6">
+      <div className="p-4 space-y-6">
         {/* Localisation */}
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">{cooperative?.commune}, {cooperative?.region}</p>
-        </div>
+        {cooperative && (
+          <JulabaCard accent="green" className="p-3 text-center">
+            <span className="text-lg">📍</span>
+            <span className="ml-2 text-sm font-medium">
+              {cooperative.commune}, {cooperative.region}
+            </span>
+          </JulabaCard>
+        )}
 
         {/* Filtre temporel */}
         <DateFilterTabs value={dateFilter} onChange={setDateFilter} />
@@ -86,70 +136,110 @@ const CooperativeDashboard: React.FC = () => {
         {/* Alertes stock */}
         <CooperativeAlerts notifications={notifications} />
 
-        {/* Ce qu'on a */}
+        {/* Statistiques */}
         <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Ce qu'on a</h2>
-          <CooperativeStats stats={stats} membersCount={cooperative?.total_members ?? null} />
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">
+            📊 Ce qu'on a
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <JulabaStatCard
+              label="Produits"
+              value={stats.products}
+              emoji="📦"
+              iconBg="orange"
+            />
+            <JulabaStatCard
+              label="Membres"
+              value={cooperative?.total_members ?? 0}
+              emoji="👥"
+              iconBg="blue"
+            />
+            <JulabaStatCard
+              label="En attente"
+              value={stats.pendingOrders}
+              emoji="⏳"
+              iconBg="gold"
+            />
+            <JulabaStatCard
+              label="Livrées"
+              value={stats.deliveredOrders}
+              emoji="✅"
+              iconBg="green"
+            />
+          </div>
         </section>
 
-        {/* Nos chiffres */}
+        {/* Graphiques */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Nos chiffres</h2>
-          <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
-          <CooperativeOrdersChart stats={stats} />
+          <h2 className="text-sm font-medium text-muted-foreground px-1">
+            📈 Nos chiffres
+          </h2>
+          <JulabaCard className="p-4">
+            <CooperativeRevenueChart data={weeklyRevenue} totalRevenue={weeklyRevenueTotal} />
+          </JulabaCard>
+          <JulabaCard className="p-4">
+            <CooperativeOrdersChart stats={stats} />
+          </JulabaCard>
         </section>
 
         {/* Action principale */}
-        <Button 
-          onClick={() => navigate('/cooperative/stock')} 
-          className="w-full h-14 text-lg font-bold rounded-2xl"
+        <JulabaButton
+          variant="hero"
+          emoji="📦"
+          onClick={() => navigate('/cooperative/stock')}
+          className="w-full"
         >
-          <Package className="h-6 w-6 mr-2" />
-          Voir nos produits
-        </Button>
+          VOIR NOS PRODUITS
+        </JulabaButton>
 
-        {/* Nos actions */}
+        {/* Actions rapides */}
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Nos actions</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">
+            🎯 Nos actions
+          </h2>
           <div className="space-y-2">
-            <UnifiedActionCard 
-              title="Nos produits" 
-              description={`${stats.products} produits`} 
-              icon={Package} 
-              onClick={() => navigate('/cooperative/stock')} 
+            <JulabaListItem
+              emoji="📦"
+              title="Nos produits"
+              subtitle={`${stats.products} produits en stock`}
+              onClick={() => navigate('/cooperative/stock')}
             />
-            <UnifiedActionCard 
-              title="Ce qu'on nous demande" 
-              description="Voir les demandes" 
-              icon={ClipboardList} 
-              onClick={() => navigate('/cooperative/commandes')} 
-              badge={stats.pendingOrders} 
-              badgeVariant="warning" 
+            <JulabaListItem
+              emoji="📋"
+              title="Ce qu'on nous demande"
+              subtitle="Voir les demandes"
+              badge={stats.pendingOrders > 0 ? {
+                text: String(stats.pendingOrders),
+                variant: 'warning'
+              } : undefined}
+              onClick={() => navigate('/cooperative/commandes')}
             />
-            <UnifiedActionCard 
-              title="Nos cultivateurs" 
-              description="Gérer les producteurs" 
-              icon={Users} 
-              onClick={() => navigate('/cooperative/producteurs')} 
+            <JulabaListItem
+              emoji="🌾"
+              title="Nos cultivateurs"
+              subtitle="Gérer les producteurs"
+              onClick={() => navigate('/cooperative/producteurs')}
             />
-            <UnifiedActionCard 
-              title="Nos membres" 
-              description={`${cooperative?.total_members ?? 0} membres`} 
-              icon={Users} 
-              onClick={() => navigate('/cooperative/membres')} 
+            <JulabaListItem
+              emoji="👥"
+              title="Nos membres"
+              subtitle={`${cooperative?.total_members ?? 0} membres`}
+              onClick={() => navigate('/cooperative/membres')}
             />
-            <UnifiedActionCard 
-              title="Acheter aux cultivateurs" 
-              description="Commander des récoltes" 
-              icon={ShoppingCart} 
-              onClick={() => navigate('/cooperative/commandes-producteurs')} 
+            <JulabaListItem
+              emoji="🛒"
+              title="Acheter aux cultivateurs"
+              subtitle="Commander des récoltes"
+              onClick={() => navigate('/cooperative/commandes-producteurs')}
             />
           </div>
         </section>
 
         <QuickGuide />
       </div>
-    </RoleLayout>
+
+      <JulabaBottomNav items={COOP_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

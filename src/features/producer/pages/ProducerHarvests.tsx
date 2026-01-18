@@ -1,20 +1,20 @@
 /**
  * Page Récoltes du Producteur - PNAVIM
+ * Refonte Jùlaba Design System
  */
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MobileLayout } from '@/shared/layout/MobileLayout';
-import { 
-  Sprout, 
-  Package, 
-  ShoppingCart, 
-  User, 
-  Plus,
-  Loader2,
-  AlertCircle
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaTabBar,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { 
   useProducerData, 
   useProducerHarvests,
@@ -33,6 +33,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Nav items Producteur
+const PRODUCER_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🌾', label: 'Accueil', path: '/producteur' },
+  { emoji: '📦', label: 'Récoltes', path: '/producteur/recoltes' },
+  { emoji: '🛒', label: 'Commandes', path: '/producteur/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/producteur/profil' },
+];
+
+const HARVEST_TABS = [
+  { id: 'available', label: 'Disponibles', emoji: '✅' },
+  { id: 'history', label: 'Historique', emoji: '📜' },
+];
+
 const ProducerHarvests: React.FC = () => {
   const { producer, isLoading: isProducerLoading } = useProducerData();
   const { 
@@ -45,16 +58,10 @@ const ProducerHarvests: React.FC = () => {
     isDeleting
   } = useProducerHarvests(producer?.id);
 
+  const [activeTab, setActiveTab] = useState('available');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editHarvest, setEditHarvest] = useState<ProducerHarvest | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const navItems = [
-    { icon: Sprout, label: 'Accueil', path: '/producteur' },
-    { icon: Package, label: 'Récoltes', path: '/producteur/recoltes', isActive: true },
-    { icon: ShoppingCart, label: 'Commandes', path: '/producteur/commandes' },
-    { icon: User, label: 'Profil', path: '/producteur/profil' },
-  ];
 
   const handleSubmit = (data: HarvestFormData) => {
     if (editHarvest) {
@@ -81,78 +88,78 @@ const ProducerHarvests: React.FC = () => {
   const availableHarvests = harvests.filter(h => h.status === 'available');
   const otherHarvests = harvests.filter(h => h.status !== 'available');
 
+  const displayedHarvests = activeTab === 'available' ? availableHarvests : otherHarvests;
+
   if (isProducerLoading) {
     return (
-      <MobileLayout title="Mes Récoltes" navItems={navItems}>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
-      </MobileLayout>
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <MobileLayout title="Mes Récoltes" navItems={navItems}>
-      <div className="space-y-4 pb-6">
-        {/* Add Button */}
-        <Button 
-          className="w-full gap-2" 
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader
+        title="Mes Récoltes"
+        subtitle={`${harvests.length} récolte(s)`}
+        showBack
+        backPath="/producteur"
+      />
+
+      <div className="p-4 space-y-4">
+        {/* Action principale */}
+        <JulabaButton
+          variant="hero"
+          emoji="🌿"
           onClick={() => {
             setEditHarvest(undefined);
             setIsDialogOpen(true);
           }}
+          className="w-full"
         >
-          <Plus className="h-4 w-4" />
-          Publier une récolte
-        </Button>
+          PUBLIER UNE RÉCOLTE
+        </JulabaButton>
 
         {/* Tabs */}
-        <Tabs defaultValue="available" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="available" className="gap-1">
-              Disponibles ({availableHarvests.length})
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-1">
-              Historique ({otherHarvests.length})
-            </TabsTrigger>
-          </TabsList>
+        <JulabaTabBar
+          tabs={HARVEST_TABS.map(t => ({
+            ...t,
+            label: `${t.label} (${t.id === 'available' ? availableHarvests.length : otherHarvests.length})`,
+          }))}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-          <TabsContent value="available" className="space-y-3 mt-4">
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : availableHarvests.length > 0 ? (
-              availableHarvests.map((harvest) => (
+        {/* Liste */}
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : displayedHarvests.length > 0 ? (
+          <div className="space-y-3">
+            {displayedHarvests.map((harvest) => (
+              <JulabaCard key={harvest.id} className="p-3">
                 <HarvestCard 
-                  key={harvest.id} 
                   harvest={harvest}
-                  onEdit={handleEdit}
-                  onDelete={(id) => setDeleteId(id)}
+                  onEdit={activeTab === 'available' ? handleEdit : undefined}
+                  onDelete={activeTab === 'available' ? (id) => setDeleteId(id) : undefined}
                 />
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Aucune récolte disponible</p>
-                <p className="text-sm mt-1">Publiez votre première récolte pour la rendre visible aux coopératives</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="history" className="space-y-3 mt-4">
-            {otherHarvests.length > 0 ? (
-              otherHarvests.map((harvest) => (
-                <HarvestCard key={harvest.id} harvest={harvest} />
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Aucun historique</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              </JulabaCard>
+            ))}
+          </div>
+        ) : (
+          <JulabaEmptyState
+            emoji={activeTab === 'available' ? '🌱' : '📜'}
+            title={activeTab === 'available' ? 'Aucune récolte disponible' : 'Aucun historique'}
+            description={activeTab === 'available' 
+              ? 'Publiez votre première récolte pour la rendre visible' 
+              : 'Les récoltes passées apparaîtront ici'
+            }
+          />
+        )}
       </div>
 
       {/* Add/Edit Dialog */}
@@ -169,8 +176,7 @@ const ProducerHarvests: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-destructive" />
-              Supprimer cette récolte ?
+              ⚠️ Supprimer cette récolte ?
             </AlertDialogTitle>
             <AlertDialogDescription>
               Cette action est irréversible. La récolte ne sera plus visible par les coopératives.
@@ -188,7 +194,9 @@ const ProducerHarvests: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </MobileLayout>
+
+      <JulabaBottomNav items={PRODUCER_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 
