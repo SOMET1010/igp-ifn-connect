@@ -15,6 +15,8 @@ export interface JulabaTantieProps {
   imageUrl?: string;
   /** Variante de taille */
   size?: 'sm' | 'md' | 'lg';
+  /** Variante de style (alias pour size) */
+  variant?: 'small' | 'medium' | 'large';
   /** Afficher bouton audio */
   showAudio?: boolean;
   /** Handler audio */
@@ -26,11 +28,15 @@ export function JulabaTantie({
   message,
   merchantName,
   imageUrl,
-  size = 'md',
+  size,
+  variant,
   showAudio = true,
   onAudioPlay,
   className,
 }: JulabaTantieProps) {
+  
+  // Mapper variant vers size
+  const resolvedSize = size || (variant === 'large' ? 'lg' : variant === 'small' ? 'sm' : 'md');
   
   // Remplacer {nom} par le nom du marchand
   const displayMessage = message.replace('{nom}', merchantName || 'ma sœur');
@@ -53,7 +59,7 @@ export function JulabaTantie({
     },
   };
   
-  const styles = sizeStyles[size];
+  const styles = sizeStyles[resolvedSize];
   
   return (
     <div className={cn("flex items-start", styles.container, className)}>

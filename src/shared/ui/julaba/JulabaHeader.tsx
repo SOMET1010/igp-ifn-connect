@@ -14,8 +14,10 @@ export interface JulabaHeaderProps {
   subtitle?: string;
   /** Afficher bouton retour */
   showBack?: boolean;
-  /** Route de retour */
+  /** Route de retour (alias backTo) */
   backTo?: string;
+  /** Route de retour (alias backPath) */
+  backPath?: string;
   /** Afficher bouton audio */
   showAudio?: boolean;
   /** Afficher bouton déconnexion */
@@ -28,6 +30,13 @@ export interface JulabaHeaderProps {
   notificationCount?: number;
   /** Handler notifications */
   onNotifications?: () => void;
+  /** Action à droite custom */
+  rightAction?: {
+    emoji?: string;
+    icon?: React.ReactNode;
+    onClick: () => void;
+    label?: string;
+  };
   className?: string;
 }
 
@@ -36,19 +45,22 @@ export function JulabaHeader({
   subtitle,
   showBack = false,
   backTo,
+  backPath,
   showAudio = false,
   showLogout = false,
   onLogout,
   showNotifications = false,
   notificationCount = 0,
   onNotifications,
+  rightAction,
   className,
 }: JulabaHeaderProps) {
   const navigate = useNavigate();
   
   const handleBack = () => {
-    if (backTo) {
-      navigate(backTo);
+    const destination = backPath || backTo;
+    if (destination) {
+      navigate(destination);
     } else {
       navigate(-1);
     }
@@ -149,6 +161,23 @@ export function JulabaHeader({
               aria-label="Déconnexion"
             >
               <LogOut className="w-5 h-5 text-muted-foreground hover:text-red-500" />
+            </button>
+          )}
+          
+          {rightAction && (
+            <button
+              onClick={rightAction.onClick}
+              className={cn(
+                "min-w-10 h-10 px-2 rounded-full",
+                "flex items-center justify-center gap-1",
+                "bg-white border border-[hsl(30_20%_90%)]",
+                "active:scale-95 transition-transform",
+                "shadow-sm"
+              )}
+              aria-label={rightAction.label}
+            >
+              {rightAction.emoji && <span className="text-lg">{rightAction.emoji}</span>}
+              {rightAction.icon}
             </button>
           )}
         </div>

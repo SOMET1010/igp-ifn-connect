@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Send, Wallet, FileText, History, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Shield, Loader2, Wallet, FileText, History, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
 import { useAuth } from "@/shared/contexts";
 import { useLanguage } from "@/shared/contexts";
 import { useOnlineStatus } from "@/shared/hooks";
 import { supabase } from "@/integrations/supabase/client";
-import { AudioButton, EnhancedHeader, UnifiedBottomNav, LoadingState, EmptyState } from "@/shared/ui";
+import { LoadingState, EmptyState } from "@/shared/ui";
 import { BigNumber, CardLarge, StatusBanner, ButtonSecondary } from "@/shared/ui/ifn";
-import { merchantNavItems } from "@/config/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -39,6 +37,19 @@ import {
 } from "@/features/merchant/components/invoices";
 import { Invoice } from "@/features/merchant/types/invoices.types";
 import { FNEInvoice } from "@/features/merchant/components/FNEInvoice";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
+
+// Jùlaba Design System
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaBottomNav,
+  JulabaTabBar,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaListItem,
+  JulabaEmptyState,
+} from "@/shared/ui/julaba";
 
 
 interface MoneyData {
@@ -139,75 +150,62 @@ export default function MerchantMoney() {
     fetchData();
   }, [user]);
 
-  const pageAudioText = `${t("your_money")}: ${data.netAmount.toLocaleString()} FCFA ${t("this_month")}.`;
+  // Tabs Jùlaba
+  const tabs = [
+    { id: "resume", emoji: "📊", label: "Mon mois" },
+    { id: "wallet", emoji: "💰", label: "Argent" },
+    { id: "historique", emoji: "📜", label: "Ventes" },
+    { id: "factures", emoji: "🧾", label: "Tickets" },
+  ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-      </div>
+      <JulabaPageLayout className="flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-[hsl(30_100%_60%)]" />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Floating Audio Button */}
-      <AudioButton 
-        textToRead={pageAudioText}
-        className="fixed bottom-28 right-4 z-50"
-        size="lg"
-      />
-
-      <EnhancedHeader
-        title={t("your_money")}
+    <JulabaPageLayout>
+      {/* Header Jùlaba */}
+      <JulabaHeader
+        title="Mon Argent"
+        subtitle="Ce que tu as gagné"
         showBack
-        backTo="/marchand"
-        showNotifications={false}
+        backPath="/marchand"
       />
 
-      <main className="p-4 space-y-4">
-        {/* Tabs: Mon mois / Mon argent / Mes ventes / Mes tickets */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 h-14">
-            <TabsTrigger value="resume" className="text-sm gap-1 px-2">
-              <ArrowUpCircle className="w-4 h-4" />
-              Mon mois
-            </TabsTrigger>
-            <TabsTrigger value="wallet" className="text-sm gap-1 px-2">
-              <Wallet className="w-4 h-4" />
-              Argent
-            </TabsTrigger>
-            <TabsTrigger value="historique" className="text-sm gap-1 px-2">
-              <History className="w-4 h-4" />
-              Ventes
-            </TabsTrigger>
-            <TabsTrigger value="factures" className="text-sm gap-1 px-2">
-              <FileText className="w-4 h-4" />
-              Tickets
-            </TabsTrigger>
-          </TabsList>
+      <main className="px-4 py-4 space-y-4">
+        {/* Tabs Jùlaba avec emojis */}
+        <JulabaTabBar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-          {/* TAB: Résumé mensuel */}
-          <TabsContent value="resume" className="space-y-6 mt-4">
-            {/* BigNumber - Net du mois */}
-            <div className="py-6">
-              <BigNumber 
-                value={data.netAmount}
-                label={`Ce que tu as gagné ${t("this_month")}`}
-                color="success"
-              />
-            </div>
+        {/* TAB: Résumé mensuel */}
+        {activeTab === "resume" && (
+          <div className="space-y-5">
+            {/* Chiffre principal */}
+            <JulabaCard className="text-center py-6">
+              <p className="text-sm text-muted-foreground mb-1">Ce que tu as gagné ce mois</p>
+              <p className="text-4xl font-extrabold text-[hsl(145_74%_42%)]">
+                {data.netAmount.toLocaleString()}
+                <span className="text-xl font-bold ml-2">FCFA</span>
+              </p>
+            </JulabaCard>
 
             {/* Détails entrées/sorties */}
-            <CardLarge className="space-y-5">
+            <JulabaCard className="space-y-4">
               {/* Ventes */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
-                  <ArrowUpCircle className="w-7 h-7 text-[hsl(142,76%,36%)]" />
+                <div className="w-12 h-12 rounded-2xl bg-[hsl(145_70%_92%)] flex items-center justify-center">
+                  <ArrowUpCircle className="w-6 h-6 text-[hsl(145_74%_42%)]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-muted-foreground">{t("your_sales")}</p>
-                  <p className="text-2xl font-bold text-[hsl(142,76%,36%)]">
+                  <p className="text-muted-foreground text-sm">Tes ventes</p>
+                  <p className="text-xl font-bold text-[hsl(145_74%_42%)]">
                     +{data.totalSales.toLocaleString()} FCFA
                   </p>
                 </div>
@@ -215,12 +213,12 @@ export default function MerchantMoney() {
 
               {/* Santé (CMU) */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <ArrowDownCircle className="w-7 h-7 text-destructive" />
+                <div className="w-12 h-12 rounded-2xl bg-[hsl(0_80%_92%)] flex items-center justify-center">
+                  <ArrowDownCircle className="w-6 h-6 text-[hsl(0_80%_50%)]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-muted-foreground">{t("health_contribution")}</p>
-                  <p className="text-xl font-bold text-destructive">
+                  <p className="text-muted-foreground text-sm">Ta cotisation santé</p>
+                  <p className="text-lg font-bold text-[hsl(0_80%_50%)]">
                     -{data.totalCMU.toLocaleString()} FCFA
                   </p>
                 </div>
@@ -228,31 +226,33 @@ export default function MerchantMoney() {
 
               {/* Épargne (RSTI) */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <ArrowUpCircle className="w-7 h-7 text-secondary" />
+                <div className="w-12 h-12 rounded-2xl bg-[hsl(210_100%_92%)] flex items-center justify-center">
+                  <ArrowUpCircle className="w-6 h-6 text-[hsl(210_100%_45%)]" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-muted-foreground">{t("savings")}</p>
-                  <p className="text-xl font-bold text-secondary">
+                  <p className="text-muted-foreground text-sm">Ton épargne</p>
+                  <p className="text-lg font-bold text-[hsl(210_100%_45%)]">
                     +{data.totalRSTI.toLocaleString()} FCFA
                   </p>
                 </div>
               </div>
-            </CardLarge>
+            </JulabaCard>
 
             {/* Badge protection santé */}
-            <CardLarge className="flex items-center gap-4 bg-[hsl(142,76%,36%)]/5 border-[hsl(142,76%,36%)]/20">
-              <div className="w-14 h-14 rounded-full bg-[hsl(142,76%,36%)]/10 flex items-center justify-center">
-                <Shield className="w-8 h-8 text-[hsl(142,76%,36%)]" />
+            <JulabaCard accent="green" className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-[hsl(145_70%_92%)] flex items-center justify-center">
+                <Shield className="w-7 h-7 text-[hsl(145_74%_42%)]" />
               </div>
-              <p className="text-lg font-bold text-[hsl(142,76%,30%)]">
-                🛡️ {t("your_health_protection")}
+              <p className="text-lg font-bold text-[hsl(145_74%_32%)]">
+                🛡️ Ta protection santé est active !
               </p>
-            </CardLarge>
-          </TabsContent>
+            </JulabaCard>
+          </div>
+        )}
 
-          {/* TAB: Portefeuille */}
-          <TabsContent value="wallet" className="space-y-6 mt-4">
+        {/* TAB: Portefeuille */}
+        {activeTab === "wallet" && (
+          <div className="space-y-5">
             {wallet ? (
               <>
                 {/* Balance Card */}
@@ -285,26 +285,32 @@ export default function MerchantMoney() {
                 />
               </>
             ) : (
-            <CardLarge className="text-center py-8">
-                <Wallet className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">Ton argent gardé n'est pas encore disponible</p>
-              </CardLarge>
+              <JulabaEmptyState
+                emoji="💰"
+                title="Portefeuille pas encore prêt"
+                description="Ton argent gardé arrive bientôt !"
+              />
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* TAB: Historique des ventes */}
-          <TabsContent value="historique" className="space-y-4 mt-4">
-            <HistoriqueTabContent />
-          </TabsContent>
+        {/* TAB: Historique des ventes */}
+        {activeTab === "historique" && (
+          <HistoriqueTabContent />
+        )}
 
-          {/* TAB: Factures */}
-          <TabsContent value="factures" className="space-y-4 mt-4">
-            <FacturesTabContent />
-          </TabsContent>
-        </Tabs>
+        {/* TAB: Factures */}
+        {activeTab === "factures" && (
+          <FacturesTabContent />
+        )}
 
         {/* Status Banner */}
-        <StatusBanner isOnline={isOnline} />
+        {!isOnline && (
+          <JulabaCard accent="orange" className="flex items-center gap-3">
+            <span className="text-xl">📡</span>
+            <p className="text-sm font-medium">Mode hors-ligne</p>
+          </JulabaCard>
+        )}
       </main>
 
       {/* Transfer Dialog */}
@@ -317,13 +323,13 @@ export default function MerchantMoney() {
         maxAmount={wallet?.balance || 0}
       />
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
 
 // ============================
-// Sous-composant Historique
+// Sous-composant Historique (style Jùlaba)
 // ============================
 function HistoriqueTabContent() {
   const { t } = useLanguage();
@@ -347,9 +353,9 @@ function HistoriqueTabContent() {
     <div className="space-y-4">
       {/* Export PDF */}
       {totalCount > 0 && (
-        <CardLarge className="space-y-4">
+        <JulabaCard className="space-y-4">
           <div className="flex items-center gap-2">
-            <FileDown className="w-5 h-5 text-primary" />
+            <FileDown className="w-5 h-5 text-[hsl(30_100%_60%)]" />
             <span className="font-bold text-foreground">Exporter PDF</span>
           </div>
           <div className="flex gap-3">
@@ -357,7 +363,7 @@ function HistoriqueTabContent() {
               value={exportPeriod} 
               onValueChange={(v) => setExportPeriod(v as ExportPeriod)}
             >
-              <SelectTrigger className="flex-1 h-12">
+              <SelectTrigger className="flex-1 h-12 rounded-xl">
                 <Calendar className="w-4 h-4 mr-2" />
                 <SelectValue placeholder="Période" />
               </SelectTrigger>
@@ -371,20 +377,21 @@ function HistoriqueTabContent() {
             <Button 
               onClick={exportToPDF}
               disabled={isExporting}
-              className="h-12 px-6"
+              className="h-12 px-6 rounded-xl bg-[hsl(30_100%_60%)] hover:bg-[hsl(27_100%_50%)]"
             >
               {isExporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileDown className="w-5 h-5" />}
             </Button>
           </div>
-        </CardLarge>
+        </JulabaCard>
       )}
 
       {/* Empty State */}
       {totalCount === 0 ? (
-        <CardLarge className="text-center py-12">
-          <div className="text-6xl mb-4">📜</div>
-          <p className="text-xl text-muted-foreground">Pas encore de ventes</p>
-        </CardLarge>
+        <JulabaEmptyState
+          emoji="📜"
+          title="Pas encore de ventes"
+          description="Tes ventes apparaîtront ici"
+        />
       ) : (
         <>
           {groupedTransactions.map((group) => (
@@ -392,31 +399,16 @@ function HistoriqueTabContent() {
               <h2 className="text-lg font-bold text-foreground mb-3 capitalize">
                 {group.label}
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {group.transactions.map((tx) => (
-                  <CardLarge key={tx.id} className="flex items-center gap-4 py-4">
-                    <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
-                      {tx.transaction_type === "cash" ? (
-                        <Banknote className="w-7 h-7 text-[hsl(142,76%,36%)]" />
-                      ) : (
-                        <Smartphone className="w-7 h-7 text-secondary" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-2xl font-black text-foreground">
-                        {Number(tx.amount).toLocaleString()}{" "}
-                        <span className="text-base font-bold">FCFA</span>
-                      </p>
-                      <p className="text-muted-foreground">
-                        {tx.transaction_type === "cash" ? "💵 Espèces" : "📱 Mobile Money"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-muted-foreground">
-                        {format(new Date(tx.created_at), "HH:mm")}
-                      </p>
-                    </div>
-                  </CardLarge>
+                  <JulabaListItem
+                    key={tx.id}
+                    emoji={tx.transaction_type === "cash" ? "💵" : "📱"}
+                    title={`${Number(tx.amount).toLocaleString()} FCFA`}
+                    subtitle={tx.transaction_type === "cash" ? "Espèces" : "Mobile Money"}
+                    value={format(new Date(tx.created_at), "HH:mm")}
+                    showChevron={false}
+                  />
                 ))}
               </div>
             </div>
@@ -435,7 +427,7 @@ function HistoriqueTabContent() {
 }
 
 // ============================
-// Sous-composant Factures
+// Sous-composant Factures (style Jùlaba)
 // ============================
 function FacturesTabContent() {
   const {
@@ -479,7 +471,7 @@ function FacturesTabContent() {
 
       {/* Create New Invoice Button */}
       <Button
-        className="w-full h-14 rounded-2xl text-lg shadow-lg"
+        className="w-full h-14 rounded-2xl text-lg font-bold bg-[hsl(30_100%_60%)] hover:bg-[hsl(27_100%_50%)]"
         onClick={() => setShowNewInvoice(true)}
       >
         <FileText className="w-5 h-5 mr-2" />
@@ -494,10 +486,10 @@ function FacturesTabContent() {
         {isLoading ? (
           <LoadingState message="Chargement..." />
         ) : filteredInvoices.length === 0 ? (
-          <EmptyState
-            Icon={FileText}
+          <JulabaEmptyState
+            emoji="🧾"
             title="Aucune facture"
-            message="Créez votre première facture"
+            description="Crée ta première facture"
           />
         ) : (
           filteredInvoices.map((invoice) => (
@@ -514,14 +506,14 @@ function FacturesTabContent() {
       <CreateInvoiceDialog
         open={showNewInvoice}
         onOpenChange={setShowNewInvoice}
-        merchantData={merchantData}
         onSubmit={createInvoice}
+        merchantData={merchantData}
       />
 
       <CancelInvoiceDialog
         invoice={invoiceToCancel}
-        onConfirm={cancelInvoice}
         onClose={() => setInvoiceToCancel(null)}
+        onConfirm={cancelInvoice}
       />
     </div>
   );
