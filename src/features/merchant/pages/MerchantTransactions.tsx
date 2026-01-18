@@ -1,12 +1,24 @@
+/**
+ * Page Historique Transactions - /marchand/transactions
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import { useNavigate } from "react-router-dom";
-import { Loader2, Banknote, Smartphone, ChevronDown, FileDown, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, FileDown, Calendar } from "lucide-react";
 import { useLanguage } from "@/shared/contexts";
 import { useOnlineStatus } from "@/shared/hooks";
 import { format } from "date-fns";
-import { AudioButton, EnhancedHeader, UnifiedBottomNav } from "@/shared/ui";
-import { CardLarge, ButtonSecondary, StatusBanner } from "@/shared/ui/ifn";
-import { merchantNavItems } from "@/config/navigation";
+import { AudioButton } from "@/shared/ui";
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaListItem,
+  JulabaEmptyState,
+  JulabaBottomNav,
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import {
   Select,
   SelectContent,
@@ -16,9 +28,6 @@ import {
 } from "@/components/ui/select";
 import { useTransactions, type ExportPeriod } from "@/features/merchant/hooks/useTransactions";
 
-// ============================================
-// Composant MerchantTransactions (UI pure)
-// ============================================
 export default function MerchantTransactions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -40,34 +49,41 @@ export default function MerchantTransactions() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-secondary" />
-      </div>
+      <JulabaPageLayout background="warm" className="flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Chargement...</p>
+        </div>
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <JulabaPageLayout background="warm" className="pb-24">
       <AudioButton 
         textToRead={pageAudioText}
         className="fixed bottom-28 right-4 z-50"
         size="lg"
       />
 
-      <EnhancedHeader
-        title={t("your_sales")}
-        subtitle={`${totalCount} vente${totalCount !== 1 ? "s" : ""}`}
-        showBack
-        backTo="/marchand"
-        showNotifications={false}
+      <JulabaHeader
+        title="📊 Mes Ventes"
+        backPath="/marchand"
       />
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-5 max-w-lg mx-auto">
+        {/* Online status */}
+        {!isOnline && (
+          <JulabaCard accent="orange" className="text-center py-3">
+            <span className="text-sm">📴 Mode hors ligne - Données en cache</span>
+          </JulabaCard>
+        )}
+
         {/* Export PDF Section */}
         {totalCount > 0 && (
-          <CardLarge className="space-y-4">
-            <div className="flex items-center gap-2">
-              <FileDown className="w-5 h-5 text-primary" />
+          <JulabaCard>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">📥</span>
               <span className="font-bold text-foreground">Exporter rapport PDF</span>
             </div>
             <div className="flex gap-3">
@@ -75,7 +91,7 @@ export default function MerchantTransactions() {
                 value={exportPeriod} 
                 onValueChange={(v) => setExportPeriod(v as ExportPeriod)}
               >
-                <SelectTrigger className="flex-1 h-12">
+                <SelectTrigger className="flex-1 h-12 rounded-xl">
                   <Calendar className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Période" />
                 </SelectTrigger>
@@ -87,67 +103,44 @@ export default function MerchantTransactions() {
                   <SelectItem value="last3months">3 derniers mois</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
+              <JulabaButton 
+                variant="primary"
+                emoji="📥"
                 onClick={exportToPDF}
-                disabled={isExporting}
-                className="h-12 px-6"
-              >
-                {isExporting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <FileDown className="w-5 h-5" />
-                )}
-              </Button>
+                isLoading={isExporting}
+              />
             </div>
-          </CardLarge>
+          </JulabaCard>
         )}
 
         {/* Empty State */}
         {totalCount === 0 ? (
-          <CardLarge className="text-center py-12">
-            <div className="text-6xl mb-4">📜</div>
-            <p className="text-xl text-muted-foreground">Pas encore de ventes</p>
-            <ButtonSecondary
-              onClick={() => navigate("/marchand/encaisser")}
-              className="mt-6"
-            >
-              <Banknote className="w-6 h-6 mr-2" />
-              {t("collect_payment")}
-            </ButtonSecondary>
-          </CardLarge>
+          <JulabaEmptyState
+            emoji="📜"
+            title="Pas encore de ventes"
+            description="Tes ventes apparaîtront ici"
+            action={{
+              label: "Encaisser maintenant",
+              onClick: () => navigate("/marchand/encaisser"),
+            }}
+          />
         ) : (
           <>
             {/* Grouped Transactions */}
             {groupedTransactions.map((group) => (
               <div key={group.label}>
-                <h2 className="text-lg font-bold text-foreground mb-3 capitalize">
-                  {group.label}
+                <h2 className="text-lg font-bold text-foreground mb-3 capitalize flex items-center gap-2">
+                  <span>📅</span> {group.label}
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {group.transactions.map((tx) => (
-                    <CardLarge key={tx.id} className="flex items-center gap-4 py-4">
-                      <div className="w-14 h-14 rounded-xl bg-secondary/10 flex items-center justify-center">
-                        {tx.transaction_type === "cash" ? (
-                          <Banknote className="w-7 h-7 text-[hsl(142,76%,36%)]" />
-                        ) : (
-                          <Smartphone className="w-7 h-7 text-secondary" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-2xl font-black text-foreground">
-                          {Number(tx.amount).toLocaleString()}{" "}
-                          <span className="text-base font-bold">FCFA</span>
-                        </p>
-                        <p className="text-muted-foreground">
-                          {tx.transaction_type === "cash" ? "💵 Espèces" : "📱 Mobile Money"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-muted-foreground">
-                          {format(new Date(tx.created_at), "HH:mm")}
-                        </p>
-                      </div>
-                    </CardLarge>
+                    <JulabaListItem
+                      key={tx.id}
+                      emoji={tx.transaction_type === "cash" ? "💵" : "📱"}
+                      title={`${Number(tx.amount).toLocaleString()} FCFA`}
+                      subtitle={tx.transaction_type === "cash" ? "Espèces" : "Mobile Money"}
+                      value={format(new Date(tx.created_at), "HH:mm")}
+                    />
                   ))}
                 </div>
               </div>
@@ -155,18 +148,20 @@ export default function MerchantTransactions() {
 
             {/* Load More */}
             {hasMore && (
-              <ButtonSecondary onClick={loadMore} className="mt-4">
-                <ChevronDown className="w-5 h-5 mr-2" />
-                {t("view_more")}
-              </ButtonSecondary>
+              <JulabaButton 
+                variant="secondary" 
+                emoji="⬇️"
+                onClick={loadMore} 
+                className="w-full"
+              >
+                Voir plus
+              </JulabaButton>
             )}
           </>
         )}
-
-        <StatusBanner isOnline={isOnline} />
       </main>
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
