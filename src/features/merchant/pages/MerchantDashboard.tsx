@@ -1,27 +1,28 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/shared/contexts";
 import { useLanguage } from "@/shared/contexts";
 import { useMerchantDashboardData } from "@/features/merchant/hooks/useMerchantDashboardData";
 import { useOnlineStatus, useSensoryFeedback, useMascotImage } from "@/shared/hooks";
 import { useFirstSaleCelebration } from "@/features/sales";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
-import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
-import { merchantNavItems } from "@/config/navigation";
-import { 
-  EnhancedHeader, 
-  UnifiedBottomNav, 
-  ErrorState, 
-  Confetti, 
-  ImmersiveBackground, 
-  TantieMascot, 
-  GlassCard, 
-  GiantActionButton, 
-  VoiceHeroButton 
-} from "@/shared/ui";
+import { Confetti } from "@/shared/ui";
 import { MerchantDashboardSkeleton } from "@/features/merchant/components/MerchantDashboardSkeleton";
-import { OnlineStatusIndicator } from "@/features/merchant/components/dashboard";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
+
+// Jùlaba Design System
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaBottomNav,
+  JulabaButton,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaTantie,
+  JulabaVoiceButton,
+  JulabaEmptyState,
+} from "@/shared/ui/julaba";
 
 // Onboarding
 import { OnboardingFlow, useOnboarding } from "@/features/onboarding";
@@ -29,7 +30,6 @@ import { OnboardingFlow, useOnboarding } from "@/features/onboarding";
 import {
   OpenDayDialog,
   CloseDayDialog,
-  DaySessionBanner,
 } from "@/features/merchant/components/daily-session";
 
 // Formater le montant
@@ -38,13 +38,13 @@ const formatCurrency = (amount: number): string => {
 };
 
 /**
- * MerchantDashboard - Écran "Aujourd'hui" simplifié
+ * MerchantDashboard - Écran "Aujourd'hui" style Jùlaba
  * 
  * Design UX inclusive :
  * - 1 action principale visible (VENDRE)
- * - 1 action secondaire maximum (Mes ventes)
- * - Pas de stats complexes au premier écran
- * - Voix automatique au chargement
+ * - Pictogrammes > Texte
+ * - Boutons géants 56px+
+ * - Feedback sensoriel
  */
 export default function MerchantDashboard() {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ export default function MerchantDashboard() {
 
   const [openDayDialogOpen, setOpenDayDialogOpen] = useState(false);
   const [closeDayDialogOpen, setCloseDayDialogOpen] = useState(false);
-  const [voiceState, setVoiceState] = useState<"idle" | "listening" | "playing">("idle");
+  const [voiceState, setVoiceState] = useState<"idle" | "listening" | "processing">("idle");
   const [showBalance, setShowBalance] = useState(false);
 
   // Onboarding state
@@ -65,7 +65,6 @@ export default function MerchantDashboard() {
   const { data, isLoading, error, refetch } = useMerchantDashboardData();
   const { showConfetti } = useFirstSaleCelebration(data?.todayTotal || 0);
   const { imageUrl: mascotImageUrl } = useMascotImage();
-  const { imageUrl: marketBgUrl } = useMarketBackground();
   
   const {
     todaySession,
@@ -123,54 +122,51 @@ export default function MerchantDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen relative">
-        <ImmersiveBackground />
-        <EnhancedHeader
+      <JulabaPageLayout>
+        <JulabaHeader
           title={t("merchant")}
-          subtitle="Espace Marchand"
-          showSignOut
-          onSignOut={handleSignOut}
+          showBack={false}
         />
         <main className="p-4">
-          <ErrorState
-            message={error instanceof Error ? error.message : "Erreur de chargement"}
-            onRetry={() => refetch()}
-            isNetworkError={!isOnline}
+          <JulabaEmptyState
+            emoji="😕"
+            title="Oups, problème !"
+            description={error instanceof Error ? error.message : "Erreur de chargement"}
+            action={{
+              label: "Réessayer",
+              emoji: "🔄",
+              onClick: () => refetch(),
+            }}
           />
         </main>
-        <UnifiedBottomNav items={merchantNavItems} />
-      </div>
+        <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen relative pb-24">
-      {/* Fond immersif Afro-Futuriste */}
-      <ImmersiveBackground 
-        variant="market-blur" 
-        backgroundImageUrl={marketBgUrl}
-        showWaxPattern 
-        showBlobs 
-      />
-
+    <JulabaPageLayout background="gradient">
       {showConfetti && <Confetti duration={3000} particleCount={60} />}
 
-      {/* Header simplifié */}
-      <EnhancedHeader
-        title={merchant?.full_name || t("merchant")}
+      {/* Header simplifié Jùlaba */}
+      <JulabaHeader
+        title={merchant?.full_name?.split(" ")[0] || t("merchant")}
         subtitle="Aujourd'hui"
-        showSignOut
-        onSignOut={handleSignOut}
-        variant="default"
+        showBack={false}
+        rightAction={{
+          emoji: "🚪",
+          onClick: handleSignOut,
+          label: "Quitter",
+        }}
       />
 
-      <main className="px-4 py-4 space-y-5 max-w-lg mx-auto">
+      <main className="px-4 py-4 space-y-5">
         {isLoading ? (
           <MerchantDashboardSkeleton />
         ) : (
           <>
             {/* 1. MASCOTTE TANTIE - Message contextuel */}
-            <TantieMascot
+            <JulabaTantie
               message={getWelcomeMessage()}
               merchantName={merchant?.full_name?.split(" ")[0]}
               imageUrl={mascotImageUrl}
@@ -179,81 +175,101 @@ export default function MerchantDashboard() {
             />
 
             {/* 2. CARTE SESSION - État de la journée */}
-            <GlassCard borderColor="gold" padding="sm">
-              <DaySessionBanner
-                sessionStatus={sessionStatus}
-                session={todaySession}
-                onOpenDay={() => setOpenDayDialogOpen(true)}
-                onCloseDay={() => setCloseDayDialogOpen(true)}
-                inclusive
-              />
-            </GlassCard>
+            <JulabaCard accent="gold" className="p-4">
+              {sessionStatus === "none" ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🌅</span>
+                    <div>
+                      <p className="font-bold text-foreground">Ouvre ta journée</p>
+                      <p className="text-sm text-muted-foreground">Pour commencer à vendre</p>
+                    </div>
+                  </div>
+                  <JulabaButton
+                    variant="primary"
+                    size="md"
+                    onClick={() => setOpenDayDialogOpen(true)}
+                  >
+                    Ouvrir
+                  </JulabaButton>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">✅</span>
+                    <div>
+                      <p className="font-bold text-foreground">Journée ouverte</p>
+                      <p className="text-sm text-muted-foreground">
+                        {todaySession?.opening_cash ? `Caisse: ${formatCurrency(todaySession.opening_cash)} FCFA` : "En cours..."}
+                      </p>
+                    </div>
+                  </div>
+                  <JulabaButton
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCloseDayDialogOpen(true)}
+                  >
+                    Fermer
+                  </JulabaButton>
+                </div>
+              )}
+            </JulabaCard>
 
             {/* 3. BOUTON GÉANT VENDRE - Action principale */}
-            <GiantActionButton
+            <JulabaButton
+              variant="hero"
+              size="hero"
               emoji="🛒"
-              title="VENDRE"
-              subtitle="Encaisser une vente"
-              variant="orange"
               onClick={handleVendre}
               disabled={!isSessionOpen}
-            />
-
-            {/* 4. BOUTON SECONDAIRE - Mes ventes du jour */}
-            <GlassCard 
-              onClick={handleMesVentes}
-              className="flex items-center justify-between cursor-pointer hover:bg-white/10 transition-colors"
+              subtitle="Encaisser une vente"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">📜</span>
-                <div>
-                  <p className="font-semibold text-foreground">Mes ventes du jour</p>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <span>{todayTransactions} vente{todayTransactions !== 1 ? 's' : ''}</span>
-                    <span>•</span>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowBalance(!showBalance);
-                      }}
-                      className="flex items-center gap-1 hover:text-foreground transition-colors"
-                    >
-                      {showBalance ? (
-                        <>
-                          <span>{formatCurrency(todayTotal)} FCFA</span>
-                          <EyeOff className="w-4 h-4" />
-                        </>
-                      ) : (
-                        <>
-                          <span>••••••</span>
-                          <Eye className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </GlassCard>
+              VENDRE
+            </JulabaButton>
+
+            {/* 4. STATS DU JOUR */}
+            <div className="grid grid-cols-2 gap-3">
+              <JulabaStatCard
+                emoji="💰"
+                value={showBalance ? formatCurrency(todayTotal) : "••••••"}
+                suffix="FCFA"
+                label="Gagné aujourd'hui"
+                iconBg="green"
+                onClick={() => setShowBalance(!showBalance)}
+              />
+              <JulabaStatCard
+                emoji="🧾"
+                value={todayTransactions}
+                label={todayTransactions > 1 ? "Ventes" : "Vente"}
+                iconBg="orange"
+                onClick={handleMesVentes}
+              />
+            </div>
 
             {/* 5. BOUTON COMMANDES VOCALES */}
-            <div className="flex justify-center pt-2">
-              <VoiceHeroButton
+            <div className="flex justify-center pt-4">
+              <JulabaVoiceButton
                 state={voiceState}
                 onClick={handleVoiceCommand}
-                label="Commandes vocales"
-                size="lg"
+                label="Parle-moi"
               />
             </div>
 
             {/* 6. Indicateur de connexion */}
-            <OnlineStatusIndicator isOnline={isOnline} />
+            {!isOnline && (
+              <JulabaCard accent="orange" className="flex items-center gap-3 p-3">
+                <span className="text-xl">📡</span>
+                <p className="text-sm font-medium text-[hsl(27_100%_45%)]">
+                  Pas de connexion - Mode hors-ligne
+                </p>
+              </JulabaCard>
+            )}
           </>
         )}
       </main>
 
-      {/* Bottom Navigation - 3 items */}
-      <UnifiedBottomNav items={merchantNavItems} />
+      {/* Bottom Navigation Jùlaba */}
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
 
       {/* Dialogs */}
       <OpenDayDialog
@@ -276,6 +292,6 @@ export default function MerchantDashboard() {
         getSummary={getSummary}
         isLoading={isClosing}
       />
-    </div>
+    </JulabaPageLayout>
   );
 }

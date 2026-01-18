@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { UnifiedBottomNav, EnhancedHeader } from '@/shared/ui';
-import { merchantNavItems } from '@/config/navigation';
+import { MERCHANT_NAV_ITEMS } from '@/config/navigation-julaba';
 import { useMerchantCredits } from '@/features/merchant/hooks/useMerchantCredits';
 import {
   CreditsSummary,
@@ -11,6 +10,17 @@ import {
   PaymentDialog
 } from '@/features/merchant/components/credits';
 import type { CustomerCredit } from '@/features/merchant/types/credits.types';
+
+// Jùlaba Design System
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaBottomNav,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaButton,
+  JulabaEmptyState,
+} from '@/shared/ui/julaba';
 
 export default function MerchantCredits() {
   const {
@@ -42,33 +52,58 @@ export default function MerchantCredits() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
+      <JulabaPageLayout className="flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-[hsl(30_100%_60%)]" />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <EnhancedHeader
+    <JulabaPageLayout>
+      <JulabaHeader
         title="Qui me doit"
-        subtitle="Les clients qui n'ont pas encore payé"
+        subtitle="Les clients pas encore payés"
         showBack
-        backTo="/marchand"
-        showNotifications={false}
+        backPath="/marchand/profil"
       />
 
-      <main className="p-4 space-y-4">
-        <CreditsSummary totalOwed={totalOwed} overdueCount={overdueCount} />
-        
+      <main className="px-4 py-4 space-y-5">
+        {/* Stats rapides */}
+        <div className="grid grid-cols-2 gap-3">
+          <JulabaStatCard
+            emoji="💸"
+            value={totalOwed.toLocaleString()}
+            suffix="FCFA"
+            label="À récupérer"
+            iconBg="orange"
+          />
+          <JulabaStatCard
+            emoji="⏰"
+            value={overdueCount}
+            label={overdueCount > 1 ? "En retard" : "En retard"}
+            iconBg={overdueCount > 0 ? "orange" : "green"}
+          />
+        </div>
+
+        {/* Bouton ajouter */}
         <AddCreditDialog onSubmit={addCredit} />
         
+        {/* Filtres */}
         <CreditsFilters filter={filter} onFilterChange={setFilter} />
         
-        <CreditsList 
-          credits={filteredCredits} 
-          onPaymentClick={handlePaymentClick}
-        />
+        {/* Liste */}
+        {filteredCredits.length === 0 ? (
+          <JulabaEmptyState
+            emoji="✨"
+            title="Personne ne te doit"
+            description="Tous tes clients ont payé !"
+          />
+        ) : (
+          <CreditsList 
+            credits={filteredCredits} 
+            onPaymentClick={handlePaymentClick}
+          />
+        )}
       </main>
 
       <PaymentDialog
@@ -78,7 +113,7 @@ export default function MerchantCredits() {
         onSubmit={handlePaymentSubmit}
       />
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
