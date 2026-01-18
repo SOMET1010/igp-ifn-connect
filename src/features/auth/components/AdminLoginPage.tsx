@@ -1,14 +1,21 @@
+/**
+ * AdminLoginPage - Page de connexion administrateur avec Design System Jùlaba
+ */
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/shared/hooks";
+import { toast } from "sonner";
 import { useAuth } from "@/shared/contexts";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { emailSchema, passwordSchema, getValidationError } from "@/shared/lib";
-import { AudioButton, BackgroundDecor } from "@/shared/ui";
+import { 
+  JulabaPageLayout, 
+  JulabaHeader, 
+  JulabaCard, 
+  JulabaButton, 
+  JulabaInput 
+} from "@/shared/ui/julaba";
+import { ImmersiveBackground } from "@/shared/ui";
 import { AdminLoginConfig } from "../types/login.types";
 
 interface AdminLoginPageProps {
@@ -20,7 +27,6 @@ interface AdminLoginPageProps {
  */
 export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ config }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { signIn, isAuthenticated, checkRole } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -42,21 +48,13 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ config }) => {
   const handleLogin = async () => {
     const emailError = getValidationError(emailSchema, email);
     if (emailError) {
-      toast({
-        title: "Erreur",
-        description: emailError,
-        variant: "destructive",
-      });
+      toast.error(emailError);
       return;
     }
 
     const passwordError = getValidationError(passwordSchema, password);
     if (passwordError) {
-      toast({
-        title: "Erreur",
-        description: passwordError,
-        variant: "destructive",
-      });
+      toast.error(passwordError);
       return;
     }
 
@@ -65,11 +63,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ config }) => {
     const { error } = await signIn(email, password);
 
     if (error) {
-      toast({
-        title: "Erreur de connexion",
-        description: "Email ou mot de passe incorrect",
-        variant: "destructive",
-      });
+      toast.error("Email ou mot de passe incorrect");
       setIsLoading(false);
       return;
     }
@@ -77,104 +71,77 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ config }) => {
     const isAdmin = await checkRole("admin");
 
     if (!isAdmin) {
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits administrateur",
-        variant: "destructive",
-      });
+      toast.error("Vous n'avez pas les droits administrateur");
       setIsLoading(false);
       return;
     }
 
-    toast({
-      title: "✅ Connexion réussie",
-      description: "Bienvenue sur l'administration PNAVIM-CI",
-    });
-
+    toast.success("Bienvenue sur l'administration DGE");
     navigate(config.redirectTo);
     setIsLoading(false);
   };
 
-  const BackgroundIcon = config.backgroundIcon;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && email && password && !isLoading) {
+      handleLogin();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex flex-col relative overflow-hidden">
-      <BackgroundDecor
-        icons={[{ Icon: BackgroundIcon, position: "bottom-right", size: "xl", rotate: 10 }]}
-        opacity={5}
+    <JulabaPageLayout background="gradient" withBottomNav={false}>
+      <ImmersiveBackground 
+        variant="solar" 
+        showMarketPhoto={false}
+        blurAmount="md"
+      />
+      
+      {/* Header Admin */}
+      <JulabaHeader
+        title="🏛️ Administration DGE"
+        subtitle={config.headerSubtitle}
+        showBack
+        backTo="/"
       />
 
-      <AudioButton
-        textToRead={config.audioText}
-        className="fixed bottom-6 right-4 z-50"
-        size="lg"
-      />
-
-      <header className="bg-gradient-to-r from-violet-800 to-violet-700 text-primary-foreground py-6 px-4 relative z-10">
-        <div className="flex items-center gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🏛️</span>
-              <span className="font-bold">{config.headerTitle}</span>
+      {/* Formulaire de connexion */}
+      <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+        <JulabaCard className="w-full max-w-md">
+          {/* Icône et titre */}
+          <div className="text-center mb-6">
+            <div className="mx-auto mb-4 w-20 h-20 bg-gradient-to-br from-violet-600 to-violet-800 rounded-2xl flex items-center justify-center shadow-lg">
+              <ShieldCheck className="h-10 w-10 text-white" />
             </div>
-            <p className="text-sm text-primary-foreground/80 mt-1">
-              {config.headerSubtitle}
+            <h1 className="text-xl font-bold text-foreground">Connexion Administrateur</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Accès réservé aux administrateurs
             </p>
           </div>
-        </div>
-      </header>
 
-      <div className="flex-1 flex items-center justify-center p-6 relative z-10">
-        <Card className="w-full max-w-md shadow-xl border-2">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto mb-4 w-20 h-20 bg-violet-100 rounded-full flex items-center justify-center">
-              <BackgroundIcon className="h-10 w-10 text-violet-700" />
-            </div>
-            <CardTitle className="text-2xl">Connexion Administrateur</CardTitle>
-            <CardDescription className="text-base">
-              Accès réservé aux administrateurs DGE
-            </CardDescription>
-          </CardHeader>
+          {/* Champs du formulaire */}
+          <div className="space-y-4" onKeyDown={handleKeyDown}>
+            <JulabaInput
+              label="📧 Adresse email"
+              type="email"
+              placeholder="admin@dge.gouv.ci"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              emoji="📧"
+            />
 
-          <CardContent className="space-y-6 pt-4">
-            <div className="space-y-3">
-              <Label htmlFor="email" className="form-label-lg">
-                Adresse email
-              </Label>
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@dge.gouv.ci"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="form-input-lg pl-12"
-                />
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              </div>
-            </div>
+            <JulabaInput
+              label="🔒 Mot de passe"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              emoji="🔒"
+            />
 
-            <div className="space-y-3">
-              <Label htmlFor="password" className="form-label-lg">
-                Mot de passe
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="form-input-lg pl-12"
-                />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              </div>
-            </div>
-
-            <Button
+            <JulabaButton
+              variant="hero"
               onClick={handleLogin}
               disabled={!email || !password || isLoading}
-              className="btn-xxl w-full bg-violet-700 hover:bg-violet-800"
+              className="w-full bg-gradient-to-r from-violet-600 to-violet-700"
             >
               {isLoading ? (
                 <>
@@ -182,20 +149,22 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ config }) => {
                   Connexion...
                 </>
               ) : (
-                "Se connecter"
+                "🔐 Se connecter"
               )}
-            </Button>
+            </JulabaButton>
+          </div>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Contactez le support DGE si vous avez oublié vos identifiants
-            </p>
-          </CardContent>
-        </Card>
+          {/* Info support */}
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Contactez le support DGE si vous avez oublié vos identifiants
+          </p>
+        </JulabaCard>
       </div>
 
-      <footer className="p-4 text-center text-sm text-muted-foreground">
-        <p>PNAVIM-CI - © 2024</p>
+      {/* Footer */}
+      <footer className="p-4 text-center text-sm text-white/70 relative z-10">
+        <p>IGP-IFN Connect - © 2024</p>
       </footer>
-    </div>
+    </JulabaPageLayout>
   );
 };

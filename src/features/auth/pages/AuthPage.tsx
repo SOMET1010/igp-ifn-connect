@@ -1,19 +1,25 @@
+/**
+ * AuthPage - Page d'authentification universelle avec Design System Jùlaba
+ * 
+ * Supporte: email/password (admin, agent) et phone/OTP (merchant, cooperative, producer)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PhoneInput, ImmersiveBackground, GlassCard } from '@/shared/ui';
+import { PhoneInput, ImmersiveBackground } from '@/shared/ui';
+import { 
+  JulabaPageLayout, 
+  JulabaCard, 
+  JulabaButton, 
+  JulabaInput 
+} from '@/shared/ui/julaba';
 import OTPInput from "@/features/auth/components/OTPInput";
 import { useAuth } from '@/shared/contexts';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { 
-  Mail, Lock, Loader2, ArrowLeft, User, ShieldCheck, 
-  Store, Users, Briefcase, Volume2
-} from 'lucide-react';
+import { Loader2, ArrowLeft, ShieldCheck, Store, Users, Briefcase } from 'lucide-react';
 import { GoogleSignInButton } from "@/features/auth/components/GoogleSignInButton";
 import { 
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
@@ -28,9 +34,10 @@ interface RoleConfig {
   title: string;
   subtitle: string;
   icon: React.ReactNode;
+  emoji: string;
   authMethod: 'email' | 'phone';
   redirectTo: string;
-  borderColor: 'orange' | 'green' | 'gold' | 'violet';
+  accentColor: string;
   bgGradient: string;
 }
 
@@ -39,45 +46,50 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     title: 'Administration',
     subtitle: 'Direction Générale des Entreprises',
     icon: <ShieldCheck className="h-8 w-8" />,
+    emoji: '🏛️',
     authMethod: 'email',
     redirectTo: '/admin',
-    borderColor: 'violet',
+    accentColor: 'violet',
     bgGradient: 'from-violet-600 to-violet-800',
   },
   agent: {
     title: 'Agent de terrain',
     subtitle: 'Enrôlement des marchands',
     icon: <Briefcase className="h-8 w-8" />,
+    emoji: '👔',
     authMethod: 'email',
     redirectTo: '/agent',
-    borderColor: 'green',
+    accentColor: 'emerald',
     bgGradient: 'from-emerald-600 to-emerald-800',
   },
   merchant: {
     title: 'Espace Marchand',
     subtitle: 'Gestion de votre activité',
     icon: <Store className="h-8 w-8" />,
+    emoji: '🏪',
     authMethod: 'phone',
     redirectTo: '/marchand',
-    borderColor: 'orange',
+    accentColor: 'orange',
     bgGradient: 'from-orange-500 to-orange-700',
   },
   cooperative: {
     title: 'Espace Coopérative',
     subtitle: 'Gestion de vos stocks',
     icon: <Users className="h-8 w-8" />,
+    emoji: '🤝',
     authMethod: 'phone',
     redirectTo: '/cooperative',
-    borderColor: 'gold',
+    accentColor: 'amber',
     bgGradient: 'from-amber-500 to-amber-700',
   },
   producer: {
     title: 'Espace Producteur',
     subtitle: 'Publication de vos récoltes',
     icon: <Users className="h-8 w-8" />,
+    emoji: '🌾',
     authMethod: 'phone',
     redirectTo: '/producteur',
-    borderColor: 'green',
+    accentColor: 'green',
     bgGradient: 'from-emerald-500 to-emerald-700',
   },
 };
@@ -205,7 +217,7 @@ const AuthPage: React.FC = () => {
     setIsLoading(true);
 
     // Check if user exists
-    const tableName = roleParam === 'merchant' ? 'merchants' : 'cooperatives';
+    const tableName = roleParam === 'merchant' ? 'merchants' : roleParam === 'producer' ? 'producers' : 'cooperatives';
     const phoneField = 'phone';
     
     const { data: existing } = await supabase
@@ -218,7 +230,7 @@ const AuthPage: React.FC = () => {
 
     // For demo: show OTP in toast (real implementation would use SMS)
     const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    toast.success(`Code de vérification : ${mockOtp}`, { duration: 15000 });
+    toast.success(`📲 Code de vérification : ${mockOtp}`, { duration: 15000 });
 
     setIsLoading(false);
     setStep('otp');
@@ -295,6 +307,14 @@ const AuthPage: React.FC = () => {
           region: 'Abidjan',
           commune: 'Abidjan'
         });
+      } else if (roleParam === 'producer') {
+        await supabase.from('producers').insert({
+          user_id: userId,
+          full_name: fullName,
+          phone: cleanPhone,
+          region: 'Abidjan',
+          commune: 'Abidjan'
+        });
       }
 
       toast.success('Compte créé avec succès');
@@ -316,7 +336,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <JulabaPageLayout background="warm" withBottomNav={false}>
       {/* Fond immersif Afro-Futuriste */}
       <ImmersiveBackground 
         variant="solar"
@@ -343,12 +363,8 @@ const AuthPage: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          {/* Carte principale avec GlassCard */}
-          <GlassCard 
-            borderColor={config.borderColor} 
-            padding="lg"
-            className="space-y-6"
-          >
+          {/* Carte principale */}
+          <JulabaCard className="space-y-6">
             {/* Icône et titre */}
             <div className="text-center">
               <motion.div 
@@ -359,7 +375,9 @@ const AuthPage: React.FC = () => {
               >
                 {config.icon}
               </motion.div>
-              <h1 className="text-2xl font-bold text-foreground">{config.title}</h1>
+              <h1 className="text-2xl font-bold text-foreground">
+                {config.emoji} {config.title}
+              </h1>
               <p className="text-sm text-muted-foreground mt-1">{config.subtitle}</p>
             </div>
 
@@ -372,43 +390,32 @@ const AuthPage: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Adresse email</Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="exemple@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 bg-white/80"
-                      />
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <JulabaInput
+                    label="Adresse email"
+                    type="email"
+                    placeholder="exemple@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    emoji="📧"
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Mot de passe</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-white/80"
-                      />
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <JulabaInput
+                    label="Mot de passe"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    emoji="🔒"
+                  />
 
-                  <Button
+                  <JulabaButton
+                    variant="hero"
                     onClick={handleEmailLogin}
                     disabled={!email || !password || isLoading}
-                    className="w-full h-12 text-base font-semibold"
+                    className="w-full"
                   >
-                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Se connecter'}
-                  </Button>
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '🔐 Se connecter'}
+                  </JulabaButton>
 
                   <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
@@ -423,58 +430,41 @@ const AuthPage: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Nom complet</Label>
-                    <div className="relative">
-                      <Input
-                        id="fullName"
-                        type="text"
-                        placeholder="Votre nom"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="pl-10 bg-white/80"
-                      />
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <JulabaInput
+                    label="Nom complet"
+                    type="text"
+                    placeholder="Votre nom"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    emoji="👤"
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signupEmail">Adresse email</Label>
-                    <div className="relative">
-                      <Input
-                        id="signupEmail"
-                        type="email"
-                        placeholder="exemple@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 bg-white/80"
-                      />
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <JulabaInput
+                    label="Adresse email"
+                    type="email"
+                    placeholder="exemple@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    emoji="📧"
+                  />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signupPassword">Mot de passe</Label>
-                    <div className="relative">
-                      <Input
-                        id="signupPassword"
-                        type="password"
-                        placeholder="Min. 8 caractères"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-white/80"
-                      />
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
+                  <JulabaInput
+                    label="Mot de passe"
+                    type="password"
+                    placeholder="Min. 8 caractères"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    emoji="🔒"
+                  />
 
-                  <Button
+                  <JulabaButton
+                    variant="hero"
                     onClick={handleEmailSignup}
                     disabled={!fullName || !email || !password || isLoading}
-                    className="w-full h-12 text-base font-semibold"
+                    className="w-full"
                   >
-                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Créer un compte'}
-                  </Button>
+                    {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '✨ Créer un compte'}
+                  </JulabaButton>
                 </TabsContent>
               </Tabs>
             )}
@@ -488,13 +478,14 @@ const AuthPage: React.FC = () => {
                   disabled={isLoading}
                 />
 
-                <Button
+                <JulabaButton
+                  variant="hero"
                   onClick={handlePhoneSubmit}
                   disabled={phone.length < 8 || isLoading}
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Recevoir le code'}
-                </Button>
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '📲 Recevoir le code'}
+                </JulabaButton>
               </div>
             )}
 
@@ -510,13 +501,14 @@ const AuthPage: React.FC = () => {
                   </div>
                 </div>
 
-                <Button
+                <JulabaButton
+                  variant="hero"
                   onClick={handleOtpSubmit}
                   disabled={otp.length !== 6 || isLoading}
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Valider'}
-                </Button>
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '✅ Valider'}
+                </JulabaButton>
 
                 <button
                   onClick={handleBack}
@@ -531,27 +523,22 @@ const AuthPage: React.FC = () => {
             {/* Phone OTP - Step 3: Register */}
             {isPhoneAuth && step === 'register' && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="registerName">
-                    {roleParam === 'cooperative' ? 'Nom de la coopérative' : 'Nom complet'}
-                  </Label>
-                  <Input
-                    id="registerName"
-                    type="text"
-                    placeholder={roleParam === 'cooperative' ? 'Ex: COOP Vivriers Abidjan' : 'Ex: Kouamé Adjoua'}
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="bg-white/80"
-                  />
-                </div>
+                <JulabaInput
+                  label={roleParam === 'cooperative' ? '🏢 Nom de la coopérative' : '👤 Nom complet'}
+                  type="text"
+                  placeholder={roleParam === 'cooperative' ? 'Ex: COOP Vivriers Abidjan' : 'Ex: Kouamé Adjoua'}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
 
-                <Button
+                <JulabaButton
+                  variant="hero"
                   onClick={handlePhoneRegister}
                   disabled={fullName.length < 3 || isLoading}
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full"
                 >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Créer mon compte'}
-                </Button>
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : '🎉 Créer mon compte'}
+                </JulabaButton>
 
                 <button
                   onClick={handleBack}
@@ -562,7 +549,7 @@ const AuthPage: React.FC = () => {
                 </button>
               </div>
             )}
-          </GlassCard>
+          </JulabaCard>
 
           {/* Sélecteur de rôle */}
           <motion.div 
@@ -578,7 +565,7 @@ const AuthPage: React.FC = () => {
                 size="sm"
                 onClick={() => navigate(`/auth?role=${role}`)}
               >
-                {cfg.title}
+                {cfg.emoji} {cfg.title}
               </PnavimPillButton>
             ))}
           </motion.div>
@@ -597,7 +584,7 @@ const AuthPage: React.FC = () => {
 
       {/* Courbe décorative Wax */}
       <PnavimWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
-    </div>
+    </JulabaPageLayout>
   );
 };
 
