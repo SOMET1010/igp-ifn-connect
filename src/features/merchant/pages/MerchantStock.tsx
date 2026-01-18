@@ -1,22 +1,23 @@
+/**
+ * Page Ma Marchandise - /marchand/stock
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import { useState, useEffect, useCallback } from "react";
+import { Volume2, VolumeX, RefreshCw } from "lucide-react";
 import { 
-  Package, 
-  AlertTriangle, 
-  TrendingDown, 
-  CheckCircle,
-  RefreshCw, 
-  Volume2, 
-  VolumeX 
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { merchantNavItems } from "@/config/navigation";
-import { PageWithList, FilterOption } from "@/templates";
-import { Pictogram } from "@/shared/ui";
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaButton,
+  JulabaCard,
+  JulabaListItem,
+  JulabaEmptyState,
+  JulabaBottomNav,
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import { useTts } from "@/shared/hooks/useTts";
 import { getStockScript } from "@/shared/config/audio/stockScripts";
 import {
-  StockCard,
   StockAlerts,
   AddStockDialog,
   EditStockDialog,
@@ -29,14 +30,12 @@ export default function MerchantStock() {
     stocks,
     isLoading,
     isSaving,
-    isCheckingStock,
     availableProducts,
     fetchData,
     addStock,
     updateStock,
     restockItem,
     deleteStock,
-    checkLowStock,
   } = useMerchantStock();
 
   const { speak, isVoiceEnabled, toggleVoice, isSpeaking: isPlaying } = useTts();
@@ -88,14 +87,6 @@ export default function MerchantStock() {
     return matchesSearch && matchesStatus;
   });
 
-  // Options de filtres avec pictogrammes
-  const filterOptions: FilterOption[] = [
-    { value: "all", label: "Tous", count: stocks.length, icon: Package },
-    { value: "out", label: "Rupture", count: outOfStockItems.length, icon: AlertTriangle },
-    { value: "low", label: "Bas", count: lowStockItems.length, icon: TrendingDown },
-    { value: "ok", label: "OK", count: okStockItems.length, icon: CheckCircle },
-  ];
-
   const alertCount = outOfStockItems.length + lowStockItems.length;
 
   const handleOpenRestock = (stock: StockItem) => {
@@ -143,112 +134,137 @@ export default function MerchantStock() {
     return success;
   };
 
-  const handleFilterChange = (value: string) => {
-    setStatusFilter(value);
-    if (isVoiceEnabled) {
-      const scriptKey = `stock_filter_${value === 'all' ? 'all' : value === 'out' ? 'out' : value === 'low' ? 'low' : 'ok'}`;
-      speak(getStockScript(scriptKey));
+  // Badge variant selon statut
+  const getStockBadge = (stock: StockItem) => {
+    const qty = Number(stock.quantity);
+    const threshold = Number(stock.min_threshold);
+    
+    if (qty <= 0) {
+      return { text: "Rupture", variant: "danger" as const };
     }
+    if (qty <= threshold) {
+      return { text: "Bas", variant: "warning" as const };
+    }
+    return { text: "OK", variant: "success" as const };
   };
 
+  if (isLoading) {
+    return (
+      <JulabaPageLayout background="warm" className="flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-6xl animate-pulse">📦</div>
+          <p className="text-lg text-muted-foreground">Chargement...</p>
+        </div>
+      </JulabaPageLayout>
+    );
+  }
+
   return (
-    <>
-      <PageWithList<StockItem>
-        title="Ma marchandise"
-        subtitle={`${stocks.length} produit${stocks.length !== 1 ? "s" : ""}${alertCount > 0 ? ` • ${alertCount} alerte${alertCount !== 1 ? "s" : ""}` : ""}`}
-        showBack
-        backTo="/marchand"
-        navItems={merchantNavItems}
-        headerRightContent={
-          <div className="flex items-center gap-2">
-            {/* Bouton son */}
-            <Button
-              variant={isVoiceEnabled ? "default" : "ghost"}
-              size="icon"
-              onClick={toggleVoice}
-              className={`h-12 w-12 rounded-full ${isVoiceEnabled ? "bg-primary text-primary-foreground" : ""}`}
-            >
-              {isVoiceEnabled ? (
-                <Volume2 className={`w-6 h-6 ${isPlaying ? "animate-pulse" : ""}`} />
-              ) : (
-                <VolumeX className="w-6 h-6" />
+    <JulabaPageLayout background="warm" className="pb-24">
+      <JulabaHeader
+        title="📦 Ma marchandise"
+        backPath="/marchand"
+        rightAction={{
+          emoji: isVoiceEnabled ? "🔊" : "🔇",
+          label: isVoiceEnabled ? "Son actif" : "Son coupé",
+          onClick: toggleVoice,
+        }}
+      />
+
+      <main className="p-4 space-y-4 max-w-2xl mx-auto">
+        {/* Stats rapides */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📊</span>
+            <div>
+              <p className="text-lg font-bold">{stocks.length} produit{stocks.length !== 1 ? "s" : ""}</p>
+              {alertCount > 0 && (
+                <p className="text-sm text-destructive font-medium">
+                  ⚠️ {alertCount} alerte{alertCount !== 1 ? "s" : ""}
+                </p>
               )}
-            </Button>
-            {/* Bouton actualiser */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => fetchData()}
-              className="h-12 w-12"
-            >
-              <RefreshCw className="w-6 h-6" />
-            </Button>
+            </div>
           </div>
-        }
-        
-        // Recherche
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Rechercher..."
-        
-        // Filtres par statut
-        filterOptions={filterOptions}
-        filterValue={statusFilter}
-        onFilterChange={handleFilterChange}
-        
-        // Liste
-        items={filteredStocks}
-        keyExtractor={(stock) => stock.id}
-        renderItem={(stock) => (
-          <StockCard
-            stock={stock}
-            onRestock={handleOpenRestock}
-            onEdit={handleOpenEdit}
-            onDelete={deleteStock}
-            onSpeak={handleSpeak}
+          <JulabaButton
+            variant="ghost"
+            size="md"
+            emoji="🔄"
+            onClick={() => fetchData()}
+          >
+            Actualiser
+          </JulabaButton>
+        </div>
+
+        {/* Alertes avec audio */}
+        <StockAlerts
+          outOfStockItems={outOfStockItems}
+          lowStockItems={lowStockItems}
+          onRestock={handleOpenRestock}
+          onSpeakAlert={isVoiceEnabled ? handleSpeak : undefined}
+        />
+
+        {/* Bouton Ajouter XXL */}
+        <JulabaButton
+          onClick={handleOpenAdd}
+          disabled={availableProducts.length === 0}
+          variant="hero"
+          emoji="➕"
+          className="w-full"
+        >
+          Ajouter à ma marchandise
+        </JulabaButton>
+
+        {/* Filtres rapides */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {[
+            { value: "all", label: "Tous", emoji: "📦", count: stocks.length },
+            { value: "out", label: "Rupture", emoji: "🚫", count: outOfStockItems.length },
+            { value: "low", label: "Bas", emoji: "⚠️", count: lowStockItems.length },
+            { value: "ok", label: "OK", emoji: "✅", count: okStockItems.length },
+          ].map((filter) => (
+            <JulabaButton
+              key={filter.value}
+              variant={statusFilter === filter.value ? "primary" : "secondary"}
+              size="md"
+              onClick={() => setStatusFilter(filter.value)}
+              className="flex-shrink-0"
+            >
+              <span className="mr-1">{filter.emoji}</span>
+              {filter.label} ({filter.count})
+            </JulabaButton>
+          ))}
+        </div>
+
+        {/* Liste des produits */}
+        {filteredStocks.length > 0 ? (
+          <div className="space-y-3">
+            {filteredStocks.map((stock) => (
+              <JulabaListItem
+                key={stock.id}
+                emoji="📦"
+                title={stock.product?.name || "Produit"}
+                subtitle={`${Number(stock.quantity)} ${stock.product?.unit || "unités"}`}
+                value={stock.unit_price ? `${stock.unit_price.toLocaleString()} F` : undefined}
+                badge={getStockBadge(stock)}
+                showChevron
+                onClick={() => handleOpenEdit(stock)}
+              />
+            ))}
+          </div>
+        ) : (
+          <JulabaEmptyState
+            emoji="📦"
+            title={searchQuery || statusFilter !== "all" ? "Rien trouvé" : "Tu n'as pas encore de marchandise"}
+            description="Appuie sur le bouton pour en ajouter"
+            action={{
+              label: "Ajouter maintenant",
+              onClick: handleOpenAdd,
+            }}
           />
         )}
-        
-        isLoading={isLoading}
-        
-        // Contenu avant la liste
-        headerContent={
-          <div className="space-y-4 py-2">
-            {/* Alertes avec audio */}
-            <StockAlerts
-              outOfStockItems={outOfStockItems}
-              lowStockItems={lowStockItems}
-              onRestock={handleOpenRestock}
-              onSpeakAlert={isVoiceEnabled ? handleSpeak : undefined}
-            />
-            
-            {/* Bouton Ajouter XXL */}
-            <Button
-              onClick={handleOpenAdd}
-              disabled={availableProducts.length === 0}
-              className="w-full h-16 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl gap-3"
-            >
-              <Pictogram type="add" size="md" showBackground={false} />
-              <span>Ajouter à ma marchandise</span>
-            </Button>
-          </div>
-        }
-        
-        // État vide personnalisé
-        emptyState={
-          <Card className="bg-muted/30">
-            <CardContent className="p-8 text-center">
-              <Pictogram type="stock" size="xl" className="mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-semibold text-foreground mb-2">
-                {searchQuery || statusFilter !== "all" ? "Rien trouvé" : "Tu n'as pas encore de marchandise"}
-              </p>
-              <p className="text-muted-foreground">
-                Appuie sur le bouton pour en ajouter
-              </p>
-            </CardContent>
-          </Card>
-        }
-      />
+      </main>
+
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
 
       {/* Dialogs */}
       <AddStockDialog
@@ -274,6 +290,6 @@ export default function MerchantStock() {
         isSaving={isSaving}
         onUpdate={handleUpdate}
       />
-    </>
+    </JulabaPageLayout>
   );
 }

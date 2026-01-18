@@ -1,18 +1,22 @@
 /**
  * Page de clôture de journée - /marchand/cloture
- * Rituel de fin de journée pour UX inclusive
+ * Refactorisée avec Design System Jùlaba
  */
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowLeft, Moon, Sun, TrendingUp, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { EnhancedHeader, AudioButton } from "@/shared/ui";
+import { 
+  JulabaPageLayout, 
+  JulabaHeader, 
+  JulabaButton, 
+  JulabaCard, 
+  JulabaStatCard,
+  JulabaTantie,
+} from "@/shared/ui/julaba";
+import { AudioButton } from "@/shared/ui";
 import { useDailySession } from "@/features/merchant/hooks/useDailySession";
 import { useMerchantDashboardData } from "@/features/merchant/hooks/useMerchantDashboardData";
-import { PnavimButton, PnavimCard, PnavimStat } from "@/features/public/components/pnavim";
 
 type CloseStep = "summary" | "confirm" | "success";
 
@@ -27,14 +31,10 @@ export default function MerchantClose() {
     sessionStatus,
     closeSession,
     isClosing,
-    getSummary,
   } = useDailySession();
 
   const todayTotal = data?.todayTotal || 0;
   const todayTransactions = data?.todayTransactions || 0;
-  
-  // Résumé de la journée
-  const summary = getSummary();
   
   const handleClose = () => {
     closeSession({
@@ -44,66 +44,75 @@ export default function MerchantClose() {
     setStep("success");
   };
 
+  // Message Tantie contextuel
+  const getTantieMessage = () => {
+    if (todayTransactions > 5) {
+      return "Super journée aujourd'hui ! Tu as bien travaillé. Repose-toi bien ce soir.";
+    }
+    if (todayTransactions > 0) {
+      return "Bon travail ! Chaque vente compte. Demain sera encore meilleur.";
+    }
+    return "Journée calme aujourd'hui. C'est pas grave, demain sera meilleur !";
+  };
+
   // Page succès après clôture
   if (step === "success") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pnavim-bg to-white flex flex-col">
+      <JulabaPageLayout background="warm" className="flex flex-col">
         <motion.div 
           className="flex-1 flex flex-col items-center justify-center p-6 text-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
           <motion.div 
-            className="w-24 h-24 rounded-full bg-pnavim-secondary flex items-center justify-center mb-6"
+            className="text-8xl mb-6"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.2 }}
           >
-            <Moon className="w-12 h-12 text-white" />
+            🌙
           </motion.div>
           
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Bonne soirée ! 🌙
+            Bonne soirée !
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Ta journée est terminée. Repose-toi bien !
           </p>
 
           {/* Résumé final */}
-          <Card className="w-full max-w-sm mb-8">
-            <CardContent className="p-6 text-center">
+          <JulabaCard accent="green" className="w-full max-w-sm mb-8">
+            <div className="text-center">
               <p className="text-muted-foreground mb-2">Tu as gagné aujourd'hui</p>
-              <p className="text-4xl font-black text-pnavim-secondary">
+              <p className="text-4xl font-black text-secondary">
                 {todayTotal.toLocaleString()} <span className="text-lg">FCFA</span>
               </p>
               <p className="text-sm text-muted-foreground mt-2">
                 en {todayTransactions} vente{todayTransactions > 1 ? "s" : ""}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </JulabaCard>
 
-          <PnavimButton
-            size="xl"
+          <JulabaButton
+            variant="hero"
+            emoji="☀️"
             onClick={() => navigate("/marchand")}
-            fullWidth
+            className="w-full max-w-sm"
           >
-            <Sun className="w-6 h-6 mr-2" />
             Retour à l'accueil
-          </PnavimButton>
+          </JulabaButton>
         </motion.div>
-      </div>
+      </JulabaPageLayout>
     );
   }
 
   // Page de confirmation
   if (step === "confirm") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pnavim-bg to-white">
-        <EnhancedHeader
-          title="Clôturer"
-          showBack
-          backTo="/marchand"
-          showNotifications={false}
+      <JulabaPageLayout background="warm">
+        <JulabaHeader
+          title="🌙 Clôturer"
+          backPath="/marchand"
         />
         
         <main className="p-4 space-y-6 max-w-lg mx-auto">
@@ -113,48 +122,43 @@ export default function MerchantClose() {
             size="lg"
           />
 
-          <PnavimCard variant="elevated" className="text-center py-8">
-            <Moon className="w-16 h-16 text-pnavim-primary mx-auto mb-4" />
+          <JulabaCard className="text-center py-8">
+            <div className="text-6xl mb-4">🌙</div>
             <h2 className="text-2xl font-bold mb-2">Fermer la journée ?</h2>
             <p className="text-muted-foreground">
               Tu ne pourras plus vendre après ça
             </p>
-          </PnavimCard>
+          </JulabaCard>
 
           <div className="flex gap-4">
-            <PnavimButton
-              variant="outline"
-              size="lg"
+            <JulabaButton
+              variant="secondary"
               onClick={() => setStep("summary")}
-              fullWidth
+              className="flex-1"
             >
               Non, annuler
-            </PnavimButton>
-            <PnavimButton
+            </JulabaButton>
+            <JulabaButton
               variant="primary"
-              size="lg"
+              emoji="✅"
               onClick={handleClose}
               isLoading={isClosing}
-              fullWidth
+              className="flex-1"
             >
-              <Check className="w-5 h-5 mr-2" />
               Oui, fermer
-            </PnavimButton>
+            </JulabaButton>
           </div>
         </main>
-      </div>
+      </JulabaPageLayout>
     );
   }
 
   // Page résumé (défaut)
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pnavim-bg to-white pb-24">
-      <EnhancedHeader
-        title="Fermer ma journée"
-        subtitle="Ce que tu as vendu aujourd'hui"
-        showBack
-        backTo="/marchand"
-        showNotifications={false}
+    <JulabaPageLayout background="warm" className="pb-24">
+      <JulabaHeader
+        title="🌙 Fermer ma journée"
+        backPath="/marchand"
       />
 
       <main className="p-4 space-y-5 max-w-lg mx-auto">
@@ -166,24 +170,28 @@ export default function MerchantClose() {
 
         {/* Stats du jour */}
         <div className="grid grid-cols-2 gap-4">
-          <PnavimStat
-            icon={TrendingUp}
+          <JulabaStatCard
+            emoji="📊"
             value={todayTransactions}
             label="Ventes"
-            variant="success"
+            iconBg="blue"
           />
-          <PnavimStat
-            icon={TrendingUp}
+          <JulabaStatCard
+            emoji="💰"
             value={`${todayTotal.toLocaleString()}`}
-            label="FCFA gagnés"
-            variant="primary"
+            suffix="F"
+            label="Gagnés"
+            iconBg="green"
           />
         </div>
 
         {/* Détails session */}
         {todaySession && (
-          <PnavimCard>
-            <h3 className="font-bold mb-4">Détails de la journée</h3>
+          <JulabaCard>
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              <span className="text-xl">📋</span>
+              Détails de la journée
+            </h3>
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Ouverture</span>
@@ -197,7 +205,7 @@ export default function MerchantClose() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Ventes du jour</span>
-                <span className="font-medium text-pnavim-secondary">+{todayTotal.toLocaleString()} FCFA</span>
+                <span className="font-medium text-secondary">+{todayTotal.toLocaleString()} FCFA</span>
               </div>
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-bold">Total attendu</span>
@@ -206,57 +214,42 @@ export default function MerchantClose() {
                 </span>
               </div>
             </div>
-          </PnavimCard>
+          </JulabaCard>
         )}
 
-        {/* Message encourageant */}
-        <PnavimCard className="bg-pnavim-secondary/10 border-pnavim-secondary/30">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl">💪</span>
-            <div>
-              <p className="font-bold text-foreground">
-                {todayTransactions > 5 ? "Super journée !" : todayTransactions > 0 ? "Bon travail !" : "Demain sera meilleur !"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {todayTransactions > 5 
-                  ? "Tu as bien travaillé aujourd'hui" 
-                  : todayTransactions > 0 
-                  ? "Chaque vente compte" 
-                  : "Repose-toi bien ce soir"}
-              </p>
-            </div>
-          </div>
-        </PnavimCard>
+        {/* Message encourageant avec Tantie */}
+        <JulabaTantie
+          message={getTantieMessage()}
+          variant="small"
+        />
 
         {/* Bouton clôturer */}
         {sessionStatus === "open" && (
-          <PnavimButton
-            variant="primary"
-            size="xl"
+          <JulabaButton
+            variant="hero"
+            emoji="🌙"
             onClick={() => setStep("confirm")}
-            fullWidth
-            leftIcon={<Moon className="w-6 h-6" />}
-            className="mt-4"
+            className="w-full mt-4"
           >
             Clôturer ma journée
-          </PnavimButton>
+          </JulabaButton>
         )}
 
         {sessionStatus !== "open" && (
-          <PnavimCard className="text-center py-6">
+          <JulabaCard className="text-center py-6">
             <p className="text-muted-foreground">
-              {sessionStatus === "closed" ? "Journée déjà clôturée ✓" : "Ouvre ta journée d'abord"}
+              {sessionStatus === "closed" ? "✅ Journée déjà clôturée" : "Ouvre ta journée d'abord"}
             </p>
-            <PnavimButton
-              variant="outline"
+            <JulabaButton
+              variant="secondary"
               className="mt-4"
               onClick={() => navigate("/marchand")}
             >
               Retour à l'accueil
-            </PnavimButton>
-          </PnavimCard>
+            </JulabaButton>
+          </JulabaCard>
         )}
       </main>
-    </div>
+    </JulabaPageLayout>
   );
 }
