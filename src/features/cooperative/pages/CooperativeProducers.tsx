@@ -1,12 +1,21 @@
 /**
- * Page de gestion des producteurs de la coopérative
+ * CooperativeProducers - Producteurs Coopérative
+ * Refonte Jùlaba Design System
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useLanguage } from '@/shared/contexts';
-import { EnhancedHeader, UnifiedBottomNav, LoadingState, ErrorState } from '@/shared/ui';
-import { Tractor } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaStatCard,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { useCooperativeDashboard } from '@/features/cooperative';
 import { useCooperativeProducers } from '@/features/cooperative/hooks/useCooperativeProducers';
 import { 
@@ -14,14 +23,19 @@ import {
   ProducersList, 
   AddProducerDialog 
 } from '@/features/cooperative/components/producers';
-import { cooperativeNavItems } from '@/config/navigation';
+
+// Nav items Coopérative
+const COOP_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/cooperative' },
+  { emoji: '📦', label: 'Stock', path: '/cooperative/stock' },
+  { emoji: '📋', label: 'Commandes', path: '/cooperative/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/cooperative/profil' },
+];
 
 const CooperativeProducers: React.FC = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { t } = useLanguage();
-
-  const navItems = cooperativeNavItems;
 
   const { cooperative, isLoading: isLoadingCoop, error: errorCoop } = useCooperativeDashboard();
 
@@ -44,52 +58,78 @@ const CooperativeProducers: React.FC = () => {
 
   if (isLoadingCoop || isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title="Producteurs" subtitle={cooperative?.name} showSignOut onSignOut={handleSignOut} />
-        <LoadingState message="Chargement des producteurs..." />
-        <UnifiedBottomNav items={navItems} />
-      </div>
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
     );
   }
 
   if (errorCoop || error) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <EnhancedHeader title="Producteurs" subtitle="Coopérative" showSignOut onSignOut={handleSignOut} />
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader 
+          title="Producteurs" 
+          subtitle={cooperative?.name}
+          showBack
+          backPath="/cooperative"
+        />
         <div className="p-4">
-          <ErrorState 
-            message={error?.message || errorCoop?.message || "Erreur de chargement"} 
-            onRetry={refetch} 
+          <JulabaEmptyState
+            emoji="😕"
+            title="Erreur de chargement"
+            description={error?.message || errorCoop?.message || "Erreur inconnue"}
           />
         </div>
-        <UnifiedBottomNav items={navItems} />
-      </div>
+        <JulabaBottomNav items={COOP_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <EnhancedHeader 
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader 
         title="Producteurs" 
-        subtitle={cooperative?.name}
-        showSignOut 
-        onSignOut={handleSignOut}
-        rightContent={
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Tractor className="h-4 w-4" />
-            {stats.total}
-          </div>
-        }
+        subtitle={`${stats.total} cultivateur(s)`}
+        showBack
+        backPath="/cooperative"
+        rightAction={{
+          emoji: '🌾',
+          onClick: () => {},
+          label: `${stats.total} producteurs`
+        }}
       />
 
       <div className="p-4 space-y-6 max-w-2xl mx-auto">
         {/* Statistiques */}
-        <ProducerStatsCards stats={stats} />
+        <div className="grid grid-cols-3 gap-2">
+          <JulabaStatCard
+            label="Total"
+            value={stats.total}
+            emoji="🌾"
+            iconBg="green"
+          />
+          <JulabaStatCard
+            label="Actifs"
+            value={stats.active}
+            emoji="✅"
+            iconBg="blue"
+          />
+          <JulabaStatCard
+            label="Certifiés"
+            value={stats.certified}
+            emoji="🏆"
+            iconBg="gold"
+          />
+        </div>
 
         {/* Action d'ajout */}
-        <div className="flex justify-end">
-          <AddProducerDialog onAdd={addProducer} isAdding={isAdding} />
-        </div>
+        <JulabaCard className="p-4">
+          <div className="flex justify-end">
+            <AddProducerDialog onAdd={addProducer} isAdding={isAdding} />
+          </div>
+        </JulabaCard>
 
         {/* Liste des producteurs */}
         <ProducersList 
@@ -99,8 +139,8 @@ const CooperativeProducers: React.FC = () => {
         />
       </div>
 
-      <UnifiedBottomNav items={navItems} />
-    </div>
+      <JulabaBottomNav items={COOP_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

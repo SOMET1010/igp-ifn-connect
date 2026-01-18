@@ -1,20 +1,22 @@
 /**
  * Dashboard Producteur - PNAVIM
- * Phase 6: Migré vers RoleLayout
+ * Refonte Jùlaba Design System
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { RoleLayout } from '@/app/layouts/RoleLayout';
-import { 
-  Package, 
-  ShoppingCart, 
-  Plus,
-  ArrowRight,
-  Loader2
-} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaListItem,
+  JulabaStatCard,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { 
   useProducerData, 
   useProducerHarvests, 
@@ -24,7 +26,16 @@ import {
   OrderCard
 } from '@/features/producer';
 
+// Nav items Producteur
+const PRODUCER_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🌾', label: 'Accueil', path: '/producteur' },
+  { emoji: '📦', label: 'Récoltes', path: '/producteur/recoltes' },
+  { emoji: '🛒', label: 'Commandes', path: '/producteur/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/producteur/profil' },
+];
+
 const ProducerDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { producer, stats, isLoading, isStatsLoading } = useProducerData();
   const { harvests, isLoading: isHarvestsLoading } = useProducerHarvests(producer?.id);
   const { pendingOrders, isLoading: isOrdersLoading } = useProducerOrders(producer?.id);
@@ -32,107 +43,180 @@ const ProducerDashboard: React.FC = () => {
   const recentHarvests = harvests.slice(0, 2);
   const recentOrders = pendingOrders.slice(0, 2);
 
-  // Header personnalisé avec gradient
-  const CustomHeader = () => (
-    <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 -mx-4 -mt-4 px-4 py-6 text-white rounded-b-xl">
-      <h1 className="text-xl font-bold">
-        Mon champ 🌾
-      </h1>
-      <p className="text-emerald-100 text-sm mt-1">
-        Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'}
-      </p>
-    </div>
-  );
+  if (isLoading) {
+    return (
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
+    );
+  }
 
   return (
-    <RoleLayout
-      title="Mon champ"
-      subtitle="Ce que je cultive"
-      isLoading={isLoading}
-      showSignOut
-      showHeader={false}
-    >
-      <div className="space-y-6 pb-6">
-        {/* Header gradient custom */}
-        <CustomHeader />
+    <JulabaPageLayout background="gradient">
+      {/* Header avec gradient custom */}
+      <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 px-4 py-6 text-white rounded-b-3xl mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-4xl">🌾</span>
+          <div>
+            <h1 className="text-xl font-bold">Mon champ</h1>
+            <p className="text-emerald-100 text-sm">
+              Bonjour, {producer?.full_name?.split(' ')[0] || 'Producteur'}
+            </p>
+          </div>
+        </div>
+      </div>
 
+      <div className="p-4 space-y-6">
         {/* Stats */}
-        <ProducerStats stats={stats} isLoading={isStatsLoading} />
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">
+            📊 Mes statistiques
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <JulabaStatCard
+              label="Récoltes"
+              value={stats.totalHarvests}
+              emoji="🌿"
+              iconBg="green"
+            />
+            <JulabaStatCard
+              label="Disponibles"
+              value={stats.availableHarvests}
+              emoji="✅"
+              iconBg="blue"
+            />
+            <JulabaStatCard
+              label="Commandes"
+              value={stats.totalOrders}
+              emoji="📋"
+              iconBg="orange"
+            />
+            <JulabaStatCard
+              label="Revenu"
+              value={stats.totalRevenue}
+              emoji="💰"
+              iconBg="gold"
+              suffix="FCFA"
+            />
+          </div>
+        </section>
 
         {/* Action principale XXL */}
-        <Link to="/producteur/recoltes">
-          <Button className="w-full gap-2 h-16 text-lg font-bold rounded-2xl">
-            <Plus className="h-6 w-6" />
-            DÉCLARER MA RÉCOLTE
-          </Button>
-        </Link>
+        <JulabaButton
+          variant="hero"
+          emoji="🌿"
+          onClick={() => navigate('/producteur/recoltes')}
+          className="w-full"
+        >
+          DÉCLARER MA RÉCOLTE
+        </JulabaButton>
 
         {/* Ce que j'ai récolté */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Ce que j'ai récolté
-              </CardTitle>
-              <Link to="/producteur/recoltes" className="text-sm text-primary flex items-center gap-1">
-                Voir tout <ArrowRight className="h-3 w-3" />
-              </Link>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              🌿 Ce que j'ai récolté
+            </h2>
+            <button 
+              onClick={() => navigate('/producteur/recoltes')}
+              className="text-xs text-primary font-medium"
+            >
+              Voir tout →
+            </button>
+          </div>
+          
+          {isHarvestsLoading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isHarvestsLoading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : recentHarvests.length > 0 ? (
-              recentHarvests.map((harvest) => (
-                <HarvestCard key={harvest.id} harvest={harvest} />
-              ))
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Tu n'as pas encore déclaré de récolte</p>
-                <Link to="/producteur/recoltes">
-                  <Button variant="link" size="sm">Déclarer maintenant</Button>
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          ) : recentHarvests.length > 0 ? (
+            <div className="space-y-2">
+              {recentHarvests.map((harvest) => (
+                <JulabaCard key={harvest.id} className="p-3">
+                  <HarvestCard harvest={harvest} />
+                </JulabaCard>
+              ))}
+            </div>
+          ) : (
+            <JulabaEmptyState
+              emoji="🌱"
+              title="Pas encore de récolte"
+              description="Déclarez votre première récolte"
+            />
+          )}
+        </section>
 
         {/* Ce qu'on me demande */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Ce qu'on me demande
-              </CardTitle>
-              <Link to="/producteur/commandes" className="text-sm text-primary flex items-center gap-1">
-                Voir tout <ArrowRight className="h-3 w-3" />
-              </Link>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-medium text-muted-foreground">
+              🛒 Ce qu'on me demande
+            </h2>
+            <button 
+              onClick={() => navigate('/producteur/commandes')}
+              className="text-xs text-primary font-medium"
+            >
+              Voir tout →
+            </button>
+          </div>
+          
+          {isOrdersLoading ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {isOrdersLoading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : recentOrders.length > 0 ? (
-              recentOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <ShoppingCart className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Personne ne t'a encore demandé de produits</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          ) : recentOrders.length > 0 ? (
+            <div className="space-y-2">
+              {recentOrders.map((order) => (
+                <JulabaCard key={order.id} className="p-3">
+                  <OrderCard order={order} />
+                </JulabaCard>
+              ))}
+            </div>
+          ) : (
+            <JulabaEmptyState
+              emoji="📭"
+              title="Pas de demande"
+              description="Les coopératives verront bientôt vos récoltes"
+            />
+          )}
+        </section>
+
+        {/* Actions rapides */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">
+            🎯 Actions rapides
+          </h2>
+          <div className="space-y-2">
+            <JulabaListItem
+              emoji="📦"
+              title="Mes récoltes"
+              subtitle="Gérer mes produits"
+              onClick={() => navigate('/producteur/recoltes')}
+            />
+            <JulabaListItem
+              emoji="🛒"
+              title="Mes commandes"
+              subtitle="Voir les demandes"
+              badge={pendingOrders.length > 0 ? {
+                text: String(pendingOrders.length),
+                variant: 'warning'
+              } : undefined}
+              onClick={() => navigate('/producteur/commandes')}
+            />
+            <JulabaListItem
+              emoji="👤"
+              title="Mon profil"
+              subtitle="Mes informations"
+              onClick={() => navigate('/producteur/profil')}
+            />
+          </div>
+        </section>
       </div>
-    </RoleLayout>
+
+      <JulabaBottomNav items={PRODUCER_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 

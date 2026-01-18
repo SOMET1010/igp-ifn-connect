@@ -1,17 +1,43 @@
+/**
+ * CooperativeOrders - Commandes Coopérative
+ * Refonte Jùlaba Design System
+ */
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/shared/contexts';
-import { ClipboardList } from 'lucide-react';
-import { EnhancedHeader, UnifiedBottomNav, EmptyState, LoadingState, NotificationBadge } from '@/shared/ui';
-import { cooperativeNavItems } from '@/config/navigation';
+import { Loader2 } from 'lucide-react';
+import {
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaTabBar,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { useCooperativeOrders } from '@/features/cooperative';
 import type { Order } from '@/features/cooperative';
 import { OrderCard, CancelOrderDialog } from '@/features/cooperative/components/orders';
 
+// Nav items Coopérative
+const COOP_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/cooperative' },
+  { emoji: '📦', label: 'Stock', path: '/cooperative/stock' },
+  { emoji: '📋', label: 'Commandes', path: '/cooperative/commandes' },
+  { emoji: '👤', label: 'Profil', path: '/cooperative/profil' },
+];
+
+const ORDER_TABS = [
+  { id: 'pending', label: 'En attente', emoji: '⏳' },
+  { id: 'confirmed', label: 'Confirmé', emoji: '✅' },
+  { id: 'in_transit', label: 'En transit', emoji: '🚚' },
+  { id: 'delivered', label: 'Livré', emoji: '📦' },
+  { id: 'cancelled', label: 'Annulé', emoji: '❌' },
+];
+
 const CooperativeOrders: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('pending');
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
   
@@ -33,129 +59,77 @@ const CooperativeOrders: React.FC = () => {
     setShowCancelDialog(true);
   };
 
+  const getOrdersByTab = () => {
+    switch (activeTab) {
+      case 'pending': return pendingOrders;
+      case 'confirmed': return confirmedOrders;
+      case 'in_transit': return inTransitOrders;
+      case 'delivered': return deliveredOrders;
+      case 'cancelled': return cancelledOrders;
+      default: return [];
+    }
+  };
+
+  const currentOrders = getOrdersByTab();
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingState message="Chargement des commandes..." />
-      </div>
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <EnhancedHeader
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader
         title="Commandes"
         subtitle={`${orders.length} commande(s)`}
         showBack
-        backTo="/cooperative"
+        backPath="/cooperative"
       />
 
-      <div className="p-4">
-        <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-4">
-            <TabsTrigger value="pending" className="relative text-xs">
-              En attente
-              <NotificationBadge 
-                count={pendingOrders.length} 
-                variant="warning" 
-                size="sm" 
-                absolute 
-              />
-            </TabsTrigger>
-            <TabsTrigger value="confirmed" className="text-xs">Confirmé</TabsTrigger>
-            <TabsTrigger value="in_transit" className="text-xs">En transit</TabsTrigger>
-            <TabsTrigger value="delivered" className="text-xs">Livré</TabsTrigger>
-            <TabsTrigger value="cancelled" className="relative text-xs">
-              Annulé
-              <NotificationBadge 
-                count={cancelledOrders.length} 
-                variant="destructive" 
-                size="sm" 
-                absolute 
-              />
-            </TabsTrigger>
-          </TabsList>
+      <div className="p-4 space-y-4">
+        {/* Tabs */}
+        <JulabaTabBar
+          tabs={ORDER_TABS.map(t => {
+            let count = 0;
+            switch (t.id) {
+              case 'pending': count = pendingOrders.length; break;
+              case 'confirmed': count = confirmedOrders.length; break;
+              case 'in_transit': count = inTransitOrders.length; break;
+              case 'delivered': count = deliveredOrders.length; break;
+              case 'cancelled': count = cancelledOrders.length; break;
+            }
+            return { ...t, label: `${t.emoji} ${count}` };
+          })}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-          <TabsContent value="pending" className="space-y-3">
-            {pendingOrders.length === 0 ? (
-              <EmptyState Icon={ClipboardList} title="Aucune commande en attente" variant="card" />
-            ) : (
-              pendingOrders.map(order => (
+        {/* Liste */}
+        {currentOrders.length === 0 ? (
+          <JulabaEmptyState
+            emoji={ORDER_TABS.find(t => t.id === activeTab)?.emoji || '📋'}
+            title={`Aucune commande ${ORDER_TABS.find(t => t.id === activeTab)?.label.toLowerCase() || ''}`}
+            description="Les commandes correspondantes apparaîtront ici"
+          />
+        ) : (
+          <div className="space-y-3">
+            {currentOrders.map(order => (
+              <JulabaCard key={order.id} className="p-3">
                 <OrderCard
-                  key={order.id}
                   order={order}
                   updatingOrderId={updatingOrderId}
                   onUpdateStatus={updateOrderStatus}
                   onCancelClick={openCancelDialog}
                 />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="confirmed" className="space-y-3">
-            {confirmedOrders.length === 0 ? (
-              <EmptyState Icon={ClipboardList} title="Aucune commande confirmée" variant="card" />
-            ) : (
-              confirmedOrders.map(order => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  updatingOrderId={updatingOrderId}
-                  onUpdateStatus={updateOrderStatus}
-                  onCancelClick={openCancelDialog}
-                />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="in_transit" className="space-y-3">
-            {inTransitOrders.length === 0 ? (
-              <EmptyState Icon={ClipboardList} title="Aucune commande en transit" variant="card" />
-            ) : (
-              inTransitOrders.map(order => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  updatingOrderId={updatingOrderId}
-                  onUpdateStatus={updateOrderStatus}
-                  onCancelClick={openCancelDialog}
-                />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="delivered" className="space-y-3">
-            {deliveredOrders.length === 0 ? (
-              <EmptyState Icon={ClipboardList} title="Aucune commande livrée" variant="card" />
-            ) : (
-              deliveredOrders.map(order => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  updatingOrderId={updatingOrderId}
-                  onUpdateStatus={updateOrderStatus}
-                  onCancelClick={openCancelDialog}
-                />
-              ))
-            )}
-          </TabsContent>
-
-          <TabsContent value="cancelled" className="space-y-3">
-            {cancelledOrders.length === 0 ? (
-              <EmptyState Icon={ClipboardList} title="Aucune commande annulée" variant="card" />
-            ) : (
-              cancelledOrders.map(order => (
-                <OrderCard
-                  key={order.id}
-                  order={order}
-                  updatingOrderId={updatingOrderId}
-                  onUpdateStatus={updateOrderStatus}
-                  onCancelClick={openCancelDialog}
-                />
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+              </JulabaCard>
+            ))}
+          </div>
+        )}
       </div>
 
       <CancelOrderDialog
@@ -165,8 +139,8 @@ const CooperativeOrders: React.FC = () => {
         onConfirm={cancelOrder}
       />
 
-      <UnifiedBottomNav items={cooperativeNavItems} />
-    </div>
+      <JulabaBottomNav items={COOP_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 
