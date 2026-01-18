@@ -265,7 +265,7 @@ export default function MerchantProfile() {
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-blue-600" />
                 </div>
-                <span className="font-semibold text-foreground">Vérification Identité</span>
+                <span className="font-semibold text-foreground">Ma carte</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
@@ -285,7 +285,7 @@ export default function MerchantProfile() {
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
                   <Package className="w-5 h-5 text-orange-600" />
                 </div>
-                <span className="font-medium text-foreground">Mon Stock</span>
+                <span className="font-medium text-foreground">Ma marchandise</span>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </CardContent>
@@ -300,7 +300,7 @@ export default function MerchantProfile() {
                 <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                   <CreditCard className="w-5 h-5 text-purple-600" />
                 </div>
-                <span className="font-medium text-foreground">Mes Crédits Clients</span>
+                <span className="font-medium text-foreground">Qui me doit</span>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </CardContent>
