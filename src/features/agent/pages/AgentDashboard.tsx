@@ -1,35 +1,44 @@
 /**
  * Dashboard Agent - PNAVIM
- * Phase 6: Migré vers RoleLayout
+ * Refonte Jùlaba Design System
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { useAuth, useLanguage } from '@/shared/contexts';
 import { useOfflineSync } from '@/shared/hooks';
-import { AudioButton, UnifiedActionCard } from '@/shared/ui';
-import { RoleLayout } from '@/app/layouts/RoleLayout';
+import { AudioButton } from '@/shared/ui';
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaListItem,
+  JulabaStatCard,
+  JulabaBottomNav,
+  JulabaEmptyState,
+  type JulabaNavItem,
+} from '@/shared/ui/julaba';
 import { 
   useAgentDashboard,
-  AgentStats,
   AgentAlerts,
   AgentEnrollmentsChart,
-  PendingSyncAlert,
   AgentQuickGuide,
   AgentRegistrationSection,
 } from '@/features/agent';
-import { 
-  UserPlus, 
-  Users, 
-  Wifi, 
-  WifiOff,
-  User,
-} from 'lucide-react';
+import { Wifi, WifiOff, Loader2 } from 'lucide-react';
+
+// Nav items Agent
+const AGENT_NAV_ITEMS: JulabaNavItem[] = [
+  { emoji: '🏠', label: 'Accueil', path: '/agent' },
+  { emoji: '✍️', label: 'Inscrire', path: '/agent/enrolement' },
+  { emoji: '👥', label: 'Marchands', path: '/agent/marchands' },
+  { emoji: '👤', label: 'Profil', path: '/agent/profil' },
+];
 
 const AgentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { isOnline, pendingCount, isSyncing, syncWithServer } = useOfflineSync();
   const {
@@ -42,57 +51,84 @@ const AgentDashboard: React.FC = () => {
 
   const audioText = `${t("audio_agent_dashboard")}: ${stats.today}. ${t("this_week")}: ${stats.week}. ${t("total")}: ${stats.total}. ${t("validated")}: ${stats.validated}.`;
 
-  // Status indicateur online/offline pour le header
-  const OnlineStatusBadge = (
-    <div className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-      isOnline ? 'text-secondary' : 'text-destructive'
-    }`}>
-      {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-      {isOnline ? t("online") : t("offline")}
-    </div>
-  );
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/agent/login');
+  };
 
-  // Cas: Erreur
+  // Loading
+  if (isLoading) {
+    return (
+      <JulabaPageLayout background="gradient">
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </JulabaPageLayout>
+    );
+  }
+
+  // Erreur
   if (error) {
     return (
-      <RoleLayout
-        title={t("agent")}
-        subtitle="Plateforme IFN – Espace Agent"
-        showSignOut
-        error={error}
-        onRetry={refetch}
-        headerRight={OnlineStatusBadge}
-      >
-        <div />
-      </RoleLayout>
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader 
+          title="Espace Agent" 
+          subtitle="IFN - PNAVIM"
+          showLogout
+          onLogout={handleLogout}
+        />
+        <div className="p-4 space-y-4">
+          <JulabaEmptyState
+            emoji="😕"
+            title="Erreur de chargement"
+            description={String(error)}
+          />
+          <JulabaButton 
+            variant="primary" 
+            onClick={() => refetch()}
+            className="w-full"
+          >
+            Réessayer
+          </JulabaButton>
+        </div>
+        <JulabaBottomNav items={AGENT_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
-  // Cas: Non enregistré comme agent
-  if (!isLoading && !isAgentRegistered) {
+  // Non enregistré comme agent
+  if (!isAgentRegistered) {
     return (
-      <RoleLayout
-        title={t("agent")}
-        subtitle="Plateforme IFN – Espace Agent"
-        showSignOut
-        headerRight={OnlineStatusBadge}
-      >
-        <div className="space-y-4">
+      <JulabaPageLayout background="gradient">
+        <JulabaHeader 
+          title="Espace Agent" 
+          subtitle="IFN - PNAVIM"
+          showLogout
+          onLogout={handleLogout}
+        />
+        <div className="p-4 space-y-4">
           <AgentRegistrationSection user={user} onSuccess={refetch} />
         </div>
-      </RoleLayout>
+        <JulabaBottomNav items={AGENT_NAV_ITEMS} />
+      </JulabaPageLayout>
     );
   }
 
-  // Cas: Normal
+  // Dashboard normal
   return (
-    <RoleLayout
-      title="Mes inscriptions"
-      subtitle="Plateforme IFN – Espace Agent"
-      showSignOut
-      isLoading={isLoading}
-      headerRight={OnlineStatusBadge}
-    >
+    <JulabaPageLayout background="gradient">
+      <JulabaHeader 
+        title="Mes inscriptions" 
+        subtitle="Agent terrain IFN"
+        showLogout
+        onLogout={handleLogout}
+        rightAction={{
+          emoji: isOnline ? '🟢' : '🔴',
+          onClick: () => {},
+          label: isOnline ? 'En ligne' : 'Hors ligne'
+        }}
+      />
+
       <AudioButton 
         textToRead={audioText}
         variant="floating"
@@ -100,65 +136,123 @@ const AgentDashboard: React.FC = () => {
         className="bottom-24 right-4 z-50"
       />
 
-      <div className="space-y-6">
-        <PendingSyncAlert
-          pendingCount={pendingCount}
-          isOnline={isOnline}
-          isSyncing={isSyncing}
-          onSync={syncWithServer}
-        />
+      <div className="p-4 space-y-6">
+        {/* Alerte sync offline */}
+        {pendingCount > 0 && (
+          <JulabaCard accent="orange" className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📤</span>
+                <div>
+                  <p className="font-semibold">{pendingCount} en attente</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isOnline ? 'Prêt à synchroniser' : 'En attente de connexion'}
+                  </p>
+                </div>
+              </div>
+              {isOnline && (
+                <JulabaButton 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={syncWithServer}
+                  isLoading={isSyncing}
+                >
+                  Sync
+                </JulabaButton>
+              )}
+            </div>
+          </JulabaCard>
+        )}
 
+        {/* Alertes */}
         <AgentAlerts 
           pendingMerchants={stats.pending} 
           todayEnrollments={stats.today} 
         />
 
-        {/* Ce que j'ai fait */}
+        {/* Statistiques rapides */}
         <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Ce que j'ai fait</h2>
-          <AgentStats stats={stats} isLoading={isLoading} />
+          <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">
+            📊 Mes statistiques
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            <JulabaStatCard
+              label="Aujourd'hui"
+              value={stats.today}
+              emoji="📅"
+              iconBg="orange"
+            />
+            <JulabaStatCard
+              label="Cette semaine"
+              value={stats.week}
+              emoji="📈"
+              iconBg="blue"
+            />
+            <JulabaStatCard
+              label="Total"
+              value={stats.total}
+              emoji="👥"
+              iconBg="green"
+            />
+            <JulabaStatCard
+              label="Validés"
+              value={stats.validated}
+              emoji="✅"
+              iconBg="gold"
+            />
+          </div>
         </section>
 
-        {/* Mes progrès */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Mes progrès</h2>
-          <AgentEnrollmentsChart 
-            data={stats.weeklyEnrollments} 
-            isLoading={isLoading} 
-          />
+        {/* Graphique */}
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground px-1">
+            📊 Mes progrès
+          </h2>
+          <JulabaCard className="p-4">
+            <AgentEnrollmentsChart 
+              data={stats.weeklyEnrollments} 
+              isLoading={false} 
+            />
+          </JulabaCard>
         </section>
 
         {/* Action principale XXL */}
-        <Button
+        <JulabaButton
+          variant="hero"
+          emoji="✍️"
           onClick={() => navigate('/agent/enrolement')}
-          className="w-full h-16 text-lg font-bold bg-primary hover:bg-primary/90 rounded-2xl"
+          className="w-full"
         >
-          <UserPlus className="h-6 w-6 mr-2" />
           INSCRIRE QUELQU'UN
-        </Button>
+        </JulabaButton>
 
-        {/* Actions */}
+        {/* Actions rapides */}
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground px-1">Mes actions</h2>
+          <h2 className="text-sm font-medium text-muted-foreground px-1">
+            🎯 Actions rapides
+          </h2>
           <div className="space-y-2">
-            <UnifiedActionCard
-              title="Les gens que j'aide"
-              description="Voir la liste"
-              icon={Users}
+            <JulabaListItem
+              emoji="👥"
+              title="Mes marchands"
+              subtitle="Voir la liste"
               onClick={() => navigate('/agent/marchands')}
             />
-            <UnifiedActionCard
-              title="Moi"
-              description="Mes réglages"
-              icon={User}
+            <JulabaListItem
+              emoji="👤"
+              title="Mon profil"
+              subtitle="Mes réglages"
               onClick={() => navigate('/agent/profil')}
             />
           </div>
         </section>
 
+        {/* Guide rapide */}
         <AgentQuickGuide />
       </div>
-    </RoleLayout>
+
+      <JulabaBottomNav items={AGENT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 };
 
