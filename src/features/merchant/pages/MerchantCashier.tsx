@@ -1,6 +1,16 @@
+/**
+ * Page Encaisser classique - /marchand/encaisser
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import { useState, useEffect, useCallback } from "react";
-import { EnhancedHeader, UnifiedBottomNav, AudioButton, ImmersiveBackground } from "@/shared/ui";
-import { merchantNavItems } from "@/config/navigation";
+import { AudioButton, ImmersiveBackground } from "@/shared/ui";
+import { 
+  JulabaPageLayout, 
+  JulabaHeader, 
+  JulabaBottomNav 
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/features/merchant/components/CalculatorKeypad";
 import { getCashierScript } from "@/shared/config/audio/cashierScripts";
@@ -33,7 +43,6 @@ export default function MerchantCashier() {
   useEffect(() => {
     if (hasScannedProducts && selectedProducts.length === 0) {
       setSelectedProducts(scannedProducts);
-      // Nettoyer sessionStorage après chargement
       clearScannedProducts();
     }
   }, [hasScannedProducts, scannedProducts, clearScannedProducts, selectedProducts.length]);
@@ -134,7 +143,7 @@ export default function MerchantCashier() {
   }
 
   return (
-    <div className="min-h-screen relative pb-20">
+    <JulabaPageLayout background="warm" className="pb-20">
       {/* Fond immersif Afro-Futuriste avec image de marché */}
       <ImmersiveBackground 
         variant="market-blur" 
@@ -150,13 +159,14 @@ export default function MerchantCashier() {
         size="lg"
       />
 
-      <EnhancedHeader
-        title={t("collect_title")}
-        showBack
-        backTo={step === "input" ? "/marchand" : undefined}
-        onSignOut={step !== "input" ? handleReset : undefined}
-        showNotifications={false}
-        showLanguageToggle={false}
+      <JulabaHeader
+        title="💵 Encaisser"
+        backPath={step === "input" ? "/marchand" : undefined}
+        rightAction={step !== "input" ? {
+          emoji: "🔄",
+          label: "Annuler",
+          onClick: handleReset,
+        } : undefined}
       />
 
       <main className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -187,7 +197,7 @@ export default function MerchantCashier() {
         )}
       </main>
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }

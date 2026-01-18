@@ -1,18 +1,22 @@
 /**
  * Page unifiée de vente - /marchand/vendre
- * Fusionne: MerchantCashier + MerchantScanner + SalesQuick
+ * Refactorisée avec Design System Jùlaba
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { EnhancedHeader, UnifiedBottomNav, AudioButton, ImmersiveBackground } from "@/shared/ui";
-import { merchantNavItems } from "@/config/navigation";
+import { AudioButton, ImmersiveBackground } from "@/shared/ui";
+import { 
+  JulabaPageLayout, 
+  JulabaHeader, 
+  JulabaTabBar, 
+  JulabaBottomNav 
+} from "@/shared/ui/julaba";
+import { MERCHANT_NAV_ITEMS } from "@/config/navigation-julaba";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSuccessFeedback } from "@/features/merchant/components/CalculatorKeypad";
 import { getCashierScript } from "@/shared/config/audio/cashierScripts";
 import { useMarketBackground } from "@/features/merchant/hooks/useMarketBackground";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Banknote, QrCode, Mic } from "lucide-react";
 import {
   useMerchantStock,
   useCashierPayment,
@@ -30,6 +34,13 @@ import { ScannerTab } from "./components/ScannerTab";
 
 // Import vente rapide
 import { QuickSaleScreen } from "@/features/sales";
+
+// Onglets Jùlaba avec emojis
+const SELL_TABS = [
+  { id: "montant", label: "Montant", emoji: "💵" },
+  { id: "scanner", label: "Scanner", emoji: "📷" },
+  { id: "rapide", label: "Vocal", emoji: "🎤" },
+];
 
 export default function MerchantSell() {
   const [searchParams] = useSearchParams();
@@ -143,7 +154,7 @@ export default function MerchantSell() {
 
   // Étape succès - rendu séparé
   if (step === "success" && method) {
-    return (
+  return (
       <CashierSuccessStep
         transactionRef={transactionRef}
         amount={numericAmount}
@@ -159,7 +170,7 @@ export default function MerchantSell() {
   }
 
   return (
-    <div className="min-h-screen relative pb-20">
+    <JulabaPageLayout background="warm" className="pb-20">
       {/* Fond immersif */}
       <ImmersiveBackground 
         variant="market-blur" 
@@ -177,35 +188,27 @@ export default function MerchantSell() {
         />
       )}
 
-      <EnhancedHeader
-        title="Vendre"
-        showBack
-        backTo={step === "input" ? "/marchand" : undefined}
-        onSignOut={step !== "input" ? handleReset : undefined}
-        showNotifications={false}
-        showLanguageToggle={false}
+      <JulabaHeader
+        title="💰 Vendre"
+        backPath={step === "input" ? "/marchand" : undefined}
+        rightAction={step !== "input" ? {
+          emoji: "🔄",
+          label: "Annuler",
+          onClick: handleReset,
+        } : undefined}
       />
 
       <main className="p-4 space-y-4 max-w-2xl mx-auto">
-        {/* Onglets : Montant / Scanner / Rapide */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-14">
-            <TabsTrigger value="montant" className="text-base gap-2">
-              <Banknote className="w-5 h-5" />
-              Montant
-            </TabsTrigger>
-            <TabsTrigger value="scanner" className="text-base gap-2">
-              <QrCode className="w-5 h-5" />
-              Scanner
-            </TabsTrigger>
-            <TabsTrigger value="rapide" className="text-base gap-2">
-              <Mic className="w-5 h-5" />
-              Vocal
-            </TabsTrigger>
-          </TabsList>
+        {/* Onglets Jùlaba avec emojis */}
+        <JulabaTabBar
+          tabs={SELL_TABS}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-          {/* TAB: Montant (Cashier classique) */}
-          <TabsContent value="montant" className="mt-4">
+        {/* TAB: Montant (Cashier classique) */}
+        {activeTab === "montant" && (
+          <div className="space-y-4">
             {step === "input" && (
               <CashierInputStep
                 stocks={stocksForSelector}
@@ -231,23 +234,23 @@ export default function MerchantSell() {
                 onEdit={resetForm}
               />
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* TAB: Scanner */}
-          <TabsContent value="scanner" className="mt-4">
-            <ScannerTab onCheckout={handleScannerCheckout} />
-          </TabsContent>
+        {/* TAB: Scanner */}
+        {activeTab === "scanner" && (
+          <ScannerTab onCheckout={handleScannerCheckout} />
+        )}
 
-          {/* TAB: Vente Rapide Vocale */}
-          <TabsContent value="rapide" className="mt-4">
-            <div className="rounded-xl overflow-hidden border bg-background">
-              <QuickSaleScreen onClose={() => setActiveTab("montant")} />
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* TAB: Vente Rapide Vocale */}
+        {activeTab === "rapide" && (
+          <div className="rounded-xl overflow-hidden border bg-background">
+            <QuickSaleScreen onClose={() => setActiveTab("montant")} />
+          </div>
+        )}
       </main>
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
