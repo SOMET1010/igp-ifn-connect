@@ -1,7 +1,17 @@
+/**
+ * Page Connexion Vocale Marchand - /marchand/connexion
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2 } from "lucide-react";
 import { ImmersiveBackground } from "@/shared/ui";
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+} from "@/shared/ui/julaba";
 import { useLanguage } from "@/shared/contexts";
 import { useSensoryFeedback } from "@/shared/hooks";
 import { LANGUAGES } from "@/shared/lib";
@@ -9,15 +19,6 @@ import { cn } from "@/shared/lib";
 import { InclusivePhoneAuth } from "@/features/auth/components/InclusivePhoneAuth";
 import { useVoiceQueue } from "@/shared/hooks/useVoiceQueue";
 
-/**
- * MerchantVoiceEntry - Page d'authentification vocale marchande
- * 
- * Utilise InclusivePhoneAuth qui gère :
- * - 🎤 Transcription vocale ElevenLabs (numéro dicté)
- * - 📱 Clavier numérique tactile (fallback)
- * - 📩 WebOTP API pour auto-remplissage SMS
- * - 🔐 Trust Score invisible (Risk Gate)
- */
 const MerchantVoiceEntry: React.FC = () => {
   const navigate = useNavigate();
   const { language, setLanguage } = useLanguage();
@@ -29,11 +30,10 @@ const MerchantVoiceEntry: React.FC = () => {
     try { return window.self !== window.top; } catch { return true; }
   })();
 
-  // Si dans iframe, tenter d'ouvrir en nouvel onglet automatiquement
+  // Si dans iframe, tenter d'ouvrir en nouvel onglet
   useEffect(() => {
     if (isInIframe) {
       const fullUrl = window.location.href;
-      // Tenter d'ouvrir en nouvel onglet (sera bloqué si popup bloqué)
       const newWindow = window.open(fullUrl, '_blank');
       if (!newWindow) {
         console.log('[MerchantVoiceEntry] Popup blocked, showing banner');
@@ -41,9 +41,9 @@ const MerchantVoiceEntry: React.FC = () => {
     }
   }, [isInIframe]);
 
-  // Message de bienvenue au chargement (seulement hors iframe)
+  // Message de bienvenue au chargement
   useEffect(() => {
-    if (isInIframe) return; // Ne pas parler dans l'iframe
+    if (isInIframe) return;
     
     const timer = setTimeout(() => {
       const message = language === "fr"
@@ -69,31 +69,27 @@ const MerchantVoiceEntry: React.FC = () => {
     speak("Appuie sur le gros bouton micro et dis ton numéro. Je vais t'aider.", { priority: 'high' });
   };
 
-  // Langues affichées
   const displayLanguages = LANGUAGES.slice(0, 3);
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <JulabaPageLayout background="warm" padding="none" withBottomNav={false}>
       <ImmersiveBackground variant="warm-gradient" showWaxPattern showBlobs />
 
-      {/* Header simple */}
+      {/* Header Jùlaba */}
       <header className="fixed top-0 left-0 right-0 z-40 bg-white/70 backdrop-blur-lg border-b border-white/20 px-4 py-3">
         <div className="flex items-center justify-between max-w-lg mx-auto">
-          {/* Bouton retour */}
-          <button
+          <JulabaButton
+            variant="ghost"
+            size="md"
+            emoji="←"
             onClick={handleBack}
-            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm"
-            aria-label="Retour"
-          >
-            <ArrowLeft className="w-5 h-5 text-charbon" />
-          </button>
+          />
 
-          {/* Titre */}
-          <span className="text-sm font-nunito font-bold text-orange-sanguine">
-            PNAVIM
+          <span className="text-lg font-bold text-primary">
+            🧡 PNAVIM
           </span>
 
-          {/* Langue */}
+          {/* Langues */}
           <div className="flex gap-1">
             {displayLanguages.map((lang) => (
               <button
@@ -103,9 +99,9 @@ const MerchantVoiceEntry: React.FC = () => {
                   setLanguage(lang.code);
                 }}
                 className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-base transition-all",
+                  "w-9 h-9 rounded-full flex items-center justify-center text-lg transition-all",
                   language === lang.code
-                    ? "bg-orange-sanguine/20 scale-110"
+                    ? "bg-primary/20 scale-110 ring-2 ring-primary"
                     : "bg-white/50"
                 )}
               >
@@ -118,27 +114,28 @@ const MerchantVoiceEntry: React.FC = () => {
 
       {/* Contenu principal */}
       <main className="relative z-10 container max-w-lg mx-auto px-6 pt-24 pb-32 flex flex-col items-center">
-        {/* Bandeau iframe bloquant */}
+        {/* Bandeau iframe */}
         {isInIframe && (
-          <div className="w-full mb-6 p-4 bg-orange-sanguine/20 border border-orange-sanguine/40 rounded-2xl text-center">
-            <p className="text-charbon font-semibold text-sm mb-2">
+          <JulabaCard accent="orange" className="w-full mb-6 text-center">
+            <p className="font-bold text-foreground mb-2">
               🎤 Le micro est bloqué dans l'aperçu
             </p>
-            <button
+            <JulabaButton
+              variant="primary"
+              emoji="🔗"
               onClick={() => window.open(window.location.href, '_blank')}
-              className="px-4 py-2 bg-orange-sanguine text-white rounded-full font-bold text-sm"
             >
               Ouvrir en plein écran
-            </button>
-          </div>
+            </JulabaButton>
+          </JulabaCard>
         )}
 
         {/* Titre */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-nunito font-extrabold text-charbon leading-tight">
-            Connexion Vocale
+          <h1 className="text-2xl font-extrabold text-foreground leading-tight">
+            🎤 Connexion Vocale
           </h1>
-          <p className="text-charbon/60 mt-2 text-sm">
+          <p className="text-muted-foreground mt-2">
             Dis ton numéro ou tape-le
           </p>
         </div>
@@ -151,16 +148,17 @@ const MerchantVoiceEntry: React.FC = () => {
           />
         </div>
 
-        {/* Bouton audio aide */}
-        <button
+        {/* Bouton aide vocale */}
+        <JulabaButton
+          variant="ghost"
+          emoji="❓"
           onClick={handleVoiceHelp}
-          className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 text-charbon/70 border border-white/40"
+          className="mt-8"
         >
-          <Volume2 className="w-5 h-5" />
-          <span className="text-sm font-medium">Aide vocale</span>
-        </button>
+          Aide vocale
+        </JulabaButton>
       </main>
-    </div>
+    </JulabaPageLayout>
   );
 };
 

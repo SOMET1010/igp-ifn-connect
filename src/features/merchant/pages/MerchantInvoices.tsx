@@ -1,16 +1,26 @@
+/**
+ * Page Factures - /marchand/factures
+ * Refactorisée avec Design System Jùlaba
+ */
+
 import { useState } from 'react';
-import { EnhancedHeader, UnifiedBottomNav, LoadingState, EmptyState } from '@/shared/ui';
-import { merchantNavItems } from '@/config/navigation';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { FileText, Plus, Shield } from 'lucide-react';
+import { 
+  JulabaPageLayout,
+  JulabaHeader,
+  JulabaCard,
+  JulabaButton,
+  JulabaStatCard,
+  JulabaEmptyState,
+  JulabaBottomNav,
+} from '@/shared/ui/julaba';
+import { MERCHANT_NAV_ITEMS } from '@/config/navigation-julaba';
+import { LoadingState } from '@/shared/ui';
 import { FNEInvoice } from '@/features/merchant/components/FNEInvoice';
 import { useInvoices } from '@/features/merchant/hooks/useInvoices';
 import {
   InvoiceCard,
   CreateInvoiceDialog,
   CancelInvoiceDialog,
-  InvoicesSummary,
   InvoicesFilters,
 } from '@/features/merchant/components/invoices';
 import { Invoice } from '@/features/merchant/types/invoices.types';
@@ -37,71 +47,90 @@ export default function MerchantInvoices() {
   // Show generated invoice preview
   if (generatedInvoice) {
     return (
-      <div className="min-h-screen bg-background">
+      <JulabaPageLayout background="warm">
         <div className="p-4 max-w-md mx-auto">
           <FNEInvoice
             invoice={generatedInvoice}
             onClose={clearGeneratedInvoice}
           />
         </div>
-      </div>
+      </JulabaPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <EnhancedHeader
-        title="Mes Factures"
-        subtitle="Factures Normalisées Électroniques"
-        showBack
-        backTo="/marchand"
-        showNotifications={false}
+    <JulabaPageLayout background="warm" className="pb-24">
+      <JulabaHeader
+        title="📜 Mes Factures"
+        backPath="/marchand"
       />
 
-      <div className="p-4 space-y-4 max-w-lg mx-auto">
+      <main className="p-4 space-y-4 max-w-lg mx-auto">
         {/* FNE Info Banner */}
-        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex items-start gap-3">
-          <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">Format FNE Conforme</p>
-            <p className="text-xs text-muted-foreground">
-              Vos factures respectent le format DGI avec hash de sécurité et QR code de vérification.
-            </p>
+        <JulabaCard accent="blue">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">🛡️</span>
+            <div>
+              <p className="font-bold text-foreground">Format FNE Conforme</p>
+              <p className="text-sm text-muted-foreground">
+                Tes factures respectent le format DGI avec sécurité et QR code.
+              </p>
+            </div>
           </div>
+        </JulabaCard>
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-3 gap-3">
+          <JulabaStatCard
+            emoji="📄"
+            value={issuedCount}
+            label="Émises"
+            iconBg="blue"
+          />
+          <JulabaStatCard
+            emoji="❌"
+            value={cancelledCount}
+            label="Annulées"
+            iconBg="orange"
+          />
+          <JulabaStatCard
+            emoji="💰"
+            value={`${Math.round(totalAmount / 1000)}k`}
+            label="Total"
+            iconBg="green"
+          />
         </div>
 
-        {/* Summary */}
-        <InvoicesSummary
-          issuedCount={issuedCount}
-          cancelledCount={cancelledCount}
-          totalAmount={totalAmount}
-        />
-
         {/* Create New Invoice Button */}
-        <Button
-          className="w-full h-16 rounded-2xl text-lg shadow-lg"
+        <JulabaButton
+          variant="hero"
+          emoji="➕"
+          className="w-full"
           onClick={() => setShowNewInvoice(true)}
         >
-          <Plus className="w-6 h-6 mr-2" />
-          Créer une nouvelle facture
-        </Button>
+          Créer une facture
+        </JulabaButton>
 
         {/* Filters */}
         <InvoicesFilters filter={filter} onFilterChange={setFilter} />
 
         {/* Invoices List */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">
-            Factures récentes
+          <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <span>📋</span> Factures récentes
           </h2>
 
           {isLoading ? (
             <LoadingState message="Chargement des factures..." />
           ) : filteredInvoices.length === 0 ? (
-            <EmptyState
-              Icon={FileText}
+            <JulabaEmptyState
+              emoji="📜"
               title="Aucune facture"
-              message="Créez votre première facture normalisée"
+              description="Crée ta première facture normalisée"
+              action={{
+                label: "Créer maintenant",
+                onClick: () => setShowNewInvoice(true),
+              }}
             />
           ) : (
             <div className="space-y-3">
@@ -115,7 +144,7 @@ export default function MerchantInvoices() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Create Invoice Dialog */}
       <CreateInvoiceDialog
@@ -132,7 +161,7 @@ export default function MerchantInvoices() {
         onClose={() => setInvoiceToCancel(null)}
       />
 
-      <UnifiedBottomNav items={merchantNavItems} />
-    </div>
+      <JulabaBottomNav items={MERCHANT_NAV_ITEMS} />
+    </JulabaPageLayout>
   );
 }
