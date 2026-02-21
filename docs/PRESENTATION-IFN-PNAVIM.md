@@ -352,11 +352,104 @@ La plateforme est conçue pour être utilisée par **toute personne**, quel que 
 
 ## 9 — Impact Attendu
 
-### Objectifs quantitatifs
+### 📊 Projections d'impact mesurable à 12 mois
+
+> *Objectifs projetés basés sur les études de faisabilité et benchmarks régionaux. Mesures effectives dès le déploiement pilote.*
+
+#### 🎯 Indicateurs clés de performance (KPI)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│              IMPACT MESURABLE PROJETÉ — HORIZON 12 MOIS             │
+│                                                                     │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  │                  │  │                  │  │                  │  │
+│  │    ↓ 65%         │  │    ↑ 85%         │  │    ↑ 70%         │  │
+│  │                  │  │                  │  │                  │  │
+│  │ ERREURS CAISSE   │  │ TRAÇABILITÉ      │  │ SOUSCRIPTION     │  │
+│  │ Réduction des    │  │ Augmentation     │  │ CMU facilitée    │  │
+│  │ erreurs de       │  │ de la traçabilité│  │ par prélèvement  │  │
+│  │ comptage         │  │ des ventes       │  │ automatique      │  │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘  │
+│                                                                     │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  │                  │  │                  │  │                  │  │
+│  │    ↓ 50%         │  │    ↑ 40%         │  │    ↓ 75%         │  │
+│  │                  │  │                  │  │                  │  │
+│  │ LITIGES          │  │ REVENUS          │  │ TEMPS GESTION    │  │
+│  │ PAIEMENT         │  │ FORMALISÉS       │  │ Réduction du     │  │
+│  │ Réduction des    │  │ Augmentation     │  │ temps de gestion │  │
+│  │ conflits         │  │ revenus déclarés │  │ quotidienne      │  │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### Détail des projections
+
+| Indicateur | Baseline (avant IFN) | Cible à 12 mois | Méthode de mesure |
+|------------|---------------------|------------------|-------------------|
+| **Erreurs de caisse** | ~30% des marchands font des erreurs quotidiennes | **↓ 65% de réduction** | Comparaison écarts caisse ouverture/clôture vs ventes enregistrées |
+| **Traçabilité des ventes** | < 5% des ventes tracées | **↑ 85% des ventes tracées** | Ratio transactions numériques / volume estimé du marché |
+| **Souscription CMU** | < 10% des marchands couverts | **↑ 70% des marchands enrôlés couverts** | Taux de cotisations CMU effectives via prélèvement automatique 1% |
+| **Litiges de paiement** | ~25% des transactions génèrent un désaccord | **↓ 50% de réduction** | Suivi des réclamations et annulations de factures |
+| **Revenus formalisés** | 0 FCFA déclarés (informel) | **↑ 40% des revenus formalisés** | Volume de transactions tracées vs estimation INSEE/INS |
+| **Temps de gestion** | ~2h/jour de comptage manuel | **↓ 75% de réduction** (30 min/jour) | Enquête terrain + données d'usage app |
+
+#### 📈 Trajectoire de déploiement
+
+```
+Mois     Marchands actifs    Transactions/jour    Taux erreurs caisse
+─────    ────────────────    ─────────────────    ───────────────────
+M1            500                 1 000               -15%
+M3          3 000                 8 000               -30%
+M6         10 000                30 000               -45%
+M9         25 000                60 000               -55%
+M12        50 000               100 000               -65%
+```
+
+#### 🏥 Impact CMU spécifique
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│         COUVERTURE MALADIE UNIVERSELLE — M12            │
+│                                                         │
+│  Marchands couverts CMU :          50 000 personnes     │
+│  Cotisations générées :        600 Millions FCFA/an     │
+│  Taux de cotisation effectif :              92%         │
+│  Bénéficiaires indirects :        200 000 personnes     │
+│  (familles des marchands)                               │
+│                                                         │
+│  Mécanisme : 1% prélevé automatiquement sur chaque      │
+│  vente → cotisation CMU mensuelle sans démarche          │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### 💰 Impact fiscal (RSTI)
+
+| Indicateur fiscal | Projection M12 |
+|-------------------|----------------|
+| Factures normalisées émises | 2 000 000+ / an |
+| Volume transactions tracées | 50 Milliards FCFA / an |
+| Nouveaux contribuables identifiés | 50 000+ |
+| Recettes fiscales additionnelles | 2,5 Milliards FCFA / an |
+
+#### 🔄 Méthodologie de suivi
+
+Les indicateurs seront mesurés via :
+1. **Données plateforme** — Tableaux de bord temps réel (transactions, erreurs, usage)
+2. **Enquêtes terrain** — Échantillon de 500 marchands, trimestrielles
+3. **Données partenaires** — CMU (inscriptions), DGI (factures), banques (crédits)
+4. **Comité de suivi** — Revue mensuelle des KPI avec toutes les parties prenantes
+
+### Objectifs quantitatifs globaux
 
 | Indicateur | Objectif |
 |------------|---------|
-| Marchands formalisés | 500 000+ |
+| Marchands formalisés | 500 000+ (3 ans) |
 | Couverture CMU | 100% des marchands enrôlés |
 | Traçabilité fiscale | Conformité RSTI |
 | Agents déployés | 5 000+ sur tout le territoire |
