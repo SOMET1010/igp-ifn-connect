@@ -1,93 +1,108 @@
 
 
-# Renommage de la Plateforme : PNAVIM-CI --> JULABA
+# Renommage PNAVIM → JÙLABA : Complétion Phases 1-2
 
-## Contexte
+## Constat
 
-La plateforme change de nom. Toutes les references visibles "PNAVIM-CI" et "PNAVIM" doivent devenir "JULABA" (ou "JULABA" selon le contexte). Le design system Julaba existe deja -- c'est le nom de la plateforme elle-meme qui s'aligne dessus.
-
-## Scope de l'intervention
-
-L'audit du codebase revele **125 fichiers** contenant "PNAVIM". Le renommage se fera en plusieurs couches, par priorite.
+Les Phases 1 et 2 ont ete partiellement implementees. L'audit revele encore **77 fichiers** avec des references "PNAVIM". Les headers/footers et index.html sont deja mis a jour. Voici les modifications restantes.
 
 ---
 
-## Phase 1 : Branding visible (utilisateur final)
+## Batch 1 : Textes visibles par l'utilisateur
 
-Fichiers modifies :
-- **`index.html`** : titre, meta tags, OG tags, loader text, SEO keywords
-- **`public/manifest.json`** : name, short_name, description
-- **`src/pages/Home.tsx`** : textes d'accueil
-- **`src/shared/ui/InstitutionalHeader.tsx`** : titre "PNAVIM-CI" -> "JULABA"
-- **`src/shared/ui/InstitutionalFooter.tsx`** : copyright
-- **`src/shared/ui/SimpleLoginPage.tsx`** : branding login
-- **`src/shared/ui/DemoBanner.tsx`** : si mention PNAVIM
-- **`src/features/public/components/pnavim/PnavimInstitutionalHeader.tsx`** : "PNAVIM-CI" -> "JULABA", sous-titre adapte
-- **`src/features/auth/pages/AuthPage.tsx`** : branding authentification
-- **`src/features/onboarding/OnboardingFlow.tsx`** : messages de bienvenue
-- **`src/features/merchant/pages/MerchantVoiceRegister.tsx`** : branding inscription
-- **`src/features/cooperative/pages/CooperativeDashboard.tsx`** : sous-titre
-- **`src/features/admin/pages/AdminDocumentation.tsx`** : texte admin
+### `src/shared/lib/translations.ts`
+- Ligne 1-5 : commentaire "Traductions PNAVIM" → "Traductions JÙLABA"
+- Ligne 33 : `platform_title: "PNAVIM"` → `platform_title: "JÙLABA"`
 
-## Phase 2 : Design tokens et configuration
+### `src/features/auth/config/loginConfigs.ts`
+- Ligne 64 : `@pnavim.ci` → `@julaba.ci`
+- Ligne 126 : `"Administration PNAVIM-CI"` → `"Administration JÙLABA"`
+- Ligne 129 : `"Portail d'administration PNAVIM-CI"` → `"Portail d'administration JÙLABA"`
 
-- **`src/styles/design-tokens.ts`** : renommer `PNAVIM_COLORS`, `PNAVIM_HSL`, `PNAVIM_SHADOWS`, `PNAVIM_SPACING`, `PNAVIM_TYPOGRAPHY`, `PNAVIM_BREAKPOINTS`, `PNAVIM_ANIMATIONS` et les types associes en `JULABA_*`
-- **`tailwind.config.ts`** : import `JULABA_HSL`, namespace couleurs `julaba.*` au lieu de `pnavim.*`, shadows `julaba-*`
-- **`src/shared/config/voiceConfig.ts`** : `PNAVIM_VOICES` -> `JULABA_VOICES`, type `PnavimVoiceId` -> `JulabaVoiceId`
+### `src/shared/ui/UnifiedLoginPage.tsx`
+- Ligne 87 : `"PNAVIM-CI"` → `"JÙLABA"`
 
-## Phase 3 : Composants Pnavim -> Julaba (renommage fichiers)
-
-Le dossier `src/features/public/components/pnavim/` contient 10 composants prefixes "Pnavim". Ils seront renommes :
-- `PnavimButton` -> `JulabaPublicButton`
-- `PnavimCard` -> `JulabaPublicCard`
-- `PnavimHelpButton` -> `JulabaHelpButton`
-- `PnavimHeroCard` -> `JulabaHeroCard`
-- `PnavimInstitutionalHeader` -> `JulabaInstitutionalHeader`
-- `PnavimPillButton` -> `JulabaPillButton`
-- `PnavimStat` -> `JulabaStat`
-- `PnavimVoiceFab` -> `JulabaVoiceFab`
-- `PnavimWaxCurve` -> `JulabaWaxCurve`
-- Mise a jour de l'index d'export et de tous les imports dans ~20 fichiers consommateurs
-
-## Phase 4 : Classes CSS Tailwind
-
-Toutes les classes `pnavim-*` (couleurs, ombres) seront renommees `julaba-*` dans :
-- `tailwind.config.ts` (definition)
-- ~30 fichiers TSX utilisant `text-pnavim-*`, `bg-pnavim-*`, `border-pnavim-*`, `shadow-pnavim-*`
-
-## Phase 5 : Services et hooks
-
-- **`src/shared/services/tts/elevenlabsTts.ts`** : `PNAVIM_VOICES` -> `JULABA_VOICES`
-- **`src/shared/hooks/useTts.ts`** : imports et types
-- **`src/shared/ui/AudioButton.tsx`** : imports
-- **`src/shared/ui/LanguageSelector.tsx`** : imports
-- **`src/shared/audio/tts/TTSManager.ts`** : imports
-- **`src/features/auth/config/personas.ts`** : imports
-- **`src/features/auth/components/VoiceSocialAuth.tsx`** : type cast
-- **`src/features/auth/components/HumanFallback.tsx`** : texte support
-- **`src/shared/services/logger.ts`** : nom fichier export logs
-
-## Phase 6 : Documentation
-
-- **`docs/PRESENTATION-IFN-PNAVIM.md`** -> `docs/PRESENTATION-JULABA.md` (renomme + contenu mis a jour)
-- **`docs/REPONSES-JURY-IFN-PNAVIM.md`** -> `docs/REPONSES-JURY-JULABA.md`
-- **`docs/manuels/README.md`** : references PNAVIM -> JULABA
-- **`docs/manuels/marchand/GUIDE-MARCHAND.md`** : contenu
-
-## Phase 7 : LocalStorage et constantes internes
-
-- `pnavim_onboarding_complete` -> `julaba_onboarding_complete` (avec migration de la cle existante pour ne pas casser les sessions actives)
-- `pnavim-logs-*` -> `julaba-logs-*`
+### `src/features/cooperative/pages/CooperativeRegister.tsx`
+- Ligne 199 : `"Plateforme PNAVIM"` → `"Plateforme JÙLABA"`
 
 ---
 
-## Ce qui ne change PAS
+## Batch 2 : Imports et references internes
 
-- Les routes (`/marchand`, `/agent`, `/cooperative`, etc.) restent identiques
-- La logique metier, les tables de base de donnees, les edge functions ne sont pas impactes
-- Le design system Julaba (`src/shared/ui/julaba/`) garde son nom (il est deja correct)
+### `src/shared/ui/LanguageSelector.tsx`
+- Ligne 9 : `PNAVIM_VOICES` → `JULABA_VOICES`
+- Ligne 24 : commentaire "voix PNAVIM" → "voix JÙLABA"
+- Ligne 29 : `PNAVIM_VOICES.DEFAULT` → `JULABA_VOICES.DEFAULT`
 
-## Strategie d'implementation
+### `src/shared/hooks/useTts.ts`
+- Ligne 13 : `PNAVIM_VOICES, type PnavimVoiceId` → `JULABA_VOICES, type JulabaVoiceId`
+- Ligne 29 : `PnavimVoiceId` → `JulabaVoiceId`
+- Ligne 89 : `PNAVIM_VOICES.GBAIRAI` / `PNAVIM_VOICES.DEFAULT` → `JULABA_VOICES.*`
+- Commentaires lignes 1-4, 64, 68 : "PNAVIM" → "JÙLABA"
 
-L'implementation sera decoupee en 3-4 messages successifs pour rester dans les limites de taille, en commencant par les fichiers les plus visibles (Phase 1 + 2), puis les composants (Phase 3 + 4), puis les services et docs (Phase 5 + 6 + 7).
+### `src/features/public/components/pnavim/PnavimHeroCard.tsx`
+- Ligne 8 : `PNAVIM_VOICES` → `JULABA_VOICES`
+- Ligne 126 : `PNAVIM_VOICES.DEFAULT` → `JULABA_VOICES.DEFAULT`
+
+---
+
+## Batch 3 : Identifiants techniques
+
+### `src/features/auth/hooks/useDeviceFingerprint.ts`
+- Lignes 50-52 : `'PNAVIM 🇨🇮'` → `'JULABA 🇨🇮'`
+
+### `src/pages/public/HealthPage.tsx`
+- Lignes 66, 71 : `'pnavim_test'` → `'julaba_test'`
+
+### `src/shared/services/logger.ts`
+- Ligne 320 : `pnavim-logs-` → `julaba-logs-`
+
+### `src/features/admin/pages/AdminCardsSearch.tsx`
+- Ligne 77 : `pnavim_cartes_` → `julaba_cartes_`
+
+---
+
+## Batch 4 : Classes CSS `pnavim-*` → `julaba-*`
+
+Les classes Tailwind `pnavim-*` fonctionnent grace aux alias dans `tailwind.config.ts`, mais doivent etre mises a jour pour coherence. Fichiers concernes (19 fichiers) :
+
+- `PnavimButton.tsx` : lignes 25-29, 69 (`bg-pnavim-primary`, `text-pnavim-*`, `ring-pnavim-primary`)
+- `PnavimCard.tsx` : lignes 24-28, 69, 93-94, 99, 104 (`border-pnavim-border`, `bg-pnavim-primary/10`, etc.)
+- `PnavimStat.tsx` : lignes 28-31, 49, 77, 83, 89 (`bg-pnavim-primary/10`, `text-pnavim-foreground`, etc.)
+- `HelpSectionContent.tsx` : lignes 101, 104, 119, 121-122 (`border-pnavim-secondary`, etc.)
+- `CMUSectionContent.tsx` : ligne 86 (`border-pnavim-secondary`)
+- `AddPromotionDialog.tsx` : ligne 90 (`shadow-pnavim-primary`)
+- `PhotoCapture.tsx` : ligne 56 (`shadow-pnavim-secondary`)
+- `StepProgress.tsx` : lignes 24, 26 (`shadow-pnavim-secondary`, `shadow-pnavim-primary`)
+
+Remplacement systematique : `pnavim-primary` → `julaba-primary`, `pnavim-secondary` → `julaba-secondary`, etc.
+
+---
+
+## Batch 5 : Commentaires et documentation en code
+
+Mise a jour des commentaires JSDoc et headers dans :
+- `src/features/producer/types/producer.types.ts` : "PNAVIM" → "JÙLABA"
+- `src/features/producer/services/producerService.ts` : "PNAVIM" → "JÙLABA"
+- `src/features/producer/pages/ProducerDashboard.tsx` : "PNAVIM" → "JÙLABA"
+- `src/features/auth/hooks/useSocialAuth.ts` : "PNAVIM" → "JÙLABA"
+- `src/features/auth/components/PersonaSelector.tsx` : "PNAVIM" → "JÙLABA"
+- `src/shared/ui/UnifiedLoginPage.tsx` : "PNAVIM" → "JÙLABA"
+- `src/features/public/components/pnavim/index.ts` : "PNAVIM" → "JÙLABA"
+- `src/features/public/components/pnavim/PnavimPillButton.tsx` : "PNAVIM" → "JÙLABA"
+- `src/features/public/components/pnavim/PnavimVoiceFab.tsx` : "PNAVIM" → "JÙLABA"
+- `src/features/public/index.ts` : "PNAVIM" → "JÙLABA"
+
+---
+
+## Ce qui ne change PAS dans cette phase
+
+- Les noms de fichiers `Pnavim*.tsx` (Phase 3 ulterieure)
+- Les exports `PnavimButton`, `PnavimCard`, etc. (Phase 3)
+- Les alias deprecated dans `design-tokens.ts` (restent pour compatibilite)
+- Les routes applicatives
+
+## Estimation
+
+~35 fichiers modifies, ~80 remplacements de texte. Aucun changement de logique metier.
 
