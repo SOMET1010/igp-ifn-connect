@@ -12,7 +12,7 @@ import {
   JulabaInstitutionalHeader,
   JulabaHelpButton,
   JulabaVoiceFab,
-} from '@/features/public/components/pnavim';
+} from '@/features/public/components/julaba';
 
 // Contexts & Hooks
 import { useLanguage } from '@/shared/contexts';
