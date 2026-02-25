@@ -60,17 +60,17 @@ interface OnboardingTutorialProps {
 export const OnboardingTutorial = forwardRef<HTMLDivElement, OnboardingTutorialProps>(
   function OnboardingTutorial({ isOpen, onClose, onComplete }, ref) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { speak, isSpeaking, stop } = useTts();
+  const { speak, isSpeaking, isLoading, stop } = useTts();
 
   const step = TUTORIAL_STEPS[currentStep];
 
   const handlePlayAudio = useCallback(() => {
-    if (isSpeaking) {
+    if (isSpeaking || isLoading) {
       stop();
     } else {
       speak(step.audioText);
     }
-  }, [step, speak, isSpeaking, stop]);
+  }, [step, speak, isSpeaking, isLoading, stop]);
 
   const handleNext = useCallback(() => {
     stop();
@@ -165,12 +165,14 @@ export const OnboardingTutorial = forwardRef<HTMLDivElement, OnboardingTutorialP
                 className={`mx-auto flex items-center gap-3 px-6 py-3 rounded-full transition-all ${
                   isSpeaking
                     ? 'bg-secondary text-secondary-foreground animate-pulse'
+                    : isLoading
+                    ? 'bg-muted text-muted-foreground cursor-wait'
                     : 'bg-primary/10 text-primary hover:bg-primary/20'
                 }`}
               >
                 <Volume2 className="w-6 h-6" />
                 <span className="font-medium">
-                  {isSpeaking ? 'En cours...' : 'Écouter'}
+                  {isLoading ? 'Chargement...' : isSpeaking ? 'En cours...' : 'Écouter'}
                 </span>
               </button>
             </motion.div>
