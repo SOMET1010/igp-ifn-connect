@@ -14,7 +14,7 @@
  */
 
 import { TTSOptions, TTSPriority, DEFAULT_TTS_OPTIONS } from '../core/types';
-import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES } from '@/shared/config/voiceConfig';
 import { supabase } from '@/integrations/supabase/client';
 
 interface QueueItem {
@@ -195,7 +195,7 @@ class TTSManagerClass {
   private async playWithElevenLabs(text: string, options: TTSOptions): Promise<void> {
     console.log('[TTSManager] 🎙️ Playing with ElevenLabs');
 
-    const voiceId = options.voiceId || PNAVIM_VOICES.DEFAULT;
+    const voiceId = options.voiceId || JULABA_VOICES.DEFAULT;
 
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,

@@ -1,9 +1,9 @@
 /**
- * Service TTS ElevenLabs avec voix PNAVIM custom
+ * Service TTS ElevenLabs avec voix JÙLABA custom
  * Appelle l'edge function elevenlabs-tts (ne jamais exposer l'API key côté client)
  */
 
-import { PNAVIM_VOICES, type PnavimVoiceId } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES, type JulabaVoiceId } from '@/shared/config/voiceConfig';
 
 // Configuration par défaut
 const DEFAULT_MODEL = "eleven_multilingual_v2";
@@ -23,7 +23,7 @@ export async function generateSpeech(
   text: string,
   options: ElevenLabsTtsOptions = {}
 ): Promise<Blob> {
-  const { voiceId = PNAVIM_VOICES.DEFAULT, modelId = DEFAULT_MODEL } = options;
+  const { voiceId = JULABA_VOICES.DEFAULT, modelId = DEFAULT_MODEL } = options;
 
   if (!text || text.trim().length === 0) {
     throw new Error("Le texte est requis pour la synthèse vocale");
@@ -95,4 +95,4 @@ export function formatTextForIvorianVoice(text: string, localStyle = false): str
 }
 
 // Re-export pour compatibilité
-export { PNAVIM_VOICES };
+export { JULABA_VOICES, JULABA_VOICES as PNAVIM_VOICES };

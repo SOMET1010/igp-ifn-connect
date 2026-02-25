@@ -6,12 +6,12 @@ import { Volume2 } from 'lucide-react';
 // Components
 import { ImmersiveBackground, OnboardingTutorial } from '@/shared/ui';
 import { 
-  PnavimHeroCard,
-  PnavimPillButton, 
-  PnavimWaxCurve,
-  PnavimInstitutionalHeader,
-  PnavimHelpButton,
-  PnavimVoiceFab,
+  JulabaHeroCard,
+  JulabaPillButton, 
+  JulabaWaxCurve,
+  JulabaInstitutionalHeader,
+  JulabaHelpButton,
+  JulabaVoiceFab,
 } from '@/features/public/components/pnavim';
 
 // Contexts & Hooks
@@ -307,7 +307,7 @@ const Index: React.FC = () => {
       />
 
       {/* Header institutionnel simplifié */}
-      <PnavimInstitutionalHeader
+      <JulabaInstitutionalHeader
         showAccessibility={true}
         showAudioToggle={true}
         showLanguageSelector={true}
@@ -358,7 +358,7 @@ const Index: React.FC = () => {
               animate={{ scale: [1, 1.03, 1] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <PnavimPillButton
+              <JulabaPillButton
                 variant="primary"
                 size="lg"
                 leftIcon={<Volume2 className="w-6 h-6" />}
@@ -366,7 +366,7 @@ const Index: React.FC = () => {
                 className="bg-jaune-sahel text-charbon font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 border-2 border-jaune-sahel/50"
               >
                 {t('click_to_listen') || '🔊 Écouter'}
-              </PnavimPillButton>
+              </JulabaPillButton>
             </motion.div>
           </motion.div>
         </motion.div>
@@ -389,7 +389,7 @@ const Index: React.FC = () => {
             className="flex-shrink-0 w-[88vw] sm:w-[75vw] md:w-full snap-center"
             variants={itemVariants}
           >
-            <PnavimHeroCard
+            <JulabaHeroCard
               role="marchand"
               title={t('i_am_merchant') || 'Marchand'}
               subtitle={t('merchant_subtitle') || 'Encaisser, vendre, épargner'}
@@ -408,7 +408,7 @@ const Index: React.FC = () => {
             className="flex-shrink-0 w-[75vw] sm:w-[60vw] md:w-full snap-center"
             variants={itemVariants}
           >
-            <PnavimHeroCard
+            <JulabaHeroCard
               role="agent"
               title={t('field_agent') || 'Agent terrain'}
               subtitle={t('agent_subtitle') || 'Accompagner les marchands'}
@@ -501,10 +501,10 @@ const Index: React.FC = () => {
       </main>
 
       {/* Courbe décorative Wax en bas */}
-      <PnavimWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
+      <JulabaWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
 
       {/* FAB Micro "Parler" - positionné en bas à droite */}
-      <PnavimVoiceFab
+      <JulabaVoiceFab
         state={micState}
         onClick={handleMicClick}
         position="bottom-right"
@@ -513,7 +513,7 @@ const Index: React.FC = () => {
       />
 
       {/* Bouton d'aide flottant - repositionné à gauche */}
-      <PnavimHelpButton onClick={() => navigate('/aide')} />
+      <JulabaHelpButton onClick={() => navigate('/aide')} />
 
       {/* Onboarding Tutorial */}
       {showTutorial && (
