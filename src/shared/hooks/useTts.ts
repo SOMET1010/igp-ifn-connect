@@ -99,6 +99,7 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const generateIdRef = useRef(0); // Guard anti-doublon
 
   const isSupported = typeof window !== 'undefined';
 
@@ -142,11 +143,17 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
     // Annuler tout audio précédent AVANT de commencer
     voiceQueue.cancel();
     
+    // Guard anti-doublon : chaque appel obtient un ID unique
+    const currentId = ++generateIdRef.current;
+    
     setIsLoading(true);
     setError(null);
 
     try {
       const audioBlob = await generateSpeech(text, { voiceId });
+      
+      // Si un nouvel appel a été lancé entre-temps, abandonner celui-ci
+      if (currentId !== generateIdRef.current) return;
       const audioUrl = URL.createObjectURL(audioBlob);
       audioUrlRef.current = audioUrl;
 
