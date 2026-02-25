@@ -1,5 +1,5 @@
 /**
- * Types pour le module Producteur - PNAVIM
+ * Types pour le module Producteur - JÙLABA
  */
 
 export interface Producer {

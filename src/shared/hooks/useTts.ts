@@ -1,5 +1,5 @@
 /**
- * Hook TTS unifié PNAVIM
+ * Hook TTS unifié JÙLABA
  * - ElevenLabs TTS exclusivement (voix Tantie Sagesse / Gbairai)
  * - Support audio pré-enregistré (priorité)
  * - Messages persona (social-auth)
@@ -10,7 +10,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
-import { PNAVIM_VOICES, type PnavimVoiceId } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES, type JulabaVoiceId } from '@/shared/config/voiceConfig';
 import type { PersonaType } from '@/features/auth/config/personas';
 import { 
   hasPrerecordedMessage, 
@@ -26,7 +26,7 @@ const VOICE_ENABLED_KEY = 'ifn_voice_enabled';
 
 export interface UseTtsOptions {
   /** Voice ID ElevenLabs (défaut: Tantie Sagesse) */
-  voiceId?: PnavimVoiceId;
+  voiceId?: JulabaVoiceId;
   /** Langue pour scripts voice-auth */
   lang?: VoiceAuthLang;
   /** Persona pour messages pré-enregistrés */
@@ -61,11 +61,11 @@ export interface UseTtsReturn {
 }
 
 /**
- * Hook React unifié pour le TTS PNAVIM
+ * Hook React unifié pour le TTS JÙLABA
  * 
  * @example Simple (texte brut)
  * const { speak, isSpeaking } = useTts();
- * speak("Bienvenue sur PNAVIM");
+ * speak("Bienvenue sur JÙLABA");
  * 
  * @example Avec persona (messages pré-enregistrés)
  * const { speak } = useTts({ persona: 'tantie' });
@@ -86,7 +86,7 @@ export function useTts(options: UseTtsOptions = {}): UseTtsReturn {
   } = options;
   
   // Voix par défaut selon la langue
-  const voiceId = initialVoiceId ?? (lang === 'nouchi' ? PNAVIM_VOICES.GBAIRAI : PNAVIM_VOICES.DEFAULT);
+  const voiceId = initialVoiceId ?? (lang === 'nouchi' ? JULABA_VOICES.GBAIRAI : JULABA_VOICES.DEFAULT);
   
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

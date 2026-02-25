@@ -1,5 +1,5 @@
 /**
- * PersonaSelector - Sélecteur visuel de persona style PNAVIM
+ * PersonaSelector - Sélecteur visuel de persona style JÙLABA
  * Design avec cartes colorées orange/vert
  */
 

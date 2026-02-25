@@ -1,5 +1,5 @@
 /**
- * Point d'entrée public du module Public
+ * Point d'entrée public du module Public - JÙLABA
  * Pages et composants accessibles sans authentification
  */
 
@@ -9,7 +9,7 @@ export * from './components/map';
 // Composants Market
 export * from './components/market';
 
-// Composants PNAVIM Design System
+// Composants JÙLABA Design System
 export * from './components/pnavim';
 
 // Export PDF

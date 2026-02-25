@@ -1,7 +1,7 @@
 /**
- * Traductions PNAVIM - Version Sociale
+ * Traductions JÙLABA - Version Sociale
  * Ton chaleureux, ivoirien, respectueux, inclusif
- * "PNAVIM parle comme une personne du marché qui veut t'aider"
+ * "JÙLABA parle comme une personne du marché qui veut t'aider"
  */
 
 export type LanguageCode = 'fr' | 'dioula' | 'baoule' | 'bete' | 'senoufo' | 'malinke';
@@ -30,7 +30,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "Bon {period} 👋",
     welcome_subtitle: "On est {day}. Il est {hour}. Le marché est ouvert.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "On est ensemble au marché",
     who_are_you: "On est ensemble au marché",
     market_open: "Le marché est ouvert",
@@ -253,7 +253,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "I ni sogoma 👋",
     welcome_subtitle: "An bɛ {day}. Sugu bɛ dayɛlɛn.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "An bɛ ɲɔgɔn fɛ sugu la",
     who_are_you: "An bɛ ɲɔgɔn fɛ sugu la",
     market_open: "Sugu bɛ dayɛlɛn",
@@ -476,7 +476,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "Mo aba 👋",
     welcome_subtitle: "Andɛ yɛ {day}. Gwa'n su ti kpa.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "É ti nun gwa'n su",
     who_are_you: "É ti nun gwa'n su",
     market_open: "Gwa'n su ti kpa",
@@ -680,7 +680,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "A za gba 👋",
     welcome_subtitle: "A yɛ {day}. Zikɛ mlɛ ti.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "A lɛ nyɛ zikɛ",
     who_are_you: "A lɛ nyɛ zikɛ",
     market_open: "Zikɛ mlɛ ti",
@@ -857,7 +857,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "I ni tié 👋",
     welcome_subtitle: "A yé {day}. Katiè bé sɔ.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "An bé nyɔgɔ fé katiè la",
     who_are_you: "An bé nyɔgɔ fé katiè la",
     market_open: "Katiè bé sɔ",
@@ -1061,7 +1061,7 @@ export const translations: Record<LanguageCode, Record<string, string>> = {
     ====================== */
     welcome: "I ni sogoma 👋",
     welcome_subtitle: "An bɛ {day}. Sugu bɛ da yɛlɛn.",
-    platform_title: "PNAVIM",
+    platform_title: "JÙLABA",
     platform_subtitle: "An bɛ ɲɔgɔn fɛ sugu kɔnɔ",
     who_are_you: "An bɛ ɲɔgɔn fɛ sugu kɔnɔ",
     market_open: "Sugu bɛ da yɛlɛn",

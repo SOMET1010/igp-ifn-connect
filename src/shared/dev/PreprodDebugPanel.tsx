@@ -14,7 +14,7 @@ interface DebugLog {
 
 /**
  * PreprodDebugPanel - Panel de diagnostic pour pré-production
- * Activer via localStorage: localStorage.setItem('pnavim-debug', 'true')
+ * Activer via localStorage: localStorage.setItem('julaba-debug', 'true')
  */
 export function PreprodDebugPanel() {
   const [isVisible, setIsVisible] = useState(false);
@@ -54,7 +54,7 @@ export function PreprodDebugPanel() {
   // Check if debug mode is enabled
   useEffect(() => {
     const checkDebugMode = () => {
-      const debugEnabled = localStorage.getItem("pnavim-debug") === "true";
+      const debugEnabled = localStorage.getItem("julaba-debug") === "true";
       setIsVisible(debugEnabled);
     };
 
@@ -279,7 +279,7 @@ export function PreprodDebugPanel() {
               size="sm"
               className="w-full text-xs"
               onClick={() => {
-                localStorage.removeItem("pnavim-debug");
+                localStorage.removeItem("julaba-debug");
                 setIsVisible(false);
               }}
             >

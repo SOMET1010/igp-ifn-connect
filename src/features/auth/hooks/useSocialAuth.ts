@@ -9,7 +9,7 @@ import { normalizeAnswer, similarityScore } from '@/features/auth/utils/normaliz
 import { toast } from 'sonner';
 
 /**
- * Hook principal d'Authentification Sociale PNAVIM
+ * Hook principal d'Authentification Sociale JÙLABA
  * Orchestre les 4 couches du protocole
  * 
  * Layer 1: Identification vocale ("C'est qui est là ?")

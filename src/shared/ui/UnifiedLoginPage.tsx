@@ -28,7 +28,7 @@ interface UnifiedLoginPageProps {
 }
 
 /**
- * UnifiedLoginPage - Composant de page login unifié PNAVIM
+ * UnifiedLoginPage - Composant de page login unifié JÙLABA
  * Garantit une expérience cohérente pour Marchand, Agent et Coopérative
  */
 export function UnifiedLoginPage({
@@ -84,7 +84,7 @@ export function UnifiedLoginPage({
           <div className="flex items-center gap-3">
             <img src={logoDge} alt="DGE" className="h-10 md:h-12 object-contain" />
             <div className="flex flex-col">
-              <span className="text-sm md:text-base font-bold text-foreground">PNAVIM-CI</span>
+              <span className="text-sm md:text-base font-bold text-foreground">JÙLABA</span>
               <span className="text-[10px] md:text-xs text-muted-foreground">République de Côte d'Ivoire</span>
               <span className={cn("text-[9px] italic", colors.text)}>
                 {roleLabels[userType]}

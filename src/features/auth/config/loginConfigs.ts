@@ -61,7 +61,7 @@ export const agentLoginConfig: LoginRoleConfig = {
     otp: "Entrez le code de vérification à 6 chiffres reçu par SMS.",
     register: "Créez votre compte agent en entrant votre nom complet.",
   },
-  emailPattern: (phone) => `agent_${phone}@pnavim.ci`,
+  emailPattern: (phone) => `agent_${phone}@julaba.ci`,
   passwordPattern: (phone) => `agent_${phone}_secure`,
   roleRpcName: "assign_agent_role",
   tableName: "agents",
@@ -123,8 +123,8 @@ export const cooperativeLoginConfig: LoginRoleConfig = {
 export const adminLoginConfig: AdminLoginConfig = {
   role: "admin",
   redirectTo: "/admin",
-  headerTitle: "Administration PNAVIM-CI",
+  headerTitle: "Administration JÙLABA",
   headerSubtitle: "Plateforme Nationale des Acteurs du Vivrier Marchand",
   backgroundIcon: ShieldCheck,
-  audioText: "Portail d'administration PNAVIM-CI. Entrez votre email et mot de passe pour vous connecter.",
+  audioText: "Portail d'administration JÙLABA. Entrez votre email et mot de passe pour vous connecter.",
 };

@@ -1,5 +1,5 @@
 // ============================================
-// PNAVIM STAT - CARTE STATISTIQUE STANDARD
+// JÙLABA STAT - CARTE STATISTIQUE STANDARD
 // ============================================
 // Pour dashboards et résumés
 // RÈGLE: Maximum 4 stats par écran, même hauteur partout
@@ -25,10 +25,10 @@ interface PnavimStatProps {
 
 const iconBackgroundStyles: Record<StatVariant, string> = {
   default: 'bg-gray-100 text-gray-600',
-  primary: 'bg-pnavim-primary/10 text-pnavim-primary',
-  success: 'bg-pnavim-secondary/10 text-pnavim-secondary',
+  primary: 'bg-julaba-primary/10 text-julaba-primary',
+  success: 'bg-julaba-secondary/10 text-julaba-secondary',
   warning: 'bg-amber-100 text-amber-600',
-  danger: 'bg-red-100 text-pnavim-destructive',
+  danger: 'bg-red-100 text-julaba-destructive',
 };
 
 export const PnavimStat: React.FC<PnavimStatProps> = ({
@@ -46,7 +46,7 @@ export const PnavimStat: React.FC<PnavimStatProps> = ({
     <div
       className={cn(
         // Base
-        "bg-white rounded-xl p-4 border border-pnavim-border",
+        "bg-white rounded-xl p-4 border border-julaba-border",
         // Layout
         "flex items-center gap-3",
         // Transition
@@ -74,19 +74,19 @@ export const PnavimStat: React.FC<PnavimStatProps> = ({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-pnavim-foreground truncate">
+          <span className="text-2xl font-bold text-julaba-foreground truncate">
             {value}
           </span>
           {trend && (
             <span className={cn(
               "text-xs font-medium",
-              trend.isPositive ? "text-pnavim-secondary" : "text-pnavim-destructive"
+              trend.isPositive ? "text-julaba-secondary" : "text-julaba-destructive"
             )}>
               {trend.isPositive ? "+" : ""}{trend.value}%
             </span>
           )}
         </div>
-        <p className="text-sm text-pnavim-muted truncate">
+        <p className="text-sm text-julaba-muted truncate">
           {label}
         </p>
       </div>

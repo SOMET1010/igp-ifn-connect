@@ -1,5 +1,5 @@
 /**
- * Logger centralisé et standardisé pour P.NA.VIM
+ * Logger centralisé et standardisé pour JÙLABA
  * Avec support traceId, Sentry et loggers contextuels
  */
 
@@ -317,7 +317,7 @@ export const logger = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pnavim-logs-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `julaba-logs-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -325,7 +325,7 @@ export const logger = {
   },
 
   /**
-   * Actions critiques P.NA.VIM avec traceId automatique
+   * Actions critiques JÙLABA avec traceId automatique
    */
   critical: {
     login(data: { phone?: string; method: string; success: boolean }): void {
