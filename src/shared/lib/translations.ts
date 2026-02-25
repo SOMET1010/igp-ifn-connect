@@ -15,12 +15,12 @@ export interface LanguageInfo {
 }
 
 export const LANGUAGES: LanguageInfo[] = [
-  { code: 'fr', name: 'Français', nativeName: 'Français', symbol: '🇫🇷', colors: 'from-blue-500 to-red-500' },
-  { code: 'dioula', name: 'Dioula', nativeName: 'Julakan', symbol: '🟡', colors: 'from-yellow-500 to-orange-500' },
-  { code: 'baoule', name: 'Baoulé', nativeName: 'Baoulé', symbol: '🟢', colors: 'from-green-500 to-emerald-500' },
-  { code: 'bete', name: 'Bété', nativeName: 'Bété', symbol: '🔵', colors: 'from-blue-600 to-indigo-500' },
-  { code: 'senoufo', name: 'Sénoufo', nativeName: 'Senufo', symbol: '🟤', colors: 'from-amber-600 to-orange-600' },
-  { code: 'malinke', name: 'Malinké', nativeName: 'Maninkakan', symbol: '🟣', colors: 'from-purple-500 to-pink-500' },
+  { code: 'fr', name: 'Français', nativeName: 'Français', symbol: 'FR', colors: 'from-blue-500 to-red-500' },
+  { code: 'dioula', name: 'Dioula', nativeName: 'Julakan', symbol: 'DJ', colors: 'from-yellow-500 to-orange-500' },
+  { code: 'baoule', name: 'Baoulé', nativeName: 'Baoulé', symbol: 'BA', colors: 'from-green-500 to-emerald-500' },
+  { code: 'bete', name: 'Bété', nativeName: 'Bété', symbol: 'BT', colors: 'from-blue-600 to-indigo-500' },
+  { code: 'senoufo', name: 'Sénoufo', nativeName: 'Senufo', symbol: 'SE', colors: 'from-amber-600 to-orange-600' },
+  { code: 'malinke', name: 'Malinké', nativeName: 'Maninkakan', symbol: 'MK', colors: 'from-purple-500 to-pink-500' },
 ];
 
 export const translations: Record<LanguageCode, Record<string, string>> = {

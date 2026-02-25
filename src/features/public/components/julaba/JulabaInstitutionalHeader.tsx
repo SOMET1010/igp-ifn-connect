@@ -142,16 +142,16 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all",
+                        "w-8 h-7 rounded-full flex items-center justify-center text-[10px] font-bold tracking-tight transition-all",
                         language === lang.code
-                          ? "bg-card shadow-sm scale-110"
-                          : "hover:bg-card/50 opacity-60 hover:opacity-100"
+                          ? "bg-card shadow-sm scale-110 text-foreground"
+                          : "hover:bg-card/50 opacity-60 hover:opacity-100 text-muted-foreground"
                       )}
                       title={lang.name}
                       aria-label={`Changer la langue en ${lang.name}`}
                       aria-pressed={language === lang.code}
                     >
-                      {lang.symbol || languageFlags[lang.code] || '🌍'}
+                      {lang.symbol}
                     </button>
                   ))}
                 </div>
