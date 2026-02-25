@@ -98,10 +98,10 @@ export function HelpSectionContent() {
           </CardLarge>
 
           {/* RSTI Section */}
-          <CardLarge className="border-2 border-pnavim-secondary/30 bg-pnavim-secondary/5">
+          <CardLarge className="border-2 border-julaba-secondary/30 bg-julaba-secondary/5">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl">🏦</span>
-              <h3 className="font-bold text-pnavim-secondary">{t("rsti_simple_title")}</h3>
+              <h3 className="font-bold text-julaba-secondary">{t("rsti_simple_title")}</h3>
             </div>
             <p className="text-foreground text-sm mb-2">"{t("rsti_analogy")}"</p>
             <div className="space-y-1 text-xs">
@@ -116,10 +116,10 @@ export function HelpSectionContent() {
       {/* Appeler mon agent */}
       <CardLarge 
         onClick={handleCallAgent}
-        className="flex items-center gap-4 bg-pnavim-secondary/5 border-pnavim-secondary/30"
+        className="flex items-center gap-4 bg-julaba-secondary/5 border-julaba-secondary/30"
       >
-        <div className="w-14 h-14 rounded-2xl bg-pnavim-secondary/10 flex items-center justify-center">
-          <Phone className="w-7 h-7 text-pnavim-secondary" />
+        <div className="w-14 h-14 rounded-2xl bg-julaba-secondary/10 flex items-center justify-center">
+          <Phone className="w-7 h-7 text-julaba-secondary" />
         </div>
         <div className="flex-1">
           <h2 className="text-lg font-bold text-foreground">

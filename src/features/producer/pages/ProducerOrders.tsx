@@ -1,5 +1,5 @@
 /**
- * Page Commandes du Producteur - PNAVIM
+ * Page Commandes du Producteur - JÙLABA
  * Refonte Jùlaba Design System
  */
 

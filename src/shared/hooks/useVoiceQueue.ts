@@ -1,5 +1,5 @@
 /**
- * Hook React pour VoiceQueue - Anti-superposition audio PNAVIM
+ * Hook React pour VoiceQueue - Anti-superposition audio JÙLABA
  * 
  * Wrapper React autour du service voiceQueue singleton
  * - Expose speak(), stop(), isSpeaking

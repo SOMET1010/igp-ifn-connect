@@ -262,7 +262,7 @@ const VivriersCooperativesPage: React.FC = () => {
           
           <Badge variant="secondary" className="hidden md:flex shrink-0">
             <Wheat className="h-3 w-3 mr-1" />
-            PNAVIM
+            JÙLABA
           </Badge>
 
           {/* Bouton de connexion si non authentifié */}

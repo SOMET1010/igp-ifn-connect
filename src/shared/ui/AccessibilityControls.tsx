@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   reduceMotion: false
 };
 
-const STORAGE_KEY = 'pnavim-accessibility';
+const STORAGE_KEY = 'julaba-accessibility';
 
 interface AccessibilityControlsProps {
   isOpen: boolean;

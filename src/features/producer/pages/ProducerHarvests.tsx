@@ -1,5 +1,5 @@
 /**
- * Page Récoltes du Producteur - PNAVIM
+ * Page Récoltes du Producteur - JÙLABA
  * Refonte Jùlaba Design System
  */
 

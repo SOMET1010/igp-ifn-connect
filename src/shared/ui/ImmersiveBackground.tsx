@@ -94,7 +94,7 @@ export const ImmersiveBackground: React.FC<ImmersiveBackgroundProps> = ({
 
   return (
     <div className={`fixed inset-0 -z-10 overflow-hidden ${className}`}>
-      {/* Photo du marché avec overlay solaire (mode PNAVIM 2.0) - Optimisé Android */}
+      {/* Photo du marché avec overlay solaire (mode JÙLABA 2.0) - Optimisé Android */}
       {showSolarPhoto && (
         <>
           <img

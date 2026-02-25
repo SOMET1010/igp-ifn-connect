@@ -2,7 +2,7 @@
  * ASSISTANT - Compagnon de marché
  * Rôle : Vente, journée, encouragements
  * 
- * RÈGLE PNAVIM : Une seule voix active par écran
+ * RÈGLE JÙLABA : Une seule voix active par écran
  * ASSISTANT parle sur le dashboard et les écrans de vente
  */
 
@@ -36,7 +36,7 @@ export interface AssistantScript {
 }
 
 /**
- * Scripts ASSISTANT - Compagnon de marché PNAVIM
+ * Scripts ASSISTANT - Compagnon de marché JÙLABA
  * Ton : Encourageant, chaleureux, positif
  * Principe : Une phrase = Une action
  */

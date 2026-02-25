@@ -1,5 +1,5 @@
 /**
- * Utilitaires standardisés pour les toasts PNAVIM
+ * Utilitaires standardisés pour les toasts JÙLABA
  * Messages en français, cohérents dans toute l'application
  */
 
@@ -87,7 +87,7 @@ export const toastPromise = <T>(
 };
 
 // ============================================
-// TOASTS SPÉCIFIQUES PNAVIM
+// TOASTS SPÉCIFIQUES JÙLABA
 // ============================================
 
 /**

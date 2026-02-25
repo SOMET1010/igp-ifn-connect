@@ -35,7 +35,7 @@ serve(async (req) => {
     // Formater le code pour une lecture claire
     const spokenDigits = otp.split('').join(', ');
     const voiceMessage = language === 'fr'
-      ? `Bonjour ! Ton code de vérification PNAVIM est : ${spokenDigits}. Je répète : ${spokenDigits}. Ce code est valable 5 minutes.`
+      ? `Bonjour ! Ton code de vérification JÙLABA est : ${spokenDigits}. Je répète : ${spokenDigits}. Ce code est valable 5 minutes.`
       : `I ko ! A code bɛ : ${spokenDigits}. N bɛ a fɔ tugun : ${spokenDigits}.`;
 
     // Générer l'audio via ElevenLabs

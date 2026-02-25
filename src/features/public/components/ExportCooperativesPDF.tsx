@@ -45,7 +45,7 @@ export const ExportCooperativesPDF: React.FC<ExportCooperativesPDFProps> = ({
       // Titre
       doc.setFontSize(18);
       doc.setTextColor(34, 139, 34); // Vert
-      doc.text('Coopératives Vivriers - PNAVIM', pageWidth / 2, 20, { align: 'center' });
+      doc.text('Coopératives Vivriers - JÙLABA', pageWidth / 2, 20, { align: 'center' });
 
       // Date
       doc.setFontSize(10);

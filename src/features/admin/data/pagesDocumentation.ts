@@ -1,5 +1,5 @@
 /**
- * Données de documentation de toutes les pages PNAVIM-CI
+ * Données de documentation de toutes les pages JÙLABA
  */
 
 import { DocumentationSection } from '../types/documentation.types';
@@ -18,7 +18,7 @@ export const documentationSections: DocumentationSection[] = [
         name: 'Page d\'accueil Voice-First',
         route: '/',
         category: 'public',
-        description: 'Point d\'entrée principal de l\'application PNAVIM-CI avec interface vocale intuitive. Affiche un message de bienvenue personnalisé selon l\'heure du jour et permet aux utilisateurs de choisir leur rôle (Marchand, Agent, Coopérative).',
+        description: 'Point d\'entrée principal de l\'application JÙLABA avec interface vocale intuitive. Affiche un message de bienvenue personnalisé selon l\'heure du jour et permet aux utilisateurs de choisir leur rôle (Marchand, Agent, Coopérative).',
         features: [
           'Greeting dynamique selon l\'heure (matin/après-midi/soir)',
           'Message contextuel avec jour et période',
@@ -508,7 +508,7 @@ export const documentationSections: DocumentationSection[] = [
         name: 'Dashboard Admin',
         route: '/admin',
         category: 'admin',
-        description: 'Vue globale de la plateforme PNAVIM-CI avec indicateurs nationaux et alertes système.',
+        description: 'Vue globale de la plateforme JÙLABA avec indicateurs nationaux et alertes système.',
         features: [
           'KPIs nationaux (marchands, agents, CA)',
           'Graphiques de tendance',

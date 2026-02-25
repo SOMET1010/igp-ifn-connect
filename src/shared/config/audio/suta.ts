@@ -2,7 +2,7 @@
  * SUTA - La voix qui rassure et guide
  * Rôle : Connexion, erreurs, navigation
  * 
- * RÈGLE PNAVIM : Une seule voix active par écran
+ * RÈGLE JÙLABA : Une seule voix active par écran
  * SUTA parle uniquement sur les écrans de connexion et d'aide
  */
 
@@ -34,7 +34,7 @@ export interface SutaScript {
 }
 
 /**
- * Scripts SUTA - Guide principal PNAVIM
+ * Scripts SUTA - Guide principal JÙLABA
  * Ton : Calme, rassurant, jamais pressant
  * Principe : Une phrase = Une action
  */

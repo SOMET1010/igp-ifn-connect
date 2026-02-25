@@ -15,7 +15,7 @@ interface SimpleLoginPageProps {
 }
 
 /**
- * SimpleLoginPage - Page de login inclusive PNAVIM
+ * SimpleLoginPage - Page de login inclusive JÙLABA
  * 
  * Flow linéaire visible : Téléphone → OTP → Connecté
  * Rails sociaux invisibles : Risk Gate silencieux après OTP

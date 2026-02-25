@@ -23,7 +23,7 @@ type Step = 'phone' | 'phone_confirm' | 'otp' | 'verifying' | 'social_check' | '
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 
 /**
- * InclusivePhoneAuth - SmartAuthGate PNAVIM v2
+ * InclusivePhoneAuth - SmartAuthGate JÙLABA v2
  * 
  * Flow "Zéro Lecture, Zéro Mémoire" :
  * - 🎤 Bouton micro géant pour dicter le numéro

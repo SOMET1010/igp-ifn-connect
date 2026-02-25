@@ -28,7 +28,7 @@ interface PnavimInstitutionalHeaderProps {
 }
 
 /**
- * Header institutionnel PNAVIM complet
+ * Header institutionnel JÙLABA complet
  * Branding + Accessibilité + Ligne tricolore
  */
 export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps> = ({
@@ -178,7 +178,7 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                 </button>
               )}
 
-              {/* Login Button - Orange PNAVIM */}
+              {/* Login Button - Orange JÙLABA */}
               {showLoginButton && (
                 <button
                   onClick={onLoginClick}

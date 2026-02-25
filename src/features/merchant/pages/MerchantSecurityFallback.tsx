@@ -55,7 +55,7 @@ const MerchantSecurityFallback: React.FC = () => {
             onClick={handleBack}
           />
           <span className="text-lg font-bold text-primary">
-            🧡 PNAVIM
+            🧡 JÙLABA
           </span>
           <div className="w-10" />
         </div>

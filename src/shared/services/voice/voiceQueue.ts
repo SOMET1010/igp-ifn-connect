@@ -1,5 +1,5 @@
 /**
- * VoiceQueue - Service centralisé anti-superposition audio PNAVIM
+ * VoiceQueue - Service centralisé anti-superposition audio JÙLABA
  * 
  * Garantit qu'une seule voix joue à la fois:
  * - Annule tout audio en cours avant d'en lancer un nouveau

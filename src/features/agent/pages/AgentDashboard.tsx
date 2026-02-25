@@ -1,5 +1,5 @@
 /**
- * Dashboard Agent - PNAVIM
+ * Dashboard Agent - JÙLABA
  * Refonte Jùlaba Design System
  */
 
@@ -73,7 +73,7 @@ const AgentDashboard: React.FC = () => {
       <JulabaPageLayout background="gradient">
         <JulabaHeader 
           title="Espace Agent" 
-          subtitle="IFN - PNAVIM"
+           subtitle="IFN - JÙLABA"
           showLogout
           onLogout={handleLogout}
         />
@@ -102,7 +102,7 @@ const AgentDashboard: React.FC = () => {
       <JulabaPageLayout background="gradient">
         <JulabaHeader 
           title="Espace Agent" 
-          subtitle="IFN - PNAVIM"
+          subtitle="IFN - JÙLABA"
           showLogout
           onLogout={handleLogout}
         />
