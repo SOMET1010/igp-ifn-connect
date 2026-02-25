@@ -4,16 +4,8 @@ import { cn } from '@/shared/lib';
 import { Volume2, VolumeX, User, Minus, Plus } from 'lucide-react';
 import { useSensoryFeedback } from '@/shared/hooks';
 import { useLanguage } from '@/shared/contexts';
+import { useDesignMode } from '@/shared/contexts';
 import { LanguageCode } from '@/shared/lib';
-
-// Icônes de drapeaux pour les langues
-const languageFlags: Record<string, string> = {
-  fr: '🇫🇷',
-  dioula: '🇨🇮',
-  baoule: '🇨🇮',
-  bete: '🇨🇮',
-  senoufo: '🇨🇮',
-};
 
 interface PnavimInstitutionalHeaderProps {
   showAccessibility?: boolean;
@@ -27,10 +19,6 @@ interface PnavimInstitutionalHeaderProps {
   className?: string;
 }
 
-/**
- * Header institutionnel JÙLABA complet
- * Branding + Accessibilité + Ligne tricolore
- */
 export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps> = ({
   showAccessibility = true,
   showAudioToggle = true,
@@ -46,6 +34,7 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
   const [zoom, setZoom] = useState(100);
   const { triggerTap } = useSensoryFeedback();
   const { language, setLanguage, languages } = useLanguage();
+  const { isInstitutional } = useDesignMode();
 
   const audioEnabled = controlledAudioEnabled ?? internalAudioEnabled;
 
@@ -84,18 +73,28 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
             
             {/* Left: Branding */}
             <Link to="/" className="flex items-center gap-2 group">
-              {/* Logo J */}
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-sanguine to-terre-battue flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <span className="text-white font-bold text-lg">J</span>
+              {/* Logo - adapté au mode */}
+              <div className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform",
+                isInstitutional
+                  ? "bg-primary"
+                  : "bg-gradient-to-br from-orange-sanguine to-terre-battue"
+              )}>
+                <span className="text-primary-foreground font-bold text-lg">J</span>
               </div>
               
               {/* Title */}
               <div className="flex flex-col">
-                <span className="text-sm sm:text-base font-extrabold text-vert-manioc leading-none">
+                <span className={cn(
+                  "text-sm sm:text-base font-extrabold leading-none",
+                  isInstitutional ? "text-primary" : "text-vert-manioc"
+                )}>
                   JÙLABA
                 </span>
                 <span className="text-[10px] sm:text-xs text-muted-foreground leading-tight hidden sm:block">
-                  Ton djè est bien géré · par ICONE
+                  {isInstitutional
+                    ? 'Plateforme Nationale · ANSUT'
+                    : 'Ton djè est bien géré · par ICONE'}
                 </span>
               </div>
             </Link>
@@ -164,7 +163,7 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                   className={cn(
                     "w-9 h-9 rounded-full flex items-center justify-center transition-all",
                     audioEnabled 
-                      ? "bg-vert-manioc text-white" 
+                      ? isInstitutional ? "bg-primary text-primary-foreground" : "bg-vert-manioc text-white"
                       : "bg-muted text-muted-foreground"
                   )}
                   aria-label={audioEnabled ? "Désactiver l'audio" : "Activer l'audio"}
@@ -178,11 +177,16 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
                 </button>
               )}
 
-              {/* Login Button - Orange JÙLABA */}
+              {/* Login Button - adapté au mode */}
               {showLoginButton && (
                 <button
                   onClick={onLoginClick}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-sanguine text-white rounded-full text-sm font-medium hover:bg-orange-sanguine/90 transition-colors shadow-md min-h-[44px]"
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 text-white rounded-full text-sm font-medium transition-colors shadow-md min-h-[44px]",
+                    isInstitutional
+                      ? "bg-primary hover:bg-primary/90"
+                      : "bg-orange-sanguine hover:bg-orange-sanguine/90"
+                  )}
                 >
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline">Se connecter</span>
@@ -193,11 +197,13 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
         </div>
       </div>
 
-      {/* Tricolor Line - inline */}
+      {/* Accent Line - adapté au mode */}
       <div 
         className="h-1 w-full"
         style={{
-          background: 'linear-gradient(90deg, #E67E22 0%, #E67E22 33%, #FFFFFF 33%, #FFFFFF 66%, #2E7D32 66%, #2E7D32 100%)'
+          background: isInstitutional
+            ? 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 50%, hsl(var(--accent)) 100%)'
+            : 'linear-gradient(90deg, #E67E22 0%, #E67E22 33%, #FFFFFF 33%, #FFFFFF 66%, #2E7D32 66%, #2E7D32 100%)'
         }}
         aria-hidden="true"
       />

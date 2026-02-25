@@ -15,7 +15,7 @@ import {
 } from '@/features/public/components/julaba';
 
 // Contexts & Hooks
-import { useLanguage } from '@/shared/contexts';
+import { useLanguage, useDesignMode } from '@/shared/contexts';
 import { useSensoryFeedback, useTimeOfDay } from '@/shared/hooks';
 
 // TTS (voix JÙLABA uniquement)
@@ -77,6 +77,7 @@ const Index: React.FC = () => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const { triggerTap } = useSensoryFeedback();
+  const { isInstitutional } = useDesignMode();
   const { timeOfDay, dayName, periodName, greeting, marketStatus, hour } = useTimeOfDay();
 
   // State
@@ -322,14 +323,22 @@ const Index: React.FC = () => {
       <main className="relative z-10 pt-20 pb-40 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
         {/* Hero Section avec glassmorphism */}
         <motion.div
-          className="bg-white/15 backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-8 border border-white/25 shadow-2xl"
+          className={`backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-8 border shadow-2xl ${
+            isInstitutional
+              ? 'bg-card/90 border-border'
+              : 'bg-white/15 border-white/25'
+          }`}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           {/* Greeting dynamique avec emoji */}
           <motion.h1 
-            className="text-center text-4xl sm:text-5xl lg:text-6xl font-nunito font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] mb-3"
+            className={`text-center text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-3 ${
+              isInstitutional
+                ? 'text-primary'
+                : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]'
+            }`}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
@@ -337,9 +346,13 @@ const Index: React.FC = () => {
             {getDynamicGreeting()} 👋
           </motion.h1>
           
-          {/* Sous-titre contextuel : jour + période + statut marché */}
+          {/* Sous-titre contextuel */}
           <motion.p 
-            className="text-center text-lg sm:text-xl lg:text-2xl font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]"
+            className={`text-center text-lg sm:text-xl lg:text-2xl font-semibold ${
+              isInstitutional
+                ? 'text-foreground'
+                : 'text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]'
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.4 }}
@@ -347,7 +360,7 @@ const Index: React.FC = () => {
             {getContextualSubtitle()}
           </motion.p>
 
-          {/* Bouton ÉCOUTER proéminent - dans le hero */}
+          {/* Bouton ÉCOUTER */}
           <motion.div
             className="flex justify-center mt-6"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -363,7 +376,11 @@ const Index: React.FC = () => {
                 size="lg"
                 leftIcon={<Volume2 className="w-6 h-6" />}
                 onClick={playWelcomeAudio}
-                className="bg-jaune-sahel text-charbon font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 border-2 border-jaune-sahel/50"
+                className={`font-bold shadow-xl hover:shadow-2xl min-h-[60px] text-lg px-8 ${
+                  isInstitutional
+                    ? 'bg-accent text-accent-foreground border-2 border-accent/50'
+                    : 'bg-jaune-sahel text-charbon border-2 border-jaune-sahel/50'
+                }`}
               >
                 {t('click_to_listen') || '🔊 Écouter'}
               </JulabaPillButton>
@@ -428,7 +445,9 @@ const Index: React.FC = () => {
               onClick={() => scrollToCard(index)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 activeCardIndex === index
-                  ? 'bg-jaune-sahel scale-125 shadow-lg shadow-jaune-sahel/50'
+                  ? isInstitutional
+                    ? 'bg-accent scale-125 shadow-lg'
+                    : 'bg-jaune-sahel scale-125 shadow-lg shadow-jaune-sahel/50'
                   : 'bg-white/40 hover:bg-white/60'
               }`}
               aria-label={`Aller à la carte ${index + 1}`}
@@ -437,9 +456,13 @@ const Index: React.FC = () => {
           ))}
         </div>
 
-        {/* Boutons secondaires avec glassmorphism amélioré */}
+        {/* Boutons secondaires */}
         <motion.div
-          className="mt-6 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20"
+          className={`mt-6 backdrop-blur-sm rounded-2xl p-4 border ${
+            isInstitutional
+              ? 'bg-card/80 border-border'
+              : 'bg-white/10 border-white/20'
+          }`}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
@@ -447,92 +470,127 @@ const Index: React.FC = () => {
           <div className="flex flex-wrap justify-center gap-3">
             <button
               onClick={() => { triggerTap(); navigate('/cooperative/connexion'); }}
-              className="bg-white/25 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-white/35 active:bg-white/45 transition-all border border-white/30 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+              className={`px-6 py-3 rounded-full font-semibold transition-all flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl ${
+                isInstitutional
+                  ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
+                  : 'bg-white/25 backdrop-blur-sm text-white hover:bg-white/35 active:bg-white/45 border border-white/30'
+              }`}
             >
               <span>🌾</span>
-              <span className="drop-shadow-sm">{t('i_am_cooperative') || 'Coopérative'}</span>
+              <span className={isInstitutional ? '' : 'drop-shadow-sm'}>{t('i_am_cooperative') || 'Coopérative'}</span>
             </button>
             <button
               onClick={() => { triggerTap(); navigate('/producteur/connexion'); }}
-              className="bg-green-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600 active:bg-green-700 transition-all border border-green-500/50 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+              className={`px-6 py-3 rounded-full font-semibold transition-all flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl ${
+                isInstitutional
+                  ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
+                  : 'bg-green-600/90 backdrop-blur-sm text-white hover:bg-green-600 active:bg-green-700 border border-green-500/50'
+              }`}
             >
               <span>🧑‍🌾</span>
-              <span className="drop-shadow-sm">{t('i_am_producer') || 'Producteur'}</span>
+              <span className={isInstitutional ? '' : 'drop-shadow-sm'}>{t('i_am_producer') || 'Producteur'}</span>
             </button>
             <button
               onClick={() => { triggerTap(); navigate('/carte'); }}
-              className="bg-blue-600/90 backdrop-blur-sm text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-600 active:bg-blue-700 transition-all border border-blue-500/50 flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl"
+              className={`px-6 py-3 rounded-full font-semibold transition-all flex items-center gap-2 min-h-[52px] shadow-lg hover:shadow-xl ${
+                isInstitutional
+                  ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
+                  : 'bg-blue-600/90 backdrop-blur-sm text-white hover:bg-blue-600 active:bg-blue-700 border border-blue-500/50'
+              }`}
             >
               <span>🗺️</span>
-              <span className="drop-shadow-sm">{t('view_map') || 'Carte'}</span>
+              <span className={isInstitutional ? '' : 'drop-shadow-sm'}>{t('view_map') || 'Carte'}</span>
             </button>
           </div>
         </motion.div>
 
-        {/* Section "Pourquoi Jùlaba ?" — étymologie bambara */}
+        {/* Section "Pourquoi Jùlaba ?" */}
         <motion.section
-          className="mt-8 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+          className={`mt-8 backdrop-blur-sm rounded-2xl p-6 border ${
+            isInstitutional
+              ? 'bg-card/80 border-border shadow-sm'
+              : 'bg-white/10 border-white/20'
+          }`}
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-            <span className="text-jaune-sahel">✦</span> Pourquoi « Jùlaba » ?
+          <h2 className={`text-lg font-bold mb-5 flex items-center gap-2 ${
+            isInstitutional ? 'text-foreground' : 'text-white'
+          }`}>
+            <span className={isInstitutional ? 'text-accent' : 'text-jaune-sahel'}>✦</span> Pourquoi « Jùlaba » ?
           </h2>
 
           <div className="flex items-center justify-center gap-3 mb-4">
             <motion.div
-              className="bg-orange-sanguine/25 border border-orange-sanguine/40 rounded-xl px-5 py-3 text-center"
+              className={`rounded-xl px-5 py-3 text-center ${
+                isInstitutional
+                  ? 'bg-primary/10 border border-primary/20'
+                  : 'bg-orange-sanguine/25 border border-orange-sanguine/40'
+              }`}
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.4 }}
             >
-              <p className="text-white font-extrabold text-lg">Jùla</p>
-              <p className="text-white/70 text-xs">commerçant</p>
-              <p className="text-white/50 text-xs">marchand</p>
+              <p className={`font-extrabold text-lg ${isInstitutional ? 'text-primary' : 'text-white'}`}>Jùla</p>
+              <p className={`text-xs ${isInstitutional ? 'text-muted-foreground' : 'text-white/70'}`}>commerçant</p>
+              <p className={`text-xs ${isInstitutional ? 'text-muted-foreground/60' : 'text-white/50'}`}>marchand</p>
             </motion.div>
 
-            <span className="text-white/60 text-xl font-light">+</span>
+            <span className={`text-xl font-light ${isInstitutional ? 'text-muted-foreground' : 'text-white/60'}`}>+</span>
 
             <motion.div
-              className="bg-terre-battue/25 border border-terre-battue/40 rounded-xl px-5 py-3 text-center"
+              className={`rounded-xl px-5 py-3 text-center ${
+                isInstitutional
+                  ? 'bg-accent/10 border border-accent/20'
+                  : 'bg-terre-battue/25 border border-terre-battue/40'
+              }`}
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.35, duration: 0.4 }}
             >
-              <p className="text-white font-extrabold text-lg">Ba</p>
-              <p className="text-white/70 text-xs">grand</p>
-              <p className="text-white/50 text-xs">respectable</p>
+              <p className={`font-extrabold text-lg ${isInstitutional ? 'text-accent-foreground' : 'text-white'}`}>Ba</p>
+              <p className={`text-xs ${isInstitutional ? 'text-muted-foreground' : 'text-white/70'}`}>grand</p>
+              <p className={`text-xs ${isInstitutional ? 'text-muted-foreground/60' : 'text-white/50'}`}>respectable</p>
             </motion.div>
           </div>
 
-          <p className="text-center text-white font-bold text-base mb-3">
-            <span className="text-white/60">=</span> « Grand commerçant »
+          <p className={`text-center font-bold text-base mb-3 ${isInstitutional ? 'text-foreground' : 'text-white'}`}>
+            <span className={isInstitutional ? 'text-muted-foreground' : 'text-white/60'}>=</span> « Grand commerçant »
           </p>
 
-          <p className="text-center text-white/80 text-sm leading-relaxed max-w-md mx-auto">
+          <p className={`text-center text-sm leading-relaxed max-w-md mx-auto ${
+            isInstitutional ? 'text-muted-foreground' : 'text-white/80'
+          }`}>
             En bambara, <em>Jùlaba</em> désigne un marchand respecté. Cette plateforme porte ce nom parce que chaque vendeuse, chaque marchand mérite d'être reconnu.
           </p>
 
-          {/* Bande décorative wax */}
-          <div className="mt-5 h-1.5 rounded-full bg-gradient-to-r from-jaune-sahel via-orange-sanguine to-terre-battue opacity-60" />
+          {/* Bande décorative */}
+          <div className={`mt-5 h-1.5 rounded-full opacity-60 ${
+            isInstitutional
+              ? 'bg-gradient-to-r from-primary via-accent to-primary'
+              : 'bg-gradient-to-r from-jaune-sahel via-orange-sanguine to-terre-battue'
+          }`} />
         </motion.section>
 
-        {/* Footer logos institutionnels avec fond dégradé */}
+        {/* Footer logos institutionnels */}
         <motion.footer
           className="mt-10 relative"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          {/* Fond dégradé pour lisibilité */}
-          <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-charbon/50 to-transparent -mx-4 px-4 py-6 rounded-t-3xl" />
+          <div className={`absolute inset-x-0 bottom-0 h-full -mx-4 px-4 py-6 rounded-t-3xl ${
+            isInstitutional
+              ? 'bg-muted/80'
+              : 'bg-gradient-to-t from-charbon/50 to-transparent'
+          }`} />
           
           <div className="relative z-10 text-center py-6">
-            <p className="text-xs font-medium mb-3 text-white">
+            <p className={`text-xs font-medium mb-3 ${isInstitutional ? 'text-muted-foreground' : 'text-white'}`}>
               {t('initiative_by') || 'Une initiative de'}
             </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -545,7 +603,7 @@ const Index: React.FC = () => {
                 />
               ))}
             </div>
-            <p className="mt-3 text-xs text-white/70">
+            <p className={`mt-3 text-xs ${isInstitutional ? 'text-muted-foreground' : 'text-white/70'}`}>
               République de Côte d'Ivoire
             </p>
           </div>
