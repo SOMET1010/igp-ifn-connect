@@ -45,137 +45,243 @@
 */
 
 @layer base {
+  /* ============================================
+     MODE TERRAIN (JÙLABA) — Défaut
+     Palette chaude, inclusive, marchands
+     ============================================ */
   :root {
-    /* Couleurs de base */
-    --background: 45 30% 97%;
-    --foreground: 25 30% 15%;
+    --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+    
+    /* Couleurs de base - Sable chaud */
+    --background: 30 100% 97%;
+    --foreground: 0 0% 18%;
 
-    /* Design ANSUT - Couleurs institutionnelles */
-    --ansut-accent: 36 95% 51%;
-    --ansut-night: 214 70% 9%;
-    --ansut-overlay: 214 50% 5%;
+    /* Design ANSUT - Couleurs institutionnelles (legacy compat) */
+    --ansut-accent: 28 81% 52%;
+    --ansut-night: 234 30% 14%;
+    --ansut-overlay: 234 30% 8%;
     --ansut-glass: 0 0% 100%;
 
     /* === COULEURS PAR RÔLE === */
-    --role-merchant: 28 95% 55%;      /* Orange vif - Marchand */
-    --role-agent: 160 50% 40%;        /* Émeraude - Agent */
-    --role-cooperative: 270 50% 55%;  /* Violet - Coopérative */
-    --role-admin: 214 70% 45%;        /* Bleu ANSUT - Admin */
+    --role-merchant: 28 95% 55%;
+    --role-agent: 160 50% 40%;
+    --role-cooperative: 270 50% 55%;
+    --role-admin: 210 100% 28%;
 
     /* Cartes */
-    --card: 45 40% 99%;
-    --card-foreground: 25 30% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 18%;
 
     /* Popover */
-    --popover: 45 40% 99%;
-    --popover-foreground: 25 30% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 18%;
 
-    /* Orange Africain - Couleur primaire */
-    --primary: 28 95% 55%;
+    /* Orange JÙLABA - Couleur primaire */
+    --primary: 24 100% 45%;
     --primary-foreground: 0 0% 100%;
 
     /* Vert Forêt - Couleur secondaire */
-    --secondary: 145 50% 35%;
+    --secondary: 142 63% 33%;
     --secondary-foreground: 0 0% 100%;
 
     /* Jaune Doré - Accent */
     --accent: 45 90% 55%;
-    --accent-foreground: 25 30% 15%;
+    --accent-foreground: 0 0% 18%;
 
     /* Muted */
-    --muted: 45 20% 92%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 30 10% 92%;
+    --muted-foreground: 0 0% 46%;
 
     /* Destructive */
-    --destructive: 0 75% 50%;
+    --destructive: 0 73% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Bordures et inputs */
-    --border: 25 20% 85%;
-    --input: 25 20% 85%;
-    --ring: 28 95% 55%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 24 100% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* ============================================
-       PNAVIM LEGACY ALIASES (Pour compatibilité CSS existant)
-       NOTE: Utilisez --primary, --secondary directement
-       ============================================ */
+    /* Legacy aliases */
     --orange: var(--primary);
-    --orange-light: 28 95% 70%;
+    --orange-light: 24 100% 70%;
     --green: var(--secondary);
-    --green-light: 145 50% 50%;
+    --green-light: 142 50% 50%;
     --gold: var(--accent);
     --earth: 25 40% 30%;
 
     /* Success et Warning */
-    --success: 145 50% 35%;
+    --success: 142 63% 33%;
     --success-foreground: 0 0% 100%;
-    --warning: 45 90% 55%;
-    --warning-foreground: 25 30% 15%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 18%;
 
     /* Sidebar */
     --sidebar-background: 25 40% 25%;
-    --sidebar-foreground: 45 30% 95%;
-    --sidebar-primary: 28 95% 55%;
+    --sidebar-foreground: 30 30% 95%;
+    --sidebar-primary: 24 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 25 35% 35%;
-    --sidebar-accent-foreground: 45 30% 95%;
+    --sidebar-accent-foreground: 30 30% 95%;
     --sidebar-border: 25 30% 35%;
-    --sidebar-ring: 28 95% 55%;
+    --sidebar-ring: 24 100% 45%;
   }
 
-  .dark {
-    /* Fond institutionnel sombre - sobre et professionnel */
+  /* ============================================
+     MODE INSTITUTIONNEL (ANSUT / GovTech)
+     Palette bleue sobre, professionnelle
+     ============================================ */
+  :root.mode-institutional {
+    --font-body: 'Montserrat', 'Inter', system-ui, sans-serif;
+    
+    /* Fond gris-bleu professionnel */
+    --background: 210 40% 98%;
+    --foreground: 234 30% 14%;
+
+    /* Cartes blanches, ombres légères */
+    --card: 0 0% 100%;
+    --card-foreground: 234 30% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 234 30% 14%;
+
+    /* Bleu ANSUT - Couleur primaire */
+    --primary: 210 100% 28%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Vert validation */
+    --secondary: 142 63% 33%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Orange ANSUT - Accent */
+    --accent: 28 81% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted sobre */
+    --muted: 214 20% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Destructive */
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Bordures subtiles bleutées */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 28%;
+
+    --radius: 0.5rem;
+
+    /* Success et Warning */
+    --success: 142 63% 33%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 234 30% 14%;
+
+    /* Sidebar institutionnelle */
+    --sidebar-background: 210 40% 12%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 210 100% 28%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 30% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 25% 25%;
+    --sidebar-ring: 210 100% 28%;
+  }
+
+  /* ============================================
+     DARK MODE — Terrain (JÙLABA)
+     ============================================ */
+  .dark:not(.mode-institutional) {
     --background: 220 15% 8%;
     --foreground: 0 0% 95%;
 
-    /* Cartes légèrement plus claires */
     --card: 220 15% 12%;
     --card-foreground: 0 0% 95%;
 
     --popover: 220 15% 12%;
     --popover-foreground: 0 0% 95%;
 
-    /* Primary (orange) - accent identique */
-    --primary: 28 95% 55%;
+    --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary (vert) légèrement plus lumineux en sombre */
-    --secondary: 145 45% 45%;
+    --secondary: 142 45% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Accent */
     --accent: 45 85% 50%;
     --accent-foreground: 220 15% 10%;
 
-    /* Muted sobre */
     --muted: 220 10% 18%;
     --muted-foreground: 0 0% 65%;
 
     --destructive: 0 70% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Bordures discrètes */
     --border: 220 10% 20%;
     --input: 220 10% 20%;
-    --ring: 28 95% 55%;
+    --ring: 24 100% 50%;
 
-    /* Success et Warning */
-    --success: 145 45% 45%;
+    --success: 142 45% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 45 85% 50%;
     --warning-foreground: 220 15% 10%;
 
-    /* Sidebar sombre */
     --sidebar-background: 220 15% 6%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 28 95% 55%;
+    --sidebar-primary: 24 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 10% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 220 10% 18%;
-    --sidebar-ring: 28 95% 55%;
+    --sidebar-ring: 24 100% 50%;
+  }
+
+  /* ============================================
+     DARK MODE — Institutionnel (ANSUT)
+     ============================================ */
+  .dark.mode-institutional {
+    --background: 220 20% 7%;
+    --foreground: 0 0% 95%;
+
+    --card: 220 18% 11%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 18% 11%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 210 90% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 142 45% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 28 80% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 220 15% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 210 90% 45%;
+
+    --success: 142 45% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 85% 50%;
+    --warning-foreground: 220 15% 10%;
+
+    --sidebar-background: 220 20% 5%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 210 90% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 210 90% 45%;
   }
 }
 
@@ -186,7 +292,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font-body, 'Nunito', 'Segoe UI', system-ui, sans-serif);
   }
 
   /* Bouton institutionnel sobre */

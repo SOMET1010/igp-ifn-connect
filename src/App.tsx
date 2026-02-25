@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioProvider } from "@/contexts/AudioContext";
+import { DesignModeProvider } from "@/shared/contexts";
 import { AppShell } from "@/app/layouts";
 import { ErrorBoundary } from "@/shared/ui";
 import { NetworkGuard } from "@/app/guards/NetworkGuard";
@@ -91,10 +92,11 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <LanguageProvider>
-          <AuthProvider>
-            <AudioProvider>
-              <TooltipProvider>
+        <DesignModeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <AudioProvider>
+                <TooltipProvider>
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
@@ -158,10 +160,11 @@ const App = () => (
                   {/* Panel debug PRÉ-PROD */}
                   <PreprodDebugPanel />
                 </BrowserRouter>
-              </TooltipProvider>
-            </AudioProvider>
-          </AuthProvider>
-        </LanguageProvider>
+                </TooltipProvider>
+              </AudioProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </DesignModeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </ThemeProvider>
