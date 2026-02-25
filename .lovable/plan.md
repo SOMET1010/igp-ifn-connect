@@ -1,49 +1,46 @@
 
 
-# Section "Pourquoi Jùlaba ?" sur la page d'accueil
+# Fix: Audio superposition dans OnboardingTutorial
 
-## Emplacement
+## Problème identifié
 
-Insertion entre les boutons secondaires (Cooperative/Producteur/Carte, ligne ~470) et le footer institutionnel (ligne ~472). Position naturelle : l'utilisateur a vu les cartes de role, les boutons secondaires, puis decouvre l'identite culturelle avant les logos institutionnels.
+Dans `OnboardingTutorial.tsx`, le bouton "Écouter" vérifie uniquement `isSpeaking` pour décider si on arrête ou on lance l'audio :
 
-## Design
-
-Section glassmorphism coherente avec le reste de la page (`bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20`), avec animation framer-motion en fade-in au scroll.
-
-### Contenu
-
-```text
-┌─────────────────────────────────────────┐
-│  ✦ Pourquoi « Jùlaba » ?               │
-│                                         │
-│  ┌───────────┐    ┌───────────┐         │
-│  │   Jùla    │ +  │    Ba     │         │
-│  │ commerçant│    │   grand   │         │
-│  │  marchand │    │respectable│         │
-│  └───────────┘    └───────────┘         │
-│                                         │
-│  = "Grand commerçant"                   │
-│                                         │
-│  En bambara, Jùlaba designe un          │
-│  marchand respecte. Cette plateforme    │
-│  porte ce nom parce que chaque          │
-│  vendeuse, chaque marchand merite       │
-│  d'etre reconnu.                        │
-│                                         │
-│  ── bande decorative wax ──             │
-└─────────────────────────────────────────┘
+```typescript
+if (isSpeaking) {
+  stop();
+} else {
+  speak(step.audioText); // ← se lance même pendant le chargement
+}
 ```
 
-### Elements visuels
-- Deux "pilules" cote a cote pour `Jùla` et `Ba` avec fond orange/terre cuite semi-transparent
-- Signe `+` entre les deux, `=` en dessous avec le resultat en gras
-- Texte explicatif court (3 lignes max), langage simple et inclusif
-- Petite bande decorative horizontale en gradient wax (jaune → orange → terre) en bas de section
-- Animation stagger : les deux pilules apparaissent l'une apres l'autre
+Quand l'utilisateur clique plusieurs fois pendant le chargement (avant que l'audio ne commence), `isSpeaking` est encore `false` mais `isLoading` est `true`. Chaque clic lance donc un nouvel appel ElevenLabs TTS. Quand les réponses arrivent, tous les audios jouent en même temps → superposition.
 
-### Technique
-- Modification uniquement de `src/pages/Home.tsx` (insertion ~25 lignes de JSX)
-- Utilisation des composants `motion.div` existants
-- Couleurs du design system : `jaune-sahel`, `orange-sanguine`, `terre-battue`
-- Responsive : empile verticalement sur mobile si necessaire (mais les deux pilules restent en ligne)
+## Solution
+
+Deux corrections complémentaires :
+
+### 1. `OnboardingTutorial.tsx` - Vérifier `isLoading` en plus de `isSpeaking`
+
+```typescript
+const { speak, isSpeaking, isLoading, stop } = useTts();
+
+const handlePlayAudio = useCallback(() => {
+  if (isSpeaking || isLoading) {
+    stop();
+  } else {
+    speak(step.audioText);
+  }
+}, [step, speak, isSpeaking, isLoading, stop]);
+```
+
+Et mettre à jour le bouton pour refléter l'état de chargement (spinner ou texte "Chargement...").
+
+### 2. `useTts.ts` - Guard anti-doublon dans `speakWithElevenLabs`
+
+Ajouter un `useRef` qui empêche deux appels concurrents à `generateSpeech`. Si un appel est déjà en cours, le nouveau annule l'ancien avant de continuer. Cela protège contre tous les composants, pas seulement OnboardingTutorial.
+
+### Fichiers modifiés
+- `src/shared/ui/OnboardingTutorial.tsx` (3 lignes changées)
+- `src/shared/hooks/useTts.ts` (ajout guard ref ~5 lignes)
 
