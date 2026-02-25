@@ -83,7 +83,7 @@ export function CMUSectionContent() {
   return (
     <div className="space-y-4">
       {/* Carte CMU */}
-      <div className={`p-4 rounded-xl border-2 ${isValid ? "border-pnavim-secondary bg-pnavim-secondary/5" : "border-destructive/30 bg-destructive/5"}`}>
+      <div className={`p-4 rounded-xl border-2 ${isValid ? "border-julaba-secondary bg-julaba-secondary/5" : "border-destructive/30 bg-destructive/5"}`}>
         <div className="flex items-start justify-between mb-3">
           <div>
             <p className="text-xs text-muted-foreground">Numéro CMU</p>
@@ -93,7 +93,7 @@ export function CMUSectionContent() {
           </div>
           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
             isValid 
-              ? "bg-pnavim-secondary text-white" 
+              ? "bg-julaba-secondary text-white" 
               : "bg-destructive text-white"
           }`}>
             {isValid ? "✓ Actif" : "Expiré"}
@@ -139,12 +139,12 @@ export function CMUSectionContent() {
           {payments.slice(0, 2).map((payment, index) => (
             <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-lg">
               <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-pnavim-secondary" />
+                <Check className="w-4 h-4 text-julaba-secondary" />
                 <span className="text-sm">
                   {new Date(payment.period_start).toLocaleDateString("fr-FR", { month: "short" })}
                 </span>
               </div>
-              <span className="text-sm font-bold text-pnavim-secondary">
+              <span className="text-sm font-bold text-julaba-secondary">
                 {Number(payment.amount).toLocaleString()} F
               </span>
             </div>

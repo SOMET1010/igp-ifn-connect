@@ -1,5 +1,5 @@
 /**
- * Service pour les opérations producteur - PNAVIM
+ * Service pour les opérations producteur - JÙLABA
  */
 
 import { supabase } from '@/integrations/supabase/client';

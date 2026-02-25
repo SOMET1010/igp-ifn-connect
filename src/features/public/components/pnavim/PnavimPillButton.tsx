@@ -58,7 +58,7 @@ const sizeStyles = {
 };
 
 /**
- * Bouton pilule PNAVIM
+ * Bouton pilule JÙLABA
  * Forme arrondie avec dégradé et ombre physique
  * Feedback haptique intégré
  */

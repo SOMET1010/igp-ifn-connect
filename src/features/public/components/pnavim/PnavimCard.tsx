@@ -1,5 +1,5 @@
 // ============================================
-// PNAVIM CARD - COMPOSANT CARTE UNIFIÉ
+// JÙLABA CARD - COMPOSANT CARTE UNIFIÉ
 // ============================================
 // Remplace: GlassCard, SafeCard, cartes génériques
 // RÈGLE: Maximum 3 cartes par écran
@@ -21,10 +21,10 @@ interface PnavimCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles: Record<CardVariant, string> = {
-  default: 'bg-white border border-pnavim-border',
+  default: 'bg-white border border-julaba-border',
   elevated: 'bg-white shadow-lg border-0',
-  outlined: 'bg-transparent border-2 border-pnavim-primary',
-  success: 'bg-pnavim-secondary/10 border border-pnavim-secondary/30',
+  outlined: 'bg-transparent border-2 border-julaba-primary',
+  success: 'bg-julaba-secondary/10 border border-julaba-secondary/30',
   warning: 'bg-amber-50 border border-amber-200',
 };
 
@@ -66,7 +66,7 @@ export const PnavimCard = React.forwardRef<HTMLDivElement, PnavimCardProps>(
         "cursor-pointer",
         "hover:shadow-md",
         "active:scale-[0.99]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pnavim-primary focus-visible:ring-offset-2"
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-julaba-primary focus-visible:ring-offset-2"
       ]
     );
 
@@ -90,18 +90,18 @@ export const PnavimCard = React.forwardRef<HTMLDivElement, PnavimCardProps>(
         {hasHeader && (
           <div className="flex items-start gap-3">
             {icon && (
-              <div className="shrink-0 w-10 h-10 rounded-lg bg-pnavim-primary/10 flex items-center justify-center text-pnavim-primary">
+              <div className="shrink-0 w-10 h-10 rounded-lg bg-julaba-primary/10 flex items-center justify-center text-julaba-primary">
                 {icon}
               </div>
             )}
             <div className="flex-1 min-w-0">
               {title && (
-                <h3 className="text-base font-semibold text-pnavim-foreground truncate">
+                <h3 className="text-base font-semibold text-julaba-foreground truncate">
                   {title}
                 </h3>
               )}
               {subtitle && (
-                <p className="text-sm text-pnavim-muted mt-0.5">
+                <p className="text-sm text-julaba-muted mt-0.5">
                   {subtitle}
                 </p>
               )}

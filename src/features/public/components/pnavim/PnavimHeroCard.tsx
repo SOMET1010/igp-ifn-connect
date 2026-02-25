@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/contexts';
 import { useSensoryFeedback } from '@/shared/hooks';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
-import { VOICE_BY_CONTEXT, PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+import { VOICE_BY_CONTEXT, JULABA_VOICES } from '@/shared/config/voiceConfig';
 
 type AccentColor = 'orange' | 'green' | 'blue';
 
@@ -123,7 +123,7 @@ export const PnavimHeroCard: React.FC<PnavimHeroCardProps> = ({
 
     try {
       // Utiliser la voix ElevenLabs selon le rôle
-      const voiceId = VOICE_BY_CONTEXT[role] || PNAVIM_VOICES.DEFAULT;
+      const voiceId = VOICE_BY_CONTEXT[role] || JULABA_VOICES.DEFAULT;
       const audioBlob = await generateSpeech(audioMessage, { voiceId });
       const audioUrl = URL.createObjectURL(audioBlob);
       audioUrlRef.current = audioUrl;

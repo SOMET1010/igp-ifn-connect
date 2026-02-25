@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Globe } from 'lucide-react';
 
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
-import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES } from '@/shared/config/voiceConfig';
 
 interface LanguageSelectorProps {
   variant?: 'icon' | 'full';
@@ -21,12 +21,12 @@ export function LanguageSelector({ variant = 'icon', className }: LanguageSelect
     setLanguage(code as any);
     setOpen(false);
 
-    // Feedback sonore (voix PNAVIM)
+    // Feedback sonore (voix JÙLABA)
     const lang = languages.find(l => l.code === code);
     if (lang) {
       void (async () => {
         try {
-          const audioBlob = await generateSpeech(lang.nativeName, { voiceId: PNAVIM_VOICES.DEFAULT });
+          const audioBlob = await generateSpeech(lang.nativeName, { voiceId: JULABA_VOICES.DEFAULT });
           const audio = new Audio(URL.createObjectURL(audioBlob));
           await audio.play();
         } catch { /* silent fail */ }

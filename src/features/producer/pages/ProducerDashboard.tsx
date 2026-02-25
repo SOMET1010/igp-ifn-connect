@@ -1,5 +1,5 @@
 /**
- * Dashboard Producteur - PNAVIM
+ * Dashboard Producteur - JÙLABA
  * Refonte Jùlaba Design System
  */
 

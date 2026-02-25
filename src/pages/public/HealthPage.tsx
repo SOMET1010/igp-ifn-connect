@@ -1,5 +1,5 @@
 /**
- * Page /health - Statut système P.NA.VIM
+ * Page /health - Statut système JÙLABA
  * Accessible publiquement pour diagnostic rapide
  */
 
@@ -63,12 +63,12 @@ export default function HealthPage() {
 
     // 3. Vérifier le stockage offline (IndexedDB)
     try {
-      const dbRequest = indexedDB.open('pnavim_test', 1);
+      const dbRequest = indexedDB.open('julaba_test', 1);
       await new Promise<void>((resolve, reject) => {
         dbRequest.onerror = () => reject(new Error('IndexedDB non disponible'));
         dbRequest.onsuccess = () => {
           dbRequest.result.close();
-          indexedDB.deleteDatabase('pnavim_test');
+          indexedDB.deleteDatabase('julaba_test');
           resolve();
         };
       });
@@ -119,7 +119,7 @@ export default function HealthPage() {
     results.push({
       name: 'Version',
       status: 'ok',
-      message: `P.NA.VIM ${version}`,
+      message: `JÙLABA ${version}`,
       icon: <Database className="w-5 h-5" />,
     });
 
@@ -179,7 +179,7 @@ export default function HealthPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">P.NA.VIM</h1>
+          <h1 className="text-3xl font-bold">JÙLABA</h1>
           <p className="text-muted-foreground">Statut du système</p>
           <div className="flex justify-center">
             {overallStatus === 'ok' && (

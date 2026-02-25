@@ -1,5 +1,5 @@
 // ============================================
-// PNAVIM BUTTON - COMPOSANT BOUTON UNIFIÉ
+// JÙLABA BUTTON - COMPOSANT BOUTON UNIFIÉ
 // ============================================
 // Remplace: GiantActionButton, PnavimPillButton, boutons génériques
 // RÈGLE: Maximum 1 bouton primary par écran
@@ -22,11 +22,11 @@ interface PnavimButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-pnavim-primary text-white hover:bg-pnavim-primary/90 shadow-md',
-  secondary: 'bg-pnavim-secondary text-white hover:bg-pnavim-secondary/90 shadow-md',
-  outline: 'border-2 border-pnavim-primary text-pnavim-primary bg-transparent hover:bg-pnavim-primary/10',
-  ghost: 'bg-transparent text-pnavim-foreground hover:bg-black/5',
-  danger: 'bg-pnavim-destructive text-white hover:bg-pnavim-destructive/90',
+  primary: 'bg-julaba-primary text-white hover:bg-julaba-primary/90 shadow-md',
+  secondary: 'bg-julaba-secondary text-white hover:bg-julaba-secondary/90 shadow-md',
+  outline: 'border-2 border-julaba-primary text-julaba-primary bg-transparent hover:bg-julaba-primary/10',
+  ghost: 'bg-transparent text-julaba-foreground hover:bg-black/5',
+  danger: 'bg-julaba-destructive text-white hover:bg-julaba-destructive/90',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -66,7 +66,7 @@ export const PnavimButton = React.forwardRef<HTMLButtonElement, PnavimButtonProp
       // Transition
       "transition-all duration-200",
       // Focus
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pnavim-primary focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-julaba-primary focus-visible:ring-offset-2",
       // Disabled
       "disabled:opacity-50 disabled:pointer-events-none",
       // Active

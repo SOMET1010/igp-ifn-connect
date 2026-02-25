@@ -53,7 +53,7 @@ export function PhotoCapture({ onCapture, label, previewUrl, className }: PhotoC
       />
 
       {preview ? (
-        <div className="relative rounded-2xl overflow-hidden border-2 border-secondary shadow-pnavim-secondary">
+        <div className="relative rounded-2xl overflow-hidden border-2 border-secondary shadow-julaba-secondary">
           <img 
             src={preview} 
             alt="Aperçu" 

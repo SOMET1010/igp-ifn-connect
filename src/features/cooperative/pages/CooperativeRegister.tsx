@@ -196,7 +196,7 @@ const CooperativeRegister: React.FC = () => {
             Retour à la connexion
           </Link>
           <h1 className="text-2xl font-bold">Inscription Coopérative</h1>
-          <p className="text-muted-foreground">Plateforme PNAVIM</p>
+          <p className="text-muted-foreground">Plateforme JÙLABA</p>
         </div>
 
         {/* Progress */}

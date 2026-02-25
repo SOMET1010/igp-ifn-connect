@@ -1,5 +1,5 @@
 /**
- * Page Admin Recherche Cartes - P.NA.VIM
+ * Page Admin Recherche Cartes - JÙLABA
  * Recherche avec support identifiants alphanumériques
  */
 
@@ -74,7 +74,7 @@ export default function AdminCardsSearch() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `pnavim_cartes_${query}_${Date.now()}.csv`;
+    a.download = `julaba_cartes_${query}_${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     

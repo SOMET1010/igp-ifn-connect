@@ -1,5 +1,5 @@
 // ============================================
-// PNAVIM DESIGN SYSTEM - COMPOSANTS UNIFIÉS
+// JÙLABA DESIGN SYSTEM - COMPOSANTS UNIFIÉS
 // Source unique de vérité pour tous les composants UI
 // ============================================
 

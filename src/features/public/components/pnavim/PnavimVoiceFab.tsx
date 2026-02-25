@@ -35,7 +35,7 @@ const iconSizes: Record<string, string> = {
 };
 
 /**
- * Bouton flottant micro PNAVIM (FAB) - Version inclusive
+ * Bouton flottant micro JÙLABA (FAB) - Version inclusive
  * Animation pulse légère (performance Android), label "Parler" visible
  */
 export const PnavimVoiceFab: React.FC<PnavimVoiceFabProps> = ({
