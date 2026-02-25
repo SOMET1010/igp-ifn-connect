@@ -4,7 +4,7 @@ import { useLanguage } from '@/shared/contexts';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { playPrerecordedAudio, stopAudio as stopPrerecordedAudio } from '@/shared/lib';
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
-import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES } from '@/shared/config/voiceConfig';
 import logger from '@/infra/logger';
 
 interface AudioButtonProps {
@@ -22,7 +22,7 @@ export function AudioButton({
   className, 
   size = 'md',
   variant = 'floating',
-  voiceId = PNAVIM_VOICES.DEFAULT,
+  voiceId = JULABA_VOICES.DEFAULT,
 }: AudioButtonProps) {
   const { language, t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,7 +53,7 @@ export function AudioButton({
     setIsPlaying(false);
   }, []);
 
-  // TTS via ElevenLabs (voix custom PNAVIM)
+  // TTS via ElevenLabs (voix custom JÙLABA)
   const speakWithElevenLabs = useCallback(async () => {
     setIsLoading(true);
 
@@ -128,7 +128,7 @@ export function AudioButton({
       setIsLoading(false);
     }
 
-    // Priorité 2: ElevenLabs TTS (voix custom PNAVIM)
+    // Priorité 2: ElevenLabs TTS (voix custom JÙLABA)
     speakWithElevenLabs();
   }, [isPlaying, language, audioKey, stopAudio, speakWithElevenLabs]);
 
@@ -166,7 +166,7 @@ interface PageAudioButtonProps {
   voiceId?: string;
 }
 
-export function PageAudioButton({ pageKey, className, voiceId = PNAVIM_VOICES.DEFAULT }: PageAudioButtonProps) {
+export function PageAudioButton({ pageKey, className, voiceId = JULABA_VOICES.DEFAULT }: PageAudioButtonProps) {
   const { t } = useLanguage();
   const textToRead = t(pageKey);
   

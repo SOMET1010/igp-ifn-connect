@@ -102,9 +102,9 @@ export function VoiceSocialAuth({
     }
   });
 
-  // Hook TTS ElevenLabs avec voix clonée PNAVIM
+  // Hook TTS ElevenLabs avec voix clonée JÙLABA
   const { speak, isSpeaking, stop, isLoading: ttsLoading } = useTts({
-    voiceId: currentPersona.voiceId as import('@/shared/config/voiceConfig').PnavimVoiceId,
+    voiceId: currentPersona.voiceId as import('@/shared/config/voiceConfig').JulabaVoiceId,
     persona,
     onStart: () => {
       if ('vibrate' in navigator) {

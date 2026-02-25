@@ -6,16 +6,16 @@
 // =============================================
 // COMPOSANTS PHASE 1 (Design System unifié)
 // =============================================
-export { PnavimButton } from './PnavimButton';
-export { PnavimCard } from './PnavimCard';
-export { PnavimStat } from './PnavimStat';
+export { PnavimButton, PnavimButton as JulabaButton } from './JulabaButton';
+export { PnavimCard, PnavimCard as JulabaCard } from './JulabaCard';
+export { PnavimStat, PnavimStat as JulabaStat } from './JulabaStat';
 
 // =============================================
-// COMPOSANTS LEGACY (À migrer progressivement)
+// COMPOSANTS (À migrer les noms progressivement)
 // =============================================
-export { PnavimHeroCard } from "./PnavimHeroCard";
-export { PnavimHelpButton } from "./PnavimHelpButton";
-export { PnavimPillButton } from "./PnavimPillButton";
-export { PnavimVoiceFab } from "./PnavimVoiceFab";
-export { PnavimWaxCurve } from "./PnavimWaxCurve";
-export { PnavimInstitutionalHeader } from "./PnavimInstitutionalHeader";
+export { PnavimHeroCard, PnavimHeroCard as JulabaHeroCard } from "./JulabaHeroCard";
+export { PnavimHelpButton, PnavimHelpButton as JulabaHelpButton } from "./JulabaHelpButton";
+export { PnavimPillButton, PnavimPillButton as JulabaPillButton } from "./JulabaPillButton";
+export { PnavimVoiceFab, PnavimVoiceFab as JulabaVoiceFab } from "./JulabaVoiceFab";
+export { PnavimWaxCurve, PnavimWaxCurve as JulabaWaxCurve } from "./JulabaWaxCurve";
+export { PnavimInstitutionalHeader, PnavimInstitutionalHeader as JulabaInstitutionalHeader } from "./JulabaInstitutionalHeader";

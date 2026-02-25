@@ -43,7 +43,7 @@ export function HumanFallback({
 
   // Hook TTS ElevenLabs avec voix clonée
   const { speak, isSpeaking } = useTts({
-    voiceId: voiceId as import('@/shared/config/voiceConfig').PnavimVoiceId,
+    voiceId: voiceId as import('@/shared/config/voiceConfig').JulabaVoiceId,
     onStart: () => {
       if ('vibrate' in navigator) {
         navigator.vibrate(30);

@@ -25,7 +25,7 @@ import {
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
 } from '@/shared/lib';
-import { PnavimInstitutionalHeader, PnavimPillButton, PnavimWaxCurve } from '@/features/public/components/pnavim';
+import { JulabaInstitutionalHeader, JulabaPillButton, JulabaWaxCurve } from '@/features/public/components/pnavim';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -347,7 +347,7 @@ const AuthPage: React.FC = () => {
       />
 
       {/* Header institutionnel */}
-      <PnavimInstitutionalHeader
+      <JulabaInstitutionalHeader
         showAccessibility={false}
         showAudioToggle={false}
         showLanguageSelector={true}
@@ -559,14 +559,14 @@ const AuthPage: React.FC = () => {
             transition={{ delay: 0.4 }}
           >
             {Object.entries(ROLE_CONFIGS).map(([role, cfg]) => (
-              <PnavimPillButton
+              <JulabaPillButton
                 key={role}
                 variant={roleParam === role ? 'primary' : 'secondary'}
                 size="sm"
                 onClick={() => navigate(`/auth?role=${role}`)}
               >
                 {cfg.emoji} {cfg.title}
-              </PnavimPillButton>
+              </JulabaPillButton>
             ))}
           </motion.div>
 
@@ -583,7 +583,7 @@ const AuthPage: React.FC = () => {
       </main>
 
       {/* Courbe décorative Wax */}
-      <PnavimWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
+      <JulabaWaxCurve className="fixed bottom-0 left-0 right-0 z-0" />
     </JulabaPageLayout>
   );
 };
