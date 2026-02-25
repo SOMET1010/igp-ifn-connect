@@ -25,7 +25,7 @@ import {
   emailSchema, passwordSchema, phoneSchema, fullNameSchema, 
   getValidationError 
 } from '@/shared/lib';
-import { JulabaInstitutionalHeader, JulabaPillButton, JulabaWaxCurve } from '@/features/public/components/pnavim';
+import { JulabaInstitutionalHeader, JulabaPillButton, JulabaWaxCurve } from '@/features/public/components/julaba';
 import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];

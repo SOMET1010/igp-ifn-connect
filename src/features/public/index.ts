@@ -10,7 +10,7 @@ export * from './components/map';
 export * from './components/market';
 
 // Composants JÙLABA Design System
-export * from './components/pnavim';
+export * from './components/julaba';
 
 // Export PDF
 export { ExportCooperativesPDF } from './components/ExportCooperativesPDF';
