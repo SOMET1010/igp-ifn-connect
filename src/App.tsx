@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AudioProvider } from "@/contexts/AudioContext";
-import { DesignModeProvider } from "@/shared/contexts";
+import { DesignModeProvider, RouteDesignModeSync } from "@/shared/contexts";
 import { AppShell } from "@/app/layouts";
 import { ErrorBoundary } from "@/shared/ui";
 import { NetworkGuard } from "@/app/guards/NetworkGuard";
@@ -100,6 +100,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <RouteDesignModeSync />
                   <NetworkGuard>
                     <AppShell>
                       <Suspense fallback={<LazyLoadingFallback />}>
