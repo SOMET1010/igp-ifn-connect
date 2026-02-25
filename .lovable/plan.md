@@ -1,19 +1,30 @@
 
 
-# Debounce visuel sur le bouton Écouter
+# Ce que représentent les cercles entourés
 
-## Modification
+Les éléments cerclés dans le header sont les **boutons de sélection de langue**. Ils affichent les 3 premières langues définies dans le système :
 
-Fichier : `src/shared/ui/OnboardingTutorial.tsx`
+1. 🇫🇷 — Français
+2. 🟡 — Dioula (Julakan)
+3. Le cercle vert — probablement Baoulé ou Bété
 
-Ajouter un état `debounced` avec `useState(false)` et un `useRef` pour le timer. Dans `handlePlayAudio`, activer `debounced = true` pendant 500ms après chaque clic. Le bouton reçoit `disabled={debounced}` pour bloquer les clics rapides.
+Le problème : ces symboles (emoji cercles colorés) ne sont **pas du tout explicites** pour l'utilisateur. Un cercle jaune et un cercle vert ne communiquent pas "changer de langue".
 
-### Changements concrets
+## Amélioration proposée
 
-1. Ajouter `const [debounced, setDebounced] = useState(false)` et `const debounceRef = useRef<NodeJS.Timeout>()` (ligne ~62)
-2. Dans `handlePlayAudio` : activer le debounce après l'action, clear le timer précédent
-3. Cleanup du timer dans un `useEffect` return
-4. Ajouter `disabled={debounced}` + style `opacity-50 pointer-events-none` sur le bouton audio
+Remplacer les symboles emoji génériques par des labels textuels courts plus compréhensibles dans le header compact :
 
-Un seul fichier modifié, ~10 lignes ajoutées.
+| Actuel | Proposé |
+|--------|---------|
+| 🟡 | **DJ** (Dioula) |
+| cercle vert | **BA** (Baoulé) |
+
+Ou bien ajouter un **tooltip/label** sous chaque bouton, ou utiliser le format `LanguageToggle` (variante pill) qui affiche le nom natif dans un dropdown — plus clair pour les utilisateurs peu lettrés.
+
+### Fichiers concernés
+- `src/shared/lib/translations.ts` — modifier les `symbol` pour utiliser des abréviations ou drapeaux plus parlants
+- `src/features/public/components/julaba/JulabaInstitutionalHeader.tsx` — optionnel : ajouter un label textuel à côté des boutons
+
+### Détail technique
+Le tableau `LANGUAGES` dans `translations.ts` définit le `symbol` de chaque langue. Actuellement Dioula utilise `'🟡'` et les autres langues ivoiriennes utilisent probablement `'🇨🇮'` ou des cercles colorés. On remplacerait par des abréviations 2 lettres (DJ, BA, BT, SE) qui restent lisibles à petite taille dans le header.
 
