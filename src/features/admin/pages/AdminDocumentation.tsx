@@ -27,7 +27,7 @@ const AdminDocumentation: React.FC = () => {
                 Documentation PDF
               </h1>
               <p className="text-sm text-muted-foreground">
-                Générez la documentation complète de PNAVIM-CI
+                Générez la documentation complète de JÙLABA
               </p>
             </div>
           </div>

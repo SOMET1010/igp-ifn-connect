@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const ONBOARDING_KEY = 'pnavim_onboarding_complete';
+const ONBOARDING_KEY = 'julaba_onboarding_complete';
 
 export function useOnboarding() {
   const [needsOnboarding, setNeedsOnboarding] = useState(false);

@@ -18,9 +18,9 @@ import {
 import { useLanguage } from '@/shared/contexts';
 import { useSensoryFeedback, useTimeOfDay } from '@/shared/hooks';
 
-// TTS (voix PNAVIM uniquement)
+// TTS (voix JÙLABA uniquement)
 import { generateSpeech } from '@/shared/services/tts/elevenlabsTts';
-import { PNAVIM_VOICES } from '@/shared/config/voiceConfig';
+import { JULABA_VOICES } from '@/shared/config/voiceConfig';
 
 // Assets
 import logoDGE from '@/assets/logo-dge.png';
@@ -38,7 +38,7 @@ const PARTNERS: InstitutionalPartner[] = [
   { id: 'ansut', name: 'ANSUT', logo: logoANSUT },
 ];
 
-// Scripts audio PNAVIM chaleureux (français ivoirien simple)
+// Scripts audio JÙLABA chaleureux (français ivoirien simple)
 // {day} et {period} seront remplacés dynamiquement
 const AUDIO_SCRIPTS = {
   welcome: {
@@ -103,7 +103,7 @@ const Index: React.FC = () => {
   }, []);
 
   const playTtsAudio = useCallback(
-    async (text: string, voiceId: string = PNAVIM_VOICES.DEFAULT) => {
+    async (text: string, voiceId: string = JULABA_VOICES.DEFAULT) => {
       if (!text || text.trim().length === 0) return;
 
       stopTtsAudio();
@@ -147,7 +147,7 @@ const Index: React.FC = () => {
   // Check for tutorial visibility on mount
   useEffect(() => {
     try {
-      const hasSeenTutorial = localStorage.getItem('pnavim-tutorial-seen');
+      const hasSeenTutorial = localStorage.getItem('julaba-tutorial-seen');
       if (!hasSeenTutorial) {
         const timer = setTimeout(() => setShowTutorial(true), 1500);
         return () => clearTimeout(timer);
@@ -180,7 +180,7 @@ const Index: React.FC = () => {
   // Handlers
   const handleTutorialComplete = useCallback(() => {
     try {
-      localStorage.setItem('pnavim-tutorial-seen', 'true');
+      localStorage.setItem('julaba-tutorial-seen', 'true');
     } catch (error) {
       console.warn('LocalStorage write failed:', error);
     }
@@ -226,7 +226,7 @@ const Index: React.FC = () => {
     });
   }, [stopTtsAudio, triggerTap]);
 
-  // Script audio complet PNAVIM avec contexte dynamique
+  // Script audio complet JÙLABA avec contexte dynamique
   const playWelcomeAudio = useCallback(() => {
     if (!audioEnabled) return;
     triggerTap();
@@ -239,18 +239,18 @@ const Index: React.FC = () => {
       .replace(/{day}/g, dayName)
       .replace(/{period}/g, periodName);
 
-    void playTtsAudio(message, PNAVIM_VOICES.DEFAULT);
+    void playTtsAudio(message, JULABA_VOICES.DEFAULT);
   }, [audioEnabled, language, playTtsAudio, triggerTap, dayName, periodName]);
 
   // Handler FAB Micro -> navigation vers social-login
   const handleMicClick = useCallback(() => {
     triggerTap();
 
-    // Jouer le script audio micro (voix PNAVIM)
+    // Jouer le script audio micro (voix JÙLABA)
     if (audioEnabled) {
       const langKey = language === 'dioula' ? 'dioula' : 'fr';
       const message = AUDIO_SCRIPTS.micro[langKey];
-      void playTtsAudio(message, PNAVIM_VOICES.DEFAULT);
+      void playTtsAudio(message, JULABA_VOICES.DEFAULT);
     }
 
     // Navigation vers auth vocale

@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { PNAVIM_HSL } from "./src/styles/design-tokens";
+import { JULABA_HSL } from "./src/styles/design-tokens";
 
 export default {
   darkMode: ["class"],
@@ -16,18 +16,30 @@ export default {
     extend: {
       colors: {
         // ============================================
-        // PNAVIM DESIGN SYSTEM (Source unique)
+        // JÙLABA DESIGN SYSTEM (Source unique)
         // ============================================
+        julaba: {
+          primary: `hsl(${JULABA_HSL.primary})`,
+          secondary: `hsl(${JULABA_HSL.secondary})`,
+          background: `hsl(${JULABA_HSL.background})`,
+          surface: `hsl(${JULABA_HSL.surface})`,
+          foreground: `hsl(${JULABA_HSL.foreground})`,
+          muted: `hsl(${JULABA_HSL.muted})`,
+          destructive: `hsl(${JULABA_HSL.destructive})`,
+          warning: `hsl(${JULABA_HSL.warning})`,
+          border: `hsl(${JULABA_HSL.border})`,
+        },
+        // Legacy alias (compatibilité temporaire)
         pnavim: {
-          primary: `hsl(${PNAVIM_HSL.primary})`,
-          secondary: `hsl(${PNAVIM_HSL.secondary})`,
-          background: `hsl(${PNAVIM_HSL.background})`,
-          surface: `hsl(${PNAVIM_HSL.surface})`,
-          foreground: `hsl(${PNAVIM_HSL.foreground})`,
-          muted: `hsl(${PNAVIM_HSL.muted})`,
-          destructive: `hsl(${PNAVIM_HSL.destructive})`,
-          warning: `hsl(${PNAVIM_HSL.warning})`,
-          border: `hsl(${PNAVIM_HSL.border})`,
+          primary: `hsl(${JULABA_HSL.primary})`,
+          secondary: `hsl(${JULABA_HSL.secondary})`,
+          background: `hsl(${JULABA_HSL.background})`,
+          surface: `hsl(${JULABA_HSL.surface})`,
+          foreground: `hsl(${JULABA_HSL.foreground})`,
+          muted: `hsl(${JULABA_HSL.muted})`,
+          destructive: `hsl(${JULABA_HSL.destructive})`,
+          warning: `hsl(${JULABA_HSL.warning})`,
+          border: `hsl(${JULABA_HSL.border})`,
         },
         
         // ============================================
@@ -199,13 +211,20 @@ export default {
       },
       boxShadow: {
         // ============================================
-        // PNAVIM SHADOWS (Source unique)
+        // JÙLABA SHADOWS (Source unique)
         // ============================================
+        "julaba-primary": "0 10px 40px -10px hsl(var(--primary) / 0.3)",
+        "julaba-secondary": "0 10px 40px -10px hsl(var(--secondary) / 0.3)",
+        "julaba-warning": "0 10px 40px -10px hsl(var(--warning) / 0.3)",
+        "julaba-muted": "0 20px 40px -15px hsl(var(--muted-foreground) / 0.2)",
+        // Legacy aliases
         "pnavim-primary": "0 10px 40px -10px hsl(var(--primary) / 0.3)",
         "pnavim-secondary": "0 10px 40px -10px hsl(var(--secondary) / 0.3)",
         "pnavim-warning": "0 10px 40px -10px hsl(var(--warning) / 0.3)",
         "pnavim-muted": "0 20px 40px -15px hsl(var(--muted-foreground) / 0.2)",
         // XL variants
+        "julaba-xl-primary": "0 20px 60px -15px hsl(var(--primary) / 0.4)",
+        "julaba-xl-secondary": "0 20px 60px -15px hsl(var(--secondary) / 0.4)",
         "pnavim-xl-primary": "0 20px 60px -15px hsl(var(--primary) / 0.4)",
         "pnavim-xl-secondary": "0 20px 60px -15px hsl(var(--secondary) / 0.4)",
         // Effets GLOW avec halo lumineux
@@ -214,7 +233,7 @@ export default {
         "glow-warning": "0 0 25px hsl(var(--warning) / 0.5), 0 0 50px hsl(var(--warning) / 0.3), 0 10px 30px -10px hsl(var(--warning) / 0.4)",
         "glow-muted": "0 0 20px hsl(var(--muted-foreground) / 0.25), 0 0 40px hsl(var(--muted-foreground) / 0.15)",
         "glow-destructive": "0 0 15px hsl(var(--destructive) / 0.6), 0 0 30px hsl(var(--destructive) / 0.4), 0 0 45px hsl(var(--destructive) / 0.2)",
-        // Legacy aliases (pour compatibilité temporaire)
+        // Legacy aliases
         "africa": "0 10px 40px -10px hsl(var(--primary) / 0.3)",
         "forest": "0 10px 40px -10px hsl(var(--secondary) / 0.3)",
       },

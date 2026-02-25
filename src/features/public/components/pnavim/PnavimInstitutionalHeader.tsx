@@ -84,18 +84,18 @@ export const PnavimInstitutionalHeader: React.FC<PnavimInstitutionalHeaderProps>
             
             {/* Left: Branding */}
             <Link to="/" className="flex items-center gap-2 group">
-              {/* Logo P */}
+              {/* Logo J */}
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-sanguine to-terre-battue flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                <span className="text-white font-bold text-lg">P</span>
+                <span className="text-white font-bold text-lg">J</span>
               </div>
               
               {/* Title */}
               <div className="flex flex-col">
                 <span className="text-sm sm:text-base font-extrabold text-vert-manioc leading-none">
-                  PNAVIM-CI
+                  JÙLABA
                 </span>
                 <span className="text-[10px] sm:text-xs text-muted-foreground leading-tight hidden sm:block">
-                  Plateforme Nationale des Acteurs du Vivrier
+                  Ton djè est bien géré · par ICONE
                 </span>
               </div>
             </Link>

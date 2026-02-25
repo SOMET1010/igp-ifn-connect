@@ -39,10 +39,10 @@ export const InstitutionalHeader: React.FC<InstitutionalHeaderProps> = ({
           {/* Titre central */}
           <div className="text-center flex-1">
             <h1 className="font-semibold text-sm text-foreground">
-              PNAVIM-CI – {subtitle}
+              JÙLABA – {subtitle}
             </h1>
             <p className="text-xs text-muted-foreground">
-              Plateforme Nationale des Acteurs du Vivrier Marchand
+              Ton djè est bien géré · par ICONE
             </p>
           </div>
           

@@ -194,7 +194,7 @@ export default function MerchantVoiceRegister() {
         <div className="flex items-center gap-3">
           <img src={logoDge} alt="DGE" className="h-10 md:h-12 object-contain" />
           <div className="flex flex-col">
-            <span className="text-sm md:text-base font-bold text-foreground">PNAVIM-CI</span>
+            <span className="text-sm md:text-base font-bold text-foreground">JÙLABA</span>
             <span className="text-[10px] md:text-xs text-muted-foreground">Inscription Vocale</span>
           </div>
         </div>
