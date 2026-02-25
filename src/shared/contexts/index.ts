@@ -13,4 +13,4 @@ export { LanguageProvider, useLanguage } from './LanguageContext';
 export { AudioProvider, useAudioContext } from './AudioContext';
 
 // Design Mode Context (Dual mode: Institutional / Terrain)
-export { DesignModeProvider, useDesignMode } from './DesignModeContext';
+export { DesignModeProvider, useDesignMode, RouteDesignModeSync } from './DesignModeContext';

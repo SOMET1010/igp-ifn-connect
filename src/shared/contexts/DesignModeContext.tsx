@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { DesignMode } from '@/styles/design-tokens';
 
 interface DesignModeContextType {
@@ -13,7 +14,7 @@ const DesignModeContext = createContext<DesignModeContextType | undefined>(undef
 const STORAGE_KEY = 'julaba-design-mode';
 
 /** Routes qui forcent le mode institutionnel */
-const INSTITUTIONAL_ROUTES = ['/', '/admin', '/presentation'];
+const INSTITUTIONAL_ROUTES = ['/admin', '/presentation'];
 
 interface DesignModeProviderProps {
   children: ReactNode;
@@ -27,7 +28,7 @@ export function DesignModeProvider({ children, defaultMode }: DesignModeProvider
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'institutional' || stored === 'terrain') return stored;
     }
-    return 'terrain'; // Défaut = mode terrain (marchands)
+    return 'terrain';
   });
 
   const setMode = useCallback((newMode: DesignMode) => {
@@ -41,7 +42,6 @@ export function DesignModeProvider({ children, defaultMode }: DesignModeProvider
     root.classList.remove('mode-institutional', 'mode-terrain');
     root.classList.add(`mode-${mode}`);
     
-    // Changer la font-family selon le mode
     if (mode === 'institutional') {
       root.style.setProperty('--font-body', "'Montserrat', 'Inter', system-ui, sans-serif");
     } else {
@@ -61,6 +61,21 @@ export function DesignModeProvider({ children, defaultMode }: DesignModeProvider
       {children}
     </DesignModeContext.Provider>
   );
+}
+
+/** Place this component inside BrowserRouter to auto-switch mode based on route */
+export function RouteDesignModeSync() {
+  const location = useLocation();
+  const { setMode } = useDesignMode();
+
+  useEffect(() => {
+    const isInstitutionalRoute = INSTITUTIONAL_ROUTES.some(
+      (route) => location.pathname === route || location.pathname.startsWith(route + '/')
+    );
+    setMode(isInstitutionalRoute ? 'institutional' : 'terrain');
+  }, [location.pathname, setMode]);
+
+  return null;
 }
 
 export function useDesignMode() {
