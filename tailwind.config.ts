@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { JULABA_HSL } from "./src/styles/design-tokens";
+import { JULABA_HSL, ANSUT_HSL } from "./src/styles/design-tokens";
 
 export default {
   darkMode: ["class"],
@@ -28,6 +28,16 @@ export default {
           destructive: `hsl(${JULABA_HSL.destructive})`,
           warning: `hsl(${JULABA_HSL.warning})`,
           border: `hsl(${JULABA_HSL.border})`,
+        },
+        ansut: {
+          primary: `hsl(${ANSUT_HSL.primary})`,
+          accent: `hsl(${ANSUT_HSL.accent})`,
+          secondary: `hsl(${ANSUT_HSL.secondary})`,
+          background: `hsl(${ANSUT_HSL.background})`,
+          surface: `hsl(${ANSUT_HSL.surface})`,
+          foreground: `hsl(${ANSUT_HSL.foreground})`,
+          muted: `hsl(${ANSUT_HSL.muted})`,
+          border: `hsl(${ANSUT_HSL.border})`,
         },
         // Legacy alias (compatibilité temporaire)
         pnavim: {
@@ -108,6 +118,7 @@ export default {
       },
       fontFamily: {
         nunito: ['Nunito', 'sans-serif'],
+        montserrat: ['Montserrat', 'Inter', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
       fontSize: {
