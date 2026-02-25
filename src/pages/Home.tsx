@@ -469,6 +469,58 @@ const Index: React.FC = () => {
           </div>
         </motion.div>
 
+        {/* Section "Pourquoi Jùlaba ?" — étymologie bambara */}
+        <motion.section
+          className="mt-8 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+            <span className="text-jaune-sahel">✦</span> Pourquoi « Jùlaba » ?
+          </h2>
+
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <motion.div
+              className="bg-orange-sanguine/25 border border-orange-sanguine/40 rounded-xl px-5 py-3 text-center"
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <p className="text-white font-extrabold text-lg">Jùla</p>
+              <p className="text-white/70 text-xs">commerçant</p>
+              <p className="text-white/50 text-xs">marchand</p>
+            </motion.div>
+
+            <span className="text-white/60 text-xl font-light">+</span>
+
+            <motion.div
+              className="bg-terre-battue/25 border border-terre-battue/40 rounded-xl px-5 py-3 text-center"
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.35, duration: 0.4 }}
+            >
+              <p className="text-white font-extrabold text-lg">Ba</p>
+              <p className="text-white/70 text-xs">grand</p>
+              <p className="text-white/50 text-xs">respectable</p>
+            </motion.div>
+          </div>
+
+          <p className="text-center text-white font-bold text-base mb-3">
+            <span className="text-white/60">=</span> « Grand commerçant »
+          </p>
+
+          <p className="text-center text-white/80 text-sm leading-relaxed max-w-md mx-auto">
+            En bambara, <em>Jùlaba</em> désigne un marchand respecté. Cette plateforme porte ce nom parce que chaque vendeuse, chaque marchand mérite d'être reconnu.
+          </p>
+
+          {/* Bande décorative wax */}
+          <div className="mt-5 h-1.5 rounded-full bg-gradient-to-r from-jaune-sahel via-orange-sanguine to-terre-battue opacity-60" />
+        </motion.section>
+
         {/* Footer logos institutionnels avec fond dégradé */}
         <motion.footer
           className="mt-10 relative"
