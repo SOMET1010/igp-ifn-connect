@@ -1,46 +1,19 @@
 
 
-# Fix: Audio superposition dans OnboardingTutorial
+# Debounce visuel sur le bouton Écouter
 
-## Problème identifié
+## Modification
 
-Dans `OnboardingTutorial.tsx`, le bouton "Écouter" vérifie uniquement `isSpeaking` pour décider si on arrête ou on lance l'audio :
+Fichier : `src/shared/ui/OnboardingTutorial.tsx`
 
-```typescript
-if (isSpeaking) {
-  stop();
-} else {
-  speak(step.audioText); // ← se lance même pendant le chargement
-}
-```
+Ajouter un état `debounced` avec `useState(false)` et un `useRef` pour le timer. Dans `handlePlayAudio`, activer `debounced = true` pendant 500ms après chaque clic. Le bouton reçoit `disabled={debounced}` pour bloquer les clics rapides.
 
-Quand l'utilisateur clique plusieurs fois pendant le chargement (avant que l'audio ne commence), `isSpeaking` est encore `false` mais `isLoading` est `true`. Chaque clic lance donc un nouvel appel ElevenLabs TTS. Quand les réponses arrivent, tous les audios jouent en même temps → superposition.
+### Changements concrets
 
-## Solution
+1. Ajouter `const [debounced, setDebounced] = useState(false)` et `const debounceRef = useRef<NodeJS.Timeout>()` (ligne ~62)
+2. Dans `handlePlayAudio` : activer le debounce après l'action, clear le timer précédent
+3. Cleanup du timer dans un `useEffect` return
+4. Ajouter `disabled={debounced}` + style `opacity-50 pointer-events-none` sur le bouton audio
 
-Deux corrections complémentaires :
-
-### 1. `OnboardingTutorial.tsx` - Vérifier `isLoading` en plus de `isSpeaking`
-
-```typescript
-const { speak, isSpeaking, isLoading, stop } = useTts();
-
-const handlePlayAudio = useCallback(() => {
-  if (isSpeaking || isLoading) {
-    stop();
-  } else {
-    speak(step.audioText);
-  }
-}, [step, speak, isSpeaking, isLoading, stop]);
-```
-
-Et mettre à jour le bouton pour refléter l'état de chargement (spinner ou texte "Chargement...").
-
-### 2. `useTts.ts` - Guard anti-doublon dans `speakWithElevenLabs`
-
-Ajouter un `useRef` qui empêche deux appels concurrents à `generateSpeech`. Si un appel est déjà en cours, le nouveau annule l'ancien avant de continuer. Cela protège contre tous les composants, pas seulement OnboardingTutorial.
-
-### Fichiers modifiés
-- `src/shared/ui/OnboardingTutorial.tsx` (3 lignes changées)
-- `src/shared/hooks/useTts.ts` (ajout guard ref ~5 lignes)
+Un seul fichier modifié, ~10 lignes ajoutées.
 
