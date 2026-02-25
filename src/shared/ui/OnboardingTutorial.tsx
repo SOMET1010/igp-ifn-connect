@@ -1,4 +1,4 @@
-import React, { useState, useCallback, forwardRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, ChevronLeft, Volume2, Shield, HelpCircle, Mic, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,17 +60,25 @@ interface OnboardingTutorialProps {
 export const OnboardingTutorial = forwardRef<HTMLDivElement, OnboardingTutorialProps>(
   function OnboardingTutorial({ isOpen, onClose, onComplete }, ref) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [debounced, setDebounced] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout>();
   const { speak, isSpeaking, isLoading, stop } = useTts();
+
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   const step = TUTORIAL_STEPS[currentStep];
 
   const handlePlayAudio = useCallback(() => {
+    if (debounced) return;
     if (isSpeaking || isLoading) {
       stop();
     } else {
       speak(step.audioText);
     }
-  }, [step, speak, isSpeaking, isLoading, stop]);
+    setDebounced(true);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebounced(false), 500);
+  }, [step, speak, isSpeaking, isLoading, stop, debounced]);
 
   const handleNext = useCallback(() => {
     stop();
@@ -162,8 +170,11 @@ export const OnboardingTutorial = forwardRef<HTMLDivElement, OnboardingTutorialP
               {/* Audio Button */}
               <button
                 onClick={handlePlayAudio}
+                disabled={debounced}
                 className={`mx-auto flex items-center gap-3 px-6 py-3 rounded-full transition-all ${
-                  isSpeaking
+                  debounced
+                    ? 'opacity-50 pointer-events-none'
+                    : isSpeaking
                     ? 'bg-secondary text-secondary-foreground animate-pulse'
                     : isLoading
                     ? 'bg-muted text-muted-foreground cursor-wait'
