@@ -25,7 +25,7 @@ interface VoiceSocialAuthProps {
 type MicState = 'idle' | 'listening' | 'processing';
 
 /**
- * VoiceSocialAuth - Composant principal d'Authentification Sociale PNAVIM
+ * VoiceSocialAuth - Composant principal d'Authentification Sociale JÙLABA
  * Design inspiré des maquettes avec style africain
  */
 export function VoiceSocialAuth({ 
@@ -245,7 +245,7 @@ export function VoiceSocialAuth({
             Le numéro {phone} n'est pas encore enregistré.
           </p>
           <p className="text-sm text-muted-foreground">
-            Contacte un agent PNAVIM pour t'inscrire.
+            Contacte un agent JÙLABA pour t'inscrire.
           </p>
         </div>
 
@@ -306,14 +306,14 @@ export function VoiceSocialAuth({
   
   const colors = roleColors[userType];
 
-  // Main auth view - PNAVIM Style
+  // Main auth view - JÙLABA Style
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn("flex flex-col items-center gap-4", className)}
     >
-      {/* Card principale avec style PNAVIM - couleur dynamique par rôle */}
+      {/* Card principale avec style JÙLABA - couleur dynamique par rôle */}
       <div className={cn("w-full max-w-sm bg-gradient-to-br rounded-3xl p-6 shadow-xl", colors.from, colors.to)}>
         {/* Badge type d'accès */}
         <div className="flex justify-center mb-4">

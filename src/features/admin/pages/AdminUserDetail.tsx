@@ -43,11 +43,11 @@ const roleConfig: Record<AppRole, { label: string; color: string }> = {
   merchant: { label: 'Marchand', color: 'bg-orange-500' },
   cooperative: { label: 'Coopérative', color: 'bg-green-500' },
   producer: { label: 'Producteur', color: 'bg-emerald-500' },
-  client: { label: 'Client', color: 'bg-gray-500' }, // Deprecated - hors périmètre PNAVIM
+  client: { label: 'Client', color: 'bg-gray-500' }, // Deprecated - hors périmètre JÙLABA
   user: { label: 'Utilisateur', color: 'bg-gray-500' },
 };
 
-// Rôles disponibles dans le périmètre PNAVIM (sans client)
+// Rôles disponibles dans le périmètre JÙLABA (sans client)
 const allRoles: AppRole[] = ['admin', 'agent', 'merchant', 'cooperative', 'producer', 'user'];
 
 const AdminUserDetail = () => {

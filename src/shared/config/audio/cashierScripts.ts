@@ -2,7 +2,7 @@
  * CASHIER - Action immédiate
  * Rôle : Encaissement uniquement
  * 
- * RÈGLE PNAVIM : Une seule voix active par écran
+ * RÈGLE JÙLABA : Une seule voix active par écran
  * CASHIER parle uniquement sur l'écran d'encaissement
  * Ton : Rapide, direct, sans discussion
  */

@@ -1,5 +1,5 @@
 /**
- * Module Producteur - PNAVIM
+ * Module Producteur - JÙLABA
  * Export centralisé
  */
 

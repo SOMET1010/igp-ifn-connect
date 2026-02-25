@@ -44,7 +44,7 @@ const ERROR_COLORS: Record<ErrorType, string> = {
 };
 
 /**
- * Codes d'erreur standardisés PNAVIM
+ * Codes d'erreur standardisés JÙLABA
  * AUTH-01: Micro refusé
  * AUTH-02: Réseau indisponible
  * AUTH-03: Timeout API (>12s)

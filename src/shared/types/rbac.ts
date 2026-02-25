@@ -66,7 +66,7 @@ export const ROLE_PAGES = {
     'users',
     'kyc',
   ],
-  client: [], // Deprecated - hors périmètre PNAVIM
+  client: [], // Deprecated - hors périmètre JÙLABA
   user: [
     'profile',
   ],
@@ -111,7 +111,7 @@ export const ROLE_ACTIONS = {
     'manage_profile',
   ],
   admin: ['*'], // Toutes les actions
-  client: [], // Deprecated - hors périmètre PNAVIM
+  client: [], // Deprecated - hors périmètre JÙLABA
   user: ['view_profile'], // Rôle de base
 } as const satisfies Record<AppRole, readonly string[]>;
 
@@ -150,7 +150,7 @@ export const ROLE_PERMISSIONS = {
   client: {
     pages: [],
     actions: [],
-    redirectTo: '/', // Deprecated - hors périmètre PNAVIM
+    redirectTo: '/', // Deprecated - hors périmètre JÙLABA
     basePath: '/',
   },
   user: {
@@ -201,7 +201,7 @@ export const ROLE_PRIORITY: Record<AppRole, number> = {
   cooperative: 3,
   producer: 3,
   merchant: 2,
-  client: 1, // Deprecated - hors périmètre PNAVIM
+  client: 1, // Deprecated - hors périmètre JÙLABA
   user: 1,
 };
 

@@ -86,7 +86,7 @@ const MerchantVoiceEntry: React.FC = () => {
           />
 
           <span className="text-lg font-bold text-primary">
-            🧡 PNAVIM
+            🧡 JÙLABA
           </span>
 
           {/* Langues */}

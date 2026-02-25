@@ -1,12 +1,12 @@
 /**
  * Hook pour persister le choix de persona dans localStorage
- * Clé: 'pnavim_preferred_persona'
+ * Clé: 'julaba_preferred_persona'
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { PersonaType } from '@/features/auth/config/personas';
 
-const STORAGE_KEY = 'pnavim_preferred_persona';
+const STORAGE_KEY = 'julaba_preferred_persona';
 const DEFAULT_PERSONA: PersonaType = 'tantie';
 
 export function usePersistedPersona() {

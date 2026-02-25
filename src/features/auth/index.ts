@@ -1,4 +1,4 @@
-// Auth Feature - Authentification PNAVIM Unifiée
+// Auth Feature - Authentification JÙLABA Unifiée
 // Protocole à 4 couches pour l'inclusion des marchands ivoiriens
 
 // === PAGES (Architecture Vertical Slices) ===

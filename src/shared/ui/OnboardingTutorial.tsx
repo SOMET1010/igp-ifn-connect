@@ -15,10 +15,10 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 1,
-    title: "Bienvenue sur PNAVIM",
+    title: "Bienvenue sur JÙLABA",
     description: "Cette application vous aide à gérer votre commerce facilement, même sans savoir lire ou écrire.",
     icon: <HelpCircle className="w-12 h-12 text-primary" />,
-    audioText: "Bienvenue sur PNAVIM. Cette application vous aide à gérer votre commerce facilement."
+    audioText: "Bienvenue sur JÙLABA. Cette application vous aide à gérer votre commerce facilement."
   },
   {
     id: 2,

@@ -59,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
   handleContactSupport = () => {
     // Ouvre WhatsApp avec message pré-rempli
     const message = encodeURIComponent(
-      `Bonjour, j'ai rencontré une erreur sur l'application PNAVIM: ${this.state.error?.message || 'Erreur inconnue'}`
+      `Bonjour, j'ai rencontré une erreur sur l'application JÙLABA: ${this.state.error?.message || 'Erreur inconnue'}`
     );
     window.open(`https://wa.me/22500000000?text=${message}`, '_blank');
   };

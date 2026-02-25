@@ -1,5 +1,5 @@
 /**
- * MobileLayout - Layout responsive pour les pages mobiles PNAVIM
+ * MobileLayout - Layout responsive pour les pages mobiles JÙLABA
  */
 
 import React from 'react';

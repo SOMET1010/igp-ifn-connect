@@ -1,5 +1,5 @@
 /**
- * Générateur de documentation PDF PNAVIM-CI
+ * Générateur de documentation PDF JÙLABA
  */
 
 import React, { useState, useCallback } from 'react';
@@ -59,7 +59,7 @@ export const DocumentationPDFGenerator: React.FC = () => {
       const contentWidth = pageWidth - margin * 2;
 
       // Couleurs
-      const primaryColor: [number, number, number] = [255, 107, 53]; // Orange PNAVIM
+      const primaryColor: [number, number, number] = [255, 107, 53]; // Orange JÙLABA
       const textColor: [number, number, number] = [30, 30, 30];
       const mutedColor: [number, number, number] = [100, 100, 100];
 
@@ -72,7 +72,7 @@ export const DocumentationPDFGenerator: React.FC = () => {
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(28);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('PNAVIM-CI', pageWidth / 2, 35, { align: 'center' });
+      pdf.text('JÙLABA', pageWidth / 2, 35, { align: 'center' });
       
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
@@ -271,7 +271,7 @@ export const DocumentationPDFGenerator: React.FC = () => {
           // Pied de page
           pdf.setFontSize(8);
           pdf.setTextColor(...mutedColor);
-          pdf.text('PNAVIM-CI - Documentation Fonctionnelle', margin, pageHeight - 10);
+          pdf.text('JÙLABA - Documentation Fonctionnelle', margin, pageHeight - 10);
           pdf.text(
             `Page ${pdf.internal.pages.length - 1}`,
             pageWidth - margin,
@@ -288,7 +288,7 @@ export const DocumentationPDFGenerator: React.FC = () => {
 
       // Téléchargement
       const date = new Date().toISOString().split('T')[0];
-      pdf.save(`PNAVIM-CI-Documentation-${date}.pdf`);
+      pdf.save(`JULABA-Documentation-${date}.pdf`);
 
       setProgress(100);
     } catch (error) {

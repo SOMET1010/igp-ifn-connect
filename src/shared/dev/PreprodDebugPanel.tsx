@@ -125,7 +125,7 @@ export function PreprodDebugPanel() {
         <div className="fixed bottom-20 right-4 z-[100] w-80 max-h-[70vh] bg-background border rounded-lg shadow-xl overflow-hidden">
           {/* Header */}
           <div className="bg-muted px-4 py-2 border-b">
-            <h3 className="font-semibold text-sm">Debug PNAVIM</h3>
+            <h3 className="font-semibold text-sm">Debug JÙLABA</h3>
             <p className="text-xs text-muted-foreground">
               {buildInfo.env} | v{buildInfo.version}
             </p>

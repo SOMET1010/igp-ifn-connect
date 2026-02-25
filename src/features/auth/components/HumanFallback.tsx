@@ -34,7 +34,7 @@ export function HumanFallback({
   personaName,
   onRetry,
   onValidated,
-  supportPhone = '0800-PNAVIM',
+  supportPhone = '0800-JULABA',
 }: HumanFallbackProps) {
   const [currentOption, setCurrentOption] = useState<FallbackOption>('menu');
   const [waitTime, setWaitTime] = useState(0);

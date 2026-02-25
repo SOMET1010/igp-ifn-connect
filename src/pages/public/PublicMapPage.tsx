@@ -81,7 +81,7 @@ const PublicMapPage: React.FC = () => {
 
   return (
     <PageLayout
-      title="Carte PNAVIM"
+      title="Carte JÙLABA"
       subtitle={`${filteredEntities.length} point(s) sur la carte`}
       showBack
       backTo="/"

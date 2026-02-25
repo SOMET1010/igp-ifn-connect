@@ -57,7 +57,7 @@ export const merchantProtectedRoutes = (
     {/* KYC standalone (wizard complet) */}
     <Route path="/marchand/kyc" element={<MerchantKyc />} />
     
-    {/* Marché Virtuel / Marketplace (Workflow 11.3 PNAVIM-CI) */}
+    {/* Marché Virtuel / Marketplace (Workflow 11.3 JÙLABA) */}
     <Route path="/marchand/fournisseurs" element={<MerchantMarketplace />} />
     
     {/* Assistant vocal */}
