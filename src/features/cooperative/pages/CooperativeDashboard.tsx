@@ -1,6 +1,6 @@
 /**
- * Dashboard Coopérative - PNAVIM
- * Refonte Jùlaba Design System
+ * Dashboard Coopérative - JÙLABA
+ * Design System Jùlaba
  */
 
 import React from 'react';
@@ -77,7 +77,7 @@ const CooperativeDashboard: React.FC = () => {
       <JulabaPageLayout background="gradient">
         <JulabaHeader 
           title="Ma Coopérative" 
-          subtitle="IFN - PNAVIM"
+          subtitle="JÙLABA"
           showLogout
         />
         <div className="p-4 space-y-4">

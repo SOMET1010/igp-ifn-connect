@@ -52,7 +52,7 @@ export function SimpleLoginPage({
         <div className="flex items-center gap-3">
           <img src={logoDge} alt="DGE" className="h-10 object-contain" />
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground">PNAVIM-CI</span>
+            <span className="text-sm font-bold text-foreground">JÙLABA</span>
             <span className="text-[10px] text-muted-foreground">
               République de Côte d'Ivoire
             </span>

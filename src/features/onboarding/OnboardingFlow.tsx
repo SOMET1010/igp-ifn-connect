@@ -20,8 +20,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
     id: "welcome",
     emoji: "👋",
     title: "Bienvenue !",
-    description: "Tu es maintenant inscrit(e) sur PNAVIM. On va t'expliquer comment ça marche.",
-    audioText: "Bienvenue sur PNAVIM ! Tu es maintenant inscrit. On va t'expliquer comment tout fonctionne, c'est très simple !",
+    description: "Tu es maintenant inscrit(e) sur JÙLABA. On va t'expliquer comment ça marche.",
+    audioText: "Bienvenue sur JÙLABA ! Tu es maintenant inscrit. On va t'expliquer comment tout fonctionne, c'est très simple !",
   },
   {
     id: "sell",
@@ -64,7 +64,7 @@ export function OnboardingFlow({ merchantName = "Ami(e)", onComplete }: Onboardi
   const handleNext = () => {
     if (isLastStep) {
       // Mark onboarding as complete in localStorage
-      localStorage.setItem("pnavim_onboarding_complete", "true");
+      localStorage.setItem("julaba_onboarding_complete", "true");
       onComplete();
       navigate("/marchand");
     } else {
@@ -73,7 +73,7 @@ export function OnboardingFlow({ merchantName = "Ami(e)", onComplete }: Onboardi
   };
 
   const handleSkip = () => {
-    localStorage.setItem("pnavim_onboarding_complete", "true");
+    localStorage.setItem("julaba_onboarding_complete", "true");
     onComplete();
     navigate("/marchand");
   };
